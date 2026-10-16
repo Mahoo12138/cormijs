@@ -1,0 +1,4 @@
+{
+  "name":"cormi-example-basic","private":true,"type":"module",
+  "dependencies":{"cormijs":"workspace:*","@cormijs/preset-react-vite":"workspace:*","@cormijs/runtime":"workspace:*","react":"19.3.1","react-dom":"19.3.1","react-router":"7.18.2"}
+}

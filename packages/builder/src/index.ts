@@ -13,6 +13,8 @@ export interface BuildPlan {
 
 export interface ServerHandle {
   readonly url: string;
+  /** Development capability: invalidate committed project-relative files and reload clients. */
+  invalidate?(files: readonly string[]): Promise<void>;
   close(): Promise<void>;
 }
 

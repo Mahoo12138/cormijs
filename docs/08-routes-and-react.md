@@ -1,0 +1,81 @@
+# cormi 路由、生成与 React 协议
+
+日期：2026-10-16。阶段：P1b，实验性本地实现；不表示已发布 npm 或整个 MVP 完成。框架名 cormi，包解析名使用 cormijs/@cormijs。
+
+## 1. 插件边界
+
+`@cormijs/routes` 提供路由 IR、约定扫描与验证；不运行页面源码，也不依赖 React/Vite。`@cormijs/plugin-react` 通过 Cordis 提供 `application` 编译能力和 `react` 贡献入口，不 import Vite。`@cormijs/runtime` 只包含浏览器代码，依赖 React/React Router，不 import Cordis、Node 或构建器。
+
+`@cormijs/plugin-react-vite` 才集成原生 React Vite 插件、依赖去重、开发依赖预构建与客户端 Node SDK 导入检查。`@cormijs/preset-react-vite` 是显式组合：Web consumer、应用命令、React compiler、Vite provider、React-Vite bridge。core 的职责未扩大为 React 或 Vite 宿主。
+
+应用命令插件依赖 commands/web/application。生成结束后才调用 builder；命令卸载会取消工作、撤销更新订阅并关闭自己的编译和服务器会话，不要求移除所有 provider。没有后端时可以单独调用 React compiler 做 prepare；默认应用命令组合仍需要 Web/builder。
+
+## 2. 最小应用
+
+```ts
+import { defineConfig } from 'cormijs';
+import reactVite from '@cormijs/preset-react-vite';
+
+export default defineConfig({
+  presets: [reactVite],
+  app: {
+    base: '/',
+    outDir: 'dist',
+    server: { host: '127.0.0.1', port: 8001 },
+  },
+});
+```
+
+当前 preset 导出的是 `definePreset` 对象，不是需要调用的工厂。应用 `index.html` 保留用户所有权，包含挂载点与 `<script type="module" src="/.cormi/app.tsx"></script>`。默认 mountId 为 root；app.mountId 可覆盖。框架不自动改写用户 HTML。
+
+```sh
+pnpm build
+pnpm cormi prepare --root examples/basic
+pnpm cormi dev --root examples/basic
+```
+
+prepare 生成入口并返回路由摘要后退出；dev 生成入口并启动开发服务。停止 dev 后才能 build/preview，因为同项目 CLI 会话仍使用独占锁。preview 读取已有产物，不重新扫描页面或生成代码。
+
+## 3. 路由约定与中间表示
+
+默认扫描 src/pages 的 .tsx/.jsx；index 是当前目录首页，`[id]` 是参数，`[...rest]` 是终端 catch-all，`_layout` 是所在目录及其后代的布局，组件内部通过 Outlet 渲染后代。点目录、下划线辅助目录和 test/spec 文件忽略。页面树中的符号链接拒绝扫描。所有扫描只读路径，不 import 页面模块。
+
+IR 字段为 id、parentId、path、index、module、source。module 仅包含 specifier/exportName；source 记录 file/pluginId。路径相对于父路由，顶层 / 规范化为空路径。默认 ID 是 `file:<项目相对文件名>`，不取数组下标。当前不开放任意 meta 或运行时路由函数。
+
+设置 app.routes 后关闭约定扫描；其值必须是平面的 IR 数组。所有来源最终统一校验：重复 ID、缺失 parent、父子环、index 携带 path/children、非终端 splat、重复参数及 URL 结构歧义会失败。`users.tsx` 与 `users/index.tsx`、`[id]` 与 `[slug]`、仅大小写不同的页面不会靠扫描顺序覆盖。静态路由与参数路由可以共存，实际匹配交给 React Router。
+
+app.pages 可选择其他项目内目录。当前不支持可选参数、路由组、并行路由、MDX 或 Umi 全量约定；超过扫描/深度限制明确报错。
+
+## 4. 贡献与生成
+
+Node 插件可注入 react，通过 `ctx.react.routes.tap()` 登记路由 reducer，通过 `ctx.react.runtime.tap()` 收集运行时模块。登记返回注销函数，调用者用 ctx.effect 绑定作用域。OrderedHooks 的 before/after、稳定 ownerOrder 和冲突诊断继续适用。不同编译轮次观察登记 revision，当前轮不修改正在遍历的登记快照。
+
+app.runtime 支持 `{ id, module: { specifier, exportName }, options }` 数组。options 必须是可复制的有限、无环 JSON，不能传递 Context、服务实例、函数或整个 Node 配置。相对模块引用在这一版一律相对项目根；包模块使用裸包 specifier。暂未实现任意插件模块 URL 作为解析基准，不要把未实现的相对解析规则写进插件。
+
+生成的 `.cormi/app.tsx` 包含静态 runtime imports、路由 lazy imports 和 mountApplication 调用。字符串使用 JSON 转义，页面源码不嵌入生成文件。提交前使用独立 esbuild 检查生成代码语法；这不是对业务页面执行完整类型检查。
+
+## 5. 提交与开发更新
+
+AtomicEntry 只管理 `.cormi/app.tsx`。已有目标必须是普通文件且含 cormi 生成标识；不会覆盖未知文件或沿符号链接写入。新内容写入同目录独占临时文件、sync/close 后，在不含 await 的临界区验证目录身份、目标旧值和 revision，再 rename。内容不变时不改 mtime。正常失败清理自己的临时文件。
+
+这是单个入口的原子可见性，不是多文件事务、断电持久性保证或整个应用源码回滚。CLI 跨进程锁防止正常并发写入；直接使用低层 compiler 的调用方应自行确保同项目只有一个写入者。不能将同用户恶意修改文件系统视为这里提供的安全沙箱。
+
+RevisionQueue 单消费者执行，仅保留最新等待任务；新 revision 会协作取消旧任务。即使旧计算不响应取消，旧结果也不能通过提交检查。生成错误保留之前成功的入口，但用户已经修改/删除的业务模块仍可能报错，不宣称全应用自动恢复旧状态。
+
+组件内容和 CSS 交给 Vite/React Fast Refresh；页面路径集合、贡献 revision 变化按 150ms 间隔观察并重新生成入口。结构变化不保证保留页面局部状态；Node 配置更新继续走已有 worker 重启。初次路由错误仍使启动失败；启动后结构冲突记录诊断、保留生成物并等待下一次结构变化恢复。
+
+**生成文件已提交不等于开发服务器转换缓存已更新。** PreparedApplication 的 updates 订阅将已提交文件通知 Web 命令；开发 ServerHandle 的可选 invalidate(files) 能力由 Vite provider 实现，显式失效模块缓存并广播整页刷新。应用组合在需要该能力而后端未提供时报告 BUILDER_INVALIDATION_UNSUPPORTED。启动过程中发生的生成更新也在注册订阅后重新对齐。此接口只接收项目相对路径，不泄漏 Vite server 类型。
+
+## 6. 浏览器运行时
+
+runtime 插件提供可选 Provider、setup 和 onRouteChange。setup 按声明顺序执行，可返回异步 disposer；后续 setup 失败时撤销已获取的资源。Provider 按数组从外到内组合。每次 mountApplication 独立拥有 React root、Router 和订阅，dispose 幂等，先撤销订阅/路由并卸载 root，再逆序关闭 runtime effects。路由观察者错误不阻塞导航，但会写入控制台。
+
+当前默认包含加载、路由错误和 404 页面。页面模块懒加载；生产与开发使用相同路由树。不存在 SSR/hydration/RSC 功能承诺。普通完整页面刷新会销毁浏览器文档；显式多 mount 使用者应调用返回的 dispose。
+
+## 7. 验证与未完成边界
+
+对应代码：[路由](../packages/routes/src/index.ts)、[生成队列](../packages/plugin-web/src/generation.ts)、[应用命令](../packages/plugin-web/src/application.ts)、[React compiler](../packages/plugin-react/src/index.ts)、[浏览器 runtime](../packages/runtime/src/index.tsx)、[Vite bridge](../packages/plugin-react-vite/src/index.ts)。
+
+测试分为 `pnpm check`（框架/测试类型和 Node 回归）、`pnpm typecheck:example`（示例源码）及 `pnpm test:browser`（真实 Chromium 系浏览器）。浏览器命令使用 CORMI_BROWSER_EXECUTABLE，Mac 默认现有 Edge；不下载浏览器，也不连接用户已有 profile。缺少可执行文件时明确失败，不以跳过当通过。
+
+生产 build 仍只写入新的专用目录，不覆盖现有 dist；staging 发布/回滚留待下一切片。生成类型文件、应用 inspect/typecheck 命令、服务端渲染、Linux/Windows、发布 tarball 全链路、长期内存趋势仍未完成。测试结果另见本阶段结果记录，不把设计目标当作已测能力。

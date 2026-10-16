@@ -2,9 +2,9 @@ import { CormiError, type CommandRequest, type Plugin } from '@cormijs/core';
 import type { BuildPlan } from '@cormijs/builder';
 import type {} from './index.js';
 
-function plan(request: CommandRequest): BuildPlan {
+export function plan(request: CommandRequest, extraFields: readonly string[] = []): BuildPlan {
   const input = request.options;
-  for (const key of Object.keys(input)) if (!['entry', 'base', 'outDir', 'server'].includes(key)) throw new CormiError('CONFIG_INVALID', `Unknown Web option: app.${key}`);
+  for (const key of Object.keys(input)) if (!['entry', 'base', 'outDir', 'server', ...extraFields].includes(key)) throw new CormiError('CONFIG_INVALID', `Unknown Web option: app.${key}`);
   for (const key of ['entry', 'base', 'outDir']) if (input[key] !== undefined && typeof input[key] !== 'string') throw new CormiError('CONFIG_INVALID', `app.${key} must be a string`);
   const server = input.server;
   if (server !== undefined) {

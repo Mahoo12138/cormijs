@@ -14,6 +14,8 @@ export interface Hook<I, O> {
 /** Explicit snapshot semantics; this is not a plugin lifecycle or a task scheduler. */
 export class OrderedHooks<I, O> {
   private readonly hooks = new Map<string, Hook<I, O>>();
+  private version = 0;
+  get revision(): number { return this.version; }
   constructor(readonly phase: string) {}
 
   tap(hook: Hook<I, O>): () => void {
@@ -22,8 +24,8 @@ export class OrderedHooks<I, O> {
     }
     if (!Number.isFinite(hook.ownerOrder) || !Number.isFinite(hook.stage ?? 0)) throw new TypeError('Invalid hook order');
     const copy = Object.freeze({ ...hook, before: Object.freeze([...(hook.before ?? [])]), after: Object.freeze([...(hook.after ?? [])]) });
-    this.hooks.set(hook.id, copy);
-    return () => { if (this.hooks.get(hook.id) === copy) this.hooks.delete(hook.id); };
+    this.hooks.set(hook.id, copy); this.version++;
+    return () => { if (this.hooks.get(hook.id) === copy) { this.hooks.delete(hook.id); this.version++; } };
   }
 
   snapshot(): readonly Hook<I, O>[] {

@@ -1,10 +1,10 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.3。修订日期：2026-10-16。
+版本：Draft 0.4。修订日期：2026-10-16。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
-P0 历史基线为 41 项测试；P1a 已实现命名修订、TS 配置、preset、插件命令、worker、独占锁和配置重载，当前 70 项测试通过，见 [P1a 结果](07-p1a-results.md)。路由、受管生成、原子产物发布、React preset、inspect/typecheck 应用命令仍为目标设计，不代表整份文档已实现。
+P0/P1a 的历史基线分别为 41/70 项测试。P1b 已接入路由 IR、页面扫描、单入口受管生成、React runtime/compiler、Vite 桥接和 preset，本机 93 项 Node 测试与 4 项浏览器测试通过。当前精确 API 与限制以 [路由和 React 协议](08-routes-and-react.md)、[P1b 结果](09-p1b-results.md) 为准；下面的完整阶段流水线、生成类型文件、meta 扩展、生产发布与 inspect/typecheck 仍含目标设计，不能推定全部实现。
 
 ## 1. 应该做一个什么框架
 
@@ -18,7 +18,7 @@ P0 历史基线为 41 项测试；P1a 已实现命名修订、TS 配置、preset
 
 ## 2. 首版边界与技术选择
 
-| 维度 | Draft 0.3 决策 | 原因 |
+| 维度 | Draft 0.4 决策 | 原因 |
 | --- | --- | --- |
 | 应用模式 | React SPA，客户端渲染 | 先把路由、构建和扩展协议做完整 |
 | Node 插件内核 | Cordis，隔离具体版本适配 | 复用 Context、服务注入和 Fiber 生命周期 |
@@ -60,7 +60,7 @@ flowchart TD
 ```
 **第一层是 Node 插件宿主。** Cordis 决定插件何时激活、服务如何注入、插件卸载时清理哪些受管资源。Cormi 只封装少量版本适配和错误诊断，不重新实现一套插件生死状态机。
 
-**第二层是应用编译流程。** 默认由 `plugin-web` 提供，把配置、路由与插件贡献转换成稳定产物。编译顺序、快照、取消和提交不是 DI 容器的职责；它们属于这个官方插件的策略，不是 core 不可替换的固有阶段。
+**第二层是应用编译流程。** P1b 的 `plugin-web` 提供命令编排、回调排序和受管提交原语，消费可替换的 application 编译服务；React 领域插件实现页面/运行时装配并提供该服务。编译顺序、快照、取消和提交不是 DI 容器的职责，更不是 core 不可替换的固有阶段。
 
 **第三层是浏览器运行时。** 它只包含 React、Router 和应用需要的 runtime 插件。不运行 Node 插件，不接收 Cordis Context，不携带构建器、文件系统访问或 Node 配置对象。
 
@@ -68,21 +68,21 @@ flowchart TD
 
 ## 4. 工程组织与公共边界
 
-按真实职责建立边界，不要求每个 service 单独发布。P0 先实现 core、builder 契约、plugin-web 与 plugin-vite；其余包在对应功能开始时建立。
+按真实职责建立边界，不要求每个 service 单独发布。P0/P1a 实现基础宿主与启动，P1b 加入下列路由和 React 包；所有包目前仍为 private。
 
 ```text
 packages/
-├── core/                    # Cordis 宿主、就绪屏障、基础诊断；无 React/Vite
-├── builder/                 # BuildPlan / Builder / 会话句柄契约；无 Vite 类型
-├── plugin-web/              # 应用编排、编译扩展点、后续受管生成
-├── plugin-vite/             # Cordis provider，提供 builder 与 vite 服务
-├── plugin-react/            # 后续：React 路由和入口，不依赖 Vite
-├── plugin-react-vite/       # 后续：React 专属 Vite 插件桥接
-├── preset-react-vite/       # 后续：可审阅、可替换的默认组合
-├── runtime/                 # 后续：仅浏览器的 React runtime
-└── cormi/                 # 后续：CLI 和配置公共入口
+├── core/                    # Cordis 宿主、就绪检查、诊断和命令协议；无 React/Vite
+├── builder/                 # 构建/会话/开发失效契约；无 Vite 类型
+├── routes/                  # 路由 IR、扫描、验证；无 React/Vite
+├── plugin-web/              # 命令编排、OrderedHooks、受管生成队列
+├── plugin-vite/             # builder 与 vite 的具体 provider
+├── plugin-react/            # application 编译服务、react 贡献；无 Vite
+├── plugin-react-vite/       # React 专属 Vite 集成
+├── preset-react-vite/       # 显式默认组合
+├── runtime/                 # 仅浏览器 React/Router 生命周期
+└── cormi/                   # CLI 和配置入口；发布包名 cormijs
 ```
-
 pnpm workspace 仅纳入 `packages/*`、`examples/*`，不纳入 `cordis/`、`umi/`。P0 源码与构建产物需可实际运行，不为图上的每个包建空壳。公共入口隔离 Node 与浏览器依赖图；不得以一个 barrel 同时 re-export core 和 runtime。
 
 `plugin-vite` 从第一个实现开始就是独立 provider，而不是等第二个构建器出现后才移出 core。通用契约只覆盖已需要的输入、结果和会话关闭；Vite 原生配置/插件通过后端专属 SDK 暴露，不伪装成跨后端能力。需要第二个真实后端时检验契约，不预先设计覆盖全部 bundler 的万能配置。
@@ -125,6 +125,8 @@ Cordis v4 的 `await ctx.plugin()` 主要等待当前 Fiber 的活动任务；�
 插件初始化本身应短小：声明服务、登记编译回调、建立受管资源。耗时的目录扫描、路由计算和代码生成进入显式编译阶段，避免把应用构建隐含在服务构造函数里。
 
 ## 7. 插件协议：原生生命周期，小型领域 SDK
+
+本节保留领域 SDK 的目标示例，不是当前完整可编译 API。P1b 路由与 runtime 贡献通过 `ctx.react.routes/runtime` 的 OrderedHooks 注册；相对 ModuleRef 目前以项目根为基准，preset-react-vite 导出的是 preset 对象而非工厂。精确使用方式见 [当前协议](08-routes-and-react.md)。
 
 建议 `definePlugin()` 接受接近 Cordis 原生插件对象的描述，增加稳定实例 ID、可诊断的 provides 元数据以及 Cormi SDK 类型。底层仍将 `apply / Config / inject` 交给 Cordis；不新增第二套 activate/deactivate 实现。
 
@@ -175,7 +177,7 @@ import reactVite from '@cormijs/preset-react-vite';
 import statusPage from './plugins/status-page';
 
 export default defineConfig({
-  presets: [reactVite()],
+  presets: [reactVite],
   plugins: [{ id: 'status-page', plugin: statusPage }],
   app: { base: '/', server: { host: '127.0.0.1', port: 8000 } },
 });
@@ -275,6 +277,8 @@ React root 由每个 mount 会话持有，销毁时先停止 runtime 订阅，�
 权限、请求客户端、国际化和状态管理以后可作为 runtime 插件加 Node 配置插件配对提供。前端权限只是 UI/导航控制，不代替后端鉴权；不能因为有一个 access preset 就宣称应用安全边界完整。
 
 ## 12. 代码生成：先用单一可执行入口，降低提交复杂度
+
+P1b 已实现 app.tsx 的所有权检查、临时文件、revision、相同内容免写和单文件 rename；尚未生成本节规划的类型/tsconfig/inspect manifest。生产目录 staging 也尚未实现。生成入口提交后，通过 PreparedApplication.updates 与 ServerHandle.invalidate 显式同步后端缓存；不能把磁盘文件更新当作开发服务缓存已失效。
 
 建议使用 `.cormi/` 作为项目级生成目录，包含 `app.tsx`、类型声明、tsconfig 和 inspect manifest。首版将框架生成的可执行路由及 runtime 装配代码集中在一个 `app.tsx` 中；页面和插件本身仍通过独立模块 import，避免单文件包含业务源码。
 

@@ -64,6 +64,16 @@ export const vitePlugin: CordisPlugin.Object<void> = {
       let closing: Promise<void> | undefined;
       const handle: ServerHandle = Object.freeze({
         url,
+        ...('moduleGraph' in server ? { async invalidate(files: readonly string[]) {
+          assertActive(ctx);
+          if (closing) throw new CormiError('SERVER_CLOSED', 'Cannot invalidate a closing development session.');
+          for (const name of files) {
+            const file = resolve(server.config.root, name);
+            if (isAbsolute(name) || !file.startsWith(server.config.root + sep)) throw new CormiError('INVALIDATION_PATH_INVALID', 'Invalidation must stay inside the project.');
+            server.moduleGraph.onFileChange(file.split(sep).join('/'));
+          }
+          server.ws.send({ type: 'full-reload', path: '*' });
+        } } : {}),
         close() {
           if (closing) return closing;
           closing = (async () => {

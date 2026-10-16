@@ -1,7 +1,9 @@
 import { assertActive, CormiError, type Context, type Plugin } from '@cormijs/core';
 import type { Builder, BuildPlan, BuildResult, ServerHandle } from '@cormijs/builder';
 export { OrderedHooks } from './ordered-hooks.js';
-export { webCommandsPlugin } from './commands.js';
+export { webCommandsPlugin, plan as createBuildPlan } from './commands.js';
+export { applicationCommandsPlugin, type ApplicationCompiler, type ApplicationRequest, type PreparedApplication } from './application.js';
+export { AtomicEntry, RevisionQueue, GENERATED_HEADER, type GenerationResult } from './generation.js';
 
 export interface WebApplication {
   dev(plan: BuildPlan, signal?: AbortSignal): Promise<ServerHandle>;
@@ -52,6 +54,10 @@ export const webPlugin: Plugin.Object<void> = {
       let closing: Promise<void> | undefined;
       const wrapped: ServerHandle = Object.freeze({
         url: handle.url,
+        ...(handle.invalidate ? { async invalidate(files: readonly string[]) {
+          if (closing) throw new CormiError('SERVER_CLOSED', 'Web session is closing.');
+          await handle.invalidate!(files);
+        } } : {}),
         close() {
           if (closing) return closing;
           closing = Promise.resolve().then(() => handle.close()).finally(() => sessions.delete(wrapped));

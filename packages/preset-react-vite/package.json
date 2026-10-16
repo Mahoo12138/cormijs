@@ -1,0 +1,5 @@
+{
+  "name":"@cormijs/preset-react-vite","version":"0.0.1","private":true,"type":"module",
+  "exports":{".":{"types":"./dist/index.d.ts","import":"./dist/index.js"}},"files":["dist"],
+  "dependencies":{"cormijs":"workspace:*","@cormijs/plugin-web":"workspace:*","@cormijs/plugin-vite":"workspace:*","@cormijs/plugin-react":"workspace:*","@cormijs/plugin-react-vite":"workspace:*","@cormijs/runtime":"workspace:*"}
+}
