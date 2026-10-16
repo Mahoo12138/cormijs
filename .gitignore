@@ -1,0 +1,18 @@
+# Reference repositories are independent checkouts, not Cormi implementation.
+/cordis/
+/umi/
+
+node_modules/
+.cormi/
+.cormi.lock/
+dist/
+coverage/
+*.log
+.DS_Store
+.cache/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.cormi-vite-*/
+examples/p0/dist-*/

@@ -1,0 +1,74 @@
+{
+  "verified_at": "2026-10-15T20:55:56.436447+00:00",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "architecture": "arm64",
+  "node": "v22.14.0",
+  "commands": [
+    {
+      "command": "pnpm check",
+      "exit_code": 0,
+      "log": ".cache/p0-check.log",
+      "sha256": "3fb4ef7554289eb2da8f4daab954d0283f1d3db273702ffd95d6fc46fe3d21f4"
+    },
+    {
+      "command": "pnpm demo",
+      "exit_code": 0,
+      "log": ".cache/p0-demo.log",
+      "sha256": "7dd6bdaf8924dff88d19403b7695c4a447538f0083de5e209cfb0066d3b43d27"
+    }
+  ],
+  "tests": {
+    "tests": 41,
+    "pass": 41,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "scope": "P0 initial contracts, host and Vite sessions; not complete P0/P1",
+  "frozen_offline_install": "passed",
+  "source_sha256": {
+    ".npmrc": "d089b05fc08a36af3a3eb500ffd9d2087c0c2517ee6a820980377dc95bede2f9",
+    ".nvmrc": "c989649ac5c541692f22f2e41f5fbc34927c02bf1644e5dcca46bb4c88281f87",
+    "package.json": "35b2456a541ca2deec32933e9cb253fa512839db0c1a4f6f3b2baa18af4bc1e4",
+    "packages/builder/package.json": "2a95b4d01cf40e05d0e0cf199775f88d26d03fcf3a5f33de095ee4eec781f72d",
+    "packages/builder/src/index.ts": "8da05f0d17a2bf1bd2867fefb29cea23c8ecaa655631e0666e0e6adc6741e403",
+    "packages/builder/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+    "packages/core/package.json": "f6932a20265c51cce32a3019b8c2809d8df465167aebc6d71dd120e6648e82b4",
+    "packages/core/src/index.ts": "3889e5e85261e997b733c1ea9dba820870c812ef538f07be068bb7bec323ae7e",
+    "packages/core/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+    "packages/plugin-vite/package.json": "5b621d92f83f314c5fe2a1cd6e070a96480d434489f0f1ce520150c629cfda69",
+    "packages/plugin-vite/src/index.ts": "43ead4d943176e9ddf13cbdb159725e710e286613aa45946c1fc34b2a38d2b83",
+    "packages/plugin-vite/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+    "packages/plugin-web/package.json": "33ed6f8ead970edf40a861f01383a12253c2e006edd7ad0ff477234bb041511d",
+    "packages/plugin-web/src/index.ts": "d4e59c94a9b53a8fe3322c42494355a9c5b465860d10017d502bc1ff4bf31e3b",
+    "packages/plugin-web/src/ordered-hooks.ts": "551fc75de6838da14a611d9338eaeb736e6e5d085e6cc415fcd3abd3ddfee59d",
+    "packages/plugin-web/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+    "patches/README.md": "71099dd9ac0ec75c8cced57ca8c32cb174f7500084a6bb5ae0c4a65d42a751a7",
+    "patches/cordis@4.0.0-rc.11.patch": "34b4c47a8ba43dde745877b7d20c7d5292a0d0eacad88ae4799dfb6ad3251356",
+    "pnpm-lock.yaml": "a76aa225a8c95488aa769bda75fed5802ee49d2e0e0101b4f9625218180acd24",
+    "tests/core.test.ts": "8fd2129e88c661275ed1f08acbfabdadb1e438283cc11793a51f3fdb83c23fdb",
+    "tests/helpers.ts": "245cf9bd55ebf3e6c227109f501ab17b3b700fc5686966ce831932d16c61208f",
+    "tests/hooks.test.ts": "e30de33fb5e3dcca4e6c7a27342c601971cc489d30016118bfaaebde4524d73f",
+    "tests/isolation.test.ts": "c046ed6306fcadce6418ba9a2bcd1fee6a5260da7fa67cc11ea651ff45a63c49",
+    "tests/providers.test.ts": "089425999a52251d4ac01df27ed3c2a0cb9959cc0ab255b730f85157af0c2986",
+    "tests/tsconfig.json": "4443f031cdf93505c08ef83f1456995f696afebae9e3ba2c34ff5734d9b28b8f",
+    "tests/vite-build.test.ts": "9003fa77ba002e7555e480fbedfad3513403e62a5c2647e9e4cb53ba83d75324",
+    "tests/vite-dev.test.ts": "1a4ab9ed86b77068117354a2dff2f7675011bd851a9d08bd30db6799ed9b7571",
+    "tsconfig.base.json": "94d2a15288b0b45c326f56f74d425daf9a8e7e2361d85bb4b12c521458e59c4c",
+    "tsconfig.json": "70610a9f6304b90284ef60a7a8b980ac6deb45457af4979141ee8bc800d06899"
+  },
+  "documents_checked": 7,
+  "local_links_checked": 47,
+  "reference_checkouts": [
+    {
+      "name": "cordis",
+      "head": "5dac6953d2d993d345d1de9fb0a5926f6d78a7e7",
+      "clean": true
+    },
+    {
+      "name": "umi",
+      "head": "788e39630dc52a9306c89f8af08705e5db0e199f",
+      "clean": true
+    }
+  ]
+}

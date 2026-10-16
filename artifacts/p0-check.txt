@@ -1,0 +1,231 @@
+
+> cormijs-workspace@0.0.0 check /Users/mahoo/Projects/cormijs
+> pnpm typecheck && pnpm test
+
+
+> cormijs-workspace@0.0.0 typecheck /Users/mahoo/Projects/cormijs
+> tsc -b && tsc -p tests/tsconfig.json --noEmit
+
+
+> cormijs-workspace@0.0.0 test /Users/mahoo/Projects/cormijs
+> pnpm build && node --import tsx --test --test-concurrency=1 tests/*.test.ts
+
+
+> cormijs-workspace@0.0.0 build /Users/mahoo/Projects/cormijs
+> tsc -b
+
+TAP version 13
+# Subtest: empty host is usable without any application provider and becomes terminal after dispose
+ok 1 - empty host is usable without any application provider and becomes terminal after dispose
+  ---
+  duration_ms: 2.226125
+  ...
+# Subtest: consumer registered before asynchronous provider activates exactly once
+ok 2 - consumer registered before asynchronous provider activates exactly once
+  ---
+  duration_ms: 11.605208
+  ...
+# Subtest: native await of a pending plugin is not a host readiness barrier
+ok 3 - native await of a pending plugin is not a host readiness barrier
+  ---
+  duration_ms: 0.839333
+  ...
+# Subtest: initialization rejection retains the original cause and cannot report ready
+ok 4 - initialization rejection retains the original cause and cannot report ready
+  ---
+  duration_ms: 7.203
+  ...
+# Subtest: nested native plugins participate in required readiness
+ok 5 - nested native plugins participate in required readiness
+  ---
+  duration_ms: 6.406083
+  ...
+# Subtest: duplicate stable IDs are rejected before mounting a second instance
+ok 6 - duplicate stable IDs are rejected before mounting a second instance
+  ---
+  duration_ms: 6.330958
+  ...
+# Subtest: disposal during asynchronous initialization drains and rejects late use
+ok 7 - disposal during asynchronous initialization drains and rejects late use
+  ---
+  duration_ms: 0.531542
+  ...
+# Subtest: initialization deadline is bounded; releasing the test gate allows real cleanup
+ok 8 - initialization deadline is bounded; releasing the test gate allows real cleanup
+  ---
+  duration_ms: 30.695042
+  ...
+# Subtest: provider remains usable while consumer teardown drains
+ok 9 - provider remains usable while consumer teardown drains
+  ---
+  duration_ms: 7.632375
+  ...
+# Subtest: one failing disposer does not omit other cleanup and host reports failure
+ok 10 - one failing disposer does not omit other cleanup and host reports failure
+  ---
+  duration_ms: 11.533666
+  ...
+# Subtest: cleanup timeout is not claimed as cancellation; late task is explicitly drained
+ok 11 - cleanup timeout is not claimed as cancellation; late task is explicitly drained
+  ---
+  duration_ms: 32.740375
+  ...
+# Subtest: independent hosts never share a service instance
+ok 12 - independent hosts never share a service instance
+  ---
+  duration_ms: 7.414042
+  ...
+# Subtest: real watcher and TCP listener are released by plugin teardown
+ok 13 - real watcher and TCP listener are released by plugin teardown
+  ---
+  duration_ms: 46.499166
+  ...
+# Subtest: explicit hook edges override stage and owner order deterministically
+ok 14 - explicit hook edges override stage and owner order deterministically
+  ---
+  duration_ms: 0.6505
+  ...
+# Subtest: duplicate hook IDs and missing order targets are diagnosed
+ok 15 - duplicate hook IDs and missing order targets are diagnosed
+  ---
+  duration_ms: 0.162666
+  ...
+# Subtest: hook order cycles are rejected instead of using registration order
+ok 16 - hook order cycles are rejected instead of using registration order
+  ---
+  duration_ms: 0.082667
+  ...
+# Subtest: an in-flight snapshot is unchanged by unregister/register during await
+ok 17 - an in-flight snapshot is unchanged by unregister/register during await
+  ---
+  duration_ms: 0.251375
+  ...
+# Subtest: stale unregister handles cannot delete replacement hook identities
+ok 18 - stale unregister handles cannot delete replacement hook identities
+  ---
+  duration_ms: 0.119833
+  ...
+# Subtest: series executes every step and does not use Cordis bail semantics
+ok 19 - series executes every step and does not use Cordis bail semantics
+  ---
+  duration_ms: 0.078
+  ...
+# Subtest: invalid reducer output is rejected with hook provenance
+ok 20 - invalid reducer output is rejected with hook provenance
+  ---
+  duration_ms: 0.145917
+  ...
+# Subtest: async hook error retains the cause
+ok 21 - async hook error retains the cause
+  ---
+  duration_ms: 0.434875
+  ...
+# Subtest: compiled core and its runtime dependencies work in a physical isolated consumer with no Vite
+ok 22 - compiled core and its runtime dependencies work in a physical isolated consumer with no Vite
+  ---
+  duration_ms: 260.337958
+  ...
+# Subtest: unchanged Web consumer uses a fake provider and can replace it without core edits
+ok 23 - unchanged Web consumer uses a fake provider and can replace it without core edits
+  ---
+  duration_ms: 15.072667
+  ...
+# Subtest: unloading only the Web consumer closes its sessions, leaving provider alive
+ok 24 - unloading only the Web consumer closes its sessions, leaving provider alive
+  ---
+  duration_ms: 7.781542
+  ...
+# Subtest: two providers of the same capability cannot silently override each other
+ok 25 - two providers of the same capability cannot silently override each other
+  ---
+  duration_ms: 6.017292
+  ...
+# Subtest: native backend-specific bridge fails clearly when its backend is absent
+ok 26 - native backend-specific bridge fails clearly when its backend is absent
+  ---
+  duration_ms: 0.467208
+  ...
+# Subtest: a non-cooperative late session is closed rather than returned after consumer unload
+ok 27 - a non-cooperative late session is closed rather than returned after consumer unload
+  ---
+  duration_ms: 8.909875
+  ...
+# Subtest: real build and preview support base paths and deep-link fallback
+ok 28 - real build and preview support base paths and deep-link fallback
+  ---
+  duration_ms: 190.059792
+  ...
+# Subtest: an existing output directory is never cleared or overwritten
+ok 29 - an existing output directory is never cleared or overwritten
+  ---
+  duration_ms: 2.879625
+  ...
+# Subtest: escaping output paths and output symlinks are refused without deleting targets
+ok 30 - escaping output paths and output symlinks are refused without deleting targets
+  ---
+  duration_ms: 3.213459
+  ...
+# Subtest: build failure is observable and cannot be disguised as a successful result
+ok 31 - build failure is observable and cannot be disguised as a successful result
+  ---
+  duration_ms: 60.049334
+  ...
+# Subtest: already-aborted build performs no output write
+ok 32 - already-aborted build performs no output write
+  ---
+  duration_ms: 7.276667
+  ...
+# Subtest: cancel during native build waits for work to settle and rejects its late result
+ok 33 - cancel during native build waits for work to settle and rejects its late result
+  ---
+  duration_ms: 15.812458
+  ...
+# Subtest: private environment values never enter the client asset while explicit public values do
+ok 34 - private environment values never enter the client asset while explicit public values do
+  ---
+  duration_ms: 10.018666
+  ...
+# Subtest: real Vite dev serves HTML and transformed TypeScript; close is idempotent
+ok 35 - real Vite dev serves HTML and transformed TypeScript; close is idempotent
+  ---
+  duration_ms: 52.829625
+  ...
+# Subtest: 20 complete host/provider/server start-stop cycles release their listening ports
+ok 36 - 20 complete host/provider/server start-stop cycles release their listening ports
+  ---
+  duration_ms: 170.6885
+  ...
+# Subtest: a busy port fails without stopping the unrelated listener
+ok 37 - a busy port fails without stopping the unrelated listener
+  ---
+  duration_ms: 5.691375
+  ...
+# Subtest: configureServer post-hook installs middleware rather than acting as a disposer
+ok 38 - configureServer post-hook installs middleware rather than acting as a disposer
+  ---
+  duration_ms: 8.098
+  ...
+# Subtest: native configureServer failure closes a provisionally acquired server
+ok 39 - native configureServer failure closes a provisionally acquired server
+  ---
+  duration_ms: 8.809166
+  ...
+# Subtest: unload while Vite is initializing rejects and closes the late session
+ok 40 - unload while Vite is initializing rejects and closes the late session
+  ---
+  duration_ms: 11.188667
+  ...
+# Subtest: native registration is scoped and each session uses fresh plugin instances
+ok 41 - native registration is scoped and each session uses fresh plugin instances
+  ---
+  duration_ms: 10.568166
+  ...
+1..41
+# tests 41
+# suites 0
+# pass 41
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1898.256291
