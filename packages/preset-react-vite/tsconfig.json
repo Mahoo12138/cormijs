@@ -1,1 +1,1 @@
-{"extends":"../../tsconfig.base.json","compilerOptions":{"rootDir":"src","outDir":"dist"},"include":["src/**/*.ts"],"references":[{"path":"../cormi"},{"path":"../plugin-web"},{"path":"../plugin-vite"},{"path":"../plugin-react"},{"path":"../plugin-react-vite"}]}
+{"extends":"../../tsconfig.base.json","compilerOptions":{"rootDir":"src","outDir":"dist"},"include":["src/**/*.ts"],"references":[{"path":"../cormi"},{"path":"../plugin-web"},{"path":"../plugin-vite"},{"path":"../plugin-react"},{"path":"../plugin-react-vite"},{"path":"../plugin-typescript"}]}

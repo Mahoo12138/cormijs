@@ -46,6 +46,8 @@ IR 字段为 id、parentId、path、index、module、source。module 仅包含 s
 
 app.pages 可选择其他项目内目录。当前不支持可选参数、路由组、并行路由、MDX 或 Umi 全量约定；超过扫描/深度限制明确报错。
 
+本节保留 P1b 的基础协议；P1c 新增的类型、生成清单与检查命令见 [增量协议](10-publication-and-tools.md)。
+
 ## 4. 贡献与生成
 
 Node 插件可注入 react，通过 `ctx.react.routes.tap()` 登记路由 reducer，通过 `ctx.react.runtime.tap()` 收集运行时模块。登记返回注销函数，调用者用 ctx.effect 绑定作用域。OrderedHooks 的 before/after、稳定 ownerOrder 和冲突诊断继续适用。不同编译轮次观察登记 revision，当前轮不修改正在遍历的登记快照。
@@ -56,7 +58,7 @@ app.runtime 支持 `{ id, module: { specifier, exportName }, options }` 数组�
 
 ## 5. 提交与开发更新
 
-AtomicEntry 只管理 `.cormi/app.tsx`。已有目标必须是普通文件且含 cormi 生成标识；不会覆盖未知文件或沿符号链接写入。新内容写入同目录独占临时文件、sync/close 后，在不含 await 的临界区验证目录身份、目标旧值和 revision，再 rename。内容不变时不改 mtime。正常失败清理自己的临时文件。
+P1b 的 AtomicEntry 管理 `.cormi/app.tsx`；P1c 扩展固定白名单 routes.d.ts/inspect.jsonc，仍保持每个目标单文件提交。已有目标必须是普通文件且含 cormi 生成标识；不会覆盖未知文件或沿符号链接写入。新内容写入同目录独占临时文件、sync/close 后，在不含 await 的临界区验证目录身份、目标旧值和 revision，再 rename。内容不变时不改 mtime。正常失败清理自己的临时文件。
 
 这是单个入口的原子可见性，不是多文件事务、断电持久性保证或整个应用源码回滚。CLI 跨进程锁防止正常并发写入；直接使用低层 compiler 的调用方应自行确保同项目只有一个写入者。不能将同用户恶意修改文件系统视为这里提供的安全沙箱。
 
@@ -78,4 +80,4 @@ runtime 插件提供可选 Provider、setup 和 onRouteChange。setup 按声明�
 
 测试分为 `pnpm check`（框架/测试类型和 Node 回归）、`pnpm typecheck:example`（示例源码）及 `pnpm test:browser`（真实 Chromium 系浏览器）。浏览器命令使用 CORMI_BROWSER_EXECUTABLE，Mac 默认现有 Edge；不下载浏览器，也不连接用户已有 profile。缺少可执行文件时明确失败，不以跳过当通过。
 
-生产 build 仍只写入新的专用目录，不覆盖现有 dist；staging 发布/回滚留待下一切片。生成类型文件、应用 inspect/typecheck 命令、服务端渲染、Linux/Windows、发布 tarball 全链路、长期内存趋势仍未完成。测试结果另见本阶段结果记录，不把设计目标当作已测能力。
+P1c 已增加 Web 命令层的受管 staging/产物替换、类型生成与 inspect/typecheck，边界及故障语义见增量协议。低层 builder 仍只写全新目录。服务端渲染、Linux/Windows、正式 tarball 消费者和长期内存趋势未完成；P1b 的历史测试结果不回写为新阶段结果。

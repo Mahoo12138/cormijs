@@ -4,6 +4,7 @@ export { OrderedHooks } from './ordered-hooks.js';
 export { webCommandsPlugin, plan as createBuildPlan } from './commands.js';
 export { applicationCommandsPlugin, type ApplicationCompiler, type ApplicationRequest, type PreparedApplication } from './application.js';
 export { AtomicEntry, RevisionQueue, GENERATED_HEADER, type GenerationResult } from './generation.js';
+export { readInspection, inspectionManifest, inspectionPlugin, type GeneratedInspection } from './inspection.js';
 
 export interface WebApplication {
   dev(plan: BuildPlan, signal?: AbortSignal): Promise<ServerHandle>;
@@ -15,7 +16,7 @@ declare module 'cordis' {
   interface Context { web: WebApplication }
 }
 
-/** P0: explicit-entry orchestration. Route scanning/code generation arrive in P1. */
+/** Raw backend sessions; command plugins add preparation and managed publication policy. */
 export const webPlugin: Plugin.Object<void> = {
   name: 'cormi:web',
   inject: ['builder'],

@@ -6,7 +6,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { ProjectRuntime } from '@cormijs/core';
 import { reactPlugin, generateApplication, runtimeContributions } from '@cormijs/plugin-react';
 import { type ApplicationRequest } from '@cormijs/plugin-web';
-import { fixture, hasCode } from './helpers.js';
+import { fixture, hasCode, gate } from './helpers.js';
 
 async function reactFixture() {
   const f = await fixture(); const root = await realpath(f.root), host = new ProjectRuntime();
@@ -78,6 +78,22 @@ test('generator escapes quote/Unicode module references and rejects server/priva
     const cycle: Record<string, unknown> = {}; cycle.self = cycle;
     assert.throws(() => runtimeContributions([{ id: 'a', module: { specifier: './runtime.ts', exportName: 'default' }, options: cycle }]), hasCode('RUNTIME_OPTIONS_INVALID'));
   } finally { await f.clean(); }
+});
+test('contribution changes during asynchronous compilation cannot publish a misleading provenance snapshot', async () => {
+  const f = await reactFixture(), entered = gate(), release = gate();
+  try {
+    const initial = await f.host.ctx.application.prepare(f.request); await initial.close();
+    const before = await readFile(f.file, 'utf8');
+    const slow = f.host.ctx.react.routes.tap({ id: 'slow', owner: 'test', ownerOrder: 0,
+      async run(routes) { entered.resolve(); await release.promise; return routes; } });
+    const preparing = f.host.ctx.application.prepare(f.request);
+    const rejected = assert.rejects(preparing, hasCode('CONTRIBUTIONS_CHANGED'));
+    await entered.promise;
+    const late = f.host.ctx.react.runtime.tap({ id: 'late', owner: 'test', ownerOrder: 0, run: () => [] });
+    release.resolve(); await rejected; assert.equal(await readFile(f.file, 'utf8'), before);
+    slow(); late();
+    const repaired = await f.host.ctx.application.prepare(f.request); await repaired.close();
+  } finally { release.resolve(); await f.clean(); }
 });
 test('preview preparation does not scan pages, generate code, or require a source HTML entry', async () => {
   const f = await reactFixture();

@@ -1,0 +1,5 @@
+{
+  "name": "@cormijs/plugin-typescript", "version": "0.0.1", "private": true, "type": "module",
+  "exports": {".": {"types": "./dist/index.d.ts", "import": "./dist/index.js"}}, "files": ["dist"],
+  "dependencies": {"@cormijs/core": "workspace:*", "@cormijs/plugin-web": "workspace:*", "cordis": "4.0.0-rc.11", "typescript": "5.9.3"}
+}

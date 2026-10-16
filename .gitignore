@@ -15,4 +15,6 @@ coverage/
 .env.*
 !.env.example
 .cormi-vite-*/
+.cormi-publish-*/
+.cormi-publish.lock/
 examples/p0/dist-*/

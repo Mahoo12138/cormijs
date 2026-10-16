@@ -58,10 +58,11 @@ export async function generateApplication(root: string, routes: readonly RouteRe
     return '{' + fields.join(',') + '}';
   }).join(',\n') + ']';
   return [
-    `import { mountApplication } from '@cormijs/runtime';`,
+    `import { mountApplication, type RuntimeEntry } from '@cormijs/runtime';`,
+    `import type { RouteObject } from 'react-router';`,
     ...runtimeModules.map((path, i) => `import * as runtime${i} from ${JSON.stringify(path)};`),
-    `const routes = ${render()};`,
-    `const plugins = [${runtimes.map((item, i) => `{id:${JSON.stringify(item.id)},plugin:runtime${i}[${JSON.stringify(item.module.exportName)}],options:${JSON.stringify(item.options)}}`).join(',')}];`,
+    `const routes: RouteObject[] = ${render()};`,
+    `const plugins: RuntimeEntry[] = [${runtimes.map((item, i) => `{id:${JSON.stringify(item.id)},plugin:runtime${i}[${JSON.stringify(item.module.exportName)}],options:${JSON.stringify(item.options)}}`).join(',')}];`,
     `const element = document.getElementById(${JSON.stringify(mountId)});`,
     `if (!element) throw new Error('cormi mount element is missing');`,
     `mountApplication({element,routes,plugins,base:${JSON.stringify(base)}}).catch(error=>{console.error(error);element.textContent='Application startup failed';});`,

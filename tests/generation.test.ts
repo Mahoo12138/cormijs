@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, readFile, writeFile, stat, symlink, readdir } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, stat, symlink, readdir, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 import { AtomicEntry, RevisionQueue, GENERATED_HEADER } from '@cormijs/plugin-web';
 import { fixture, gate, hasCode } from './helpers.js';
@@ -28,6 +28,18 @@ test('unowned entries and symlink directories are not overwritten', async () => 
   const g = await fixture();
   try { await mkdir(join(g.root, 'target')); await symlink(join(g.root, 'target'), join(g.root, '.cormi')); await assert.rejects(AtomicEntry.open(g.root), hasCode('GENERATED_PATH_INVALID')); }
   finally { await g.clean(); }
+});
+test('a replaced generation directory is rejected before unchanged fast paths or temporary writes', async () => {
+  const f = await fixture();
+  try {
+    const writer = await AtomicEntry.open(f.root);
+    await writer.publish('same content', () => true);
+    await rename(join(f.root, '.cormi'), join(f.root, 'saved'));
+    await symlink(join(f.root, 'saved'), join(f.root, '.cormi'), 'dir');
+    await assert.rejects(writer.publish('same content', () => true), hasCode('GENERATED_PATH_INVALID'));
+    await assert.rejects(writer.publish('different content', () => true), hasCode('GENERATED_PATH_INVALID'));
+    assert.deepEqual(await readdir(join(f.root, 'saved')), ['app.tsx']);
+  } finally { await f.clean(); }
 });
 test('100 rapid inputs coalesce; noncooperative old work cannot publish over latest input', async () => {
   const blocked = gate(); const commits: number[] = [];

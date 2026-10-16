@@ -30,6 +30,7 @@
     "@cormijs/runtime": "workspace:*",
     "@cormijs/plugin-react": "workspace:*",
     "@cormijs/plugin-react-vite": "workspace:*",
+    "@cormijs/plugin-typescript": "workspace:*",
     "@cormijs/preset-react-vite": "workspace:*",
     "react": "19.3.1",
     "react-dom": "19.3.1",

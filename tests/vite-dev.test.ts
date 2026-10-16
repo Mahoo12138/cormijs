@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { readdir } from 'node:fs/promises';
-import { ProjectRuntime, type Plugin } from '@cormijs/core';
+import { readdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { ProjectRuntime, deadline, type Plugin } from '@cormijs/core';
 import { webPlugin } from '@cormijs/plugin-web';
 import { vitePlugin } from '@cormijs/plugin-vite';
 import { assertPortFree, close, fixture, gate, hasCode, listen } from './helpers.js';
@@ -25,6 +26,26 @@ test('real Vite dev serves HTML and transformed TypeScript; close is idempotent'
   } finally { await h.dispose(); await f.clean(); }
 });
 
+test('explicit invalidation owns generated-file updates instead of also propagating watcher HMR', options, async () => {
+  const f = await fixture(), h = host(), observed = gate();
+  let count = -1;
+  h.mount('observer', { inject: ['vite'], apply: ctx => {
+    ctx.effect(() => ctx.vite.add('observer', () => ({ name: 'observer', enforce: 'post',
+      handleHotUpdate(update) {
+        if (update.file.endsWith('/main.ts')) { count = update.modules.length; observed.resolve(); }
+      },
+    })));
+  } });
+  try {
+    await h.ready(); const dev = await h.ctx.web.dev(f.plan);
+    await fetch(new URL('main.ts', dev.url));
+    assert.ok(dev.invalidate); await dev.invalidate(['main.ts']);
+    await writeFile(join(f.root, 'main.ts'), 'document.body.textContent = "managed update";');
+    await deadline(observed.promise, 5000, new Error('Watcher did not observe the managed update'));
+    assert.equal(count, 0);
+    assert.match(await (await fetch(new URL('main.ts', dev.url))).text(), /managed update/);
+  } finally { await h.dispose(); await f.clean(); }
+});
 test('20 complete host/provider/server start-stop cycles release their listening ports', { timeout: 30000 }, async () => {
   const f = await fixture();
   try {

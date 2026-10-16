@@ -1,5 +1,5 @@
 import { assertActive, CormiError, type Plugin } from '@cormijs/core';
-import { AtomicEntry, RevisionQueue, OrderedHooks, createBuildPlan, type ApplicationRequest, type PreparedApplication } from '@cormijs/plugin-web';
+import { AtomicEntry, RevisionQueue, OrderedHooks, createBuildPlan, inspectionManifest, type ApplicationRequest, type PreparedApplication, type GeneratedInspection } from '@cormijs/plugin-web';
 import { pageFiles, routesFromFiles, validateRoutes, type RouteRecord } from '@cormijs/routes';
 import { realpath, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -7,6 +7,8 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { transform } from 'esbuild';
 import { generateApplication, runtimeContributions, type RuntimeContribution } from './generate.js';
 export { generateApplication, runtimeContributions, type RuntimeContribution } from './generate.js';
+import { generateRouteTypes } from './types.js';
+export { generateRouteTypes } from './types.js';
 
 export interface ReactCompilation {
   readonly routes: OrderedHooks<readonly RouteRecord[], readonly RouteRecord[]>;
@@ -38,18 +40,23 @@ export const reactPlugin: Plugin.Object<void> = {
       const html = await readFile(join(root, 'index.html'), 'utf8');
       if (!html.includes('/.cormi/app.tsx')) throw new CormiError('GENERATED_ENTRY_MISSING', 'index.html must import /.cormi/app.tsx.');
       const entry = await AtomicEntry.open(root); signal.throwIfAborted();
-      let latestRoutes: readonly RouteRecord[] = [], lastSignature = '', lastError = '';
+      const typeFile = await AtomicEntry.open(root, 'routes.d.ts'), manifestFile = await AtomicEntry.open(root, 'inspect.jsonc');
+      let latestSnapshot: GeneratedInspection | undefined, lastSignature = '', lastError = '';
       let polling: Promise<void> | undefined, closing: Promise<void> | undefined;
       const generatedFiles = Object.freeze(['.cormi/app.tsx']);
       const listeners = new Set<(files: readonly string[]) => Promise<void>>();
-      const queue = new RevisionQueue<{ code: string; routes: readonly RouteRecord[] }>(async (value, current) => {
-        const changed = await entry.publish(value.code, () => current() && !signal.aborted);
-        latestRoutes = value.routes;
+      const queue = new RevisionQueue<{ code: string; types: string; inspection: GeneratedInspection }>(async (value, current) => {
+        const valid = () => current() && !signal.aborted;
+        await typeFile.publish(value.types, valid);
+        const changed = await entry.publish(value.code, valid);
+        await manifestFile.publish(JSON.stringify(value.inspection, null, 2) + '\n', valid);
+        latestSnapshot = value.inspection;
         if (changed) for (const listener of [...listeners]) await listener(generatedFiles);
         return changed;
       });
       const session: PreparedApplication = {
-        plan, get snapshot() { return { routes: latestRoutes, entry: '.cormi/app.tsx' }; },
+        plan, get snapshot() { return latestSnapshot; },
+        typecheck: { files: ['.cormi/app.tsx', '.cormi/routes.d.ts'] },
         updates: { files: generatedFiles, subscribe(listener) {
           signal.throwIfAborted(); listeners.add(listener);
           return () => { listeners.delete(listener); };
@@ -66,12 +73,24 @@ export const reactPlugin: Plugin.Object<void> = {
       const signature = (files: readonly string[]) => JSON.stringify([files, routes.revision, runtime.revision]);
       const compile = (files: readonly string[]) => queue.enqueue(async cancelled => {
         const combined = AbortSignal.any([signal, cancelled]); combined.throwIfAborted();
+        const routeRevision = routes.revision, runtimeRevision = runtime.revision;
+        const routeOrder = routes.snapshot(), runtimeOrder = runtime.snapshot();
         const initial = input.routes !== undefined ? validateRoutes(input.routes) : routesFromFiles(files, pages);
         const next = validateRoutes(await routes.reduce(initial, (value): value is readonly RouteRecord[] => Array.isArray(value)));
         const plugins = runtimeContributions([...(runtimeContributions(input.runtime ?? [])), ...await runtime.collect(undefined)]);
         const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles);
         await transform(code, { loader: 'tsx', format: 'esm', jsx: 'automatic', logLevel: 'silent' });
-        combined.throwIfAborted(); return { code, routes: next };
+        const types = generateRouteTypes(next);
+        const hookInfo = (items: readonly { id: string; owner: string; stage?: number }[]) => items.map(({ id, owner, stage }) => ({ id, owner, stage: stage ?? 0 }));
+        const inspection = inspectionManifest(code, types, {
+          renderer: 'react', mode: request.mode, base: plan.base, entry: '.cormi/app.tsx',
+          routes: next, runtime: plugins.map(({ id, module }) => ({ id, module })),
+          hooks: { routes: hookInfo(routeOrder), runtime: hookInfo(runtimeOrder) },
+        });
+        if (routes.revision !== routeRevision || runtime.revision !== runtimeRevision) {
+          throw new CormiError('CONTRIBUTIONS_CHANGED', 'Plugin contributions changed during compilation; this result cannot be published.');
+        }
+        combined.throwIfAborted(); return { code, types, inspection };
       });
       const report = (error: unknown) => {
         if (signal.aborted) return;

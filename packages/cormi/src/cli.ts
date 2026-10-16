@@ -16,7 +16,7 @@ try {
   } });
   json = !!parsed.values.json;
   if (parsed.values.help || !parsed.positionals.length) {
-    console.log('cormi <command> [--root path] [--mode name] [--no-watch] [--json]\nCommands are provided by plugins in cormi.config.ts. Web plugins provide dev/build/preview.');
+    console.log('cormi <command> [--root path] [--mode name] [--no-watch] [--json]\nCommands are provided by plugins in cormi.config.ts. Web plugins provide dev/build/preview; the React preset also provides prepare/inspect/typecheck.');
   } else {
     if (parsed.positionals.length !== 1) throw new Error('Expected exactly one command');
     process.exitCode = await runCormi({ root: resolve(parsed.values.root ?? process.cwd()), command: parsed.positionals[0]!,

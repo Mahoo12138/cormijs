@@ -101,7 +101,8 @@ test('build and preview run in separate command workers; failed rebuild does not
   const f = await app(t); await f.write('settings.ts', 'export const value="build";'); await f.write('cormi.config.ts', webConfig('', `{base:'/demo/'}`));
   const build = cli(t, f.root, 'build'); assert.equal(await build.finish(), 0, JSON.stringify(build.events));
   const html = await readFile(join(f.root, 'dist/index.html'), 'utf8');
-  const second = cli(t, f.root, 'build'); assert.equal(await second.finish(), 1); assert.ok(second.events.some(e => e.code === 'OUTPUT_NOT_FRESH'));
+  await f.write('main.ts', 'const broken: = ;');
+  const second = cli(t, f.root, 'build'); assert.equal(await second.finish(), 1); assert.ok(second.events.some(e => e.type === 'error'));
   assert.equal(await readFile(join(f.root, 'dist/index.html'), 'utf8'), html);
   const preview = cli(t, f.root, 'preview'); const ready = await preview.waitFor(e => e.type === 'ready');
   assert.equal((await fetch(new URL('/demo/nested/path', ready.url))).status, 200);

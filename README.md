@@ -2,7 +2,7 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P1b 路由生成与 React 应用链路。** 已完成配置启动、插件命令、worker、项目锁、路由 IR、单入口受管生成、React runtime、React–Vite 桥接和默认 preset。本机验证为 **93 项 Node 回归 + 4 项真实浏览器测试通过**，不是完整 MVP 或跨平台发布保证。最新结果见 [P1b 记录](docs/09-p1b-results.md)。
+**当前阶段：P1c 受管构建发布与应用检查。** 在 P1b 的 React/路由链路上，增加重复构建的 staging/受管目录替换、失败回滚、路由类型生成及应用 inspect/typecheck。本机最终验证为 **118 项 Node + 4 项真实浏览器测试通过**，精确结果见 [P1c 记录](docs/11-p1c-results.md)；这不是完整 MVP、跨平台或零停机部署保证。
 
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 
@@ -24,12 +24,16 @@ React 示例默认监听 `127.0.0.1:8001`。首页包含可点击计数器，导
 # 只准备路由和生成入口，然后退出
 pnpm cormi prepare --root examples/basic
 
+# 检查业务源码与生成入口；读取上次成功生成的快照
+pnpm cormi typecheck --root examples/basic --startup-timeout 30000
+pnpm cormi inspect --root examples/basic --json
+
 # 停止 dev 后，构建并预览应用
 pnpm cormi build --root examples/basic
 pnpm cormi preview --root examples/basic
 ```
 
-**同项目只允许一个 CLI 会话。build 仍要求输出目录不存在，不清空或覆盖已有 dist。** 重复构建前保管旧产物或改用另一个 `app.outDir`；生产 staging/发布替换是下一切片。preview 只服务已有产物，不重新扫描或生成。`examples/p0` 保留原 HTML + TypeScript 示例，端口 8000；`pnpm demo` 仍是一轮构建/HTTP 预览检查/关闭，不是常驻服务。
+**同项目只允许一个 CLI 会话。现在可以重复 build，但只替换由本协议创建且内容未被修改的 dist。** 没有 `.cormi-build.json` 的旧目录、或新增/修改了用户文件的产物目录会被拒绝；先保管旧产物或改用另一个 app.outDir，不自动清空未知目录。构建先写 staging，失败保留旧结果；切换使用两个目录 rename 并有失败回滚，不是无间隙原子交换。preview 只服务已有产物，不重新扫描或生成。`examples/p0` 保留原 HTML+TypeScript 示例；`pnpm demo` 仍是一次性原始 builder 验证。
 
 ## 验证
 
@@ -39,7 +43,7 @@ pnpm typecheck:example
 pnpm test:browser
 ```
 
-check 包含框架与测试的类型检查、构建和 Node 测试；typecheck:example 检查示例业务源码。browser 测试用 playwright-core 启动独立的无头浏览器，不接入个人浏览器 profile。Mac 默认使用现有 Microsoft Edge，其他环境通过 `CORMI_BROWSER_EXECUTABLE` 指定 Chromium 系可执行文件；未找到时明确失败，不下载浏览器或静默跳过。应用级 `cormi inspect/typecheck` 尚未实现。
+check 包含框架与测试的类型检查、构建和 Node 测试；typecheck:example 检查示例业务源码。browser 测试用 playwright-core 启动独立的无头浏览器，不接入个人浏览器 profile。Mac 默认使用现有 Microsoft Edge，其他环境通过 `CORMI_BROWSER_EXECUTABLE` 指定 Chromium 系可执行文件；未找到时明确失败，不下载浏览器或静默跳过。应用级 `cormi typecheck` 先 prepare，再检查业务及生成代码；即使 tsconfig 排除 .cormi，也会检查必要生成入口。`cormi inspect` 读取上次成功快照，不重新计算源文件，不表示当前源文件已验证。
 
 ## 模块
 
@@ -53,6 +57,7 @@ packages/
 ├── plugin-react/            # application 编译服务与 react 贡献入口；无 Vite
 ├── runtime/                 # 仅浏览器 React/Router 生命周期
 ├── plugin-react-vite/       # React 原生 Vite 集成和客户端边界
+├── plugin-typescript/       # 可选应用类型检查命令；TypeScript 按需加载
 ├── preset-react-vite/       # 可审阅、可替换的默认组合
 └── cormi/                   # 包名 cormijs；CLI/config/preset/锁/worker
 ```
@@ -61,7 +66,7 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 
 ## 文档与记录
 
-[架构 Draft 0.4](docs/02-architecture.md)描述完整目标，[MVP 计划](docs/03-mvp-plan.md)记录进度，[插件优先 ADR](docs/04-plugin-first-adr.md)记录边界原则。[命名和启动协议](docs/06-naming-and-launcher.md)描述 CLI，[路由与 React 协议](docs/08-routes-and-react.md)描述当前 P1b API。历史 [P0](docs/05-p0-results.md)、[P1a](docs/07-p1a-results.md) 保留原阶段事实；最新 [P1b 结果](docs/09-p1b-results.md) 对应 [机器验证](artifacts/p1b-validation.json)，不改写历史验证 JSON。
+[架构 Draft 0.5](docs/02-architecture.md)描述完整目标，[MVP 计划](docs/03-mvp-plan.md)记录进度，[插件优先 ADR](docs/04-plugin-first-adr.md)记录边界原则。[命名和启动协议](docs/06-naming-and-launcher.md)描述 CLI，[路由与 React 协议](docs/08-routes-and-react.md)描述当前 P1b API。历史 [P0](docs/05-p0-results.md)、[P1a](docs/07-p1a-results.md) 保留原阶段事实；最新 [P1b 结果](docs/09-p1b-results.md) 对应 [机器验证](artifacts/p1b-validation.json)，不改写历史验证 JSON。 当前增量协议见 [受管发布与检查](docs/10-publication-and-tools.md)，本轮 [P1c 结果](docs/11-p1c-results.md) 对应 [P1c 机器验证](artifacts/p1c-validation.json)。
 
 ## 固定依赖与参考
 
@@ -83,4 +88,6 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 
 正常 CLI 退出移除自己的 run 缓存与锁；强杀父进程可能留下 stale 锁，不按 PID/时间猜测自动抢锁。恢复前核实相关会话及 worker 均已结束。低层编译 API 不自动取得 CLI 锁，调用者应确保单写入者。
 
-下一切片优先完成生产 staging 与发布替换、生成类型/诊断和应用 inspect/typecheck，再补跨平台及发布消费者验收。SSR/RSC、Linux/Windows、移动端浏览器矩阵和长期内存趋势均未验证，不以本机测试替代这些门槛。
+生成集包含 app.tsx、routes.d.ts 和 inspect.jsonc，文件哈希用于发现混合状态，不声称跨文件事务。typecheck 暂不支持 tsconfig solution/project references；build 转译通过不代表类型正确。发布锁和事务目录在崩溃后可能保留，人工恢复前核实所属进程及旧产物位置，不自动删锁或备份。
+
+下一切片优先补首次路由错误的修复恢复与结构诊断 overlay，再执行跨平台和发布消费者验收。SSR/RSC、Linux/Windows、移动端浏览器矩阵、断电持久性和长期内存趋势均未验证，不以本机测试替代这些门槛。

@@ -1,6 +1,7 @@
 import { CormiError, type CommandRequest, type Plugin } from '@cormijs/core';
 import type { BuildPlan } from '@cormijs/builder';
 import type {} from './index.js';
+import { publishBuild } from './publication.js';
 
 export function plan(request: CommandRequest, extraFields: readonly string[] = []): BuildPlan {
   const input = request.options;
@@ -23,7 +24,7 @@ export const webCommandsPlugin: Plugin.Object<void> = {
   name: 'cormi:web-commands', inject: ['commands', 'web'],
   apply: ctx => {
     ctx.effect(() => ctx.commands.register('dev', async request => ({ kind: 'server', handle: await ctx.web.dev(plan(request), request.signal) })));
-    ctx.effect(() => ctx.commands.register('build', async request => ({ kind: 'result', data: await ctx.web.build(plan(request), request.signal) })));
+    ctx.effect(() => ctx.commands.register('build', async request => ({ kind: 'result', data: await publishBuild(plan(request), (input, signal) => ctx.web.build(input, signal), request.signal) })));
     ctx.effect(() => ctx.commands.register('preview', async request => ({ kind: 'server', handle: await ctx.web.preview(plan(request), request.signal) })));
   },
 };

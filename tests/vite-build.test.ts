@@ -36,7 +36,7 @@ test('escaping output paths and output symlinks are refused without deleting tar
   await symlink(external.root, join(f.root, 'linked'), 'dir');
   try {
     await h.ready(); await assert.rejects(h.ctx.web.build({ ...f.plan, outDir: '../elsewhere' }), hasCode('OUTPUT_PATH_INVALID'));
-    await assert.rejects(h.ctx.web.build({ ...f.plan, outDir: 'linked' }), hasCode('OUTPUT_NOT_FRESH'));
+    await assert.rejects(h.ctx.web.build({ ...f.plan, outDir: 'linked' }), hasCode('OUTPUT_PATH_INVALID'));
     assert.match(await readFile(join(external.root, 'index.html'), 'utf8'), /Cormi/);
   } finally { await h.dispose(); await f.clean(); await external.clean(); }
 });

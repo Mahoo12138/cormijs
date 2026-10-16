@@ -1,10 +1,10 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.4。修订日期：2026-10-16。
+版本：Draft 0.5。修订日期：2026-10-16。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
-P0/P1a 的历史基线分别为 41/70 项测试。P1b 已接入路由 IR、页面扫描、单入口受管生成、React runtime/compiler、Vite 桥接和 preset，本机 93 项 Node 测试与 4 项浏览器测试通过。当前精确 API 与限制以 [路由和 React 协议](08-routes-and-react.md)、[P1b 结果](09-p1b-results.md) 为准；下面的完整阶段流水线、生成类型文件、meta 扩展、生产发布与 inspect/typecheck 仍含目标设计，不能推定全部实现。
+P0/P1a/P1b 保留各自历史结果。P1c 在 React/路由基础上增加受管 staging 与产物替换、路由类型、生成清单及应用 inspect/typecheck。精确协议见 [发布和检查](10-publication-and-tools.md)，已测范围见 [P1c 结果](11-p1c-results.md)。下面的完整编译阶段、完整诊断图、meta 与跨平台发布仍含目标设计，不能推定整份草案已经实现。
 
 ## 1. 应该做一个什么框架
 
@@ -18,7 +18,7 @@ P0/P1a 的历史基线分别为 41/70 项测试。P1b 已接入路由 IR、页�
 
 ## 2. 首版边界与技术选择
 
-| 维度 | Draft 0.4 决策 | 原因 |
+| 维度 | Draft 0.5 决策 | 原因 |
 | --- | --- | --- |
 | 应用模式 | React SPA，客户端渲染 | 先把路由、构建和扩展协议做完整 |
 | Node 插件内核 | Cordis，隔离具体版本适配 | 复用 Context、服务注入和 Fiber 生命周期 |
@@ -278,13 +278,13 @@ React root 由每个 mount 会话持有，销毁时先停止 runtime 订阅，�
 
 ## 12. 代码生成：先用单一可执行入口，降低提交复杂度
 
-P1b 已实现 app.tsx 的所有权检查、临时文件、revision、相同内容免写和单文件 rename；尚未生成本节规划的类型/tsconfig/inspect manifest。生产目录 staging 也尚未实现。生成入口提交后，通过 PreparedApplication.updates 与 ServerHandle.invalidate 显式同步后端缓存；不能把磁盘文件更新当作开发服务缓存已失效。
+P1c 的受管文件为 app.tsx、routes.d.ts 与 inspect.jsonc；仍逐个原子 rename，不是跨文件事务。提交顺序为类型、入口、最后 manifest；manifest 保存内容哈希和白名单摘要。inspect/typecheck 检测混合文件状态并拒绝假成功。没有生成/覆盖用户 tsconfig，检查器读取项目配置或使用明确的内存默认值。入口变更继续通过 updates/invalidate 同步后端缓存。
 
-建议使用 `.cormi/` 作为项目级生成目录，包含 `app.tsx`、类型声明、tsconfig 和 inspect manifest。首版将框架生成的可执行路由及 runtime 装配代码集中在一个 `app.tsx` 中；页面和插件本身仍通过独立模块 import，避免单文件包含业务源码。
+使用 `.cormi/` 作为项目级生成目录，当前包含 `app.tsx`、`routes.d.ts` 与 `inspect.jsonc`；tsconfig 文件生成暂未提供。首版将框架生成的可执行路由及 runtime 装配代码集中在一个 `app.tsx` 中；页面和插件本身仍通过独立模块 import，避免单文件包含业务源码。
 
 这样一轮编译的可执行提交点可以收敛为同目录临时文件的 rename，而不是先开放任意插件多文件输出，再试图补一个复杂文件系统事务。插件在首版贡献 IR 与模块引用，不开放覆盖任意项目路径的 `writeFile()`。
 
-生成步骤是：收集输入快照、内存生成、检查重复 ID 与模块边界、转译语法校验、比较内容 hash、写临时文件、确认 revision 仍然有效、提交入口。最终 revision 检查和入口发布必须在同一个串行提交临界区内完成，不能检查后再无保护地 await 写入而允许新的已接收 revision 插入。类型与诊断 manifest 在入口提交前写好并记录同一 generation；这不承诺多个文件对 IDE 具有跨文件原子可见性。`typecheck` 通过独占 prepare 流程确保读取一致的生成集。
+生成步骤是：收集输入快照、内存生成、检查重复 ID 与模块边界、转译语法校验、比较内容 hash、写临时文件、确认 revision 仍然有效、提交入口。最终 revision 检查和入口发布必须在同一个串行提交临界区内完成，不能检查后再无保护地 await 写入而允许新的已接收 revision 插入。类型文件先于入口提交，诊断 manifest 在最后提交并校验整组哈希；这不承诺多个文件对 IDE 具有跨文件原子可见性。`typecheck` 通过独占 prepare 流程确保读取一致的生成集。
 
 默认 HTML 入口使用项目内的 `index.html`，脚手架引用 `/.cormi/app.tsx`。先 prepare 成功，再调用 Vite dev/build；HTML 的资产与 base 处理交给 Vite 标准入口流程。用户控制 HTML 内容，框架不重复实现另一套 HTML 打包器。[Vite 入口说明](https://vite.dev/guide/)
 
@@ -318,7 +318,7 @@ P1a 增加后端无关 CommandRegistry 协议。launcher 挂载其 provider，We
 
 `builder` 包定义有限契约：`dev(plan) → ServerHandle`、`build(plan) → BuildResult`、`preview(plan) → ServerHandle`。plan 包含项目根、HTML 入口、mode、base、输出目录与显式监听配置，不包含 Vite `InlineConfig`；句柄只暴露 URL 与可等待、幂等的 close，不泄漏原生 server。`plugin-web` 只注入 builder；`plugin-vite` 同时提供 builder 与专属 vite 服务。provider 激活时只登记能力，不立即启动 server；所有桥接登记完成且宿主就绪后，消费者才调用 dev/build。这样避免“server 等配置，配置插件等 server”的循环。
 
-P0 后端先要求全新、项目内输出目录，拒绝清空或覆盖已有目录；生产发布与 staging 替换在 P1 单独实现。后端不响应取消时，取消仅意味着拒收结果，不能声称底层工作已经停止。卸载必须阻止新会话、等待正在创建的会话/构建收尾、关闭自身句柄；不能把 Promise 超时冒充强制取消。
+低层 builder 仍要求全新目录；P1c Web 命令层使用 publishBuild 封装受管 staging、完整清单和 SHA-256 所有权检查，并允许替换本项目未被修改的旧结果。两个目录 rename 之间可能有可见缺口；切换失败尝试恢复 previous，恢复失败保留锁、日志及备份。不是在线原子部署或断电耐久性保证。后端不响应取消时，取消仅意味着拒收结果，不能声称底层工作已经停止。卸载必须阻止新会话、等待正在创建的会话/构建收尾、关闭自身句柄；不能把 Promise 超时冒充强制取消。
 
 `ctx.vite` 的插件贡献采用每会话快照，初始实现允许在下一会话读取变化，不承诺正在运行的 Vite 会话动态重配。专属插件的 disposer 只撤销下一会话的贡献；真正的外部副作用须绑定会话或触发会话重建。
 
@@ -329,14 +329,16 @@ P0 后端先要求全新、项目内输出目录，拒绝清空或覆盖已有�
 | `cormi dev` | prepare、创建开发会话、观察变化、响应退出 |
 | `cormi build` | 封闭输入、生成、构建、验证输出、释放资源，失败退出非零 |
 | `cormi preview` | 预览已有静态产物，不偷偷重新构建 |
-| `cormi inspect` | 输出有效配置、插件状态、hook 顺序、路由来源及版本信息 |
-| `cormi typecheck` | prepare 后运行 TypeScript 检查，不以转译代替检查 |
+| `cormi inspect` | 校验并读取上次成功生成的摘要、路由来源和 hook 顺序；不重算源文件 |
+| `cormi typecheck` | TypeScript 插件先 prepare，强制 noEmit/noCheck=false，检查业务及生成根；references 暂拒绝 |
 
 每条一次性命令都通过 try/finally 关闭所拥有的资源；不依赖直接 `process.exit(0)` 掩盖残留 watcher。Vite 官方提示同进程 dev/build 可能受 NODE_ENV 影响，因此 CLI 将这些命令隔离到独立 worker，不在同一个可变全局环境中并行处理生产和开发构建。[Vite JS API](https://vite.dev/guide/api-javascript.html)
 
 默认 dev/preview 只监听 loopback，LAN 访问需要显式 host 配置。Preview 仅是开发验收用途，不包装成生产 Web 服务方案；SPA 静态部署必须说明 history fallback 和子路径配置。
 
 ## 15. 可观测性与故障表达
+
+P1c 已实现的 inspect 是 last-successful-generation，不输出全量配置或私有 options，也不返回未经检查的当前源文件状态。它仍走已有配置求值/插件初始化/项目锁流程。以下完整配置来源、所有插件状态和阶段耗时是后续诊断目标，不与当前静态摘要混淆。
 
 当前 IPC 只报告版本化启动、就绪、结果及有界错误链，不输出完整配置。Vite provider 使用 serverOnlyFiles 拒绝开发 HTTP 访问 Node 配置源、传递依赖、私有 run 缓存和锁；不会一概屏蔽未来客户端生成入口。此机制不是可信插件沙箱，也不保护用户主动复制到 public 的敏感文件。
 

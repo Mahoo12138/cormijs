@@ -2,8 +2,8 @@ import { assertActive, CormiError, type Context, type Plugin as CordisPlugin } f
 import type { Builder, BuildPlan, BuildResult, ServerHandle } from '@cormijs/builder';
 import { build as viteBuild, createServer, preview as vitePreview,
   type InlineConfig, type PluginOption, type PreviewServer, type ViteDevServer } from 'vite';
-import { mkdir, mkdtemp, realpath, rm, stat } from 'node:fs/promises';
-import { basename, dirname, isAbsolute, join, resolve, sep } from 'node:path';
+import { lstat, mkdir, mkdtemp, realpath, rm, stat } from 'node:fs/promises';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 export interface ViteExtensions {
   /** Create fresh native plugins per session. Bind the returned unregister to the contributor's ctx.effect. */
@@ -20,10 +20,18 @@ async function validatePlan(plan: BuildPlan, preview: boolean): Promise<{ root: 
   const root = await realpath(plan.root);
   if (plan.entry !== 'index.html') throw new CormiError('ENTRY_UNSUPPORTED', 'P0 supports index.html only.');
   const output = resolve(root, plan.outDir);
-  // P0 deliberately only supports direct child output directories, never overwrites them.
-  if (dirname(output) !== root || ['node_modules', '.git', 'src', 'public', '.cormi', '.cormi.lock'].includes(basename(output))) {
-    throw new CormiError('OUTPUT_PATH_INVALID', 'Output must be a dedicated direct child of the project.', { output });
+  const outputRelative = relative(root, output);
+  const segments = outputRelative.split(sep);
+  // Nested output is allowed for command-owned staging, but every parent must already be real.
+  if (!outputRelative || isAbsolute(outputRelative) || segments.includes('..')
+    || segments.some(part => ['node_modules', '.git', 'src', 'public', '.cormi', '.cormi.lock', '.cormi-publish.lock'].includes(part))) {
+    throw new CormiError('OUTPUT_PATH_INVALID', 'Output must remain in a dedicated project directory.', { output });
   }
+  if (await realpath(dirname(output)) !== dirname(output)) throw new CormiError('OUTPUT_PATH_INVALID', 'Output parent cannot contain symlinks.');
+  try {
+    const info = await lstat(output);
+    if (!info.isDirectory() || info.isSymbolicLink()) throw new CormiError('OUTPUT_PATH_INVALID', 'Output must be a real directory.');
+  } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
   if (!plan.base.startsWith('/') || !plan.base.endsWith('/') || plan.base.startsWith('//')
     || plan.base.includes('\\') || plan.base.split('/').includes('..')) throw new CormiError('BASE_INVALID', 'base must be an absolute URL path ending with /.');
   const port = plan.server?.port;
@@ -42,6 +50,7 @@ export const vitePlugin: CordisPlugin.Object<void> = {
     const lifetime = new AbortController();
     const pending = new Set<Promise<unknown>>();
     const sessions = new Set<ServerHandle>();
+    const managedUpdates = new WeakMap<ViteDevServer, Set<string>>();
     const cleanupErrors: unknown[] = [];
     const extensions = new Map<string, { create: () => PluginOption; order: number }>();
     const ordered = () => [...extensions].sort(([a, x], [b, y]) => x.order - y.order || (a < b ? -1 : a > b ? 1 : 0));
@@ -62,6 +71,7 @@ export const vitePlugin: CordisPlugin.Object<void> = {
       const url = server.resolvedUrls?.local[0] ?? server.resolvedUrls?.network[0];
       if (!url) throw new CormiError('SERVER_ADDRESS_MISSING', 'Server did not report a listening URL.');
       let closing: Promise<void> | undefined;
+      if ('moduleGraph' in server) managedUpdates.set(server, new Set());
       const handle: ServerHandle = Object.freeze({
         url,
         ...('moduleGraph' in server ? { async invalidate(files: readonly string[]) {
@@ -70,6 +80,7 @@ export const vitePlugin: CordisPlugin.Object<void> = {
           for (const name of files) {
             const file = resolve(server.config.root, name);
             if (isAbsolute(name) || !file.startsWith(server.config.root + sep)) throw new CormiError('INVALIDATION_PATH_INVALID', 'Invalidation must stay inside the project.');
+            managedUpdates.get(server)!.add(file.split(sep).join('/'));
             server.moduleGraph.onFileChange(file.split(sep).join('/'));
           }
           server.ws.send({ type: 'full-reload', path: '*' });
@@ -121,7 +132,8 @@ export const vitePlugin: CordisPlugin.Object<void> = {
         server: { host: plan.server?.host ?? '127.0.0.1', port: plan.server?.port ?? 0,
           strictPort: true, open: false, fs: { strict: true, allow: [root],
             deny: ['.env', '.env.*', '*.{crt,pem,key,p12,pfx,cer,der}', '.npmrc', '.yarnrc.yml', '**/.git/**',
-              '**/.cormi/run-*/**', '**/.cormi.lock/**', '**/cormi.config.*',
+              '**/.cormi/run-*/**', '**/.cormi.lock/**', '**/cormi.config.*', '**/.cormi/inspect.jsonc', '**/.cormi/*.d.ts',
+              '**/.cormi-publish-*/**', '**/.cormi-publish.lock/**',
               ...(plan.serverOnlyFiles ?? []).map(file => file.split(sep).join('/').replace(/[?*\[\]{}()!+@]/g, '\\$&'))],
           } },
         preview: { host: plan.server?.host ?? '127.0.0.1', port: plan.server?.port ?? 0, strictPort: true, open: false },
@@ -131,6 +143,10 @@ export const vitePlugin: CordisPlugin.Object<void> = {
           name: 'cormi:session-owner', enforce: 'pre',
           configureServer(server) { capture(server); },
           configurePreviewServer(server) { capture(server); },
+          handleHotUpdate(update) {
+            // Explicit generated-entry invalidation owns the reload; native watcher delivery is not a second reload.
+            if (managedUpdates.get(update.server)?.has(update.file.split(sep).join('/'))) return [];
+          },
           configResolved(resolved) {
             if (resolve(resolved.root) !== root || resolve(resolved.build.outDir) !== output
               || resolved.build.emptyOutDir || resolved.build.watch || resolve(resolved.cacheDir) !== cache) {

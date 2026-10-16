@@ -1,17 +1,20 @@
 import { assertActive, CormiError, type CommandRequest, type CommandResult, type Plugin } from '@cormijs/core';
 import type { BuildPlan, ServerHandle } from '@cormijs/builder';
 import type {} from './index.js';
+import { publishBuild } from './publication.js';
 
 export interface PreparedApplication {
   readonly plan: BuildPlan;
   readonly snapshot: unknown;
+  /** Required generated source roots, added even when the user's tsconfig excludes .cormi. */
+  readonly typecheck?: { readonly files: readonly string[] };
   readonly updates?: {
     readonly files: readonly string[];
     subscribe(listener: (files: readonly string[]) => Promise<void>): () => void;
   };
   close(): Promise<void>;
 }
-export interface ApplicationRequest extends CommandRequest { readonly command: 'dev' | 'build' | 'preview' | 'prepare' }
+export interface ApplicationRequest extends CommandRequest { readonly command: 'dev' | 'build' | 'preview' | 'prepare' | 'typecheck' }
 export interface ApplicationCompiler { prepare(request: ApplicationRequest): Promise<PreparedApplication> }
 declare module 'cordis' { interface Context { application: ApplicationCompiler } }
 
@@ -32,7 +35,7 @@ export const applicationCommandsPlugin: Plugin.Object<void> = {
         request.signal.throwIfAborted();
         if (command === 'prepare') { await prepared.close(); return { kind: 'result', data: prepared.snapshot }; }
         if (command === 'build') {
-          const result = await web.build(prepared.plan, request.signal);
+          const result = await publishBuild(prepared.plan, (plan, signal) => web.build(plan, signal), request.signal);
           await prepared.close(); request.signal.throwIfAborted(); return { kind: 'result', data: result };
         }
         server = command === 'dev' ? await web.dev(prepared.plan, request.signal) : await web.preview(prepared.plan, request.signal);

@@ -73,28 +73,44 @@ test('Fast Refresh retains counter state and route structure changes regenerate 
   await writeFile(home, (await readFile(home, 'utf8')).replace('cormi is running.', 'cormi updated.'));
   await text(page, 'h1', 'cormi updated.'); await text(page, 'button', 'Count: 2');
   const added = join(f.root, 'src/pages/added.tsx'), entry = join(f.root, '.cormi/app.tsx');
-  await writeFile(added, 'export default function Added(){return <h1>Added route</h1>}');
-  await generated(entry, 'added.tsx');
+  // Disk commit precedes the explicit browser invalidation; wait for the actual reload before navigating.
+  await Promise.all([
+    page.waitForEvent('domcontentloaded', { timeout: 10000 }),
+    (async () => { await writeFile(added, 'export default function Added(){return <h1>Added route</h1>}'); await generated(entry, 'added.tsx'); })(),
+  ]);
+  await text(page, 'h1', 'cormi updated.');
   await page.goto(new URL('added', ready.url).href); await text(page, 'h1', 'Added route');
   const good = await readFile(entry, 'utf8');
   await writeFile(join(f.root, 'src/pages/added.jsx'), 'export default function Conflict(){return <h1>Conflict</h1>}');
   await delay(600); assert.equal(await readFile(entry, 'utf8'), good);
-  await unlink(join(f.root, 'src/pages/added.jsx')); await unlink(added);
-  await generated(entry, 'added.tsx', false);
-  await page.goto(new URL('added', ready.url).href); await text(page, 'h1', '404');
+  await Promise.all([
+    page.waitForEvent('domcontentloaded', { timeout: 10000 }),
+    (async () => { await unlink(join(f.root, 'src/pages/added.jsx')); await unlink(added); await generated(entry, 'added.tsx', false); })(),
+  ]);
+  // The currently open removed page must recover to 404 without a manual second navigation.
+  await text(page, 'h1', '404');
   assert.equal(await dev.stop(), 0);
 });
 
-test('built React assets render in preview and preview does not regenerate deleted source pages', { timeout: 45000 }, async t => {
+test('managed rebuild and failed rebuild preserve preview behavior without regenerating deleted source pages', { timeout: 45000 }, async t => {
   const f = await project(t), page = await browser(t);
   const build = cli(t, f.root, 'build', ['--startup-timeout', '30000']);
   assert.equal(await build.finish(30000), 0, JSON.stringify(build.events) + build.stderr);
+  const home = join(f.root, 'src/pages/index.tsx');
+  await writeFile(home, (await readFile(home, 'utf8')).replace('cormi is running.', 'cormi release two.'));
+  const rebuild = cli(t, f.root, 'build', ['--startup-timeout', '30000']);
+  assert.equal(await rebuild.finish(30000), 0, JSON.stringify(rebuild.events) + rebuild.stderr);
+  const manifest = await readFile(join(f.root, 'dist/.cormi-build.json'), 'utf8');
+  await writeFile(join(f.root, 'src/pages/about.tsx'), 'export default (broken syntax');
+  const failed = cli(t, f.root, 'build', ['--startup-timeout', '30000']);
+  assert.equal(await failed.finish(30000), 1);
+  assert.equal(await readFile(join(f.root, 'dist/.cormi-build.json'), 'utf8'), manifest);
   const generatedFile = join(f.root, '.cormi/app.tsx'), before = await stat(generatedFile);
   await unlink(join(f.root, 'src/pages/users/[id].tsx'));
   const preview = cli(t, f.root, 'preview'); const ready = await preview.waitFor(event => event.type === 'ready');
   await page.goto(new URL('users/73', ready.url).href); await text(page, 'h1', 'User 73');
   assert.equal((await stat(generatedFile)).mtimeMs, before.mtimeMs);
-  await page.goto(ready.url); await text(page, 'h1', 'cormi is running.');
+  await page.goto(ready.url); await text(page, 'h1', 'cormi release two.');
   await page.locator('button').click(); await text(page, 'button', 'Count: 1');
   assert.equal(await preview.stop(), 0);
 });
