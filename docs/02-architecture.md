@@ -1,12 +1,14 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.6。修订日期：2026-10-16。
+版本：Draft 0.7。修订日期：2026-10-17。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
 P0/P1a/P1b 保留各自历史结果。P1c 在 React/路由基础上增加受管 staging 与产物替换、路由类型、生成清单及应用 inspect/typecheck。精确协议见 [发布和检查](10-publication-and-tools.md)，已测范围见 [P1c 结果](11-p1c-results.md)。下面的完整编译阶段、完整诊断图、meta 与跨平台发布仍含目标设计，不能推定整份草案已经实现。
 
 P2a 增加开发态编译恢复：PreparedApplication.development 提供状态，Web 命令通过后端无关契约转发，Vite 才实现 WebSocket 和浏览器面板。首次可修复错误保留开发服务但不伪造成功输出；一次性 build/prepare/typecheck 仍失败退出。监听就绪与应用编译状态分离，详见 [开发恢复协议](12-development-recovery.md)。
+
+P3a 增加真实 tarball 与仓库外消费者验收。Node 包提供明确 engines，dist 的 sourcemap 对应 src 一并入包；默认 preset 的公开类型使用 Preset，不泄漏未声明的传递类型依赖。Cordis 原始运行时仍不变，本地试用选择消费者根显式 pnpm 声明补丁，不复制或改名上游 Context；无补丁透明公共安装仍是发布限制。详见 [打包消费协议](15-package-consumers.md)。
 
 ## 1. 应该做一个什么框架
 

@@ -1,4 +1,4 @@
-import { definePreset } from 'cormijs';
+import { definePreset, type Preset } from 'cormijs';
 import { webPlugin, applicationCommandsPlugin, inspectionPlugin } from '@cormijs/plugin-web';
 import { vitePlugin } from '@cormijs/plugin-vite';
 import { reactPlugin } from '@cormijs/plugin-react';
@@ -6,7 +6,7 @@ import { reactVitePlugin } from '@cormijs/plugin-react-vite';
 import { typescriptPlugin } from '@cormijs/plugin-typescript';
 
 /** Explicit composition, not privileged kernel functionality. */
-export const reactVite = definePreset({
+export const reactVite: Preset = definePreset({
   id: 'cormi:react-vite',
   plugins: [
     { id: 'web', plugin: webPlugin },

@@ -1,0 +1,1015 @@
+{
+  "phase": "P3a",
+  "verified_at": "2026-10-17T04:13:45.560535+00:00",
+  "baseline_commit": "09218f06d48e707d4a19ed8030323e7e99b2eb7e",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "node": "v22.14.0",
+  "commands": [
+    {
+      "command": [
+        "pnpm",
+        "install",
+        "--offline",
+        "--ignore-scripts",
+        "--frozen-lockfile"
+      ],
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p3a-final-install.log",
+      "sha256": "fdcf71cb471e78f444bede5af4200a7f39a57897194196b8eb89a6883c6829bf"
+    },
+    {
+      "command": [
+        "pnpm",
+        "check"
+      ],
+      "exit_code": 0,
+      "counts": {
+        "tests": 143,
+        "pass": 143,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "log": ".cache/p3a-final-check.log",
+      "sha256": "69dacc7c83f807ac6081f391ccfe4064bb23d99b009deda881158362f5d7c622"
+    },
+    {
+      "command": [
+        "pnpm",
+        "test:browser"
+      ],
+      "exit_code": 0,
+      "counts": {
+        "tests": 10,
+        "pass": 10,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "log": ".cache/p3a-final-browser.log",
+      "sha256": "690e750249f453a1ecfa62935af8b818863cc4002ae583363b974e6ae21fd100"
+    },
+    {
+      "command": [
+        "pnpm",
+        "test:package"
+      ],
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p3a-final-package-1.log",
+      "sha256": "0cb49ee3101ee86588946ceb837f87154990a2d51762c7ead53cee4e0fdc31bd"
+    },
+    {
+      "command": [
+        "pnpm",
+        "test:package"
+      ],
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p3a-final-package-2.log",
+      "sha256": "edb7e2ca8c61e6b9c59133cac9661f7b571b4ce5d645f3695f989c0a0d138012"
+    },
+    {
+      "command": [
+        "pnpm",
+        "typecheck:example"
+      ],
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p3a-final-example.log",
+      "sha256": "a06cb80d5dd91de659483dbfd9be16bb86a73ccfece1f0f0ee41a1c0e8b1a57e"
+    },
+    {
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "packages/plugin-vite",
+        "--noEmit",
+        "--skipLibCheck",
+        "false"
+      ],
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p3a-final-strict.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "pnpm",
+        "demo"
+      ],
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p3a-final-demo.log",
+      "sha256": "2ddb4c9c1dc17c69e60e0f1ffd0dcbdd2fc79debe3e5a1f8f5ce824b0e7ab67b"
+    },
+    {
+      "command": [
+        "pnpm",
+        "pack:local",
+        "--out",
+        "/Users/mahoo/Projects/cormijs/.cache/cormi-p3a-kit-d11abd90"
+      ],
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p3a-final-local-kit.log",
+      "sha256": "152b82fcf1ea6215543e7491d3d4821f11e66870c21549a510d51b848074c962"
+    }
+  ],
+  "package_runs": [
+    {
+      "result": ".cache/package-test-1792210372806/result.json",
+      "sha256": "ac32d1f92084fcf1e693e6a0fbd79b7fea99c92b711f131ad817172ab1f54a39",
+      "stages": [
+        {
+          "label": "archive-exports-imports-maps-bins",
+          "packages": 11
+        },
+        {
+          "label": "raw-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/raw-install.log",
+          "sha256": "12cb3b0953fe9b3bc2d59ba84883d790400a3434e9e488845356a63d013893a5"
+        },
+        {
+          "label": "raw-runtime",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/raw-runtime.log",
+          "sha256": "bb38e74b2fea792da01884c1c637ab82857112e2be0fc9ab5992d2301ac570f5"
+        },
+        {
+          "label": "raw-nodenext-expected-failure",
+          "exitCode": 2,
+          "expectedExitCode": 2,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/raw-nodenext-expected-failure.log",
+          "sha256": "3d794147702a6eaa9faf51dccb847ffbdda07c5f9d46b769881ca3d4beaf07e4"
+        },
+        {
+          "label": "isolated-links:raw",
+          "links": 7,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/raw-pnpm-lock.yaml",
+          "lockSha256": "674dab7ea624caacb3843f3bf185d31e362517a47fb6c23a1d422c0ab85ff2d7"
+        },
+        {
+          "label": "core-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/core-install.log",
+          "sha256": "66c294dc225b8ac386ffd3fb5671748ab9e3d0b6d533a04dc26f170f1d8efb33"
+        },
+        {
+          "label": "core-runtime",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/core-runtime.log",
+          "sha256": "bb38e74b2fea792da01884c1c637ab82857112e2be0fc9ab5992d2301ac570f5"
+        },
+        {
+          "label": "core-strict-types",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/core-strict-types.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "isolated-links:core",
+          "links": 7,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/core-pnpm-lock.yaml",
+          "lockSha256": "a6c9ccf376d903dd766c53f958ee64488278278838e5109a5154580fba0dca17"
+        },
+        {
+          "label": "cordis-runtime-identity",
+          "sha256": "2b5009648dfb64a2b904315e3a577179f6d378507cbbb3965897d94994d78fe9",
+          "unchanged": true
+        },
+        {
+          "label": "launcher-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/launcher-install.log",
+          "sha256": "80c223351e02a7cbc5b06910668601732af36d86d0b6b069844e710cb23e9204"
+        },
+        {
+          "label": "launcher-bin",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/launcher-bin.log",
+          "sha256": "91fc02773ea037b2a4a69622a921707deaf621c1f43048a65a65569826c30a18"
+        },
+        {
+          "label": "launcher-types",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/launcher-types.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "launcher-custom-command",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/launcher-custom-command.log",
+          "sha256": "50f069c8b22adf3adc2daf54ea405fd2e08c810b08344d1685ee5ec16b8d133e"
+        },
+        {
+          "label": "launcher-no-vite",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/launcher-no-vite.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "isolated-links:launcher",
+          "links": 11,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/launcher-pnpm-lock.yaml",
+          "lockSha256": "d237db6a28ef305d0d47014758a3e9ef4b0642e99aca1ba6df53625e475738ab"
+        },
+        {
+          "label": "missing-peer-rejected",
+          "exitCode": 1,
+          "expectedExitCode": 1,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/missing-peer-rejected.log",
+          "sha256": "68d35a3317304f5813ed324ccbd8997a43cf4793ae1466d59e442f768a8a0d16"
+        },
+        {
+          "label": "sdk-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/sdk-install.log",
+          "sha256": "a27eaac629ecf9f7e8100dc964d957600e0a69690a6241e650b4d559c4cd7472"
+        },
+        {
+          "label": "all-public-types",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/all-public-types.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "all-public-esm-exports",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/all-public-esm-exports.log",
+          "sha256": "d5f15f3986b000290b20195640fb6d9f9f0f45639d2ee18a97d09dc67f875476"
+        },
+        {
+          "label": "isolated-links:sdk",
+          "links": 171,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/sdk-pnpm-lock.yaml",
+          "lockSha256": "25150d0d64123c4f5f35deae4f74d8ba3850d808b3cc67e17d56c82f9930b9ff"
+        },
+        {
+          "label": "react-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/react-install.log",
+          "sha256": "5443d8d671c98767ea5bbb98462e2419c78d2d930be317450035852b60d897f1"
+        },
+        {
+          "label": "isolated-links:app",
+          "links": 163,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/app-pnpm-lock.yaml",
+          "lockSha256": "1475339faa709e0c9f311f07abb4dd1e75f5965e28b78b32449124927881f4a6"
+        },
+        {
+          "label": "frozen-reinstall",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/frozen-reinstall.log",
+          "sha256": "d0d266cde732e303940a25c940c334a56d1e4fa8b7cd23ec5b3ecbd10ce4c9e9"
+        },
+        {
+          "label": "react-prepare",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/react-prepare.log",
+          "sha256": "7df104e6ce736f37ef3e2f9719994fa0d206a42bc76d7f0e4717aa310837456f"
+        },
+        {
+          "label": "react-typecheck",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/react-typecheck.log",
+          "sha256": "efdecb03938a91ed729fa8985e23de1485bf5f899361d015f43ca322fc1c1187"
+        },
+        {
+          "label": "react-inspect",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/react-inspect.log",
+          "sha256": "035a3bc4fda09c11719dd5e550f6ccdc78558096ec1b828e6e0dee223d7d5ce3"
+        },
+        {
+          "label": "packed-react-dom-fast-refresh-recovery-deep-route",
+          "browser": "155.0.4283.60",
+          "pageerrors": 0
+        },
+        {
+          "label": "dev-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        },
+        {
+          "label": "react-build",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/react-build.log",
+          "sha256": "714055486f1ef173cc53702ddf49442015cc8da99feebf06cbc2fdf793544ee8"
+        },
+        {
+          "label": "react-rebuild",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/react-rebuild.log",
+          "sha256": "4a7ee46847b92fd8768c6bd0a269984ce93c39b9eb42c3f56ba9c246a0197337"
+        },
+        {
+          "label": "failed-build",
+          "exitCode": 1,
+          "expectedExitCode": 1,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/failed-build.log",
+          "sha256": "994901215b45e1dc6772e7f9c85fdd8b9487fef257e1a8b15c8de96f42e94498"
+        },
+        {
+          "label": "failed-types",
+          "exitCode": 1,
+          "expectedExitCode": 1,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210372806/failed-types.log",
+          "sha256": "01255a440adcd663ba729415ee08d9836cd2d8792b7650cfd7cbd6e34c740994"
+        },
+        {
+          "label": "preview-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        }
+      ],
+      "packages": [
+        {
+          "name": "@cormijs/builder",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-builder-0.0.1.tgz",
+          "sha256": "5dca11256099cc17808c49b04b74631f2495446cb124a88f0e2eed78a9698f8f",
+          "contentSha256": "307b023eaed503e4cbbf763799cc5c90b415be4fcf121d66257cb6c67b5997b5",
+          "files": 11,
+          "bytes": 2024
+        },
+        {
+          "name": "@cormijs/core",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-core-0.0.1.tgz",
+          "sha256": "02cdceeb637e95f743b1a29ad94144ff22b6736624a0842b97b522829b07d0a6",
+          "contentSha256": "ff44b9bfa2c562f7329eeb7576db2c5439f3cc220583fd027f750bf154e3e76a",
+          "files": 11,
+          "bytes": 6370
+        },
+        {
+          "name": "cormijs",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-0.0.1.tgz",
+          "sha256": "972e1364b6801b7504449a318e13a564968a5a10069a0cddad6e0a92f15d9010",
+          "contentSha256": "6cba8f1ac2e10ba1d51b604263a05645ff4ceda0bddf1b68cd5340d0bcd0eabc",
+          "files": 51,
+          "bytes": 29653
+        },
+        {
+          "name": "@cormijs/plugin-react",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-react-0.0.1.tgz",
+          "sha256": "42d0a56bcea391a8f0ef3e4b864a987e562f75e04a1e409debf21da39d6a3c45",
+          "contentSha256": "f32ddd9b0960b3b510e66445b3c5ee7bb9626c7409cb8de7edd21b96fc06255f",
+          "files": 21,
+          "bytes": 21285
+        },
+        {
+          "name": "@cormijs/plugin-react-vite",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-react-vite-0.0.1.tgz",
+          "sha256": "5bd5c1c092a805cc5616768789a988184891498489a906d8082a7e03ec068a0f",
+          "contentSha256": "92f5fb4d94430106eb749bca38115f811de6c43b4e046ac6e13bdbedf9914b28",
+          "files": 6,
+          "bytes": 1698
+        },
+        {
+          "name": "@cormijs/plugin-typescript",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-typescript-0.0.1.tgz",
+          "sha256": "a5c0cd8584aa104bebc1e442ac5eec77485a4fed9df7b20ceaf9d7c737320e5d",
+          "contentSha256": "272dcb1920b126c2c46b1900fcfd2b42bfe2ce44f2eea0bfd06ee8c6b19429f5",
+          "files": 6,
+          "bytes": 5177
+        },
+        {
+          "name": "@cormijs/plugin-vite",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-vite-0.0.1.tgz",
+          "sha256": "4b873dc4c51bb7b282b4c8400f9d599182273679397e3050de98dce1d6face03",
+          "contentSha256": "9910747ad6890486f9d67479e5a7d6ad565d0eebd5111cf6392f7e84cf166053",
+          "files": 16,
+          "bytes": 19707
+        },
+        {
+          "name": "@cormijs/plugin-web",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-web-0.0.1.tgz",
+          "sha256": "870d0b3e17f601ad3b4f2c0006dfa924bdf553b48d74aa158845a93f4653dfbd",
+          "contentSha256": "305aac2ae9de0e1f381c8701efb3e7db53aaee12d58fa4f6b37ed7e4b80c32dd",
+          "files": 36,
+          "bytes": 29341
+        },
+        {
+          "name": "@cormijs/preset-react-vite",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-preset-react-vite-0.0.1.tgz",
+          "sha256": "b2566f85d84de343c2d6c860bdc133bab2cb40fdef615cda4ed9af2fae2fa3f5",
+          "contentSha256": "506c640affe58e74d6ea32cbd8e98297d0850fba48e0653f89a1097d68d3e540",
+          "files": 6,
+          "bytes": 1208
+        },
+        {
+          "name": "@cormijs/routes",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-routes-0.0.1.tgz",
+          "sha256": "a7cf50533eda74ecc337df8018de1342b9faae25be9c42846d18f46678d65f06",
+          "contentSha256": "de6881968a407f6001b08e4c21b922668e581699cf1bab353fa7a291143f30c1",
+          "files": 6,
+          "bytes": 7535
+        },
+        {
+          "name": "@cormijs/runtime",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-runtime-0.0.1.tgz",
+          "sha256": "2879e1082a27f00b34a7bda89f2002c27160e78ea632451bd7173e0157badda2",
+          "contentSha256": "3abd421a32c24c35074e827d620ffb5c10d3dca2fe0f941464da675279984375",
+          "files": 6,
+          "bytes": 3669
+        }
+      ]
+    },
+    {
+      "result": ".cache/package-test-1792210398096/result.json",
+      "sha256": "2acfb05e947cd4143bb3a6e7d93933aca9f0bed296708958c69bbfde18760cac",
+      "stages": [
+        {
+          "label": "archive-exports-imports-maps-bins",
+          "packages": 11
+        },
+        {
+          "label": "raw-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/raw-install.log",
+          "sha256": "ca31254f95ccef0a099ec827db51433b229d0e1b42301c1577759cf9b4c89fdc"
+        },
+        {
+          "label": "raw-runtime",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/raw-runtime.log",
+          "sha256": "bb38e74b2fea792da01884c1c637ab82857112e2be0fc9ab5992d2301ac570f5"
+        },
+        {
+          "label": "raw-nodenext-expected-failure",
+          "exitCode": 2,
+          "expectedExitCode": 2,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/raw-nodenext-expected-failure.log",
+          "sha256": "3d794147702a6eaa9faf51dccb847ffbdda07c5f9d46b769881ca3d4beaf07e4"
+        },
+        {
+          "label": "isolated-links:raw",
+          "links": 7,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/raw-pnpm-lock.yaml",
+          "lockSha256": "674dab7ea624caacb3843f3bf185d31e362517a47fb6c23a1d422c0ab85ff2d7"
+        },
+        {
+          "label": "core-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/core-install.log",
+          "sha256": "f17f0e2c18a188109fff41b6998ad5c283bbd08b88c98155fa568f09599d33eb"
+        },
+        {
+          "label": "core-runtime",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/core-runtime.log",
+          "sha256": "bb38e74b2fea792da01884c1c637ab82857112e2be0fc9ab5992d2301ac570f5"
+        },
+        {
+          "label": "core-strict-types",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/core-strict-types.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "isolated-links:core",
+          "links": 7,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/core-pnpm-lock.yaml",
+          "lockSha256": "a6c9ccf376d903dd766c53f958ee64488278278838e5109a5154580fba0dca17"
+        },
+        {
+          "label": "cordis-runtime-identity",
+          "sha256": "2b5009648dfb64a2b904315e3a577179f6d378507cbbb3965897d94994d78fe9",
+          "unchanged": true
+        },
+        {
+          "label": "launcher-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/launcher-install.log",
+          "sha256": "3d4b8164e1f38994dbd4ebed10d9bb73ef72d7919348319f4a50aa2dce19d33a"
+        },
+        {
+          "label": "launcher-bin",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/launcher-bin.log",
+          "sha256": "91fc02773ea037b2a4a69622a921707deaf621c1f43048a65a65569826c30a18"
+        },
+        {
+          "label": "launcher-types",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/launcher-types.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "launcher-custom-command",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/launcher-custom-command.log",
+          "sha256": "c5507e008a4d5d993fa0eacb5e10010a6430f2037fea6d3de9f62a5f745b3457"
+        },
+        {
+          "label": "launcher-no-vite",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/launcher-no-vite.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "isolated-links:launcher",
+          "links": 11,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/launcher-pnpm-lock.yaml",
+          "lockSha256": "d237db6a28ef305d0d47014758a3e9ef4b0642e99aca1ba6df53625e475738ab"
+        },
+        {
+          "label": "missing-peer-rejected",
+          "exitCode": 1,
+          "expectedExitCode": 1,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/missing-peer-rejected.log",
+          "sha256": "13ffb64ad516935a35d12a98e60bcdf44eaeaf83901b54cfe96f215446513d3a"
+        },
+        {
+          "label": "sdk-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/sdk-install.log",
+          "sha256": "aec52421eb5e0924524b15f33bc9caba6ff26585f0226164dc97c73fccc7753a"
+        },
+        {
+          "label": "all-public-types",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/all-public-types.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "all-public-esm-exports",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/all-public-esm-exports.log",
+          "sha256": "d5f15f3986b000290b20195640fb6d9f9f0f45639d2ee18a97d09dc67f875476"
+        },
+        {
+          "label": "isolated-links:sdk",
+          "links": 171,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/sdk-pnpm-lock.yaml",
+          "lockSha256": "5fc0c4ec7ded2fb3b9e8c8f9044e4b32c9214aebf78b03734a245a998f444525"
+        },
+        {
+          "label": "react-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/react-install.log",
+          "sha256": "0b61c9c6b38b3a7dec726298b5c09de918ddd4d4bc8a4ac910a20e6a875f1d11"
+        },
+        {
+          "label": "isolated-links:app",
+          "links": 163,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/app-pnpm-lock.yaml",
+          "lockSha256": "6893489a43968568b0243334dbe71387e9655b707f74c991e00458c6f7e9e642"
+        },
+        {
+          "label": "frozen-reinstall",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/frozen-reinstall.log",
+          "sha256": "ea680b804714d818f4207dc42a7208de027d910a2c6b1ffc0200d8f54a01e978"
+        },
+        {
+          "label": "react-prepare",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/react-prepare.log",
+          "sha256": "1d4d3bbfa30498f7d5bdfa82e40cb35c994aab66c4db97f255632b06341eac93"
+        },
+        {
+          "label": "react-typecheck",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/react-typecheck.log",
+          "sha256": "c66e38eb9f3f86bbef3dc48e0e2e0941baa71b9d76e3a2adbc8889a55cc1f117"
+        },
+        {
+          "label": "react-inspect",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/react-inspect.log",
+          "sha256": "2dab8e1dcfb8a94aac141e651eca682320995269bd86bcdd4916c4230aa44f70"
+        },
+        {
+          "label": "packed-react-dom-fast-refresh-recovery-deep-route",
+          "browser": "155.0.4283.60",
+          "pageerrors": 0
+        },
+        {
+          "label": "dev-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        },
+        {
+          "label": "react-build",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/react-build.log",
+          "sha256": "ada8c3976841bae83832c6a8e589674644445021c4901334592ac9b8d71ca914"
+        },
+        {
+          "label": "react-rebuild",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/react-rebuild.log",
+          "sha256": "d9795a3a090b7ebaad2242d41aaef722a5240d2614502d72d73cf664e6b23ca2"
+        },
+        {
+          "label": "failed-build",
+          "exitCode": 1,
+          "expectedExitCode": 1,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/failed-build.log",
+          "sha256": "d06831acb3f347c8700bde3d7e269c23271c95045f5fae3057a88cbca53fca76"
+        },
+        {
+          "label": "failed-types",
+          "exitCode": 1,
+          "expectedExitCode": 1,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792210398096/failed-types.log",
+          "sha256": "bfa034934851d935d509175659ebfce16180d6e7edaeaef5cdcbf82c17624da3"
+        },
+        {
+          "label": "preview-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        }
+      ],
+      "packages": [
+        {
+          "name": "@cormijs/builder",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-builder-0.0.1.tgz",
+          "sha256": "5dca11256099cc17808c49b04b74631f2495446cb124a88f0e2eed78a9698f8f",
+          "contentSha256": "307b023eaed503e4cbbf763799cc5c90b415be4fcf121d66257cb6c67b5997b5",
+          "files": 11,
+          "bytes": 2024
+        },
+        {
+          "name": "@cormijs/core",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-core-0.0.1.tgz",
+          "sha256": "02cdceeb637e95f743b1a29ad94144ff22b6736624a0842b97b522829b07d0a6",
+          "contentSha256": "ff44b9bfa2c562f7329eeb7576db2c5439f3cc220583fd027f750bf154e3e76a",
+          "files": 11,
+          "bytes": 6370
+        },
+        {
+          "name": "cormijs",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-0.0.1.tgz",
+          "sha256": "972e1364b6801b7504449a318e13a564968a5a10069a0cddad6e0a92f15d9010",
+          "contentSha256": "6cba8f1ac2e10ba1d51b604263a05645ff4ceda0bddf1b68cd5340d0bcd0eabc",
+          "files": 51,
+          "bytes": 29653
+        },
+        {
+          "name": "@cormijs/plugin-react",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-react-0.0.1.tgz",
+          "sha256": "f4dab9eaba52cc642873e12ed8d97261e4da3004c21fae8f4dcfedc269a66399",
+          "contentSha256": "f32ddd9b0960b3b510e66445b3c5ee7bb9626c7409cb8de7edd21b96fc06255f",
+          "files": 21,
+          "bytes": 21285
+        },
+        {
+          "name": "@cormijs/plugin-react-vite",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-react-vite-0.0.1.tgz",
+          "sha256": "6ad9a71bf7d7d9bea115427cd08446b14458e7beadbc0f29ad84672d22b8429e",
+          "contentSha256": "92f5fb4d94430106eb749bca38115f811de6c43b4e046ac6e13bdbedf9914b28",
+          "files": 6,
+          "bytes": 1697
+        },
+        {
+          "name": "@cormijs/plugin-typescript",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-typescript-0.0.1.tgz",
+          "sha256": "a5c0cd8584aa104bebc1e442ac5eec77485a4fed9df7b20ceaf9d7c737320e5d",
+          "contentSha256": "272dcb1920b126c2c46b1900fcfd2b42bfe2ce44f2eea0bfd06ee8c6b19429f5",
+          "files": 6,
+          "bytes": 5177
+        },
+        {
+          "name": "@cormijs/plugin-vite",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-vite-0.0.1.tgz",
+          "sha256": "4b873dc4c51bb7b282b4c8400f9d599182273679397e3050de98dce1d6face03",
+          "contentSha256": "9910747ad6890486f9d67479e5a7d6ad565d0eebd5111cf6392f7e84cf166053",
+          "files": 16,
+          "bytes": 19707
+        },
+        {
+          "name": "@cormijs/plugin-web",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-web-0.0.1.tgz",
+          "sha256": "870d0b3e17f601ad3b4f2c0006dfa924bdf553b48d74aa158845a93f4653dfbd",
+          "contentSha256": "305aac2ae9de0e1f381c8701efb3e7db53aaee12d58fa4f6b37ed7e4b80c32dd",
+          "files": 36,
+          "bytes": 29341
+        },
+        {
+          "name": "@cormijs/preset-react-vite",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-preset-react-vite-0.0.1.tgz",
+          "sha256": "b2566f85d84de343c2d6c860bdc133bab2cb40fdef615cda4ed9af2fae2fa3f5",
+          "contentSha256": "506c640affe58e74d6ea32cbd8e98297d0850fba48e0653f89a1097d68d3e540",
+          "files": 6,
+          "bytes": 1208
+        },
+        {
+          "name": "@cormijs/routes",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-routes-0.0.1.tgz",
+          "sha256": "a7cf50533eda74ecc337df8018de1342b9faae25be9c42846d18f46678d65f06",
+          "contentSha256": "de6881968a407f6001b08e4c21b922668e581699cf1bab353fa7a291143f30c1",
+          "files": 6,
+          "bytes": 7535
+        },
+        {
+          "name": "@cormijs/runtime",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-runtime-0.0.1.tgz",
+          "sha256": "2879e1082a27f00b34a7bda89f2002c27160e78ea632451bd7173e0157badda2",
+          "contentSha256": "3abd421a32c24c35074e827d620ffb5c10d3dca2fe0f941464da675279984375",
+          "files": 6,
+          "bytes": 3669
+        }
+      ]
+    }
+  ],
+  "local_kit": {
+    "path": ".cache/cormi-p3a-kit-d11abd90",
+    "manifest_sha256": "51da546fb6538e228d96d09531081ffddd458b482869e2afc943c1176c574ff0",
+    "packages": [
+      {
+        "name": "@cormijs/builder",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-builder-0.0.1.tgz",
+        "sha256": "5dca11256099cc17808c49b04b74631f2495446cb124a88f0e2eed78a9698f8f",
+        "contentSha256": "307b023eaed503e4cbbf763799cc5c90b415be4fcf121d66257cb6c67b5997b5",
+        "files": 11,
+        "bytes": 2024
+      },
+      {
+        "name": "@cormijs/core",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-core-0.0.1.tgz",
+        "sha256": "02cdceeb637e95f743b1a29ad94144ff22b6736624a0842b97b522829b07d0a6",
+        "contentSha256": "ff44b9bfa2c562f7329eeb7576db2c5439f3cc220583fd027f750bf154e3e76a",
+        "files": 11,
+        "bytes": 6370
+      },
+      {
+        "name": "cormijs",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-0.0.1.tgz",
+        "sha256": "972e1364b6801b7504449a318e13a564968a5a10069a0cddad6e0a92f15d9010",
+        "contentSha256": "6cba8f1ac2e10ba1d51b604263a05645ff4ceda0bddf1b68cd5340d0bcd0eabc",
+        "files": 51,
+        "bytes": 29653
+      },
+      {
+        "name": "@cormijs/plugin-react",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-plugin-react-0.0.1.tgz",
+        "sha256": "42d0a56bcea391a8f0ef3e4b864a987e562f75e04a1e409debf21da39d6a3c45",
+        "contentSha256": "f32ddd9b0960b3b510e66445b3c5ee7bb9626c7409cb8de7edd21b96fc06255f",
+        "files": 21,
+        "bytes": 21285
+      },
+      {
+        "name": "@cormijs/plugin-react-vite",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-plugin-react-vite-0.0.1.tgz",
+        "sha256": "6ad9a71bf7d7d9bea115427cd08446b14458e7beadbc0f29ad84672d22b8429e",
+        "contentSha256": "92f5fb4d94430106eb749bca38115f811de6c43b4e046ac6e13bdbedf9914b28",
+        "files": 6,
+        "bytes": 1697
+      },
+      {
+        "name": "@cormijs/plugin-typescript",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-plugin-typescript-0.0.1.tgz",
+        "sha256": "a5c0cd8584aa104bebc1e442ac5eec77485a4fed9df7b20ceaf9d7c737320e5d",
+        "contentSha256": "272dcb1920b126c2c46b1900fcfd2b42bfe2ce44f2eea0bfd06ee8c6b19429f5",
+        "files": 6,
+        "bytes": 5177
+      },
+      {
+        "name": "@cormijs/plugin-vite",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-plugin-vite-0.0.1.tgz",
+        "sha256": "4b873dc4c51bb7b282b4c8400f9d599182273679397e3050de98dce1d6face03",
+        "contentSha256": "9910747ad6890486f9d67479e5a7d6ad565d0eebd5111cf6392f7e84cf166053",
+        "files": 16,
+        "bytes": 19707
+      },
+      {
+        "name": "@cormijs/plugin-web",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-plugin-web-0.0.1.tgz",
+        "sha256": "870d0b3e17f601ad3b4f2c0006dfa924bdf553b48d74aa158845a93f4653dfbd",
+        "contentSha256": "305aac2ae9de0e1f381c8701efb3e7db53aaee12d58fa4f6b37ed7e4b80c32dd",
+        "files": 36,
+        "bytes": 29341
+      },
+      {
+        "name": "@cormijs/preset-react-vite",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-preset-react-vite-0.0.1.tgz",
+        "sha256": "ed6e03a653b320d02f8a96c90c12670974de599f9b251f04e70da2a9cbfeedab",
+        "contentSha256": "506c640affe58e74d6ea32cbd8e98297d0850fba48e0653f89a1097d68d3e540",
+        "files": 6,
+        "bytes": 1208
+      },
+      {
+        "name": "@cormijs/routes",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-routes-0.0.1.tgz",
+        "sha256": "a7cf50533eda74ecc337df8018de1342b9faae25be9c42846d18f46678d65f06",
+        "contentSha256": "de6881968a407f6001b08e4c21b922668e581699cf1bab353fa7a291143f30c1",
+        "files": 6,
+        "bytes": 7535
+      },
+      {
+        "name": "@cormijs/runtime",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-runtime-0.0.1.tgz",
+        "sha256": "2879e1082a27f00b34a7bda89f2002c27160e78ea632451bd7173e0157badda2",
+        "contentSha256": "3abd421a32c24c35074e827d620ffb5c10d3dca2fe0f941464da675279984375",
+        "files": 6,
+        "bytes": 3669
+      }
+    ],
+    "publication_eligible": false
+  },
+  "identical_package_file_content_after_dependency_key_normalization": true,
+  "identical_archive_bytes": false,
+  "archive_difference_note": "pnpm 10.6.3 may reorder workspace dependency keys. Export-condition order and all non-manifest file bytes remain significant.",
+  "source_sha256": {
+    ".gitignore": "3cca158907938dbe9ddc2e20cd5ee0751a00c024dbef8ddef25adf64cd90be87",
+    ".npmrc": "d089b05fc08a36af3a3eb500ffd9d2087c0c2517ee6a820980377dc95bede2f9",
+    ".nvmrc": "c989649ac5c541692f22f2e41f5fbc34927c02bf1644e5dcca46bb4c88281f87",
+    "examples/basic/cormi.config.ts": "4e0d200067661fa8cb373725d3886a6e4f60ce9f208c183b715e24ea675983c4",
+    "examples/basic/index.html": "0c205f840d5f7f8691addc6a22b891f63a9e59ea618dcd720cffabadca59db18",
+    "examples/basic/package.json": "049f13856347e194b61f58b46a419706e20e6426ae00b61758971d8dd11c6f41",
+    "examples/basic/src/pages/_layout.tsx": "bbac7a9d61194cbc784331096a3f00b21767590d304bfbfc9a0247ced42aea4f",
+    "examples/basic/src/pages/about.tsx": "6873f7250c512db26f9cda180d947fd5bb4d443992d85f21f233add0a5f28f5e",
+    "examples/basic/src/pages/docs/[...rest].tsx": "701fa4ae30b1d3b2373c297ed54eda3d9494e13ff62f6af9de92eef66e36ca68",
+    "examples/basic/src/pages/index.tsx": "65a53613b6d708da153e6e9abea837468480cb3e354f780ffe6822fc09e51c87",
+    "examples/basic/src/pages/users/[id].tsx": "a4f06c7b6718da0e49dadb71412a07bb04f2a436c46b6611f1772f2660056a5c",
+    "examples/basic/src/pages/users/_layout.tsx": "85f38314daebd7034a8313012c91d8fa2a82a1f27a123b8733def4dfa69a9b2c",
+    "examples/basic/src/runtime.tsx": "23b4e85a742ac8ee8e947ad2d26b920d09e442423730cd97f2ace2168fd38005",
+    "examples/basic/src/style.css": "eaa53d86ef42901a32ed45075c984a6f928b04fa77a82ea621b7fda7458e9bd3",
+    "examples/basic/tsconfig.json": "2980d7a034b338a2d97ce55ad1cea058f9ecf79bb259f51cbb7d6895368d07ba",
+    "examples/p0/cormi.config.ts": "095812bd25b9bcaa8c3074a9e73f70b75678bca4d6a647fa8f7f45d3acdf286b",
+    "examples/p0/index.html": "977f68e405034fd9cc89fea8904d253e28f65b79062a3e66e29f4d61819394bd",
+    "examples/p0/main.ts": "7b106e81fe362567b22af1c792dac2b3a73f7eb5564298c01bb745455cb6f33c",
+    "examples/p0/run.mjs": "651796f3f94ca4787e5f6c3fc4bbd38467c6db2dfc1c36108a8da347a76a2874",
+    "package.json": "d68186e01bf3f138bd74a612dcbb0d8a5a4bb5ac1856bb8b6f861e3a3214d01c",
+    "packages/builder/package.json": "9245887a3a0167952041e4b7286eca08d03834a81b48cc381fbb18652e715e80",
+    "packages/builder/src/development.ts": "990ad6fba4ad4fc7c1e1763b7548fbe39cc04ab77d20dfbcbf83fb39bafbcbd8",
+    "packages/builder/src/index.ts": "1f4517f3bdd2d9e663460b32bfb595532ba8413d24875e838f32caee8f31763f",
+    "packages/builder/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+    "packages/core/package.json": "3fa528f98bdaf408531384868936adbeaf07448570420fb6da2c6e3291711462",
+    "packages/core/src/commands.ts": "6baf25c48aeb3a1bfaaef13ce8080608b47ed1fbf3e08d69691d9e3d5f6f1c50",
+    "packages/core/src/index.ts": "c6fab623e0c70ac06312dca66379b89e860cbf0aaff9841ddd956b8d291e2509",
+    "packages/core/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+    "packages/cormi/package.json": "0b8e34384674057913d5d395658721d1b28316b604d8107a689c930f97637c7f",
+    "packages/cormi/src/cli.ts": "752b3c12a97898aee4b612aa561afab74abf150fa3e20848400484fbdf530bb2",
+    "packages/cormi/src/commands.ts": "6ee4b4438ead4d793657d0d0b66f84e26daf47ab413ee65722764e51ec63fa64",
+    "packages/cormi/src/compiler.ts": "81fd22c57b23857780f7e1b78186828bc21ed53e319d1e9a39d4b524007d01be",
+    "packages/cormi/src/config.ts": "c4571fa34e595e748f7db2f70c0450f5158de372ecb5b91cbf964fd207b2ded7",
+    "packages/cormi/src/index.ts": "410185de6b0437666d3dcdd36539486efb856b0502fcd12318aa8a8030b8e324",
+    "packages/cormi/src/inputs.ts": "27d138488a93ac09070e7d07c850310f4c72c485f64e92b58e5abf1974f41d4e",
+    "packages/cormi/src/lock.ts": "3e5f6e3160ab21e86dc7da891f23859c8c237c85ac5cf79f31253b24686fde98",
+    "packages/cormi/src/protocol.ts": "07c958e41c2e052aac354d827fbe5636432b93506c14ca39357ea414329c8dc6",
+    "packages/cormi/src/supervisor.ts": "4b2896f499c95bd5ee95f1994c2e2c1d892659b269d42b95f6a0fc76ef028d47",
+    "packages/cormi/src/worker.ts": "d08bcdb6c101805991fc2e896611ca34ab7fb4e2e32ac32ef0d813a534e28f3c",
+    "packages/cormi/tsconfig.json": "179d61257f38a628a52cb296e104d16e9f0b066b52389733bea08b179f4fe983",
+    "packages/plugin-react-vite/package.json": "84816ade6202cc56974bb9248f42be1ad3ef99a2aee6a3391ffc4fd642c961dc",
+    "packages/plugin-react-vite/src/index.ts": "a84ed8db545616ec38c0b960e3326275cdd66cbbe544b9c17c7d310f545e2a67",
+    "packages/plugin-react-vite/tsconfig.json": "6dff251ba0e8067dc31ef48390d0615fd7a4f8e17aa7190b9d0be4fe602459a5",
+    "packages/plugin-react/package.json": "435c75b26a172e365c15fa369746407985f9e26240dc6780498b14ebcb3388a2",
+    "packages/plugin-react/src/development.ts": "8dc43fb167d5e371ad55f3aa834d1478f66523376d0bdb66de059545078fda2b",
+    "packages/plugin-react/src/generate.ts": "0947ca3f9b078e5e70e0283716d1ed275972eedcf518eceeacb66d3d53efaa9a",
+    "packages/plugin-react/src/index.ts": "2e0f7e3d0eca1fee015e51fb2ad5d4fcca3812735a9eb29d6714d4fa9a819792",
+    "packages/plugin-react/src/types.ts": "8a9e5bcee8b5a58a7e0f333f5d54a243735f99bee5d4d7058b26cacb9901493c",
+    "packages/plugin-react/tsconfig.json": "66f54d79216879f555b0ff20f08676fd463819c4059992f30276361e8e346d34",
+    "packages/plugin-typescript/package.json": "8145438f128372a9ab4f38166ee348bfd878c32abd0a90a68c11f53cbc266a30",
+    "packages/plugin-typescript/src/index.ts": "4b9e12755825fb3c51a2a0277439773009d4d2edcd75ce4d1dda8e8b450314c4",
+    "packages/plugin-typescript/tsconfig.json": "e5595878a3ee9605f089f9d1387e097dcc01531cffdbcaa1520f4440d4d4a78f",
+    "packages/plugin-vite/package.json": "de1005a5d44637bdeac1454fcec87c51e088aea9f5a0dfb9fdc60d089d7f7031",
+    "packages/plugin-vite/src/development-client.ts": "cbcb5d03ec2e61dc5690ff4491a73933bd9eb88464ae50361b50750c37fd5133",
+    "packages/plugin-vite/src/development.ts": "c603f305d940c27ad976b3fafdea319c13979d0e8e759168760f173ed4083119",
+    "packages/plugin-vite/src/index.ts": "c0f07e84af0c6b8b68217a8243e07ccab6f69bac101b9ff6dbb16ede33cf572a",
+    "packages/plugin-vite/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+    "packages/plugin-web/package.json": "5e44ddd9b5af7fb9a336366142bda16ae7cd0ad30a903cb345684cc6e4894782",
+    "packages/plugin-web/src/application.ts": "034887f7bf0dd76fe48857e3db0dad926af373d9155872e6ebcc1b9720638c46",
+    "packages/plugin-web/src/commands.ts": "263f457961f86a051f7ce09496035c7574dc4b71d0942fbcf22a9e115303024c",
+    "packages/plugin-web/src/generation.ts": "6c3ca0f365717c871ecb09b6151f5fb37aa34a7c4077b809d30d42d289d6c1cd",
+    "packages/plugin-web/src/index.ts": "569e99f4d11a4fa6212e3b5eb823d2ffbfceca424c4bf060885cac82d5b8c9d9",
+    "packages/plugin-web/src/inspection.ts": "081be205c89cb5f430d663e3691c66038fcfac03aa10edbdc8e3e745ef7772fa",
+    "packages/plugin-web/src/ordered-hooks.ts": "8bfc9924337b5cc758bf00c3efa0e241945254f6902db2e78c38229d0ac881c7",
+    "packages/plugin-web/src/publication.ts": "50244955eb8f880128b37c49c75a4169a390e6517dc991e72fe8341357cd492e",
+    "packages/plugin-web/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+    "packages/preset-react-vite/package.json": "017381e90b80dcd3fce68d427c748de960c3f06f5a2d7e321806cb6500f5935d",
+    "packages/preset-react-vite/src/index.ts": "e0291dc4b5836708665d6a110f88e561d7bf71b2f2b7f0f920cc29330d035d66",
+    "packages/preset-react-vite/tsconfig.json": "3c37c029213990f8b3f91b0b6bbdc043e764e6e62c6722722dbbf63ffd85c4a0",
+    "packages/routes/package.json": "aeef2670ddabaea9be5eb8f39a0457f8aa41eac8fe1187bd4198379451c71bc0",
+    "packages/routes/src/index.ts": "ddd299133a807698d28e8613c430716d689ec14377c1e8494137c82502a1cd41",
+    "packages/routes/tsconfig.json": "179d61257f38a628a52cb296e104d16e9f0b066b52389733bea08b179f4fe983",
+    "packages/runtime/package.json": "4ae9491115adb2dde225314dde154e43ce62a157ca4610eea445888f5018b0bf",
+    "packages/runtime/src/index.tsx": "338d4b10edd0408b5351255b93e9112693bbe00edac3b1d0d687c111d91b3dbd",
+    "packages/runtime/tsconfig.json": "e409e3b42ce86c6d10b739e22d0c8fc049d9a1b4ab816fbb83a739de9eba0dc7",
+    "patches/CORDIS-LICENSE": "034fb52b1d57360ecbae6cb1632a88f86fd7c3d3f5631a5f082710203dda0be7",
+    "patches/cordis@4.0.0-rc.11.patch": "11a745abd66488d5cba00b7388beebaf8a70bc0fdd6e998608e511f77358228e",
+    "pnpm-lock.yaml": "eed0a6157c5c16b42b23c541a944b6ab3c63ad2ffa437b7889c4945238966d12",
+    "pnpm-workspace.yaml": "995d2de1cd963f1aaa4dae859bd504d60bbd8b3c5eb4358916a87aa77c671904",
+    "scripts/pack-local.ts": "cb51e421a58b15ae3bce72928544af39f5e4f3bbe5f1cae883b2bd9fe94116ab",
+    "scripts/packaging.ts": "8080b8887a442e7a97256f93d5a1afcc6c64a6f918cc1ab19d92cbf4d589da8d",
+    "scripts/test-package.ts": "32ba8447b7cb4922d64434d86c86f176053b7f538aeb39948c9711948222cffb",
+    "tests/app-tools.test.ts": "84767164b7baa2c94fe353a1ad1d4e701455596d463dc1697d932c0e054278d9",
+    "tests/application-commands.test.ts": "a676b5a5f21f1f1e5f97f96dcc21d0b8b8f01f58e680ced3ee6b26706b5eaa9f",
+    "tests/browser/development.test.ts": "738eae072993e76e933e31efa6d35cf468500ce478430935bf0b9097776045b9",
+    "tests/browser/react.test.ts": "7e2d3871a3561138d641c2ebbd0b7f63d40599ac5713f3d16449f9d0190dbe9a",
+    "tests/commands.test.ts": "c0a7f39b11a9b5d757b40073013df1cc941f8c0da5162cccb48e8fbd5a04aec6",
+    "tests/config.test.ts": "fd9beab2d662977c5425276e653f7673a5ee83c142603a94627a0e7b5c251455",
+    "tests/core.test.ts": "60f68f93e6274cda6fe4a49c55cabc482439f45b350f265bee266d3d48f48ddc",
+    "tests/development-backend.test.ts": "f895381af5cd0ea615829467d591af2a1b70ce8a510973003e6cec54166b0d07",
+    "tests/development-lifecycle.test.ts": "9946155fa060d26fb36a8ffa5520165be35034611ffff09959870314012706ec",
+    "tests/development-recovery.test.ts": "605258aedfbf6015008eafeeff5f1f74a5a7aa2ab3698b1f4e2012e65b3a104b",
+    "tests/generation.test.ts": "9e25e013fb0dd84af7e13eef1cb66a03e28e26ed961de1f648d924a1fe9b2033",
+    "tests/helpers.ts": "dccaf8e3165920ab038c398697bfcb0db45809915fb40a1b988f1f13942353bc",
+    "tests/hooks.test.ts": "e30de33fb5e3dcca4e6c7a27342c601971cc489d30016118bfaaebde4524d73f",
+    "tests/isolation.test.ts": "36a41ed4ef9654aef81e41fc1660ab82b7066701ddd7702fc675b83c16c13752",
+    "tests/launcher-boundaries.test.ts": "48b1622a60d15b9dc1b41d1226718fe949974c04e8bf68d77c5a7f14b70ab21b",
+    "tests/launcher-helpers.ts": "ae8f12861f3d3aa72945a29fadf6336aefa7178e708e0bbd5c400d461f6a0308",
+    "tests/launcher-recovery.test.ts": "bca11866d287cb5ad5df3434b316f959efcccbc209de62cf85d69c089d03c667",
+    "tests/launcher.test.ts": "c9cb721dafef1820dcfe7f301cbfcc0d21f0e9cdcf57f68e9827704c29e2c4c0",
+    "tests/locks.test.ts": "2227e1d24722d712b58952e9971e26c9470a101bcb90aae79f98cbba1ce9a76e",
+    "tests/packaging.test.ts": "ed19554e2fb7b1e512c6c71d63c650cd5444a22d3ea2a82fc99bf6e7fc1d83f9",
+    "tests/providers.test.ts": "089425999a52251d4ac01df27ed3c2a0cb9959cc0ab255b730f85157af0c2986",
+    "tests/publication.test.ts": "0c0168aa9766df4cca0e431b1d6c6d07fa75017d7f0bccacabdf0065d3bbee4c",
+    "tests/react-boundary.test.ts": "b49bf04b4711ac175593c471badbab927647d3fc6c3d0d3d6eaa456594075061",
+    "tests/react-compiler.test.ts": "c8e287a8d21eaf1427a75a8a958b24d4124a36a8c5619d259f6d914c5bb5d183",
+    "tests/routes.test.ts": "ffc720fd8d27d676cd68db4d0f492ca5d76851e65d28912b31977e208b581548",
+    "tests/tsconfig.json": "62b7f8530dddcc3bc455f37fa9f0e771b2a7835922001fc08c3e209ee97d88f1",
+    "tests/vite-build.test.ts": "e1165a90659bfcbb240bb0ff66f582bdba651a8c235a4a317b0a3704264c9328",
+    "tests/vite-dev.test.ts": "1949034c527a495ef8b6c442c8cea78c664315a274df2a71a0e67b0ad14edc08",
+    "tsconfig.base.json": "94d2a15288b0b45c326f56f74d425daf9a8e7e2361d85bb4b12c521458e59c4c",
+    "tsconfig.json": "34a045e97055047471ba104861c738f7d1af8589110b8f0cdbff620b6b703e20"
+  },
+  "source_unchanged_during_validation": true
+}

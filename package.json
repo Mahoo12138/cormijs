@@ -13,6 +13,8 @@
     "test:browser": "pnpm build && node --import tsx --test --test-concurrency=1 tests/browser/*.test.ts",
     "typecheck:example": "tsc -p examples/basic/tsconfig.json",
     "demo": "pnpm build && node examples/p0/run.mjs",
+    "pack:local": "pnpm build && node --import tsx scripts/pack-local.ts",
+    "test:package": "pnpm build && node --import tsx scripts/test-package.ts",
     "check": "pnpm typecheck && pnpm test"
   },
   "pnpm": {

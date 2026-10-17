@@ -2,9 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P2a 开发态编译恢复与结构诊断。** 在已有受管构建、类型检查和快照基础上，首次路由冲突或缺失客户端模块可以保留开发会话，浏览器显示诊断，修复后自动恢复；后续结构冲突保留最后成功生成物。协议见 [开发恢复](docs/12-development-recovery.md)，实际测试结果单独记录，不把开发服务器监听等同于应用已经编译成功。
+**当前阶段：P3a 本地打包与独立消费者。** 在已有开发恢复、受管构建和应用检查上，新增真实 tgz 打包、exports/bin/类型及依赖校验，并提供消费者根目录显式声明补丁的试用配置。协议见 [打包消费](docs/15-package-consumers.md)；包仍为 private，不把试用配置通过等同于任意 npm 安装或正式发布已经可用。
 
-P2a 收尾复核已通过 **133 项 Node + 10 项真实浏览器测试**，0 失败/取消/跳过。新增覆盖生成所有权前置拒绝、诊断通知的关闭/注销竞态，以及旧磁盘入口冷启动恢复。最新证据见 [收尾复核](docs/14-p2a-review.md) 和 [机器记录](artifacts/p2a-review-validation.json)；[初批 P2a 记录](docs/13-p2a-results.md) 保留历史结果。本机通过不代表完整跨平台或发布验收。
+本轮通过 **148 项 Node + 10 项既有浏览器测试**；另将真实 tgz 独立消费者验收完整执行两轮，每轮 36 个检查阶段满足预期，包含重定位后删除 node_modules、按未变化锁文件重新安装及真实 React 交互。最新证据见 [P3a 结果](docs/16-p3a-results.md) 和 [机器记录](artifacts/p3a-review-validation.json)。P2a 的 [收尾复核](docs/14-p2a-review.md) 与历史记录保留；本机通过不代表完整跨平台或任意包管理器的发布验收。
 
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 
@@ -47,6 +47,16 @@ pnpm test:browser
 
 check 包含框架与测试的类型检查、构建和 Node 测试；typecheck:example 检查示例业务源码。browser 测试用 playwright-core 启动独立的无头浏览器，不接入个人浏览器 profile。Mac 默认使用现有 Microsoft Edge，其他环境通过 `CORMI_BROWSER_EXECUTABLE` 指定 Chromium 系可执行文件；未找到时明确失败，不下载浏览器或静默跳过。应用级 `cormi typecheck` 先 prepare，再检查业务及生成代码；即使 tsconfig 排除 .cormi，也会检查必要生成入口。`cormi inspect` 读取上次成功快照，不重新计算源文件，不表示当前源文件已验证。
 
+## 仓库外试用
+
+`pnpm pack:local` 生成全新的 `.cache/cormi-kit-<uuid>`，包含 11 个真实 tgz、声明兼容补丁、上游许可、哈希清单和独立 app 示例。**将整个 kit 移出本 workspace 后，再进入 app 安装**，不要在仓库内的 kit/app 执行 pnpm install。也可以 `pnpm pack:local --out <尚不存在的外部目录>` 直接指定目的地。
+
+试用环境固定 pnpm 10.6.3，先 `pnpm install --ignore-scripts`，然后 `pnpm exec cormi typecheck`、`pnpm dev`。build/preview 先停止 dev 再执行。包不包含第三方依赖缓存，首次安装可能需要网络。`pnpm test:package` 自动创建带空格/中文路径的仓库外消费者，离线使用本机下载缓存独立安装，验证 Node/类型/CLI 和实际浏览器行为；缺少缓存或浏览器时明确失败。
+
+Cordis RC.11 暂时仍要求**消费者根**配置 `pnpm.patchedDependencies`。本地 kit 已明确提供，不使用 postinstall、不修改上游 JavaScript、不引入第二个 Context。原始无补丁包的严格 NodeNext 失败作为负向测试保留；公开发布的透明安装方案尚待确定。
+
+包检查和示例复制拒绝已知私有文件及链接；示例先检查完整源文件快照再创建目标。pack:local 不安装第三方依赖，也不附带已解析的应用锁文件；首次安装后应保留 pnpm-lock.yaml。两轮独立消费验证包含移动整个 kit 后的 frozen/offline 干净安装，不会依赖原位置残留的 node_modules。
+
 ## 模块
 
 ```text
@@ -68,7 +78,7 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 
 ## 文档与记录
 
-[架构 Draft 0.6](docs/02-architecture.md)描述完整目标，[MVP 计划](docs/03-mvp-plan.md)记录进度，[插件优先 ADR](docs/04-plugin-first-adr.md)记录边界原则。[命名和启动协议](docs/06-naming-and-launcher.md)、[路由与 React 协议](docs/08-routes-and-react.md)、[受管发布与检查](docs/10-publication-and-tools.md)和[开发恢复](docs/12-development-recovery.md)描述各层接口。历史 [P0](docs/05-p0-results.md)、[P1a](docs/07-p1a-results.md)、[P1b](docs/09-p1b-results.md)、[P1c](docs/11-p1c-results.md) 保留各阶段实际结果，不改写历史验证 JSON。
+[架构 Draft 0.7](docs/02-architecture.md)描述完整目标，[MVP 计划](docs/03-mvp-plan.md)记录进度，[插件优先 ADR](docs/04-plugin-first-adr.md)记录边界原则。[命名和启动协议](docs/06-naming-and-launcher.md)、[路由与 React 协议](docs/08-routes-and-react.md)、[受管发布与检查](docs/10-publication-and-tools.md)和[开发恢复](docs/12-development-recovery.md)描述各层接口。历史 [P0](docs/05-p0-results.md)、[P1a](docs/07-p1a-results.md)、[P1b](docs/09-p1b-results.md)、[P1c](docs/11-p1c-results.md) 保留各阶段实际结果，不改写历史验证 JSON。
 
 ## 固定依赖与参考
 
@@ -80,7 +90,7 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 | TypeScript / tsx / esbuild | 5.9.3 / 4.23.15 / 0.28.2 |
 | playwright-core / 实测 Edge | 1.58.2 / 155.0.4283.45 |
 
-直接依赖固定版本，间接依赖使用 pnpm-lock.yaml；以上不表示最新版本。Cordis npm 声明文件仍使用仅声明的 pnpm patch，不修改运行时 JavaScript；该补丁未来消费者分发问题尚未解决，包保持 private，见 [补丁说明](patches/README.md)。
+直接依赖固定版本，间接依赖使用 pnpm-lock.yaml；以上不表示最新版本。Cordis npm 声明文件仍使用仅声明的 pnpm patch，不修改运行时 JavaScript；该补丁已提供本地 pnpm 显式试用配置，但透明公共分发问题尚未解决，包保持 private，见 [补丁说明](patches/README.md)。
 
 `cordis/` 与 `umi/` 是独立 depth-1 参考 checkout，不进入 workspace 或本仓库提交。固定 HEAD 见 [源码研究](docs/01-source-study.md)。本地 Git 已初始化为 main，P1a 初始提交为 `a4e3384`；没有配置远端、推送或发布。
 
@@ -92,4 +102,4 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 
 生成集包含 app.tsx、routes.d.ts 和 inspect.jsonc，文件哈希用于发现混合状态，不声称跨文件事务。typecheck 暂不支持 tsconfig solution/project references；build 转译通过不代表类型正确。发布锁和事务目录在崩溃后可能保留，人工恢复前核实所属进程及旧产物位置，不自动删锁或备份。
 
-下一切片优先完成真实打包消费者与 Cordis 声明补丁的分发方案，再执行跨平台验证。SSR/RSC、Linux/Windows、移动端浏览器矩阵、断电持久性和长期内存趋势均未验证；本次窄屏 viewport 检查不等于真机移动浏览器验收。
+本地打包消费者协议已接入；下一切片优先运行 Linux 验证、完善 Windows 兼容性，并在正式发布前确认项目许可、包名归属和声明兼容策略。SSR/RSC、Linux/Windows、移动端浏览器矩阵、断电持久性和长期内存趋势均未验证；本次窄屏 viewport 检查不等于真机移动浏览器验收。

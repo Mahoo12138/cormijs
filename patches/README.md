@@ -9,3 +9,7 @@
 基线：npm gitHead `0b96d9fd517b998e44e2209560c9e5f0671ce933`。仅修复声明后运行 P0 实验；参考 HEAD `5dac6953d2d993d345d1de9fb0a5926f6d78a7e7` 是不同提交。
 
 P2a 进一步检查发现 `lib/utils.d.ts` 仍通过 `'.'` 引用目录入口，原补丁漏掉了这类写法。补充为 `'./index.js'`，仍仅改声明，不升级或修改 Cordis 运行时代码；本轮同时重新验证严格声明检查。
+
+P3a 使用实际 tgz 安装证明：不配置根补丁时 ESM 运行正常，但严格 NodeNext 类型消费失败；本地试用包将这份补丁放入 compatibility，由消费者根 patchedDependencies 显式启用。脚本还比较原始/兼容安装中的 Cordis 运行时代码哈希，不通过新增 Context 副本、postinstall 或 skipLibCheck 遮蔽问题。公开 npm/yarn 的透明安装尚未解决。
+
+[Cordis 许可副本](CORDIS-LICENSE)来自参考 checkout 的根 LICENSE，固定提交为 `5dac6953d2d993d345d1de9fb0a5926f6d78a7e7`；npm 包元数据声明 MIT，但实测包根没有 LICENSE 文件，因此本地 kit 附带这份已核对的上游文本并标明来源。这不是替 cormi 选择开源许可证。详见 [消费者协议](../docs/15-package-consumers.md)。
