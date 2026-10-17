@@ -26,7 +26,9 @@ try {
       onLog: (_stream, text) => process.stderr.write(text),
       onEvent: event => {
         if (json) console.log(JSON.stringify(event));
-        else if (event.type === 'ready') console.log(`cormi ready: ${event.url}`);
+        else if (event.type === 'ready') console.log(event.applicationStatus === 'error'
+          ? `cormi server listening: ${event.url} (application compilation failed; waiting for repair)`
+          : `cormi ready: ${event.url}`);
         else if (event.type === 'error') console.error(`[cormi:${event.code}] ${event.message}`);
         else if (event.type === 'result') console.log(JSON.stringify(event.data, null, 2));
         else if (event.type === 'restarting') console.log('cormi: restarting worker');

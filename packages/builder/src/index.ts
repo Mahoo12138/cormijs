@@ -1,5 +1,6 @@
 import type {} from 'cordis';
-
+import type { DevelopmentPlan, DevelopmentState } from './development.js';
+export type { DevelopmentDiagnostic, DevelopmentPlan, DevelopmentState } from './development.js';
 /** Deliberately backend-neutral. The first implementation supports HTML applications. */
 export interface BuildPlan {
   readonly root: string;
@@ -8,13 +9,17 @@ export interface BuildPlan {
   readonly mode: string;
   readonly base: string;
   readonly serverOnlyFiles?: readonly string[];
+  /** Dev-only recovery descriptor. Must never affect build or preview. */
+  readonly development?: DevelopmentPlan;
   readonly server?: { readonly host?: string; readonly port?: number };
 }
 
 export interface ServerHandle {
   readonly url: string;
+  readonly applicationStatus?: 'ready' | 'error';
   /** Development capability: invalidate committed project-relative files and reload clients. */
   invalidate?(files: readonly string[]): Promise<void>;
+  setDevelopmentState?(state: DevelopmentState): Promise<void>;
   close(): Promise<void>;
 }
 

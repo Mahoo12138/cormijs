@@ -1,10 +1,12 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.5。修订日期：2026-10-16。
+版本：Draft 0.6。修订日期：2026-10-16。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
 P0/P1a/P1b 保留各自历史结果。P1c 在 React/路由基础上增加受管 staging 与产物替换、路由类型、生成清单及应用 inspect/typecheck。精确协议见 [发布和检查](10-publication-and-tools.md)，已测范围见 [P1c 结果](11-p1c-results.md)。下面的完整编译阶段、完整诊断图、meta 与跨平台发布仍含目标设计，不能推定整份草案已经实现。
+
+P2a 增加开发态编译恢复：PreparedApplication.development 提供状态，Web 命令通过后端无关契约转发，Vite 才实现 WebSocket 和浏览器面板。首次可修复错误保留开发服务但不伪造成功输出；一次性 build/prepare/typecheck 仍失败退出。监听就绪与应用编译状态分离，详见 [开发恢复协议](12-development-recovery.md)。
 
 ## 1. 应该做一个什么框架
 
@@ -18,7 +20,7 @@ P0/P1a/P1b 保留各自历史结果。P1c 在 React/路由基础上增加受管 
 
 ## 2. 首版边界与技术选择
 
-| 维度 | Draft 0.5 决策 | 原因 |
+| 维度 | Draft 0.6 决策 | 原因 |
 | --- | --- | --- |
 | 应用模式 | React SPA，客户端渲染 | 先把路由、构建和扩展协议做完整 |
 | Node 插件内核 | Cordis，隔离具体版本适配 | 复用 Context、服务注入和 Fiber 生命周期 |

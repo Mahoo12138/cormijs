@@ -136,7 +136,7 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
         emit({ type: 'starting', generation, pid: active.pid });
         try {
           const first = await cancellable(deadline(active.first, startup, new CormiError('WORKER_START_TIMEOUT', 'Worker startup/command exceeded its deadline.')), signal);
-          emit({ type: first.type, generation, pid: active.pid, ...(first.type === 'ready' ? { url: first.url } : { data: first.data }) });
+          emit({ type: first.type, generation, pid: active.pid, ...(first.type === 'ready' ? { url: first.url, ...(first.applicationStatus ? { applicationStatus: first.applicationStatus } : {}) } : { data: first.data }) });
           if (first.type === 'result') { await stopActive(); break; }
         } catch (error) {
           if (!signal.aborted) emit({ type: 'error', ...wireError(error), generation, servingPrevious: false });

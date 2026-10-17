@@ -52,6 +52,6 @@ console.log('ISOLATED_CORE_OK');
     assert.match(child.stdout, /ISOLATED_CORE_OK/);
     await writeFile(join(temp, 'types.mts'), `import { ProjectRuntime, type Context } from '@cormijs/core';\nconst host: ProjectRuntime = new ProjectRuntime();\nconst ctx: Context = host.ctx;\nctx.provide('answer', 42);\nawait host.ready();\n`);
     const compiler = resolve('node_modules/typescript/bin/tsc');
-    await exec(process.execPath, [compiler, '--noEmit', '--target', 'ES2023', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--skipLibCheck', 'types.mts'], { cwd: temp, timeout: 8000 });
+    await exec(process.execPath, [compiler, '--noEmit', '--target', 'ES2023', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--skipLibCheck', 'false', 'types.mts'], { cwd: temp, timeout: 8000 });
   } finally { await rm(temp, { recursive: true, force: true }); }
 });

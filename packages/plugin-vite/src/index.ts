@@ -1,9 +1,10 @@
-import { assertActive, CormiError, type Context, type Plugin as CordisPlugin } from '@cormijs/core';
+import { assertActive, CormiError, type Plugin as CordisPlugin } from '@cormijs/core';
 import type { Builder, BuildPlan, BuildResult, ServerHandle } from '@cormijs/builder';
 import { build as viteBuild, createServer, preview as vitePreview,
   type InlineConfig, type PluginOption, type PreviewServer, type ViteDevServer } from 'vite';
 import { lstat, mkdir, mkdtemp, realpath, rm, stat } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { developmentBridge } from './development.js';
 
 export interface ViteExtensions {
   /** Create fresh native plugins per session. Bind the returned unregister to the contributor's ctx.effect. */
@@ -46,7 +47,7 @@ async function validatePlan(plan: BuildPlan, preview: boolean): Promise<{ root: 
 /** Vite is a Cordis provider, not a dependency of the host or Web consumer. */
 export const vitePlugin: CordisPlugin.Object<void> = {
   name: 'cormi:vite',
-  apply: (ctx: Context) => {
+  apply: ctx => {
     const lifetime = new AbortController();
     const pending = new Set<Promise<unknown>>();
     const sessions = new Set<ServerHandle>();
@@ -67,13 +68,18 @@ export const vitePlugin: CordisPlugin.Object<void> = {
       ids: () => ordered().map(([id]) => id),
     };
 
-    function own(server: NativeServer, cache: string): ServerHandle {
+    function own(server: NativeServer, cache: string, diagnostics?: ReturnType<typeof developmentBridge>): ServerHandle {
       const url = server.resolvedUrls?.local[0] ?? server.resolvedUrls?.network[0];
       if (!url) throw new CormiError('SERVER_ADDRESS_MISSING', 'Server did not report a listening URL.');
       let closing: Promise<void> | undefined;
       if ('moduleGraph' in server) managedUpdates.set(server, new Set());
       const handle: ServerHandle = Object.freeze({
         url,
+        ...(diagnostics ? { async setDevelopmentState(state: import('@cormijs/builder').DevelopmentState) {
+          assertActive(ctx);
+          if (closing) throw new CormiError('SERVER_CLOSED', 'Development session is closing.');
+          await diagnostics.set(state);
+        } } : {}),
         ...('moduleGraph' in server ? { async invalidate(files: readonly string[]) {
           assertActive(ctx);
           if (closing) throw new CormiError('SERVER_CLOSED', 'Cannot invalidate a closing development session.');
@@ -89,7 +95,11 @@ export const vitePlugin: CordisPlugin.Object<void> = {
           if (closing) return closing;
           closing = (async () => {
             try {
-              await server.close();
+              // Drain admitted module transforms before canceling their dependency optimizer.
+              // The outer worker deadline still bounds non-cooperative work.
+              try {
+                if ('environments' in server) await server.environments.client?.waitForRequestsIdle();
+              } finally { await server.close(); }
             } finally {
               await rm(cache, { recursive: true, force: true });
               sessions.delete(handle);
@@ -121,8 +131,9 @@ export const vitePlugin: CordisPlugin.Object<void> = {
     }
 
     async function configuration(plan: BuildPlan, forPreview: boolean,
-      capture: (server: NativeServer) => void): Promise<{ config: InlineConfig; cache: string; output: string }> {
+      capture: (server: NativeServer) => void, dev = false): Promise<{ config: InlineConfig; cache: string; output: string; diagnostics?: ReturnType<typeof developmentBridge> }> {
       const { root, output } = await validatePlan(plan, forPreview);
+      const diagnostics = dev && plan.development ? developmentBridge(root, plan.base, plan.development) : undefined;
       // Factory snapshot taken before creating the Vite session; caller order is explicit.
       const plugins = ordered().map(([, entry]) => entry.create());
       const cache = await mkdtemp(join(root, '.cormi-vite-'));
@@ -139,7 +150,7 @@ export const vitePlugin: CordisPlugin.Object<void> = {
         preview: { host: plan.server?.host ?? '127.0.0.1', port: plan.server?.port ?? 0, strictPort: true, open: false },
         build: { outDir: output, emptyOutDir: false, write: true, watch: null },
         optimizeDeps: { noDiscovery: true, include: [] },
-        plugins: [{
+        plugins: [...(diagnostics ? [diagnostics.plugin] : []), {
           name: 'cormi:session-owner', enforce: 'pre',
           configureServer(server) { capture(server); },
           configurePreviewServer(server) { capture(server); },
@@ -155,12 +166,12 @@ export const vitePlugin: CordisPlugin.Object<void> = {
           },
         }, ...plugins],
       };
-      return { config, cache, output };
+      return { config, cache, output, diagnostics };
     }
 
     async function open(plan: BuildPlan, isPreview: boolean, signal: AbortSignal): Promise<ServerHandle> {
       let server: NativeServer | undefined;
-      const { config, cache } = await configuration(plan, isPreview, value => { server = value; });
+      const { config, cache, diagnostics } = await configuration(plan, isPreview, value => { server = value; }, !isPreview);
       try {
         signal.throwIfAborted();
         if (isPreview) server = await vitePreview(config);
@@ -169,7 +180,7 @@ export const vitePlugin: CordisPlugin.Object<void> = {
           server = dev;
           await dev.listen();
         }
-        return own(server, cache);
+        return own(server, cache, diagnostics);
       } catch (error) {
         if (server) {
           try {

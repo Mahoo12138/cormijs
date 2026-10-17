@@ -24,6 +24,8 @@ export class AtomicEntry {
     try { await mkdir(directory); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
     const info = lstatSync(directory);
     if (!info.isDirectory() || info.isSymbolicLink() || await realpath(directory) !== directory) throw new CormiError('GENERATED_PATH_INVALID', '.cormi must be a real project directory.');
+    // Admission errors must not be hidden by a recoverable route failure before publish.
+    existing(join(directory, filename));
     return new AtomicEntry(directory, info, filename);
   }
   private assertDirectory(): void {

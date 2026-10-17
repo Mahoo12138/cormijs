@@ -153,3 +153,11 @@
  export declare abstract class Service<out T = never> {
      protected ctx: Context;
      static readonly init: unique symbol;
+--- a/lib/utils.d.ts
++++ b/lib/utils.d.ts
+@@ -1,4 +1,4 @@
+-import type { Context, Service } from '.';
++import type { Context, Service } from './index.js';
+ export declare class DisposableList<T extends WeakKey> {
+     private sn;
+     private map;

@@ -1,0 +1,268 @@
+{
+  "verified_at": "2026-10-16T08:43:24.023326+00:00",
+  "phase": "P2a",
+  "baseline_commit": "6923d9ad3f72acfdba930484b682606422dacb53",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "node": "v22.14.0",
+  "commands": [
+    {
+      "command": "pnpm install --offline --ignore-scripts --frozen-lockfile",
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p2a-final-install.log",
+      "sha256": "8d7d8170918af511529ceeee8f2bafed04966963011b522420e6fd083e077518"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 0,
+      "counts": {
+        "tests": 128,
+        "pass": 128,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "log": ".cache/p2a-final-check.log",
+      "sha256": "b7a2e704e0006cdf9d4bf495bd7c5757ac3e4a2c96a156eb3b9cd658bc89749d"
+    },
+    {
+      "command": "pnpm typecheck:example",
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p2a-final-example.log",
+      "sha256": "a06cb80d5dd91de659483dbfd9be16bb86a73ccfece1f0f0ee41a1c0e8b1a57e"
+    },
+    {
+      "command": "pnpm test:browser",
+      "exit_code": 0,
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "log": ".cache/p2a-final-browser.log",
+      "sha256": "965027554707b52d82a57cba4e26530d2d0a4190a4c7c365fa971e171a4e6df8"
+    },
+    {
+      "command": "node --import tsx --test --test-concurrency=1 --test-name-pattern=initial route conflict|missing runtime module|live route conflicts tests/browser/development.test.ts",
+      "exit_code": 0,
+      "counts": {
+        "tests": 3,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "log": ".cache/p2a-final-browser-repeat-1.log",
+      "sha256": "65d0517f51a10933d3f79034f97e5266b281554c4ef4382edce14be5d3a05df1"
+    },
+    {
+      "command": "node --import tsx --test --test-concurrency=1 --test-name-pattern=initial route conflict|missing runtime module|live route conflicts tests/browser/development.test.ts",
+      "exit_code": 0,
+      "counts": {
+        "tests": 3,
+        "pass": 3,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "log": ".cache/p2a-final-browser-repeat-2.log",
+      "sha256": "803ac4331ee86ed7db80d34ac8c28de54c1cfb8b7312a658239e8b7b2ef7e50b"
+    },
+    {
+      "command": "node --import tsx --test --test-concurrency=1 tests/development-recovery.test.ts tests/development-backend.test.ts tests/application-commands.test.ts tests/generation.test.ts",
+      "exit_code": 0,
+      "counts": {
+        "tests": 20,
+        "pass": 20,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "log": ".cache/p2a-final-fault-repeat-1.log",
+      "sha256": "cdf6c48b1f628fd459ab93c595733b5ca86fd7bb1e2bed6342400912b3cfbe33"
+    },
+    {
+      "command": "node --import tsx --test --test-concurrency=1 tests/development-recovery.test.ts tests/development-backend.test.ts tests/application-commands.test.ts tests/generation.test.ts",
+      "exit_code": 0,
+      "counts": {
+        "tests": 20,
+        "pass": 20,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      },
+      "log": ".cache/p2a-final-fault-repeat-2.log",
+      "sha256": "6f6781c283bdd7bb8aaccd8bbc172bdc18ff4964b7195d038b83cfdc610ed317"
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc -p packages/plugin-vite --noEmit --skipLibCheck false",
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p2a-final-strict-declarations.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "pnpm demo",
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p2a-final-demo.log",
+      "sha256": "f61810dc18f808aa35ed80177235729b04450391eae6c593e7c2778b6f9dc9a2"
+    },
+    {
+      "command": "pnpm cormi typecheck --root examples/basic --startup-timeout 30000",
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p2a-final-example-app-typecheck.log",
+      "sha256": "2d2cfebe67d48819f117eb9e11d10410e6f71255e41a54e452b59a32468e8bf0"
+    },
+    {
+      "command": "pnpm cormi inspect --root examples/basic --json",
+      "exit_code": 0,
+      "counts": {},
+      "log": ".cache/p2a-final-example-inspect.log",
+      "sha256": "82d5a7fe1b227a55c36fea9a185cfdbc2482fcb98650bb5cbd6648d27b271e45"
+    }
+  ],
+  "source_unchanged_during_validation": true,
+  "source_sha256": {
+    ".gitignore": "3cca158907938dbe9ddc2e20cd5ee0751a00c024dbef8ddef25adf64cd90be87",
+    ".npmrc": "d089b05fc08a36af3a3eb500ffd9d2087c0c2517ee6a820980377dc95bede2f9",
+    ".nvmrc": "c989649ac5c541692f22f2e41f5fbc34927c02bf1644e5dcca46bb4c88281f87",
+    "examples/basic/cormi.config.ts": "4e0d200067661fa8cb373725d3886a6e4f60ce9f208c183b715e24ea675983c4",
+    "examples/basic/index.html": "0c205f840d5f7f8691addc6a22b891f63a9e59ea618dcd720cffabadca59db18",
+    "examples/basic/package.json": "049f13856347e194b61f58b46a419706e20e6426ae00b61758971d8dd11c6f41",
+    "examples/basic/src/pages/_layout.tsx": "bbac7a9d61194cbc784331096a3f00b21767590d304bfbfc9a0247ced42aea4f",
+    "examples/basic/src/pages/about.tsx": "6873f7250c512db26f9cda180d947fd5bb4d443992d85f21f233add0a5f28f5e",
+    "examples/basic/src/pages/docs/[...rest].tsx": "701fa4ae30b1d3b2373c297ed54eda3d9494e13ff62f6af9de92eef66e36ca68",
+    "examples/basic/src/pages/index.tsx": "65a53613b6d708da153e6e9abea837468480cb3e354f780ffe6822fc09e51c87",
+    "examples/basic/src/pages/users/[id].tsx": "a4f06c7b6718da0e49dadb71412a07bb04f2a436c46b6611f1772f2660056a5c",
+    "examples/basic/src/pages/users/_layout.tsx": "85f38314daebd7034a8313012c91d8fa2a82a1f27a123b8733def4dfa69a9b2c",
+    "examples/basic/src/runtime.tsx": "23b4e85a742ac8ee8e947ad2d26b920d09e442423730cd97f2ace2168fd38005",
+    "examples/basic/src/style.css": "eaa53d86ef42901a32ed45075c984a6f928b04fa77a82ea621b7fda7458e9bd3",
+    "examples/basic/tsconfig.json": "2980d7a034b338a2d97ce55ad1cea058f9ecf79bb259f51cbb7d6895368d07ba",
+    "examples/p0/cormi.config.ts": "095812bd25b9bcaa8c3074a9e73f70b75678bca4d6a647fa8f7f45d3acdf286b",
+    "examples/p0/index.html": "977f68e405034fd9cc89fea8904d253e28f65b79062a3e66e29f4d61819394bd",
+    "examples/p0/main.ts": "7b106e81fe362567b22af1c792dac2b3a73f7eb5564298c01bb745455cb6f33c",
+    "examples/p0/run.mjs": "651796f3f94ca4787e5f6c3fc4bbd38467c6db2dfc1c36108a8da347a76a2874",
+    "package.json": "6f33672cd0a5665104b6f932b0c413775e6deb904fb531f048832a58b73cc22d",
+    "packages/builder/package.json": "811ff8eb3e6e02e27882b0d9827d7540e15919151c7a6c1cf2a6e3e75752d2b7",
+    "packages/builder/src/development.ts": "990ad6fba4ad4fc7c1e1763b7548fbe39cc04ab77d20dfbcbf83fb39bafbcbd8",
+    "packages/builder/src/index.ts": "1f4517f3bdd2d9e663460b32bfb595532ba8413d24875e838f32caee8f31763f",
+    "packages/builder/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+    "packages/core/package.json": "f6932a20265c51cce32a3019b8c2809d8df465167aebc6d71dd120e6648e82b4",
+    "packages/core/src/commands.ts": "6baf25c48aeb3a1bfaaef13ce8080608b47ed1fbf3e08d69691d9e3d5f6f1c50",
+    "packages/core/src/index.ts": "c6fab623e0c70ac06312dca66379b89e860cbf0aaff9841ddd956b8d291e2509",
+    "packages/core/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+    "packages/cormi/package.json": "5110078f0b0369e540e511a51a5b49a52cb04948f7b79e0947ee5f85c92ee51e",
+    "packages/cormi/src/cli.ts": "752b3c12a97898aee4b612aa561afab74abf150fa3e20848400484fbdf530bb2",
+    "packages/cormi/src/commands.ts": "6ee4b4438ead4d793657d0d0b66f84e26daf47ab413ee65722764e51ec63fa64",
+    "packages/cormi/src/compiler.ts": "81fd22c57b23857780f7e1b78186828bc21ed53e319d1e9a39d4b524007d01be",
+    "packages/cormi/src/config.ts": "c4571fa34e595e748f7db2f70c0450f5158de372ecb5b91cbf964fd207b2ded7",
+    "packages/cormi/src/index.ts": "410185de6b0437666d3dcdd36539486efb856b0502fcd12318aa8a8030b8e324",
+    "packages/cormi/src/inputs.ts": "27d138488a93ac09070e7d07c850310f4c72c485f64e92b58e5abf1974f41d4e",
+    "packages/cormi/src/lock.ts": "3e5f6e3160ab21e86dc7da891f23859c8c237c85ac5cf79f31253b24686fde98",
+    "packages/cormi/src/protocol.ts": "07c958e41c2e052aac354d827fbe5636432b93506c14ca39357ea414329c8dc6",
+    "packages/cormi/src/supervisor.ts": "4b2896f499c95bd5ee95f1994c2e2c1d892659b269d42b95f6a0fc76ef028d47",
+    "packages/cormi/src/worker.ts": "d08bcdb6c101805991fc2e896611ca34ab7fb4e2e32ac32ef0d813a534e28f3c",
+    "packages/cormi/tsconfig.json": "179d61257f38a628a52cb296e104d16e9f0b066b52389733bea08b179f4fe983",
+    "packages/plugin-react-vite/package.json": "7212f40c7c441ee23bf8f5574635b8dc06621c871ce3900e7e12844a906d0b7e",
+    "packages/plugin-react-vite/src/index.ts": "a84ed8db545616ec38c0b960e3326275cdd66cbbe544b9c17c7d310f545e2a67",
+    "packages/plugin-react-vite/tsconfig.json": "6dff251ba0e8067dc31ef48390d0615fd7a4f8e17aa7190b9d0be4fe602459a5",
+    "packages/plugin-react/package.json": "a056873b19272c4b7a38e5d2531979718d54932574481f7c4e43987c339fc6c7",
+    "packages/plugin-react/src/development.ts": "8dc43fb167d5e371ad55f3aa834d1478f66523376d0bdb66de059545078fda2b",
+    "packages/plugin-react/src/generate.ts": "0947ca3f9b078e5e70e0283716d1ed275972eedcf518eceeacb66d3d53efaa9a",
+    "packages/plugin-react/src/index.ts": "4075cd4b886f55e3bf54af1fc6337951e64fdb8db330cc3a1edaacadea2372bd",
+    "packages/plugin-react/src/types.ts": "8a9e5bcee8b5a58a7e0f333f5d54a243735f99bee5d4d7058b26cacb9901493c",
+    "packages/plugin-react/tsconfig.json": "66f54d79216879f555b0ff20f08676fd463819c4059992f30276361e8e346d34",
+    "packages/plugin-typescript/package.json": "8c1dd8b0f6f8158f060259378833d7f2e7d262ef2a81ed9243844597527f041d",
+    "packages/plugin-typescript/src/index.ts": "4b9e12755825fb3c51a2a0277439773009d4d2edcd75ce4d1dda8e8b450314c4",
+    "packages/plugin-typescript/tsconfig.json": "e5595878a3ee9605f089f9d1387e097dcc01531cffdbcaa1520f4440d4d4a78f",
+    "packages/plugin-vite/package.json": "5b621d92f83f314c5fe2a1cd6e070a96480d434489f0f1ce520150c629cfda69",
+    "packages/plugin-vite/src/development-client.ts": "cbcb5d03ec2e61dc5690ff4491a73933bd9eb88464ae50361b50750c37fd5133",
+    "packages/plugin-vite/src/development.ts": "c603f305d940c27ad976b3fafdea319c13979d0e8e759168760f173ed4083119",
+    "packages/plugin-vite/src/index.ts": "c0f07e84af0c6b8b68217a8243e07ccab6f69bac101b9ff6dbb16ede33cf572a",
+    "packages/plugin-vite/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+    "packages/plugin-web/package.json": "33ed6f8ead970edf40a861f01383a12253c2e006edd7ad0ff477234bb041511d",
+    "packages/plugin-web/src/application.ts": "034887f7bf0dd76fe48857e3db0dad926af373d9155872e6ebcc1b9720638c46",
+    "packages/plugin-web/src/commands.ts": "263f457961f86a051f7ce09496035c7574dc4b71d0942fbcf22a9e115303024c",
+    "packages/plugin-web/src/generation.ts": "7ba889996a2a88c300c1a6e851b767c5b010e566bb0937730c8dace3e896a6f7",
+    "packages/plugin-web/src/index.ts": "569e99f4d11a4fa6212e3b5eb823d2ffbfceca424c4bf060885cac82d5b8c9d9",
+    "packages/plugin-web/src/inspection.ts": "081be205c89cb5f430d663e3691c66038fcfac03aa10edbdc8e3e745ef7772fa",
+    "packages/plugin-web/src/ordered-hooks.ts": "8bfc9924337b5cc758bf00c3efa0e241945254f6902db2e78c38229d0ac881c7",
+    "packages/plugin-web/src/publication.ts": "50244955eb8f880128b37c49c75a4169a390e6517dc991e72fe8341357cd492e",
+    "packages/plugin-web/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+    "packages/preset-react-vite/package.json": "3efaf06dc4ee0aeda2181311f77ff06ade0dd1484903f4c08c5feff1c43b0ddd",
+    "packages/preset-react-vite/src/index.ts": "ceaadaac01748b7aba0c7f2e1da88f5d0634fc7e90cfa7e221985ca3b978441d",
+    "packages/preset-react-vite/tsconfig.json": "3c37c029213990f8b3f91b0b6bbdc043e764e6e62c6722722dbbf63ffd85c4a0",
+    "packages/routes/package.json": "75e84d756059b8c8edd027c374b84c6a681836bdc9246d6ceb873e9390e0492b",
+    "packages/routes/src/index.ts": "ddd299133a807698d28e8613c430716d689ec14377c1e8494137c82502a1cd41",
+    "packages/routes/tsconfig.json": "179d61257f38a628a52cb296e104d16e9f0b066b52389733bea08b179f4fe983",
+    "packages/runtime/package.json": "6fb403985275dd709438da30f0848728e903606b7248f448466f72bfea9d86bb",
+    "packages/runtime/src/index.tsx": "338d4b10edd0408b5351255b93e9112693bbe00edac3b1d0d687c111d91b3dbd",
+    "packages/runtime/tsconfig.json": "e409e3b42ce86c6d10b739e22d0c8fc049d9a1b4ab816fbb83a739de9eba0dc7",
+    "patches/README.md": "ca4c46ce56ab5b8fb0415cde7a5735846a76860bc241d95c372d930e7fdc0b97",
+    "patches/cordis@4.0.0-rc.11.patch": "11a745abd66488d5cba00b7388beebaf8a70bc0fdd6e998608e511f77358228e",
+    "pnpm-lock.yaml": "eed0a6157c5c16b42b23c541a944b6ab3c63ad2ffa437b7889c4945238966d12",
+    "pnpm-workspace.yaml": "995d2de1cd963f1aaa4dae859bd504d60bbd8b3c5eb4358916a87aa77c671904",
+    "tests/app-tools.test.ts": "84767164b7baa2c94fe353a1ad1d4e701455596d463dc1697d932c0e054278d9",
+    "tests/application-commands.test.ts": "a676b5a5f21f1f1e5f97f96dcc21d0b8b8f01f58e680ced3ee6b26706b5eaa9f",
+    "tests/browser/development.test.ts": "0a5b39d5c392af4b1ae8bb8be502caea22bce17b2bbf6b4c316cb04234159d9f",
+    "tests/browser/react.test.ts": "7e2d3871a3561138d641c2ebbd0b7f63d40599ac5713f3d16449f9d0190dbe9a",
+    "tests/commands.test.ts": "c0a7f39b11a9b5d757b40073013df1cc941f8c0da5162cccb48e8fbd5a04aec6",
+    "tests/config.test.ts": "fd9beab2d662977c5425276e653f7673a5ee83c142603a94627a0e7b5c251455",
+    "tests/core.test.ts": "60f68f93e6274cda6fe4a49c55cabc482439f45b350f265bee266d3d48f48ddc",
+    "tests/development-backend.test.ts": "f895381af5cd0ea615829467d591af2a1b70ce8a510973003e6cec54166b0d07",
+    "tests/development-recovery.test.ts": "605258aedfbf6015008eafeeff5f1f74a5a7aa2ab3698b1f4e2012e65b3a104b",
+    "tests/generation.test.ts": "9e25e013fb0dd84af7e13eef1cb66a03e28e26ed961de1f648d924a1fe9b2033",
+    "tests/helpers.ts": "dccaf8e3165920ab038c398697bfcb0db45809915fb40a1b988f1f13942353bc",
+    "tests/hooks.test.ts": "e30de33fb5e3dcca4e6c7a27342c601971cc489d30016118bfaaebde4524d73f",
+    "tests/isolation.test.ts": "36a41ed4ef9654aef81e41fc1660ab82b7066701ddd7702fc675b83c16c13752",
+    "tests/launcher-boundaries.test.ts": "48b1622a60d15b9dc1b41d1226718fe949974c04e8bf68d77c5a7f14b70ab21b",
+    "tests/launcher-helpers.ts": "ae8f12861f3d3aa72945a29fadf6336aefa7178e708e0bbd5c400d461f6a0308",
+    "tests/launcher-recovery.test.ts": "bca11866d287cb5ad5df3434b316f959efcccbc209de62cf85d69c089d03c667",
+    "tests/launcher.test.ts": "c9cb721dafef1820dcfe7f301cbfcc0d21f0e9cdcf57f68e9827704c29e2c4c0",
+    "tests/locks.test.ts": "2227e1d24722d712b58952e9971e26c9470a101bcb90aae79f98cbba1ce9a76e",
+    "tests/providers.test.ts": "089425999a52251d4ac01df27ed3c2a0cb9959cc0ab255b730f85157af0c2986",
+    "tests/publication.test.ts": "0c0168aa9766df4cca0e431b1d6c6d07fa75017d7f0bccacabdf0065d3bbee4c",
+    "tests/react-boundary.test.ts": "b49bf04b4711ac175593c471badbab927647d3fc6c3d0d3d6eaa456594075061",
+    "tests/react-compiler.test.ts": "c8e287a8d21eaf1427a75a8a958b24d4124a36a8c5619d259f6d914c5bb5d183",
+    "tests/routes.test.ts": "ffc720fd8d27d676cd68db4d0f492ca5d76851e65d28912b31977e208b581548",
+    "tests/tsconfig.json": "2019a492a91d18fe9ec4c51a3cb9bd6b42410f5fc0c082c8e6a9093a0cbd1097",
+    "tests/vite-build.test.ts": "e1165a90659bfcbb240bb0ff66f582bdba651a8c235a4a317b0a3704264c9328",
+    "tests/vite-dev.test.ts": "1949034c527a495ef8b6c442c8cea78c664315a274df2a71a0e67b0ad14edc08",
+    "tsconfig.base.json": "94d2a15288b0b45c326f56f74d425daf9a8e7e2361d85bb4b12c521458e59c4c",
+    "tsconfig.json": "34a045e97055047471ba104861c738f7d1af8589110b8f0cdbff620b6b703e20"
+  },
+  "reference_checkouts": [
+    {
+      "name": "cordis",
+      "head": "5dac6953d2d993d345d1de9fb0a5926f6d78a7e7",
+      "clean": true
+    },
+    {
+      "name": "umi",
+      "head": "788e39630dc52a9306c89f8af08705e5db0e199f",
+      "clean": true
+    }
+  ],
+  "screenshots": [
+    {
+      "path": ".cache/cormi-development-desktop.png",
+      "sha256": "4e88fb9951a91e521f91b81d079a67712b75f58f0b8f11a2f06bd4617e29eb35"
+    },
+    {
+      "path": ".cache/cormi-development-mobile.png",
+      "sha256": "6960803860b836179e2f36ffe30143c12d6652106fec69651b11c50ab79d244d"
+    }
+  ],
+  "not_tested": [
+    "Linux/Windows",
+    "published tarball consumer",
+    "long-term memory stability",
+    "Cordis patch downstream distribution",
+    "configuration-error standalone recovery server"
+  ]
+}

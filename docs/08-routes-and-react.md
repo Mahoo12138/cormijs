@@ -64,7 +64,7 @@ P1b 的 AtomicEntry 管理 `.cormi/app.tsx`；P1c 扩展固定白名单 routes.d
 
 RevisionQueue 单消费者执行，仅保留最新等待任务；新 revision 会协作取消旧任务。即使旧计算不响应取消，旧结果也不能通过提交检查。生成错误保留之前成功的入口，但用户已经修改/删除的业务模块仍可能报错，不宣称全应用自动恢复旧状态。
 
-组件内容和 CSS 交给 Vite/React Fast Refresh；页面路径集合、贡献 revision 变化按 150ms 间隔观察并重新生成入口。结构变化不保证保留页面局部状态；Node 配置更新继续走已有 worker 重启。初次路由错误仍使启动失败；启动后结构冲突记录诊断、保留生成物并等待下一次结构变化恢复。
+组件内容和 CSS 交给 Vite/React Fast Refresh；页面集合、已知模块元数据、贡献 revision 变化按 150ms 间隔观察。结构变化不保证保留页面局部状态；Node 配置更新继续走已有 worker 重启。P2a 起，开发态首次可修复路由/模块错误也可启动诊断会话，修复后生成有效入口；后续结构冲突保留既有生成物，清除冲突且内容不变时仅清除面板，不额外刷新。具体错误分类及一次性命令的严格失败语义见 [开发恢复](12-development-recovery.md)。
 
 **生成文件已提交不等于开发服务器转换缓存已更新。** PreparedApplication 的 updates 订阅将已提交文件通知 Web 命令；开发 ServerHandle 的可选 invalidate(files) 能力由 Vite provider 实现，显式失效模块缓存并广播整页刷新。应用组合在需要该能力而后端未提供时报告 BUILDER_INVALIDATION_UNSUPPORTED。启动过程中发生的生成更新也在注册订阅后重新对齐。此接口只接收项目相对路径，不泄漏 Vite server 类型。
 

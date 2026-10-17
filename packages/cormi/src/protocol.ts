@@ -12,7 +12,7 @@ export function wireError(error: unknown, depth = 0): WireError {
 }
 export type WorkerMessage =
   | { version: 1; type: 'watch'; files: string[]; fingerprint: string }
-  | { version: 1; type: 'ready'; url: string }
+  | { version: 1; type: 'ready'; url: string; applicationStatus?: 'ready' | 'error' }
   | { version: 1; type: 'result'; data: unknown }
   | { version: 1; type: 'error'; error: WireError }
   | { version: 1; type: 'stopped'; code: number };

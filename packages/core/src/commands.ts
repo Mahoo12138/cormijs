@@ -11,7 +11,7 @@ export interface CommandRequest {
 }
 export type CommandResult =
   | { readonly kind: 'result'; readonly data: unknown }
-  | { readonly kind: 'server'; readonly handle: { readonly url: string; close(): Promise<void> } };
+  | { readonly kind: 'server'; readonly handle: { readonly url: string; readonly applicationStatus?: 'ready' | 'error'; close(): Promise<void> } };
 export type CommandHandler = (request: CommandRequest) => Promise<CommandResult>;
 export interface CommandRegistry {
   register(name: string, handler: CommandHandler): () => void;

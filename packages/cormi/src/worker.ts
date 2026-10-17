@@ -65,7 +65,9 @@ async function run(message: StartMessage): Promise<void> {
   if (!result || !['result', 'server'].includes(result.kind)) throw new CormiError('COMMAND_RESULT_INVALID', 'Command returned an invalid result.');
   if (result.kind === 'server') {
     if (!result.handle || typeof result.handle.close !== 'function' || typeof result.handle.url !== 'string') throw new CormiError('COMMAND_RESULT_INVALID', 'Invalid server handle.');
-    if (!stopping) send({ version: 1, type: 'ready', url: result.handle.url });
+    const status = result.handle.applicationStatus;
+    if (status !== undefined && status !== 'ready' && status !== 'error') throw new CormiError('COMMAND_RESULT_INVALID', 'Invalid application status.');
+    if (!stopping) send({ version: 1, type: 'ready', url: result.handle.url, ...(status ? { applicationStatus: status } : {}) });
   }
 }
 process.on('message', (message: unknown) => {

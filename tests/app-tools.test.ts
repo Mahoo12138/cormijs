@@ -120,8 +120,9 @@ test('development serves the generated app but refuses inspection, type, staging
       assert.doesNotMatch(await response.text(), /PRIVATE-PUBLISH|PRIVATE-OWNER/);
     }
   }
-  assert.equal((await fetch(new URL('.cormi/app.tsx', ready.url))).status, 200);
-  assert.equal(await server.stop(), 0);
+  const appResponse = await fetch(new URL('.cormi/app.tsx', ready.url));
+  assert.equal(appResponse.status, 200); await appResponse.text();
+  assert.equal(await server.stop(), 0, JSON.stringify(server.events) + server.stderr);
 });
 test('repeated CLI build replaces managed output and a failed build preserves it', options, async t => {
   const f = await project(t); await command(t, f.root, 'build');

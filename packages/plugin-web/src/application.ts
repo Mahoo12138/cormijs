@@ -1,11 +1,16 @@
 import { assertActive, CormiError, type CommandRequest, type CommandResult, type Plugin } from '@cormijs/core';
-import type { BuildPlan, ServerHandle } from '@cormijs/builder';
+import type { BuildPlan, ServerHandle, DevelopmentState } from '@cormijs/builder';
 import type {} from './index.js';
 import { publishBuild } from './publication.js';
 
 export interface PreparedApplication {
   readonly plan: BuildPlan;
   readonly snapshot: unknown;
+  readonly development?: {
+    readonly entry: string;
+    current(): DevelopmentState;
+    subscribe(listener: (state: DevelopmentState) => Promise<void>): () => void;
+  };
   /** Required generated source roots, added even when the user's tsconfig excludes .cormi. */
   readonly typecheck?: { readonly files: readonly string[] };
   readonly updates?: {
@@ -30,7 +35,7 @@ export const applicationCommandsPlugin: Plugin.Object<void> = {
       const request = { ...original, signal: AbortSignal.any([original.signal, lifetime.signal]) };
       request.signal.throwIfAborted();
       const prepared = await application.prepare({ ...request, command });
-      let server: ServerHandle | undefined, unsubscribe: (() => void) | undefined;
+      let server: ServerHandle | undefined, unsubscribe: (() => void) | undefined, stopDiagnostics: (() => void) | undefined;
       try {
         request.signal.throwIfAborted();
         if (command === 'prepare') { await prepared.close(); return { kind: 'result', data: prepared.snapshot }; }
@@ -38,8 +43,15 @@ export const applicationCommandsPlugin: Plugin.Object<void> = {
           const result = await publishBuild(prepared.plan, (plan, signal) => web.build(plan, signal), request.signal);
           await prepared.close(); request.signal.throwIfAborted(); return { kind: 'result', data: result };
         }
-        server = command === 'dev' ? await web.dev(prepared.plan, request.signal) : await web.preview(prepared.plan, request.signal);
+        const devPlan = command === 'dev' && prepared.development ? { ...prepared.plan,
+          development: { entry: prepared.development.entry, initial: prepared.development.current() } } : prepared.plan;
+        server = command === 'dev' ? await web.dev(devPlan, request.signal) : await web.preview(prepared.plan, request.signal);
         const native = server;
+        if (command === 'dev' && prepared.development) {
+          if (!native.setDevelopmentState) throw new CormiError('BUILDER_DIAGNOSTICS_UNSUPPORTED', 'Recoverable development needs a diagnostic-capable backend.');
+          stopDiagnostics = prepared.development.subscribe(state => native.setDevelopmentState!(state));
+          await native.setDevelopmentState(prepared.development.current());
+        }
         if (command === 'dev' && prepared.updates) {
           if (!native.invalidate) throw new CormiError('BUILDER_INVALIDATION_UNSUPPORTED', 'Generated applications need a backend with development invalidation.');
           unsubscribe = prepared.updates.subscribe(files => native.invalidate!(files));
@@ -48,17 +60,18 @@ export const applicationCommandsPlugin: Plugin.Object<void> = {
         }
         request.signal.throwIfAborted();
         let closing: Promise<void> | undefined;
-        const handle: ServerHandle = { url: native.url, close() {
+        const handle: ServerHandle = { url: native.url,
+          get applicationStatus() { return prepared.development?.current().status; }, close() {
           if (closing) return closing;
           closing = (async () => {
-            unsubscribe?.();
+            unsubscribe?.(); stopDiagnostics?.();
             try { await prepared.close(); } finally { try { await native.close(); } finally { sessions.delete(handle); } }
           })();
           closing.catch(error => { cleanupErrors.push(error); }); return closing;
         } };
         sessions.add(handle); return { kind: 'server', handle };
       } catch (error) {
-        unsubscribe?.();
+        unsubscribe?.(); stopDiagnostics?.();
         try { await prepared.close(); } finally { await server?.close(); }
         throw error;
       }

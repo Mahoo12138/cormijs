@@ -55,6 +55,10 @@ export const webPlugin: Plugin.Object<void> = {
       let closing: Promise<void> | undefined;
       const wrapped: ServerHandle = Object.freeze({
         url: handle.url,
+        ...(handle.setDevelopmentState ? { async setDevelopmentState(state: import('@cormijs/builder').DevelopmentState) {
+          if (closing) throw new CormiError('SERVER_CLOSED', 'Web session is closing.');
+          await handle.setDevelopmentState!(state);
+        } } : {}),
         ...(handle.invalidate ? { async invalidate(files: readonly string[]) {
           if (closing) throw new CormiError('SERVER_CLOSED', 'Web session is closing.');
           await handle.invalidate!(files);
