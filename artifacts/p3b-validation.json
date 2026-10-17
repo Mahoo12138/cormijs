@@ -1,0 +1,572 @@
+{
+  "phase": "P3b",
+  "verified_at": "2026-10-17T18:18:09.604219+00:00",
+  "baseline_commit": "9e712b0f8b0786ae213936a0afa5a03881ee7a80",
+  "linux": {
+    "driver": {
+      "path": ".cache/linux-run-Ej0JvE/result.json",
+      "sha256": "662c6f0ee77d5e45352de5384dbdf9fc93926535e852f24e62430a19b8af1f23"
+    },
+    "verification": {
+      "path": ".cache/linux-run-Ej0JvE/results/result.json",
+      "sha256": "91ac0239f46120a45e92d06237af6768a6c4e724ac74a244e2c26373b18fb4d7"
+    },
+    "environment": {
+      "platform": "linux",
+      "arch": "arm64",
+      "node": "v22.14.0",
+      "kernel": "7.0.14-orbstack-00374-gbbca68e8d741",
+      "uid": 1000,
+      "init": "docker-init",
+      "os": "PRETTY_NAME=\"Debian GNU/Linux 12 (bookworm)\"\nNAME=\"Debian GNU/Linux\"\nVERSION_ID=\"12\"\nVERSION=\"12 (bookworm)\"\nVERSION_CODENAME=bookworm\nID=debian\nHOME_URL=\"https://www.debian.org/\"\nSUPPORT_URL=\"https://www.debian.org/support\"\nBUG_REPORT_URL=\"https://bugs.debian.org/\"\n",
+      "fsType": 2035054128,
+      "networkIsolated": true,
+      "caseSensitive": true,
+      "browser": "Chromium 155.0.8059.79 built on Debian GNU/Linux 12 (bookworm)",
+      "pnpm": "10.6.3",
+      "cjkFont": "Noto Sans CJK SC"
+    },
+    "image_id": "sha256:acf0fa5b16b3f27f73c35c640e2efadb7a13e4fc6461cb2dfb5cbdd759f686ee",
+    "isolation": {
+      "nonRoot": true,
+      "init": true,
+      "externalNetworks": 0,
+      "publishedPorts": 0,
+      "hostMounts": [
+        {
+          "target": "/input",
+          "readOnly": true
+        }
+      ],
+      "nativeContainerWorkspace": "/home/node/work"
+    },
+    "container_removed": true,
+    "commands": [
+      {
+        "label": "offline-install",
+        "args": [
+          "pnpm",
+          "install",
+          "--offline",
+          "--frozen-lockfile",
+          "--ignore-scripts"
+        ],
+        "code": 0,
+        "log": ".cache/linux-run-Ej0JvE/results/offline-install.log",
+        "sha256": "6b5087137bf05bee8b7fbcc22591e038eb2a600560fc225dc319cc46171cdd66",
+        "counts": {}
+      },
+      {
+        "label": "check",
+        "args": [
+          "pnpm",
+          "check"
+        ],
+        "code": 0,
+        "log": ".cache/linux-run-Ej0JvE/results/check.log",
+        "sha256": "4494671a7c73d5fd6b2cda44a97f624689620e0ab19028921509a0ca79608539",
+        "counts": {
+          "tests": 151,
+          "pass": 151,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "label": "browser",
+        "args": [
+          "pnpm",
+          "test:browser"
+        ],
+        "code": 0,
+        "log": ".cache/linux-run-Ej0JvE/results/browser.log",
+        "sha256": "12dd4c149d21a6dd7fc9f59e7dcf2d2bdbe838602cdccf5874ae2aca4b6cddf6",
+        "counts": {
+          "tests": 10,
+          "pass": 10,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "label": "package-1",
+        "args": [
+          "pnpm",
+          "test:package"
+        ],
+        "code": 0,
+        "log": ".cache/linux-run-Ej0JvE/results/package-1.log",
+        "sha256": "9bfa29dbdde123b176326f0a94f5689fe57a5168ec35f50618b6ed32291ab43b",
+        "counts": {},
+        "packageStages": 36
+      },
+      {
+        "label": "package-2",
+        "args": [
+          "pnpm",
+          "test:package"
+        ],
+        "code": 0,
+        "log": ".cache/linux-run-Ej0JvE/results/package-2.log",
+        "sha256": "f22893970282a8ee1cfef3c6a1269442226fc20684cac07af084887cfa05f84b",
+        "counts": {},
+        "packageStages": 36
+      },
+      {
+        "label": "lifecycle-repeat",
+        "args": [
+          "node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-concurrency=1",
+          "tests/launcher-recovery.test.ts",
+          "tests/development-lifecycle.test.ts",
+          "tests/publication.test.ts",
+          "tests/vite-dev.test.ts"
+        ],
+        "code": 0,
+        "log": ".cache/linux-run-Ej0JvE/results/lifecycle-repeat.log",
+        "sha256": "2480f984b38cf69e87fa34af34edc9ac5e84b24168a8962c7b2534069f15bc8c",
+        "counts": {
+          "tests": 27,
+          "pass": 27,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        }
+      },
+      {
+        "label": "example-types",
+        "args": [
+          "pnpm",
+          "typecheck:example"
+        ],
+        "code": 0,
+        "log": ".cache/linux-run-Ej0JvE/results/example-types.log",
+        "sha256": "7a900cabb473a386b19375793034872d7f57329597143ef7d92065e8aa7ee39c",
+        "counts": {}
+      },
+      {
+        "label": "strict-types",
+        "args": [
+          "node",
+          "node_modules/typescript/bin/tsc",
+          "-p",
+          "packages/plugin-vite",
+          "--noEmit",
+          "--skipLibCheck",
+          "false"
+        ],
+        "code": 0,
+        "log": ".cache/linux-run-Ej0JvE/results/strict-types.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "counts": {}
+      },
+      {
+        "label": "demo",
+        "args": [
+          "pnpm",
+          "demo"
+        ],
+        "code": 0,
+        "log": ".cache/linux-run-Ej0JvE/results/demo.log",
+        "sha256": "0f4c7649f3d0dba3e4231218a89c40a74a336395c92621c5c546827f30665226",
+        "counts": {}
+      },
+      {
+        "label": "app-types",
+        "args": [
+          "pnpm",
+          "cormi",
+          "typecheck",
+          "--root",
+          "examples/basic",
+          "--startup-timeout",
+          "30000"
+        ],
+        "code": 0,
+        "log": ".cache/linux-run-Ej0JvE/results/app-types.log",
+        "sha256": "b8606c8531ec27e2f767f0e29bce385bf131243a99de80d2030b3ea4acafcda2",
+        "counts": {}
+      },
+      {
+        "label": "inspect",
+        "args": [
+          "pnpm",
+          "cormi",
+          "inspect",
+          "--root",
+          "examples/basic",
+          "--json"
+        ],
+        "code": 0,
+        "log": ".cache/linux-run-Ej0JvE/results/inspect.log",
+        "sha256": "3ca0ed1fbd2c39e551147812ad42053a21a69e452c4c6dd9bdde2b8b55770c8f",
+        "counts": {}
+      }
+    ],
+    "package_runs": [
+      {
+        "path": ".cache/linux-run-Ej0JvE/results/package-1/result.json",
+        "sha256": "1336124bcb50c09122ce7ba78afd2f60587fccc2c4225860f4b68a4dfaa9f937",
+        "stages": 36,
+        "passed": true,
+        "negative_assertions": [
+          {
+            "label": "raw-nodenext-expected-failure",
+            "exitCode": 2,
+            "expectedExitCode": 2
+          },
+          {
+            "label": "missing-peer-rejected",
+            "exitCode": 1,
+            "expectedExitCode": 1
+          },
+          {
+            "label": "failed-build",
+            "exitCode": 1,
+            "expectedExitCode": 1
+          },
+          {
+            "label": "failed-types",
+            "exitCode": 1,
+            "expectedExitCode": 1
+          }
+        ],
+        "browser": [
+          {
+            "label": "packed-react-dom-fast-refresh-recovery-deep-route",
+            "browser": "155.0.8059.79",
+            "pageerrors": 0
+          }
+        ],
+        "relocation": [
+          {
+            "label": "relocated-clean-install",
+            "oldLocationExists": false,
+            "reusedNodeModules": false,
+            "lockUnchanged": true
+          }
+        ]
+      },
+      {
+        "path": ".cache/linux-run-Ej0JvE/results/package-2/result.json",
+        "sha256": "00dc87a49cde7df7b7d380f3b5d6c7e6bf66991b32dd09d4ae6104425563930f",
+        "stages": 36,
+        "passed": true,
+        "negative_assertions": [
+          {
+            "label": "raw-nodenext-expected-failure",
+            "exitCode": 2,
+            "expectedExitCode": 2
+          },
+          {
+            "label": "missing-peer-rejected",
+            "exitCode": 1,
+            "expectedExitCode": 1
+          },
+          {
+            "label": "failed-build",
+            "exitCode": 1,
+            "expectedExitCode": 1
+          },
+          {
+            "label": "failed-types",
+            "exitCode": 1,
+            "expectedExitCode": 1
+          }
+        ],
+        "browser": [
+          {
+            "label": "packed-react-dom-fast-refresh-recovery-deep-route",
+            "browser": "155.0.8059.79",
+            "pageerrors": 0
+          }
+        ],
+        "relocation": [
+          {
+            "label": "relocated-clean-install",
+            "oldLocationExists": false,
+            "reusedNodeModules": false,
+            "lockUnchanged": true
+          }
+        ]
+      }
+    ],
+    "screenshot": {
+      "path": ".cache/linux-run-Ej0JvE/results/package-2/packed-consumer.png",
+      "sha256": "0a80aa2f29aea3980d68b067ebc383983e29505c878976c297f244f44a344283"
+    },
+    "snapshot": {
+      "path": ".cache/linux-run-Ej0JvE/input/snapshot.json",
+      "sha256": "8a8200d5893468e1dffbc1a263fa49117846f9746994ee1adcbc648723e578bd"
+    },
+    "input_file_count": 118,
+    "synthetic_npmrc": true
+  },
+  "macos": {
+    "verification": {
+      "path": ".cache/p3b-mac-ecbd7b6bc3d2422886f0291bcf0b23e4/result.json",
+      "sha256": "fc18e98916ef04a4a21037c1bf5d7b813cf4d44de587aaecfec00653ebdb063c"
+    },
+    "commands": [
+      {
+        "label": "check",
+        "args": [
+          "pnpm",
+          "check"
+        ],
+        "code": 0,
+        "counts": {
+          "tests": 151,
+          "pass": 151,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "log": ".cache/p3b-mac-ecbd7b6bc3d2422886f0291bcf0b23e4/check.log",
+        "sha256": "e85d16778f58c93c1888edb38a1e1bebd915328f3aae869b268712ffb2462a09"
+      },
+      {
+        "label": "browser",
+        "args": [
+          "pnpm",
+          "test:browser"
+        ],
+        "code": 0,
+        "counts": {
+          "tests": 10,
+          "pass": 10,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "log": ".cache/p3b-mac-ecbd7b6bc3d2422886f0291bcf0b23e4/browser.log",
+        "sha256": "9dc8b5ea7af4c37d8cc6e6ea97a2a89119cf6e5b463a61055709d85930a7d736"
+      },
+      {
+        "label": "packages",
+        "args": [
+          "pnpm",
+          "test:package"
+        ],
+        "code": 0,
+        "counts": {},
+        "log": ".cache/p3b-mac-ecbd7b6bc3d2422886f0291bcf0b23e4/packages.log",
+        "sha256": "05ee3dc48dd83f98b58bea40c550e1ef92853796059531269aff57ffcb723a5e"
+      },
+      {
+        "label": "example",
+        "args": [
+          "pnpm",
+          "typecheck:example"
+        ],
+        "code": 0,
+        "counts": {},
+        "log": ".cache/p3b-mac-ecbd7b6bc3d2422886f0291bcf0b23e4/example.log",
+        "sha256": "a06cb80d5dd91de659483dbfd9be16bb86a73ccfece1f0f0ee41a1c0e8b1a57e"
+      }
+    ],
+    "package_run": {
+      "path": ".cache/package-test-1792260997267/result.json",
+      "sha256": "0593509484ab4878a52a03b6b66f3301e8c4432cb104297f51019ea80380afc7",
+      "stages": 36,
+      "passed": true,
+      "negative_assertions": [
+        {
+          "label": "raw-nodenext-expected-failure",
+          "exitCode": 2,
+          "expectedExitCode": 2
+        },
+        {
+          "label": "missing-peer-rejected",
+          "exitCode": 1,
+          "expectedExitCode": 1
+        },
+        {
+          "label": "failed-build",
+          "exitCode": 1,
+          "expectedExitCode": 1
+        },
+        {
+          "label": "failed-types",
+          "exitCode": 1,
+          "expectedExitCode": 1
+        }
+      ],
+      "browser": [
+        {
+          "label": "packed-react-dom-fast-refresh-recovery-deep-route",
+          "browser": "155.0.4283.62",
+          "pageerrors": 0
+        }
+      ],
+      "relocation": [
+        {
+          "label": "relocated-clean-install",
+          "oldLocationExists": false,
+          "reusedNodeModules": false,
+          "lockUnchanged": true
+        }
+      ]
+    },
+    "source_file_count": 118
+  },
+  "initial_failed_run": {
+    "driver": {
+      "path": ".cache/linux-run-UDaL5W/result.json",
+      "sha256": "02210185e7be3078f5b92651fcc78ea844031bf76a9b089d32d77c62792a72e5"
+    },
+    "verification": {
+      "path": ".cache/linux-run-UDaL5W/results/result.json",
+      "sha256": "037a56c07b06002f636ac8f9bc755bea6524f1b436224d6c81e1732655c8b324"
+    },
+    "failure": "ERR_PNPM_NO_OFFLINE_META while installing a new raw consumer after frozen workspace install",
+    "corrective_action": "Explicit online seed-consumer cache preparation before disconnecting network; functional acceptance remains offline"
+  },
+  "source_sha256": {
+    ".npmrc": "d089b05fc08a36af3a3eb500ffd9d2087c0c2517ee6a820980377dc95bede2f9",
+    ".nvmrc": "c989649ac5c541692f22f2e41f5fbc34927c02bf1644e5dcca46bb4c88281f87",
+    "examples/basic/cormi.config.ts": "4e0d200067661fa8cb373725d3886a6e4f60ce9f208c183b715e24ea675983c4",
+    "examples/basic/index.html": "0c205f840d5f7f8691addc6a22b891f63a9e59ea618dcd720cffabadca59db18",
+    "examples/basic/package.json": "049f13856347e194b61f58b46a419706e20e6426ae00b61758971d8dd11c6f41",
+    "examples/basic/src/pages/_layout.tsx": "bbac7a9d61194cbc784331096a3f00b21767590d304bfbfc9a0247ced42aea4f",
+    "examples/basic/src/pages/about.tsx": "6873f7250c512db26f9cda180d947fd5bb4d443992d85f21f233add0a5f28f5e",
+    "examples/basic/src/pages/docs/[...rest].tsx": "701fa4ae30b1d3b2373c297ed54eda3d9494e13ff62f6af9de92eef66e36ca68",
+    "examples/basic/src/pages/index.tsx": "65a53613b6d708da153e6e9abea837468480cb3e354f780ffe6822fc09e51c87",
+    "examples/basic/src/pages/users/[id].tsx": "a4f06c7b6718da0e49dadb71412a07bb04f2a436c46b6611f1772f2660056a5c",
+    "examples/basic/src/pages/users/_layout.tsx": "85f38314daebd7034a8313012c91d8fa2a82a1f27a123b8733def4dfa69a9b2c",
+    "examples/basic/src/runtime.tsx": "23b4e85a742ac8ee8e947ad2d26b920d09e442423730cd97f2ace2168fd38005",
+    "examples/basic/src/style.css": "eaa53d86ef42901a32ed45075c984a6f928b04fa77a82ea621b7fda7458e9bd3",
+    "examples/basic/tsconfig.json": "2980d7a034b338a2d97ce55ad1cea058f9ecf79bb259f51cbb7d6895368d07ba",
+    "examples/p0/cormi.config.ts": "095812bd25b9bcaa8c3074a9e73f70b75678bca4d6a647fa8f7f45d3acdf286b",
+    "examples/p0/index.html": "977f68e405034fd9cc89fea8904d253e28f65b79062a3e66e29f4d61819394bd",
+    "examples/p0/main.ts": "7b106e81fe362567b22af1c792dac2b3a73f7eb5564298c01bb745455cb6f33c",
+    "examples/p0/run.mjs": "651796f3f94ca4787e5f6c3fc4bbd38467c6db2dfc1c36108a8da347a76a2874",
+    "package.json": "7e2ad6642acc95f3aacb0ab086b7a771cf1eabd5c2a72ee27dc8db42e6a933ff",
+    "packages/builder/package.json": "9245887a3a0167952041e4b7286eca08d03834a81b48cc381fbb18652e715e80",
+    "packages/builder/src/development.ts": "990ad6fba4ad4fc7c1e1763b7548fbe39cc04ab77d20dfbcbf83fb39bafbcbd8",
+    "packages/builder/src/index.ts": "1f4517f3bdd2d9e663460b32bfb595532ba8413d24875e838f32caee8f31763f",
+    "packages/builder/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+    "packages/core/package.json": "3fa528f98bdaf408531384868936adbeaf07448570420fb6da2c6e3291711462",
+    "packages/core/src/commands.ts": "6baf25c48aeb3a1bfaaef13ce8080608b47ed1fbf3e08d69691d9e3d5f6f1c50",
+    "packages/core/src/index.ts": "c6fab623e0c70ac06312dca66379b89e860cbf0aaff9841ddd956b8d291e2509",
+    "packages/core/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+    "packages/cormi/package.json": "0b8e34384674057913d5d395658721d1b28316b604d8107a689c930f97637c7f",
+    "packages/cormi/src/cli.ts": "752b3c12a97898aee4b612aa561afab74abf150fa3e20848400484fbdf530bb2",
+    "packages/cormi/src/commands.ts": "6ee4b4438ead4d793657d0d0b66f84e26daf47ab413ee65722764e51ec63fa64",
+    "packages/cormi/src/compiler.ts": "81fd22c57b23857780f7e1b78186828bc21ed53e319d1e9a39d4b524007d01be",
+    "packages/cormi/src/config.ts": "c4571fa34e595e748f7db2f70c0450f5158de372ecb5b91cbf964fd207b2ded7",
+    "packages/cormi/src/index.ts": "410185de6b0437666d3dcdd36539486efb856b0502fcd12318aa8a8030b8e324",
+    "packages/cormi/src/inputs.ts": "27d138488a93ac09070e7d07c850310f4c72c485f64e92b58e5abf1974f41d4e",
+    "packages/cormi/src/lock.ts": "3e5f6e3160ab21e86dc7da891f23859c8c237c85ac5cf79f31253b24686fde98",
+    "packages/cormi/src/protocol.ts": "07c958e41c2e052aac354d827fbe5636432b93506c14ca39357ea414329c8dc6",
+    "packages/cormi/src/supervisor.ts": "4b2896f499c95bd5ee95f1994c2e2c1d892659b269d42b95f6a0fc76ef028d47",
+    "packages/cormi/src/worker.ts": "d08bcdb6c101805991fc2e896611ca34ab7fb4e2e32ac32ef0d813a534e28f3c",
+    "packages/cormi/tsconfig.json": "179d61257f38a628a52cb296e104d16e9f0b066b52389733bea08b179f4fe983",
+    "packages/plugin-react-vite/package.json": "84816ade6202cc56974bb9248f42be1ad3ef99a2aee6a3391ffc4fd642c961dc",
+    "packages/plugin-react-vite/src/index.ts": "a84ed8db545616ec38c0b960e3326275cdd66cbbe544b9c17c7d310f545e2a67",
+    "packages/plugin-react-vite/tsconfig.json": "6dff251ba0e8067dc31ef48390d0615fd7a4f8e17aa7190b9d0be4fe602459a5",
+    "packages/plugin-react/package.json": "435c75b26a172e365c15fa369746407985f9e26240dc6780498b14ebcb3388a2",
+    "packages/plugin-react/src/development.ts": "8dc43fb167d5e371ad55f3aa834d1478f66523376d0bdb66de059545078fda2b",
+    "packages/plugin-react/src/generate.ts": "0947ca3f9b078e5e70e0283716d1ed275972eedcf518eceeacb66d3d53efaa9a",
+    "packages/plugin-react/src/index.ts": "2e0f7e3d0eca1fee015e51fb2ad5d4fcca3812735a9eb29d6714d4fa9a819792",
+    "packages/plugin-react/src/types.ts": "8a9e5bcee8b5a58a7e0f333f5d54a243735f99bee5d4d7058b26cacb9901493c",
+    "packages/plugin-react/tsconfig.json": "66f54d79216879f555b0ff20f08676fd463819c4059992f30276361e8e346d34",
+    "packages/plugin-typescript/package.json": "8145438f128372a9ab4f38166ee348bfd878c32abd0a90a68c11f53cbc266a30",
+    "packages/plugin-typescript/src/index.ts": "4b9e12755825fb3c51a2a0277439773009d4d2edcd75ce4d1dda8e8b450314c4",
+    "packages/plugin-typescript/tsconfig.json": "e5595878a3ee9605f089f9d1387e097dcc01531cffdbcaa1520f4440d4d4a78f",
+    "packages/plugin-vite/package.json": "de1005a5d44637bdeac1454fcec87c51e088aea9f5a0dfb9fdc60d089d7f7031",
+    "packages/plugin-vite/src/development-client.ts": "cbcb5d03ec2e61dc5690ff4491a73933bd9eb88464ae50361b50750c37fd5133",
+    "packages/plugin-vite/src/development.ts": "c603f305d940c27ad976b3fafdea319c13979d0e8e759168760f173ed4083119",
+    "packages/plugin-vite/src/index.ts": "c0f07e84af0c6b8b68217a8243e07ccab6f69bac101b9ff6dbb16ede33cf572a",
+    "packages/plugin-vite/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+    "packages/plugin-web/package.json": "5e44ddd9b5af7fb9a336366142bda16ae7cd0ad30a903cb345684cc6e4894782",
+    "packages/plugin-web/src/application.ts": "034887f7bf0dd76fe48857e3db0dad926af373d9155872e6ebcc1b9720638c46",
+    "packages/plugin-web/src/commands.ts": "263f457961f86a051f7ce09496035c7574dc4b71d0942fbcf22a9e115303024c",
+    "packages/plugin-web/src/generation.ts": "6c3ca0f365717c871ecb09b6151f5fb37aa34a7c4077b809d30d42d289d6c1cd",
+    "packages/plugin-web/src/index.ts": "569e99f4d11a4fa6212e3b5eb823d2ffbfceca424c4bf060885cac82d5b8c9d9",
+    "packages/plugin-web/src/inspection.ts": "081be205c89cb5f430d663e3691c66038fcfac03aa10edbdc8e3e745ef7772fa",
+    "packages/plugin-web/src/ordered-hooks.ts": "8bfc9924337b5cc758bf00c3efa0e241945254f6902db2e78c38229d0ac881c7",
+    "packages/plugin-web/src/publication.ts": "50244955eb8f880128b37c49c75a4169a390e6517dc991e72fe8341357cd492e",
+    "packages/plugin-web/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+    "packages/preset-react-vite/package.json": "017381e90b80dcd3fce68d427c748de960c3f06f5a2d7e321806cb6500f5935d",
+    "packages/preset-react-vite/src/index.ts": "e0291dc4b5836708665d6a110f88e561d7bf71b2f2b7f0f920cc29330d035d66",
+    "packages/preset-react-vite/tsconfig.json": "3c37c029213990f8b3f91b0b6bbdc043e764e6e62c6722722dbbf63ffd85c4a0",
+    "packages/routes/package.json": "aeef2670ddabaea9be5eb8f39a0457f8aa41eac8fe1187bd4198379451c71bc0",
+    "packages/routes/src/index.ts": "ddd299133a807698d28e8613c430716d689ec14377c1e8494137c82502a1cd41",
+    "packages/routes/tsconfig.json": "179d61257f38a628a52cb296e104d16e9f0b066b52389733bea08b179f4fe983",
+    "packages/runtime/package.json": "4ae9491115adb2dde225314dde154e43ce62a157ca4610eea445888f5018b0bf",
+    "packages/runtime/src/index.tsx": "338d4b10edd0408b5351255b93e9112693bbe00edac3b1d0d687c111d91b3dbd",
+    "packages/runtime/tsconfig.json": "e409e3b42ce86c6d10b739e22d0c8fc049d9a1b4ab816fbb83a739de9eba0dc7",
+    "patches/CORDIS-LICENSE": "034fb52b1d57360ecbae6cb1632a88f86fd7c3d3f5631a5f082710203dda0be7",
+    "patches/cordis@4.0.0-rc.11.patch": "11a745abd66488d5cba00b7388beebaf8a70bc0fdd6e998608e511f77358228e",
+    "pnpm-lock.yaml": "eed0a6157c5c16b42b23c541a944b6ab3c63ad2ffa437b7889c4945238966d12",
+    "pnpm-workspace.yaml": "995d2de1cd963f1aaa4dae859bd504d60bbd8b3c5eb4358916a87aa77c671904",
+    "scripts/linux/Dockerfile": "ad44353d111c27e075871d146d5bcfbf2e212abd2b2d0a0499fdf826d651b5a1",
+    "scripts/linux/snapshot.ts": "f87610a332247870ebe0677998988f4a05e513567f0636f6b27bba48d7fc1eb9",
+    "scripts/linux/verify.ts": "c8591836e2a5f733545b3f79f9178f3325e131d50ce65f7c58b705b5a951c915",
+    "scripts/linux/warm-cache.ts": "660311b13595be15efc747d9f54fe7abf2e58271e776c4e08a7136c64b0401aa",
+    "scripts/pack-local.ts": "cb51e421a58b15ae3bce72928544af39f5e4f3bbe5f1cae883b2bd9fe94116ab",
+    "scripts/packaging.ts": "5a44487c469c3c26b3567c73d8ae318cac6c5d08bab191642c9e5f1171441ee6",
+    "scripts/test-linux.ts": "bdf97d0aabb05ee3c92634a7ba3a6577cddf403ee53c54fdfc80adc4286a380d",
+    "scripts/test-package.ts": "f490692b6fc4e866db89bd21f8f51b0f95219f18cdc736b9a754af910b779b6f",
+    "tests/app-tools.test.ts": "84767164b7baa2c94fe353a1ad1d4e701455596d463dc1697d932c0e054278d9",
+    "tests/application-commands.test.ts": "a676b5a5f21f1f1e5f97f96dcc21d0b8b8f01f58e680ced3ee6b26706b5eaa9f",
+    "tests/browser/development.test.ts": "738eae072993e76e933e31efa6d35cf468500ce478430935bf0b9097776045b9",
+    "tests/browser/react.test.ts": "7e2d3871a3561138d641c2ebbd0b7f63d40599ac5713f3d16449f9d0190dbe9a",
+    "tests/commands.test.ts": "c0a7f39b11a9b5d757b40073013df1cc941f8c0da5162cccb48e8fbd5a04aec6",
+    "tests/config.test.ts": "fd9beab2d662977c5425276e653f7673a5ee83c142603a94627a0e7b5c251455",
+    "tests/core.test.ts": "60f68f93e6274cda6fe4a49c55cabc482439f45b350f265bee266d3d48f48ddc",
+    "tests/development-backend.test.ts": "f895381af5cd0ea615829467d591af2a1b70ce8a510973003e6cec54166b0d07",
+    "tests/development-lifecycle.test.ts": "9946155fa060d26fb36a8ffa5520165be35034611ffff09959870314012706ec",
+    "tests/development-recovery.test.ts": "605258aedfbf6015008eafeeff5f1f74a5a7aa2ab3698b1f4e2012e65b3a104b",
+    "tests/generation.test.ts": "9e25e013fb0dd84af7e13eef1cb66a03e28e26ed961de1f648d924a1fe9b2033",
+    "tests/helpers.ts": "dccaf8e3165920ab038c398697bfcb0db45809915fb40a1b988f1f13942353bc",
+    "tests/hooks.test.ts": "e30de33fb5e3dcca4e6c7a27342c601971cc489d30016118bfaaebde4524d73f",
+    "tests/isolation.test.ts": "36a41ed4ef9654aef81e41fc1660ab82b7066701ddd7702fc675b83c16c13752",
+    "tests/launcher-boundaries.test.ts": "48b1622a60d15b9dc1b41d1226718fe949974c04e8bf68d77c5a7f14b70ab21b",
+    "tests/launcher-helpers.ts": "ae8f12861f3d3aa72945a29fadf6336aefa7178e708e0bbd5c400d461f6a0308",
+    "tests/launcher-recovery.test.ts": "bca11866d287cb5ad5df3434b316f959efcccbc209de62cf85d69c089d03c667",
+    "tests/launcher.test.ts": "c9cb721dafef1820dcfe7f301cbfcc0d21f0e9cdcf57f68e9827704c29e2c4c0",
+    "tests/linux-snapshot.test.ts": "0e9935d61bdc701e35eeea51fb664c2202bfe1aa84123e7ef14c788f81d1d6cc",
+    "tests/locks.test.ts": "2227e1d24722d712b58952e9971e26c9470a101bcb90aae79f98cbba1ce9a76e",
+    "tests/packaging-boundaries.test.ts": "933ae66fbcc7406d0876f519ce8c4e5f7d0dbc1603d6c3d708c5b9a1034e7d0a",
+    "tests/packaging.test.ts": "ed19554e2fb7b1e512c6c71d63c650cd5444a22d3ea2a82fc99bf6e7fc1d83f9",
+    "tests/providers.test.ts": "089425999a52251d4ac01df27ed3c2a0cb9959cc0ab255b730f85157af0c2986",
+    "tests/publication.test.ts": "0c0168aa9766df4cca0e431b1d6c6d07fa75017d7f0bccacabdf0065d3bbee4c",
+    "tests/react-boundary.test.ts": "b49bf04b4711ac175593c471badbab927647d3fc6c3d0d3d6eaa456594075061",
+    "tests/react-compiler.test.ts": "c8e287a8d21eaf1427a75a8a958b24d4124a36a8c5619d259f6d914c5bb5d183",
+    "tests/routes.test.ts": "ffc720fd8d27d676cd68db4d0f492ca5d76851e65d28912b31977e208b581548",
+    "tests/tsconfig.json": "62b7f8530dddcc3bc455f37fa9f0e771b2a7835922001fc08c3e209ee97d88f1",
+    "tests/vite-build.test.ts": "e1165a90659bfcbb240bb0ff66f582bdba651a8c235a4a317b0a3704264c9328",
+    "tests/vite-dev.test.ts": "1949034c527a495ef8b6c442c8cea78c664315a274df2a71a0e67b0ad14edc08",
+    "tsconfig.base.json": "94d2a15288b0b45c326f56f74d425daf9a8e7e2361d85bb4b12c521458e59c4c",
+    "tsconfig.json": "34a045e97055047471ba104861c738f7d1af8589110b8f0cdbff620b6b703e20"
+  },
+  "source_unchanged_during_final_validation": true,
+  "reference_checkouts": [
+    {
+      "name": "cordis",
+      "head": "5dac6953d2d993d345d1de9fb0a5926f6d78a7e7",
+      "clean": true
+    },
+    {
+      "name": "umi",
+      "head": "788e39630dc52a9306c89f8af08705e5db0e199f",
+      "clean": true
+    }
+  ],
+  "previous_running_containers_still_running": 10,
+  "remaining_validation_containers": 0,
+  "limitations": [
+    "Linux Debian 12 arm64 on OrbStack only",
+    "No Windows native, Linux x64 or musl validation",
+    "Online image/cache preparation is distinct from offline functional checks",
+    "Cordis consumer-root declaration patch remains required",
+    "No npm publication, deployment, long-term resource trend or zero-downtime claim"
+  ]
+}

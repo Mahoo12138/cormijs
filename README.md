@@ -2,9 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P3a 本地打包与独立消费者。** 在已有开发恢复、受管构建和应用检查上，新增真实 tgz 打包、exports/bin/类型及依赖校验，并提供消费者根目录显式声明补丁的试用配置。协议见 [打包消费](docs/15-package-consumers.md)；包仍为 private，不把试用配置通过等同于任意 npm 安装或正式发布已经可用。
+**当前阶段：P3b 隔离 Linux 验证。** 在已有真实打包消费基础上，增加可复用的非 root Linux 容器验证、受限源码快照、冷缓存准备与断网后的完整回归。协议见 [Linux 验证](docs/17-linux-validation.md)，精确结果见 [P3b 记录](docs/18-p3b-results.md)。包保持 private，Linux arm64 的实测结果不等同于 Windows、x64、全部发行版或正式发布保证。
 
-本轮通过 **148 项 Node + 10 项既有浏览器测试**；另将真实 tgz 独立消费者验收完整执行两轮，每轮 36 个检查阶段满足预期，包含重定位后删除 node_modules、按未变化锁文件重新安装及真实 React 交互。最新证据见 [P3a 结果](docs/16-p3a-results.md) 和 [机器记录](artifacts/p3a-review-validation.json)。P2a 的 [收尾复核](docs/14-p2a-review.md) 与历史记录保留；本机通过不代表完整跨平台或任意包管理器的发布验收。
+历史 [P3a 结果](docs/16-p3a-results.md) 与 [机器记录](artifacts/p3a-review-validation.json) 保留 148 项 Node、10 项浏览器及两轮独立消费者的原始事实；P2a 的 [收尾复核](docs/14-p2a-review.md) 也不改写。当前执行数量、平台和输入哈希以 [P3b 机器记录](artifacts/p3b-validation.json) 为准，不把跨平台重跑或负向断言累加成新的测试用例。
 
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 
@@ -47,6 +47,16 @@ pnpm test:browser
 
 check 包含框架与测试的类型检查、构建和 Node 测试；typecheck:example 检查示例业务源码。browser 测试用 playwright-core 启动独立的无头浏览器，不接入个人浏览器 profile。Mac 默认使用现有 Microsoft Edge，其他环境通过 `CORMI_BROWSER_EXECUTABLE` 指定 Chromium 系可执行文件；未找到时明确失败，不下载浏览器或静默跳过。应用级 `cormi typecheck` 先 prepare，再检查业务及生成代码；即使 tsconfig 排除 .cormi，也会检查必要生成入口。`cormi inspect` 读取上次成功快照，不重新计算源文件，不表示当前源文件已验证。
 
+## Linux 验证
+
+```sh
+pnpm test:linux
+```
+
+需要 Docker 已在本机运行。首次构建验证镜像、安装依赖和准备新消费者解析缓存需要网络；随后自动断开测试容器的外部网络，执行 offline 安装、Node/浏览器回归、两轮 tgz 消费者和故障重复。源码快照只读挂载后复制到 Linux 原生工作目录，不直接使用主机 node_modules 或在 macOS 共享文件系统上代替 Linux 文件测试。
+
+测试不向主机暴露服务端口、不挂载 Docker socket、不传入主机 .npmrc。容器非 root、只读输入、限制资源，结束后删除本轮容器并取回日志；镜像留作缓存，不修改已有服务。可用 `pnpm test:linux --image sha256:<完整本地镜像ID>` 复用记录的镜像。工具只接受 macOS/Linux 宿主，Windows 原生验收尚待进行。
+
 ## 仓库外试用
 
 `pnpm pack:local` 生成全新的 `.cache/cormi-kit-<uuid>`，包含 11 个真实 tgz、声明兼容补丁、上游许可、哈希清单和独立 app 示例。**将整个 kit 移出本 workspace 后，再进入 app 安装**，不要在仓库内的 kit/app 执行 pnpm install。也可以 `pnpm pack:local --out <尚不存在的外部目录>` 直接指定目的地。
@@ -78,7 +88,7 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 
 ## 文档与记录
 
-[架构 Draft 0.7](docs/02-architecture.md)描述完整目标，[MVP 计划](docs/03-mvp-plan.md)记录进度，[插件优先 ADR](docs/04-plugin-first-adr.md)记录边界原则。[命名和启动协议](docs/06-naming-and-launcher.md)、[路由与 React 协议](docs/08-routes-and-react.md)、[受管发布与检查](docs/10-publication-and-tools.md)和[开发恢复](docs/12-development-recovery.md)描述各层接口。历史 [P0](docs/05-p0-results.md)、[P1a](docs/07-p1a-results.md)、[P1b](docs/09-p1b-results.md)、[P1c](docs/11-p1c-results.md) 保留各阶段实际结果，不改写历史验证 JSON。
+[架构 Draft 0.8](docs/02-architecture.md)描述完整目标，[MVP 计划](docs/03-mvp-plan.md)记录进度，[插件优先 ADR](docs/04-plugin-first-adr.md)记录边界原则。[命名和启动协议](docs/06-naming-and-launcher.md)、[路由与 React 协议](docs/08-routes-and-react.md)、[受管发布与检查](docs/10-publication-and-tools.md)和[开发恢复](docs/12-development-recovery.md)描述各层接口。历史 [P0](docs/05-p0-results.md)、[P1a](docs/07-p1a-results.md)、[P1b](docs/09-p1b-results.md)、[P1c](docs/11-p1c-results.md) 保留各阶段实际结果，不改写历史验证 JSON。
 
 ## 固定依赖与参考
 
@@ -102,4 +112,4 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 
 生成集包含 app.tsx、routes.d.ts 和 inspect.jsonc，文件哈希用于发现混合状态，不声称跨文件事务。typecheck 暂不支持 tsconfig solution/project references；build 转译通过不代表类型正确。发布锁和事务目录在崩溃后可能保留，人工恢复前核实所属进程及旧产物位置，不自动删锁或备份。
 
-本地打包消费者协议已接入；下一切片优先运行 Linux 验证、完善 Windows 兼容性，并在正式发布前确认项目许可、包名归属和声明兼容策略。SSR/RSC、Linux/Windows、移动端浏览器矩阵、断电持久性和长期内存趋势均未验证；本次窄屏 viewport 检查不等于真机移动浏览器验收。
+Linux 验证限定已记录的 Debian 12 / arm64 容器与依赖组合；下一切片优先进行 Windows 原生路径、进程/信号和包消费验收，再以小型真实应用检验插件复用价值。正式发布前仍须确认项目许可、包名归属和声明兼容策略。SSR/RSC、Windows、Linux x64/musl、真机移动浏览器、断电持久性及长期资源趋势仍无通过保证。
