@@ -1,12 +1,14 @@
 # cormi：真实 React Admin 迁移验收计划
 
-日期：2026-10-18。状态：已完成候选源码与许可核对，**尚未执行迁移、安装依赖或通过 Admin 浏览器验收**。本计划是 P4c 之后的下一条开发主线，不再以 Windows 或抽象功能列表作为前置条件。
+日期：2026-10-18。状态：已完成原版独立副本安装、类型/构建与首组模块行为基线，**尚未将 Admin 移植到 cormi，也未通过迁移版验收**。模块逐项跟踪见 [议题台账](admin/00-module-ledger.md) 与 [问题登记](admin/03-issue-register.md)。P5 不再以 Windows 或抽象功能列表作为前置条件。
 
 ## 1. 选择的真实项目
 
 选择 [minimal-ui-kit/material-kit-react](https://github.com/minimal-ui-kit/material-kit-react) 的免费版本。它是 React SPA，而不是需要先移植服务器协议的 Next.js 工程；源码包含 Dashboard、Users、Products、Blog、Sign in 和 Not found。上游 MIT 许可见 [固定许可文件](https://github.com/minimal-ui-kit/material-kit-react/blob/69e780a40c455d664b2e13c525faf1d492a072a7/LICENSE.md)。
 
 本地只读参考位于 `.cache/admin-upstream-material-kit`。本次浅克隆固定 HEAD 为 **69e780a40c455d664b2e13c525faf1d492a072a7**，src/public 共 229 个跟踪文件、2771976 字节。没有执行上游 clean、re:build 等清理脚本，也没有安装其依赖或修改它。文件数量只是迁移范围，不代表复杂度或已验证比例；固定文件哈希见 [上游清单](../artifacts/admin-upstream.json)。
+
+原版运行在独立复制的 `.cache/admin-baseline-c6c7a9ae2686`，使用原 package-lock.json 执行 npm ci，关闭安装生命周期脚本；244 份跟踪文件在参考目录与运行副本之间保持相同哈希。这里的安装/运行与前述只读参考 checkout 分开，不能混称为修改了上游。
 
 包声明使用 React ^19.1.0、React Router DOM ^7.4.1、MUI ^7.0.1、TypeScript ^5.8.2、Vite ^6.2.5。迁移时保留应用组件/主题，不把这些依赖塞进 cormi core。React、Router 与 cormi 实际 peer 的交集需要在新应用锁文件中明确固定；不把复制 package.json 就视为已经兼容。
 

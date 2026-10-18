@@ -214,6 +214,7 @@ Mock、请求、权限、国际化与 UI 库可作为后续第一批产品插件
 - [x] P4b 实现独立项目创建、本地 kit 自包含交付和可选开发 Mock/HTTP 代理；Mac 209 项 Node、13 项浏览器通过，13 包消费者 56 阶段满足预期，慢响应/HEAD/创建保护复核见 [协议](23-project-creation-and-dev-api.md) 与 [结果](24-p4b-results.md)。
 - [x] P4c 实现应用配置派生、preset/user/hook 覆盖来源与受限值诊断；config --for 与旧 inspect 明确区分，见 [协议](25-configuration-provenance.md)。构建器全配置来源/服务图不在此完成范围。
 - [x] 选定并浅克隆 Material Kit React 免费版固定提交，核对许可、启动/路由/主题/Users/Sign in 源码，见 [迁移计划](26-admin-migration.md)。
+- [x] P5a 将 Admin 迁移分为11个模块议题，建立未修改源码的原版安装/类型/构建和交互基线；占位控件、上游缺陷与框架接入缺口分别登记，见 [模块台账](admin/00-module-ledger.md)。这不是迁移完成。
 - [ ] P5 下一主线：保留上游六页与真实交互，迁移到独立 cormi 包消费者并执行 dev/typecheck/build/preview 对照验收；当前未开始移植，不以选型代替通过。
 - [ ] 完成 P0-A 到 P0-E 的全部退出条件：跨平台、完整依赖图诊断和长期资源趋势仍待验证。
 - [x] P1 基础应用纵切已交付：CLI/config/preset、生成、React dev/build/preview 与失败 fixture；P4a 补齐独立状态功能插件示例。完整发布与长期稳定性仍单独验收。
