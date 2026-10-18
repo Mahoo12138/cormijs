@@ -207,6 +207,9 @@ Mock、请求、权限、国际化与 UI 库可作为后续第一批产品插件
 - [x] P3a 建立逐包真实 tgz 检查、仓库外 core/launcher/SDK/React 消费者和显式根声明补丁试用包；正式发布、平台矩阵及许可仍未完成，见 [协议](15-package-consumers.md)。
 - [x] P3a 收尾：148 项 Node、10 项浏览器通过，完整独立消费者两轮各 36 阶段通过；包含重定位后干净安装、私有文件与源码链接拒绝、归档版本核对，见 [本轮结果](16-p3a-results.md)。
 - [x] P3b 建立受限源码快照、非 root Linux 容器与断网验证驱动；具体平台、实测数量和冷缓存修正见 [Linux 结果](18-p3b-results.md)。Windows、其他架构与长序列资源趋势门槛仍保留。
+- [x] P3c-prep：父 IPC 协作关闭、无 shell 的 pnpm 调用与原生 Windows 专项入口已建立；原生运行结果另记，不将 Mac/Linux 预检当作 Windows 通过，见 [协议](19-windows-validation.md)。
+- [x] P3c-prep共享回归：Mac/Linux各165项Node、10项浏览器通过；Windows专属5项定义未原生执行，见 [结果与边界](20-p3c-prep-results.md)。
+- [ ] 获取并确认真实 Windows 执行目标，再执行原生契约、完整 CLI/浏览器/包消费与交互控制台验收。
 - [ ] 完成 P0-A 到 P0-E 的全部退出条件：跨平台、完整依赖图诊断和长期资源趋势仍待验证。
 - [ ] 实现 P1 应用纵切及失败 fixture。
 - [ ] 完成 P2 更新可靠性测试。

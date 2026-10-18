@@ -16,6 +16,7 @@
     "pack:local": "pnpm build && node --import tsx scripts/pack-local.ts",
     "test:package": "pnpm build && node --import tsx scripts/test-package.ts",
     "test:linux": "node --import tsx scripts/test-linux.ts",
+    "test:windows": "node --import tsx scripts/test-windows.ts",
     "check": "pnpm typecheck && pnpm test"
   },
   "pnpm": {

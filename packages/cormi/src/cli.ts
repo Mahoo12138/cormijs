@@ -3,10 +3,10 @@ import { parseArgs } from 'node:util';
 import { resolve } from 'node:path';
 import { runCormi } from './supervisor.js';
 import { wireError } from './protocol.js';
+import { bindLauncherControl } from './control.js';
 
 const lifetime = new AbortController();
-const stop = () => lifetime.abort();
-process.on('SIGINT', stop); process.on('SIGTERM', stop);
+const detachControl = bindLauncherControl(lifetime);
 let json = false;
 try {
   const parsed = parseArgs({ allowPositionals: true, strict: true, options: {
@@ -40,4 +40,8 @@ try {
   if (json) console.log(JSON.stringify({ type: 'error', ...detail }));
   else console.error(`[cormi:${detail.code}] ${detail.message}`);
   process.exitCode = 1;
-} finally { process.off('SIGINT', stop); process.off('SIGTERM', stop); }
+} finally {
+  detachControl();
+  // A forked CLI must not stay alive merely because its optional parent channel remains open.
+  if (process.connected) process.disconnect();
+}

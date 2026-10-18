@@ -6,6 +6,7 @@ import { cp, lstat, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile }
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, posix, relative, resolve, sep } from 'node:path';
 import ts from 'typescript';
+import { pnpmCommand } from './tool-command.js';
 
 export const sha256 = (data: string | Buffer): string => createHash('sha256').update(data).digest('hex');
 export const slash = (path: string): string => path.split(sep).join('/');
@@ -117,7 +118,8 @@ export function validateDeclarationPatch(patch: string): number {
 }
 export async function run(executable: string, args: string[], cwd: string, env: NodeJS.ProcessEnv = process.env, timeout = 60000) {
   return new Promise<{ code: number; stdout: string; stderr: string }>((resolveResult, reject) => {
-    const child = spawn(executable, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
+    const command = executable === 'pnpm' ? pnpmCommand(args, env) : { executable, args };
+    const child = spawn(command.executable, command.args, { cwd, env, shell: false, stdio: ['ignore', 'pipe', 'pipe'] });
     let stdout = '', stderr = '', failure: Error | undefined;
     const timer = setTimeout(() => { failure = new Error(`Command timed out: ${executable} ${args.join(' ')}`); child.kill('SIGKILL'); }, timeout);
     const collect = (chunk: Buffer, output: 'stdout' | 'stderr') => {

@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.8。修订日期：2026-10-17。
+版本：Draft 0.9。修订日期：2026-10-18。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -11,6 +11,8 @@ P2a 增加开发态编译恢复：PreparedApplication.development 提供状态�
 P3a 增加真实 tarball 与仓库外消费者验收。Node 包提供明确 engines，dist 的 sourcemap 对应 src 一并入包；默认 preset 的公开类型使用 Preset，不泄漏未声明的传递类型依赖。Cordis 原始运行时仍不变，本地试用选择消费者根显式 pnpm 声明补丁，不复制或改名上游 Context；无补丁透明公共安装仍是发布限制。详见 [打包消费协议](15-package-consumers.md)。
 
 P3b 将 Linux 验证作为仓库开发工具提供，不向 core 或默认 preset 加入 Docker 依赖。受限源码快照进入非 root 容器的原生文件系统；在线准备依赖后断开外部网络，执行同一套类型、Node、浏览器和真实包消费测试。通过范围以具体平台和版本记录为准，不能扩张为 Windows、全部 Linux 或生产部署保证。见 [Linux 协议](17-linux-validation.md) 与 [结果](18-p3b-results.md)。
+
+P3c-prep 区分平台逻辑准备与 Windows 原生证据。Launcher 为已建立 IPC 的父进程提供协作关闭消息，不将 Windows kill 信号当作 Unix 优雅退出；pnpm 自动化优先使用原生 Node argv。Windows 契约入口在非 Windows 明确拒绝且不运行用例，完整平台验收仍待实际 Windows 目标。见 [Windows 验证协议](19-windows-validation.md)。
 
 ## 1. 应该做一个什么框架
 
