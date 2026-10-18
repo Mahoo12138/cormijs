@@ -10,6 +10,7 @@ const messages: Readonly<Record<string, string>> = {
   ROUTE_PARENT_CYCLE: 'Route parents contain a cycle or exceed the supported depth.',
   ROUTE_PATH_INVALID: 'A page filename or route path does not follow the supported convention.',
   ROUTE_INVALID: 'The route configuration does not satisfy the route contract.',
+  ROUTE_META_INVALID: 'Route metadata must be bounded public JSON data.',
   ROUTE_MODULE_INVALID: 'A route module reference is invalid.',
   ROUTE_SYMLINK: 'Page directories cannot contain symbolic links.',
   ROUTE_LIMIT: 'The page tree exceeds the supported size or depth.',
@@ -52,11 +53,11 @@ export function developmentDiagnostic(error: unknown, phase: string, root: strin
     ...(clean(details.hookId) ? { hookId: clean(details.hookId) } : {}) });
 }
 /** Metadata only; no file contents or symlink targets are read to detect repair. */
-export async function repairSignature(root: string, files: readonly string[]): Promise<string> {
+export async function repairSignature(root: string, files: readonly string[], anchoredFiles: ReadonlySet<string> = new Set()): Promise<string> {
   const result: unknown[] = [];
   for (const file of [...new Set(files)].sort()) {
     const path = resolve(root, file), local = relative(root, path);
-    if (isAbsolute(file) || !local || local === '..' || local.startsWith(`..${sep}`)) continue;
+    if (!anchoredFiles.has(file) && (isAbsolute(file) || !local || local === '..' || local.startsWith(`..${sep}`))) continue;
     try { const s = await lstat(path); result.push([file, s.dev, s.ino, s.size, s.mtimeMs, s.isSymbolicLink()]); }
     catch (error) { result.push([file, (error as NodeJS.ErrnoException).code]); }
   }

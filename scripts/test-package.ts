@@ -69,6 +69,7 @@ async function command(label: string, cwd: string, name: string, expected = 0, p
   return execute(label, cwd, join(cwd, 'node_modules/.bin/cormi'), [name, '--json', '--startup-timeout', '30000'], expected, pattern);
 }
 async function withServer(cwd: string, name: 'dev' | 'preview', action: (url: string) => Promise<void>) {
+  const sessionLabel = cwd.split(sep).at(-1) + '-' + name;
   const child = spawn(join(cwd, 'node_modules/.bin/cormi'), [name, '--json', '--startup-timeout', '30000'], { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
   const events: Array<Record<string, any>> = []; let stdout = '', stderr = '', buffer = '';
   let resolveReady!: (url: string) => void, rejectReady!: (error: Error) => void;
@@ -98,9 +99,9 @@ async function withServer(cwd: string, name: 'dev' | 'preview', action: (url: st
       const code = await Promise.race([done, new Promise<never>((_, reject) => { deadline = setTimeout(() => reject(new Error('Packed server cleanup deadline exceeded')), 8000); })]);
       assert.equal(code, 0, JSON.stringify(events) + stderr);
       assert.equal(existsSync(join(cwd, '.cormi.lock')), false, 'Packed CLI must release its lock');
-      report.stages.push({ label: name + '-session', exitCode: code, workerStarts: events.filter(x => x.type === 'starting').length });
+      report.stages.push({ label: sessionLabel + '-session', exitCode: code, workerStarts: events.filter(x => x.type === 'starting').length });
     } catch (error) { child.kill('SIGKILL'); report.retainedConsumer = temporary; throw error; }
-    finally { clearTimeout(deadline); await writeFile(join(logRoot, name + '-server.log'), stdout + stderr); }
+    finally { clearTimeout(deadline); await writeFile(join(logRoot, sessionLabel + '-server.log'), stdout + stderr); }
   }
 }
 try {
@@ -185,6 +186,27 @@ try {
     await withServer(app, 'preview', async url => {
       await page.goto(new URL('users/73', url).href); await page.locator('#root h1').filter({hasText:'User 73'}).waitFor();
       assert.equal(await page.locator('cormi-development-overlay').count(), 0); assert.deepEqual(errors, []);
+    });
+    const features = join(delivery, 'features'); await createReactConsumer(root, kit, features, 'features');
+    await install('features-install', features); await auditLinks(features);
+    await command('features-typecheck', features, 'typecheck');
+    await command('features-inspect', features, 'inspect', 0, /example:status/);
+    await withServer(features, 'dev', async url => {
+      await page.goto(new URL('status', url).href);
+      await page.getByRole('heading', {name:'插件已经接入。', exact:true}).waitFor();
+      assert.equal(await page.locator('[data-status-provider]').count(), 1);
+      assert.equal(await page.locator('[data-testid="breadcrumbs"]').innerText(), '工作台 / 功能插件');
+      await page.getByRole('button', {name:'Count: 0', exact:true}).click();
+      assert.equal(await page.getByRole('button', {name:'Count: 1', exact:true}).count(), 1);
+      assert.deepEqual(errors, []);
+      report.stages.push({label:'packed-feature-page-provider-meta', browser:browser.version(), pageerrors:errors.length});
+    });
+    await command('features-build', features, 'build');
+    await withServer(features, 'preview', async url => {
+      await page.goto(new URL('status', url).href);
+      await page.getByRole('heading', {name:'插件已经接入。', exact:true}).waitFor();
+      assert.equal(await page.locator('[data-testid="feature-label"]').innerText(), '本地工作台');
+      assert.deepEqual(errors, []);
     });
   } finally { await browser.close(); }
   report.passed = true;

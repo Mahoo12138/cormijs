@@ -40,7 +40,7 @@ prepare 生成入口并返回路由摘要后退出；dev 生成入口并启动�
 
 默认扫描 src/pages 的 .tsx/.jsx；index 是当前目录首页，`[id]` 是参数，`[...rest]` 是终端 catch-all，`_layout` 是所在目录及其后代的布局，组件内部通过 Outlet 渲染后代。点目录、下划线辅助目录和 test/spec 文件忽略。页面树中的符号链接拒绝扫描。所有扫描只读路径，不 import 页面模块。
 
-IR 字段为 id、parentId、path、index、module、source。module 仅包含 specifier/exportName；source 记录 file/pluginId。路径相对于父路由，顶层 / 规范化为空路径。默认 ID 是 `file:<项目相对文件名>`，不取数组下标。当前不开放任意 meta 或运行时路由函数。
+基础 IR 字段为 id、parentId、path、index、module、source；P4a 增加公开 JSON meta。module 的 specifier/exportName 可附带显式作者 file URL from；source 记录 file/pluginId。路径相对于父路由，顶层 / 规范化为空路径。默认 ID 是 `file:<项目相对文件名>`，不取数组下标。不开放任意运行时路由函数，增量规则见 [功能插件协议](21-react-features.md)。
 
 设置 app.routes 后关闭约定扫描；其值必须是平面的 IR 数组。所有来源最终统一校验：重复 ID、缺失 parent、父子环、index 携带 path/children、非终端 splat、重复参数及 URL 结构歧义会失败。`users.tsx` 与 `users/index.tsx`、`[id]` 与 `[slug]`、仅大小写不同的页面不会靠扫描顺序覆盖。静态路由与参数路由可以共存，实际匹配交给 React Router。
 
@@ -52,7 +52,7 @@ app.pages 可选择其他项目内目录。当前不支持可选参数、路由�
 
 Node 插件可注入 react，通过 `ctx.react.routes.tap()` 登记路由 reducer，通过 `ctx.react.runtime.tap()` 收集运行时模块。登记返回注销函数，调用者用 ctx.effect 绑定作用域。OrderedHooks 的 before/after、稳定 ownerOrder 和冲突诊断继续适用。不同编译轮次观察登记 revision，当前轮不修改正在遍历的登记快照。
 
-app.runtime 支持 `{ id, module: { specifier, exportName }, options }` 数组。options 必须是可复制的有限、无环 JSON，不能传递 Context、服务实例、函数或整个 Node 配置。相对模块引用在这一版一律相对项目根；包模块使用裸包 specifier。暂未实现任意插件模块 URL 作为解析基准，不要把未实现的相对解析规则写进插件。
+app.runtime 支持 `{ id, module: { specifier, exportName }, options }` 数组。options 必须是可复制的有限、无环 JSON，不能传递 Context、服务实例、函数或整个 Node 配置。未带 from 的相对模块仍相对项目根；包模块使用裸包 specifier。P4a 可通过 clientModule 为 ./ 客户端引用显式绑定作者位置，限制在作者目录子树内，并接入缺失文件修复观察。详见 [功能插件协议](21-react-features.md)。
 
 生成的 `.cormi/app.tsx` 包含静态 runtime imports、路由 lazy imports 和 mountApplication 调用。字符串使用 JSON 转义，页面源码不嵌入生成文件。提交前使用独立 esbuild 检查生成代码语法；这不是对业务页面执行完整类型检查。
 

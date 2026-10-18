@@ -1,8 +1,16 @@
 import { CormiError } from '@cormijs/core';
 import { lstat, readdir, realpath } from 'node:fs/promises';
 import { dirname, isAbsolute, join, posix, relative, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { routeMeta, type RouteMeta } from './json.js';
+export { jsonData, routeMeta, type JsonValue, type RouteMeta } from './json.js';
 
-export interface ModuleRef { readonly specifier: string; readonly exportName: string }
+export interface ModuleRef {
+  readonly specifier: string;
+  readonly exportName: string;
+  /** Explicit Node author-module URL. Relative references are confined to its directory. */
+  readonly from?: string;
+}
 export interface RouteRecord {
   readonly id: string;
   readonly parentId?: string;
@@ -10,6 +18,8 @@ export interface RouteRecord {
   readonly path?: string;
   readonly index?: boolean;
   readonly module?: ModuleRef;
+  /** Public browser metadata, never server credentials or executable callbacks. */
+  readonly meta?: RouteMeta;
   readonly source: { readonly file?: string; readonly pluginId?: string };
 }
 const compare = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0;
@@ -24,10 +34,18 @@ export function projectPath(root: string, file: string): string {
 export function moduleRef(value: unknown): ModuleRef {
   if (!value || typeof value !== 'object' || Array.isArray(value)) fail('ROUTE_MODULE_INVALID', 'Expected a module reference.');
   const ref = value as Record<string, unknown>;
-  if (Object.keys(ref).some(key => !['specifier', 'exportName'].includes(key)) || typeof ref.specifier !== 'string' || !ref.specifier
+  if (Object.keys(ref).some(key => !['specifier', 'exportName', 'from'].includes(key)) || typeof ref.specifier !== 'string' || !ref.specifier
     || typeof ref.exportName !== 'string' || !ref.exportName || /[\0\r\n?#%\\]/.test(ref.specifier)
-    || ref.specifier.startsWith('/') || /^(?:node|file|https?):/.test(ref.specifier)) fail('ROUTE_MODULE_INVALID', 'Invalid module reference.', { value });
-  return Object.freeze({ specifier: ref.specifier, exportName: ref.exportName });
+    || ref.specifier.startsWith('/') || /^[A-Za-z][A-Za-z0-9+.-]*:/.test(ref.specifier)) fail('ROUTE_MODULE_INVALID', 'Invalid module reference.');
+  if (ref.from !== undefined) {
+    try {
+      if (typeof ref.from !== 'string' || !ref.specifier.startsWith('./')) throw new Error('Only local relative modules can specify from.');
+      const url = new URL(ref.from);
+      if (url.protocol !== 'file:' || url.search || url.hash || url.username || url.password || url.pathname.endsWith('/')) throw new Error('Expected a file module URL.');
+      fileURLToPath(url);
+    } catch { fail('ROUTE_MODULE_INVALID', 'from must be an absolute file module URL paired with a ./ reference.'); }
+  }
+  return Object.freeze({ specifier: ref.specifier, exportName: ref.exportName, ...(ref.from !== undefined ? { from: ref.from as string } : {}) });
 }
 
 /** Validate and copy plugin/config output before it becomes executable application code. */
@@ -37,7 +55,7 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
   const routes = input.map((item: unknown): RouteRecord => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) fail('ROUTE_INVALID', 'Expected a route object.');
     const value = item as Record<string, unknown>;
-    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'source'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
+    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'source', 'meta'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
     if (typeof value.id !== 'string' || !value.id || value.id.startsWith('cormi:') || byId.has(value.id)) fail('ROUTE_ID_CONFLICT', `Invalid, reserved or duplicate route id: ${value.id}`);
     if (value.parentId !== undefined && (typeof value.parentId !== 'string' || !value.parentId)) fail('ROUTE_INVALID', 'Invalid parent id.', { id: value.id });
     if (value.index !== undefined && typeof value.index !== 'boolean') fail('ROUTE_INVALID', 'index must be boolean.', { id: value.id });
@@ -56,7 +74,8 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
     if (Object.keys(source).some(key => !['file', 'pluginId'].includes(key)) || Object.values(source).some(v => typeof v !== 'string')) fail('ROUTE_INVALID', 'Invalid route provenance.');
     const route: RouteRecord = Object.freeze({ id: value.id, ...(value.parentId !== undefined ? { parentId: value.parentId as string } : {}),
       ...(path !== undefined ? { path } : {}), ...(value.index === true ? { index: true } : {}),
-      ...(value.module !== undefined ? { module: moduleRef(value.module) } : {}), source: Object.freeze({ ...source }) });
+      ...(value.module !== undefined ? { module: moduleRef(value.module) } : {}),
+      ...(value.meta !== undefined ? { meta: routeMeta(value.meta) } : {}), source: Object.freeze({ ...source }) });
     byId.set(route.id, route); return route;
   });
   const children = new Map<string, RouteRecord[]>();

@@ -209,13 +209,14 @@ Mock、请求、权限、国际化与 UI 库可作为后续第一批产品插件
 - [x] P3b 建立受限源码快照、非 root Linux 容器与断网验证驱动；具体平台、实测数量和冷缓存修正见 [Linux 结果](18-p3b-results.md)。Windows、其他架构与长序列资源趋势门槛仍保留。
 - [x] P3c-prep：父 IPC 协作关闭、无 shell 的 pnpm 调用与原生 Windows 专项入口已建立；原生运行结果另记，不将 Mac/Linux 预检当作 Windows 通过，见 [协议](19-windows-validation.md)。
 - [x] P3c-prep共享回归：Mac/Linux各165项Node、10项浏览器通过；Windows专属5项定义未原生执行，见 [结果与边界](20-p3c-prep-results.md)。
-- [ ] 获取并确认真实 Windows 执行目标，再执行原生契约、完整 CLI/浏览器/包消费与交互控制台验收。
+- [ ] Windows 原生验收已按 2026-10-18 用户决定挂起；保留现有准备工作，不阻塞框架功能迭代。
+- [x] P4a 实现可复用功能插件、作者位置模块引用、公开路由 meta 和浏览器匹配读取；Mac 176 项 Node、12 项浏览器通过，tgz 消费者 44 阶段满足预期，见 [协议](21-react-features.md) 与 [结果](22-p4a-results.md)。
 - [ ] 完成 P0-A 到 P0-E 的全部退出条件：跨平台、完整依赖图诊断和长期资源趋势仍待验证。
-- [ ] 实现 P1 应用纵切及失败 fixture。
+- [x] P1 基础应用纵切已交付：CLI/config/preset、生成、React dev/build/preview 与失败 fixture；P4a 补齐独立状态功能插件示例。完整发布与长期稳定性仍单独验收。
 - [ ] 完成 P2 更新可靠性测试。
 - [ ] 完成 P3 类型、发布包与真实应用试用。
 
-P0、P1a、P1b、P1c 与 P2a 的具体交付分别记录，reference checkout 保持不变。P3a 已接入真实 tarball 消费者及临时的显式声明兼容配置，P3b 增加隔离 Linux 验证；后续优先执行 Windows 原生及其他架构测试、确认公开发布策略，并用真实小应用验证插件复用价值。完整 P2 的长序列与资源趋势门槛仍需验证，不因局部错误恢复完成就勾选整个阶段。
+P0、P1a、P1b、P1c 与 P2a 的具体交付分别记录，reference checkout 保持不变。P3a 已接入真实 tarball 消费者及临时的显式声明兼容配置，P3b 增加隔离 Linux 验证；Windows 与其他架构扩展暂缓；P4a 起优先完成可复用功能插件、标准项目创建、开发请求代理/Mock 和配置诊断，公开发布策略单独记录。完整 P2 的长序列与资源趋势门槛仍需验证，不因局部错误恢复完成就勾选整个阶段。
 
 ## 11. 仍需实验决定的问题
 

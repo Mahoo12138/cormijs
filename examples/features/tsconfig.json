@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ES2023","module":"ESNext","moduleResolution":"Bundler","jsx":"react-jsx","lib":["ES2023","DOM","DOM.Iterable"],"strict":true,"skipLibCheck":true,"noEmit":true,"allowImportingTsExtensions":true},"include":["src/**/*.ts","src/**/*.tsx","features/**/*.ts","features/**/*.tsx"]}

@@ -222,13 +222,15 @@ export function consumerManifest(kit: LocalKit, profile: 'core' | 'launcher' | '
     pnpm: { overrides: override, ...(patched ? { patchedDependencies: { [kit.compatibility.package]: '../' + kit.compatibility.patch } } : {}) } };
 }
 export const consumerNpmrc = 'auto-install-peers=false\nstrict-peer-dependencies=true\nhoist=false\nmanage-package-manager-versions=false\nignore-scripts=true\n';
-export async function createReactConsumer(root: string, kit: LocalKit, destination: string): Promise<void> {
+export async function createReactConsumer(root: string, kit: LocalKit, destination: string, templateName: 'basic' | 'features' = 'basic'): Promise<void> {
+  assert.ok(templateName === 'basic' || templateName === 'features', 'Unknown React template');
   root = await realpath(root);
-  const base = join(root, 'examples/basic');
+  const base = join(root, 'examples', templateName);
   assert.equal(await realpath(base), base, 'Example directory must not traverse links');
   const sources = await filesUnder(join(base, 'src'));
   const template = new Map([...sources].map(([path, bytes]) => ['src/' + path, bytes]));
-  for (const name of ['index.html', 'tsconfig.json']) {
+  if (templateName === 'features') for (const [path, bytes] of await filesUnder(join(base, 'features'))) template.set('features/' + path, bytes);
+  for (const name of ['index.html', 'tsconfig.json', ...(templateName === 'features' ? ['cormi.config.ts'] : [])]) {
     const file = join(base, name), info = await lstat(file);
     assert.ok(info.isFile() && !info.isSymbolicLink() && info.nlink === 1, 'Example entry must be an independent file');
     assert.ok(info.size <= 1024 * 1024, 'Example entry exceeds copy budget');
@@ -241,7 +243,10 @@ export async function createReactConsumer(root: string, kit: LocalKit, destinati
     const target = join(destination, file); await mkdir(dirname(target), { recursive: true });
     await writeFile(target, bytes, { flag: 'wx' });
   }
-  await writeFile(join(destination, 'package.json'), JSON.stringify(consumerManifest(kit, 'react'), null, 2) + '\n');
+  const manifest = consumerManifest(kit, 'react');
+  if (templateName === 'features') manifest.dependencies['@cormijs/plugin-react'] = manifest.pnpm.overrides['@cormijs/plugin-react']!;
+  await writeFile(join(destination, 'package.json'), JSON.stringify(manifest, null, 2) + '\n');
   await writeFile(join(destination, '.npmrc'), consumerNpmrc);
-  await writeFile(join(destination, 'cormi.config.ts'), "import { defineConfig } from 'cormijs';\nimport reactVite from '@cormijs/preset-react-vite';\nexport default defineConfig({presets:[reactVite],app:{base:'/demo/',server:{host:'127.0.0.1',port:0},runtime:[{id:'example',module:{specifier:'./src/runtime.tsx',exportName:'default'}}]}});\n");
+  if (templateName === 'features') await writeFile(join(destination, 'cormi.config.ts'), template.get('cormi.config.ts')!.toString().replace('port: 8002', 'port: 0'));
+  else await writeFile(join(destination, 'cormi.config.ts'), "import { defineConfig } from 'cormijs';\nimport reactVite from '@cormijs/preset-react-vite';\nexport default defineConfig({presets:[reactVite],app:{base:'/demo/',server:{host:'127.0.0.1',port:0},runtime:[{id:'example',module:{specifier:'./src/runtime.tsx',exportName:'default'}}]}});\n");
 }

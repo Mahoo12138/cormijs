@@ -1,10 +1,10 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.9。修订日期：2026-10-18。
+版本：Draft 0.10。修订日期：2026-10-18。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
-P0/P1a/P1b 保留各自历史结果。P1c 在 React/路由基础上增加受管 staging 与产物替换、路由类型、生成清单及应用 inspect/typecheck。精确协议见 [发布和检查](10-publication-and-tools.md)，已测范围见 [P1c 结果](11-p1c-results.md)。下面的完整编译阶段、完整诊断图、meta 与跨平台发布仍含目标设计，不能推定整份草案已经实现。
+P0/P1a/P1b 保留各自历史结果。P1c 在 React/路由基础上增加受管 staging 与产物替换、路由类型、生成清单及应用 inspect/typecheck。精确协议见 [发布和检查](10-publication-and-tools.md)，已测范围见 [P1c 结果](11-p1c-results.md)。下面的完整编译阶段、完整诊断图与跨平台发布仍含目标设计，不能推定整份草案已经实现。
 
 P2a 增加开发态编译恢复：PreparedApplication.development 提供状态，Web 命令通过后端无关契约转发，Vite 才实现 WebSocket 和浏览器面板。首次可修复错误保留开发服务但不伪造成功输出；一次性 build/prepare/typecheck 仍失败退出。监听就绪与应用编译状态分离，详见 [开发恢复协议](12-development-recovery.md)。
 
@@ -13,6 +13,8 @@ P3a 增加真实 tarball 与仓库外消费者验收。Node 包提供明确 engi
 P3b 将 Linux 验证作为仓库开发工具提供，不向 core 或默认 preset 加入 Docker 依赖。受限源码快照进入非 root 容器的原生文件系统；在线准备依赖后断开外部网络，执行同一套类型、Node、浏览器和真实包消费测试。通过范围以具体平台和版本记录为准，不能扩张为 Windows、全部 Linux 或生产部署保证。见 [Linux 协议](17-linux-validation.md) 与 [结果](18-p3b-results.md)。
 
 P3c-prep 区分平台逻辑准备与 Windows 原生证据。Launcher 为已建立 IPC 的父进程提供协作关闭消息，不将 Windows kill 信号当作 Unix 优雅退出；pnpm 自动化优先使用原生 Node argv。Windows 契约入口在非 Windows 明确拒绝且不运行用例，完整平台验收仍待实际 Windows 目标。见 [Windows 验证协议](19-windows-validation.md)。
+
+P4a 回到应用功能主线，Windows 原生验收按用户决定挂起。React 功能插件可声明自己的客户端模块、路由 meta 与 runtime；显式 from 通过 clientModule 绑定作者位置。defineReactFeature 只生成原生 Cordis 插件，useRouteMatches 读取浏览器路由元数据。精确接口及可运行例子见 [功能插件协议](21-react-features.md)，不要继续把旧章节中的目标接口当成唯一的当前 API。
 
 ## 1. 应该做一个什么框架
 
@@ -175,9 +177,9 @@ export default definePlugin({
 });
 ```
 
-示例中的 npm 模块仅为示意。相对 module specifier 必须结合声明插件的模块 URL 解析，不能按不稳定的当前工作目录解析。记录里只保存模块引用与可序列化数据，构建器最终生成静态 import。
+示例中的 npm 模块仅为示意。P4a 的未带 from 相对 module specifier 保留项目根语义；可复用插件使用 clientModule 显式绑定作者 file URL 并限制在作者目录子树。记录里只保存模块引用与可序列化数据，构建器最终生成静态 import；具体实现见功能插件协议。
 
-用户配置表达功能组合，而不是把 preset 内部所有子插件平铺出来。下例 React preset 尚未实现，但配置结构已按当前启动协议调整：
+用户配置表达功能组合，而不是把 preset 内部所有子插件平铺出来。React preset 已实现；下例是结构说明，可运行配置以 examples/features/cormi.config.ts 为准：
 
 ```ts
 import { defineConfig } from 'cormijs';

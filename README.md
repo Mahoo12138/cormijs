@@ -2,9 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P3c-prep Windows 兼容性准备。** 新增父进程 IPC 协作关闭、无 shell 的 pnpm 工具调用和拒绝非 Windows 冒充原生验收的测试入口。原生 Windows 尚未执行，协议与限制见 [Windows 验证](docs/19-windows-validation.md)。此前 Linux 的实测范围仍限定为 [P3b](docs/18-p3b-results.md) 的 Debian12/arm64，不以准备代码代替平台通过。
+**当前阶段：P4a 可复用 React 功能插件。** 一个插件可以拥有自己的页面、根 Provider 和公开路由元数据；应用用普通插件配置接入或停用。新增作者位置相对的 clientModule、defineReactFeature、useRouteMatches 和 [可运行示例](examples/features/cormi.config.ts)，详见 [功能插件协议](docs/21-react-features.md)。Windows 验收已按用户决定挂起，不作为当前功能开发前置条件。
 
-当前共享实现通过 macOS arm64 与 Debian12/arm64 各165项 Node、10项浏览器回归；Mac一轮、Linux两轮独立消费者各36阶段满足预期。Windows原生执行为0，非Windows预检拒绝不等于平台通过。最新证据见 [P3c-prep结果](docs/20-p3c-prep-results.md) 与 [机器记录](artifacts/p3c-prep-validation.json)；历史 [P3a](docs/16-p3a-results.md)、[P3b](docs/18-p3b-results.md) 和 [P2a](docs/14-p2a-review.md) 原始事实均保留，不累加平台重跑为新用例。
+本轮 macOS arm64 通过 **176 项 Node、12 项浏览器测试**，真实框架 tgz 消费者 44 个检查阶段满足预期，新增功能插件的类型、开发交互、停用与构建预览均有验证。最新证据见 [P4a 结果](docs/22-p4a-results.md) 与 [复核记录](artifacts/p4a-review-validation.json)。本轮未执行 Linux/Windows；历史 [P3c-prep](docs/20-p3c-prep-results.md)、[P3a](docs/16-p3a-results.md)、[P3b](docs/18-p3b-results.md) 和 [P2a](docs/14-p2a-review.md) 原始事实保留，不将此前平台通过或重复执行算作本轮新增结果。
 
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 
@@ -47,6 +47,15 @@ pnpm test:browser
 
 check 包含框架与测试的类型检查、构建和 Node 测试；typecheck:example 检查示例业务源码。browser 测试用 playwright-core 启动独立的无头浏览器，不接入个人浏览器 profile。Mac 默认使用现有 Microsoft Edge，其他环境通过 `CORMI_BROWSER_EXECUTABLE` 指定 Chromium 系可执行文件；未找到时明确失败，不下载浏览器或静默跳过。应用级 `cormi typecheck` 先 prepare，再检查业务及生成代码；即使 tsconfig 排除 .cormi，也会检查必要生成入口。`cormi inspect` 读取上次成功快照，不重新计算源文件，不表示当前源文件已验证。
 
+## 功能插件示例
+
+```sh
+pnpm build
+pnpm cormi dev --root examples/features
+```
+
+默认监听 `127.0.0.1:8002/workspace/`。状态页面、Provider 与元数据来自 `features/status/plugin.ts`；修改组件保留 Fast Refresh，配置中停用插件则撤销贡献并重启 worker。停止 dev 后可用同样 root 执行 typecheck/build/preview。`pnpm pack:local --template features` 可生成仓库外试用 kit；默认 basic 模板不变。
+
 ## Linux 验证
 
 ```sh
@@ -57,7 +66,9 @@ pnpm test:linux
 
 测试不向主机暴露服务端口、不挂载 Docker socket、不传入主机 .npmrc。容器非 root、只读输入、限制资源，结束后删除本轮容器并取回日志；镜像留作缓存，不修改已有服务。可用 `pnpm test:linux --image sha256:<完整本地镜像ID>` 复用记录的镜像。工具只接受 macOS/Linux 宿主，Windows 原生验收尚待进行。
 
-## Windows 验证准备
+## Windows 验证准备（已挂起）
+
+2026-10-18 起暂停原生 Windows 工作，保留以下入口供以后恢复；这不是本轮框架功能的验收前置条件。
 
 `pnpm test:windows --probe` 只探测真实执行环境；Mac/Linux 返回 WINDOWS_NATIVE_REQUIRED、退出 2、原生用例数 0。Windows 版 Node22.14.0 + pnpm10.6.3 下可运行 `pnpm test:windows` 的专项契约，结果仍不等于完整 Windows 支持。MahooPC 在本轮检查时隧道离线，没有未经确认安装虚拟机、切换到 WSL 或上传 CI。
 
@@ -94,7 +105,7 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 
 ## 文档与记录
 
-[架构 Draft 0.9](docs/02-architecture.md)描述完整目标，[MVP 计划](docs/03-mvp-plan.md)记录进度，[插件优先 ADR](docs/04-plugin-first-adr.md)记录边界原则。[命名和启动协议](docs/06-naming-and-launcher.md)、[路由与 React 协议](docs/08-routes-and-react.md)、[受管发布与检查](docs/10-publication-and-tools.md)和[开发恢复](docs/12-development-recovery.md)描述各层接口。历史 [P0](docs/05-p0-results.md)、[P1a](docs/07-p1a-results.md)、[P1b](docs/09-p1b-results.md)、[P1c](docs/11-p1c-results.md) 保留各阶段实际结果，不改写历史验证 JSON。
+[架构 Draft 0.10](docs/02-architecture.md)描述完整目标，[MVP 计划](docs/03-mvp-plan.md)记录进度，[插件优先 ADR](docs/04-plugin-first-adr.md)记录边界原则。[命名和启动协议](docs/06-naming-and-launcher.md)、[路由与 React 协议](docs/08-routes-and-react.md)、[受管发布与检查](docs/10-publication-and-tools.md)和[开发恢复](docs/12-development-recovery.md)描述各层接口。历史 [P0](docs/05-p0-results.md)、[P1a](docs/07-p1a-results.md)、[P1b](docs/09-p1b-results.md)、[P1c](docs/11-p1c-results.md) 保留各阶段实际结果，不改写历史验证 JSON。
 
 ## 固定依赖与参考
 
@@ -112,10 +123,10 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 
 ## 明确限制与下一步
 
-单入口 rename 不等于多文件事务或业务源码回滚。开发态可修复的路由/模块错误会保留监听会话，并通过独立 Shadow DOM 面板展示；有效修复自动清除诊断。首次失败没有当前有效输出，后续失败可以保留上次生成入口，刚修改/删除的业务模块仍可能报错。基础配置、HTML 入口和受管文件所有权错误仍需明确失败；prepare/build/typecheck 不采用容错成功策略。相对模块引用当前按项目根解析，完整的插件模块 URL 解析仍待完善。
+单入口 rename 不等于多文件事务或业务源码回滚。开发态可修复的路由/模块错误会保留监听会话，并通过独立 Shadow DOM 面板展示；有效修复自动清除诊断。首次失败没有当前有效输出，后续失败可以保留上次生成入口，刚修改/删除的业务模块仍可能报错。基础配置、HTML 入口和受管文件所有权错误仍需明确失败；prepare/build/typecheck 不采用容错成功策略。未带 from 的相对引用仍按项目根解析；功能插件可用 clientModule 显式按作者文件位置解析。完整跨包源码重载和跨盘符导入仍未实现。
 
 正常 CLI 退出移除自己的 run 缓存与锁；强杀父进程可能留下 stale 锁，不按 PID/时间猜测自动抢锁。恢复前核实相关会话及 worker 均已结束。低层编译 API 不自动取得 CLI 锁，调用者应确保单写入者。
 
 生成集包含 app.tsx、routes.d.ts 和 inspect.jsonc，文件哈希用于发现混合状态，不声称跨文件事务。typecheck 暂不支持 tsconfig solution/project references；build 转译通过不代表类型正确。发布锁和事务目录在崩溃后可能保留，人工恢复前核实所属进程及旧产物位置，不自动删锁或备份。
 
-Linux 验证限定已记录的 Debian 12 / arm64 容器与依赖组合；下一切片优先进行 Windows 原生路径、进程/信号和包消费验收，再以小型真实应用检验插件复用价值。正式发布前仍须确认项目许可、包名归属和声明兼容策略。SSR/RSC、Windows、Linux x64/musl、真机移动浏览器、断电持久性及长期资源趋势仍无通过保证。
+Linux 验证限定已记录的 Debian 12 / arm64 容器与依赖组合；Windows 原生工作已挂起。下一切片继续标准项目创建、开发请求代理/Mock 插件与配置诊断等框架功能。正式发布前仍须确认项目许可、包名归属和声明兼容策略。SSR/RSC、Windows、Linux x64/musl、真机移动浏览器、断电持久性及长期资源趋势仍无通过保证。

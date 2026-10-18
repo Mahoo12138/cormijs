@@ -2,6 +2,7 @@ import { createElement, type ComponentType, type PropsWithChildren, type ReactNo
 import { createRoot, type Root } from 'react-dom/client';
 import { createBrowserRouter, type RouteObject, type Location } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
+export { useRouteMatches, type CormiRouteMatch } from './route-matches.js';
 
 export interface RuntimePlugin {
   Provider?: ComponentType<PropsWithChildren<{ options: unknown }>>;

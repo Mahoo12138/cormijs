@@ -3,12 +3,16 @@ import type { DevelopmentState } from '@cormijs/builder';
 import { AtomicEntry, RevisionQueue, OrderedHooks, createBuildPlan, inspectionManifest, type ApplicationRequest, type PreparedApplication, type GeneratedInspection } from '@cormijs/plugin-web';
 import { pageFiles, routesFromFiles, validateRoutes, type RouteRecord } from '@cormijs/routes';
 import { realpath, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { isAbsolute, join, relative } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { transform } from 'esbuild';
 import { generateApplication, runtimeContributions, type RuntimeContribution } from './generate.js';
 import { generateRouteTypes } from './types.js';
 import { developmentDiagnostic, recoverable, repairSignature } from './development.js';
+import { clientModuleFile, inspectModule } from './modules.js';
+export { clientModule } from './modules.js';
+export { defineReactFeature, type ReactFeature } from './feature.js';
+export type { ModuleRef, RouteMeta, RouteRecord } from '@cormijs/routes';
 export { generateApplication, runtimeContributions, type RuntimeContribution } from './generate.js';
 export { generateRouteTypes } from './types.js';
 
@@ -66,16 +70,22 @@ export const reactPlugin: Plugin.Object<void> = {
         return task;
       }
 
-      const repairFiles = new Set<string>([pages]);
+      const repairFiles = new Set<string>([pages]), anchoredFiles = new Set<string>();
       const rememberModules = (items: unknown) => {
         if (!Array.isArray(items)) return;
         for (const item of items) {
-          const name = item?.module?.specifier;
-          if (typeof name === 'string' && name.startsWith('./')) repairFiles.add(name);
+          if (!item?.module) continue;
+          try {
+            const file = clientModuleFile(root, item.module);
+            if (!file) continue;
+            const local = relative(root, file);
+            if (local.startsWith('..') || isAbsolute(local)) anchoredFiles.add(file);
+            else repairFiles.add(local);
+          } catch { /* Compilation, not observation, reports invalid module declarations. */ }
         }
       };
       rememberModules(input.routes); rememberModules(input.runtime);
-      const baseRepairFiles = [...repairFiles];
+      const baseRepairFiles = [...repairFiles], baseAnchoredFiles = [...anchoredFiles];
       const setState = async (next: Omit<DevelopmentState, 'revision'>) => {
         if (signal.aborted) return;
         const published = state = Object.freeze({ ...next, revision: state.revision + 1 });
@@ -126,7 +136,7 @@ export const reactPlugin: Plugin.Object<void> = {
         let files: readonly string[] = [], error: unknown;
         try { files = input.routes !== undefined ? [] : await pageFiles(root, pages as string); } catch (cause) { error = cause; }
         // Metadata observes repair of missing runtime/explicit modules, without executing any page.
-        const key = JSON.stringify([files, await repairSignature(root, [...files, ...repairFiles]), routes.revision, runtime.revision,
+        const key = JSON.stringify([files, await repairSignature(root, [...files, ...repairFiles, ...anchoredFiles], anchoredFiles), routes.revision, runtime.revision,
           error instanceof Error ? [(error as NodeJS.ErrnoException).code, error.message] : null]);
         return { files, error, key };
       }
@@ -138,6 +148,7 @@ export const reactPlugin: Plugin.Object<void> = {
             if (observed.error) throw observed.error;
             // Retain only current/configured references, not every page ever seen by this session.
             repairFiles.clear(); for (const file of baseRepairFiles) repairFiles.add(file);
+            anchoredFiles.clear(); for (const file of baseAnchoredFiles) anchoredFiles.add(file);
             phase = 'routes';
             const routeRevision = routes.revision, runtimeRevision = runtime.revision;
             const routeOrder = routes.snapshot(), runtimeOrder = runtime.snapshot();
@@ -151,7 +162,8 @@ export const reactPlugin: Plugin.Object<void> = {
             const types = generateRouteTypes(next);
             const hookInfo = (items: readonly { id: string; owner: string; stage?: number }[]) => items.map(({ id, owner, stage }) => ({ id, owner, stage: stage ?? 0 }));
             const inspection = inspectionManifest(code, types, { renderer: 'react', mode: request.mode, base: plan.base, entry: '.cormi/app.tsx',
-              routes: next, runtime: plugins.map(({ id, module }) => ({ id, module })),
+              routes: next.map(route => ({ ...route, ...(route.module ? { module: inspectModule(root, route.module) } : {}) })),
+              runtime: plugins.map(({ id, module }) => ({ id, module: inspectModule(root, module) })),
               hooks: { routes: hookInfo(routeOrder), runtime: hookInfo(runtimeOrder) } });
             if (routes.revision !== routeRevision || runtime.revision !== runtimeRevision) throw new CormiError('CONTRIBUTIONS_CHANGED', 'Plugin contributions changed during compilation; this result cannot be published.');
             combined.throwIfAborted(); phase = 'commit'; return { code, types, inspection };
