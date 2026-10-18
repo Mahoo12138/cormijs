@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.10。修订日期：2026-10-18。
+版本：Draft 0.11。修订日期：2026-10-18。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -15,6 +15,8 @@ P3b 将 Linux 验证作为仓库开发工具提供，不向 core 或默认 prese
 P3c-prep 区分平台逻辑准备与 Windows 原生证据。Launcher 为已建立 IPC 的父进程提供协作关闭消息，不将 Windows kill 信号当作 Unix 优雅退出；pnpm 自动化优先使用原生 Node argv。Windows 契约入口在非 Windows 明确拒绝且不运行用例，完整平台验收仍待实际 Windows 目标。见 [Windows 验证协议](19-windows-validation.md)。
 
 P4a 回到应用功能主线，Windows 原生验收按用户决定挂起。React 功能插件可声明自己的客户端模块、路由 meta 与 runtime；显式 from 通过 clientModule 绑定作者位置。defineReactFeature 只生成原生 Cordis 插件，useRouteMatches 读取浏览器路由元数据。精确接口及可运行例子见 [功能插件协议](21-react-features.md)，不要继续把旧章节中的目标接口当成唯一的当前 API。
+
+P4b 增加独立项目创建器与显式开发 API 插件。create-cormi 不依赖目标项目配置或 Cordis 宿主，用本地 kit 生成可重定位应用；Mock/代理主入口为 Node HTTP handler，/vite 桥接才注入 Vite 服务，默认 preset 不强制安装。开发接口不进入 build/preview，详见 [创建与 API 协议](23-project-creation-and-dev-api.md)。
 
 ## 1. 应该做一个什么框架
 

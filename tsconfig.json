@@ -5,6 +5,8 @@
     {"path": "packages/builder"},
     {"path": "packages/plugin-web"},
     {"path": "packages/plugin-vite"},
+    {"path": "packages/plugin-dev-api"},
+    {"path": "packages/create"},
     {"path": "packages/cormi"},
     {"path": "packages/routes"},
     {"path": "packages/runtime"},

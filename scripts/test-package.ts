@@ -39,7 +39,7 @@ async function create(name: string, profile: 'core' | 'launcher' | 'react', patc
   await writeFile(join(path, '.npmrc'), consumerNpmrc); return path;
 }
 const typeArguments = ['node_modules/typescript/bin/tsc', '--noEmit', '--target', 'ES2023', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--strict', '--skipLibCheck', 'false', 'types.mts'];
-async function auditLinks(cwd: string) {
+async function auditLinks(cwd: string, standalone = false) {
   let links = 0;
   async function visit(directory: string): Promise<void> {
     for (const name of await readdir(directory)) {
@@ -49,7 +49,8 @@ async function auditLinks(cwd: string) {
     }
   }
   await visit(join(cwd, 'node_modules'));
-  assert.ok(!existsSync(join(cwd, 'pnpm-workspace.yaml')));
+  if (standalone) assert.equal(await readFile(join(cwd, 'pnpm-workspace.yaml'), 'utf8'), 'packages: []\n');
+  else assert.ok(!existsSync(join(cwd, 'pnpm-workspace.yaml')));
   const lock = await readFile(join(cwd, 'pnpm-lock.yaml'), 'utf8');
   assert.doesNotMatch(lock, /workspace:|link:.*packages\//);
   const lockFile = join(logRoot, cwd.split(sep).at(-1) + '-pnpm-lock.yaml'); await writeFile(lockFile, lock);
@@ -134,7 +135,7 @@ try {
   const sdk = await create('sdk', 'react'); const sdkManifest = consumerManifest(kit, 'react');
   Object.assign(sdkManifest.dependencies, sdkManifest.pnpm.overrides); await writeFile(join(sdk, 'package.json'), JSON.stringify(sdkManifest));
   await install('sdk-install', sdk);
-  const specifiers = kit.packages.map(item => item.name).concat('cormijs/launcher', '@cormijs/builder/development');
+  const specifiers = kit.packages.map(item => item.name).concat('cormijs/launcher', '@cormijs/builder/development', '@cormijs/plugin-dev-api/vite');
   await writeFile(join(sdk, 'types.mts'), specifiers.map((specifier, i) => `import * as p${i} from ${JSON.stringify(specifier)};void p${i};`).join('\n'));
   await execute('all-public-types', sdk, process.execPath, typeArguments);
   await writeFile(join(sdk, 'exports.mjs'), `for(const name of ${JSON.stringify(specifiers)}){await import(name); console.log(name)}`);
@@ -207,6 +208,42 @@ try {
       await page.getByRole('heading', {name:'插件已经接入。', exact:true}).waitFor();
       assert.equal(await page.locator('[data-testid="feature-label"]').innerText(), '本地工作台');
       assert.deepEqual(errors, []);
+    });
+    const createdInitial = join(temporary, 'created app 初始');
+    const creator = join(delivery, 'sdk/node_modules/.bin/create-cormi');
+    await execute('packed-creator-help', temporary, creator, ['--help'], 0, /create-cormi/);
+    await execute('packed-create-react-api', temporary, creator, [createdInitial, '--kit', delivery, '--template', 'react-api', '--name', 'created-api', '--json']);
+    assert.equal(existsSync(join(createdInitial, 'node_modules')), false);
+    assert.equal(existsSync(join(createdInitial, '.git')), false);
+    const created = join(temporary, 'created app 移动'); await rename(createdInitial, created);
+    await execute('packed-create-refuses-existing', temporary, creator, [created, '--kit', delivery, '--json'], 1, /CREATE_TARGET_EXISTS/);
+    // Move the original kit away: generated references must use their own .cormi-local files.
+    const movedKit = join(temporary, 'old kit relocated again'); await rename(delivery, movedKit);
+    assert.equal(existsSync(delivery), false); delivery = movedKit;
+    await install('created-app-install', created); await auditLinks(created, true);
+    const createdConfig = join(created, 'cormi.config.ts');
+    await writeFile(createdConfig, (await readFile(createdConfig, 'utf8')).replace('port: 8000', 'port: 0'));
+    await command('created-app-typecheck', created, 'typecheck');
+    await command('created-app-inspect', created, 'inspect');
+    await withServer(created, 'dev', async url => {
+      await page.goto(url); assert.equal(await page.title(), 'cormi app');
+      await page.getByRole('heading', {name:'开始构建你的应用。', exact:true}).waitFor();
+      await page.getByRole('button', {name:'请求 Mock', exact:true}).click();
+      await page.locator('output').filter({hasText:'Hello, cormi!'}).waitFor();
+      await page.getByRole('button', {name:'Count: 0', exact:true}).click();
+      await page.getByRole('button', {name:'Count: 1', exact:true}).waitFor();
+      assert.equal((await fetch(new URL('/mock.ts?raw',url))).status,403);
+      assert.equal((await fetch(new URL('/.cormi-local/manifest.json?raw',url))).status,403);
+      assert.equal(await page.locator('cormi-development-overlay,vite-error-overlay').count(),0);
+      assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'created-api-app.png')});
+      report.stages.push({label:'created-app-browser-mock-and-private-inputs',browser:browser.version(),pageerrors:errors.length});
+    });
+    await command('created-app-build',created,'build');
+    await command('created-app-rebuild',created,'build',0,/"replaced":true/);
+    await withServer(created,'preview',async url=>{
+      await page.goto(url);await page.getByRole('heading',{name:'开始构建你的应用。',exact:true}).waitFor();
+      const response=await fetch(new URL('/api/hello',url));assert.doesNotMatch(await response.text(),/"message":"Hello/);
+      assert.deepEqual(errors,[]);
     });
   } finally { await browser.close(); }
   report.passed = true;

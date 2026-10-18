@@ -211,6 +211,8 @@ Mock、请求、权限、国际化与 UI 库可作为后续第一批产品插件
 - [x] P3c-prep共享回归：Mac/Linux各165项Node、10项浏览器通过；Windows专属5项定义未原生执行，见 [结果与边界](20-p3c-prep-results.md)。
 - [ ] Windows 原生验收已按 2026-10-18 用户决定挂起；保留现有准备工作，不阻塞框架功能迭代。
 - [x] P4a 实现可复用功能插件、作者位置模块引用、公开路由 meta 和浏览器匹配读取；Mac 176 项 Node、12 项浏览器通过，tgz 消费者 44 阶段满足预期，见 [协议](21-react-features.md) 与 [结果](22-p4a-results.md)。
+- [x] P4b 实现独立项目创建、本地 kit 自包含交付和可选开发 Mock/HTTP 代理；Mac 209 项 Node、13 项浏览器通过，13 包消费者 56 阶段满足预期，慢响应/HEAD/创建保护复核见 [协议](23-project-creation-and-dev-api.md) 与 [结果](24-p4b-results.md)。
+- [ ] 完善应用配置派生、覆盖来源、有效值脱敏与启动诊断，不把当前 inspect 快照当作全部配置诊断。
 - [ ] 完成 P0-A 到 P0-E 的全部退出条件：跨平台、完整依赖图诊断和长期资源趋势仍待验证。
 - [x] P1 基础应用纵切已交付：CLI/config/preset、生成、React dev/build/preview 与失败 fixture；P4a 补齐独立状态功能插件示例。完整发布与长期稳定性仍单独验收。
 - [ ] 完成 P2 更新可靠性测试。

@@ -7,6 +7,7 @@
   "engines": { "node": ">=22.14.0" },
   "scripts": {
     "cormi": "node packages/cormi/dist/cli.js",
+    "create:app": "pnpm build && node packages/create/dist/cli.js",
     "build": "tsc -b",
     "typecheck": "tsc -b && tsc -p tests/tsconfig.json --noEmit",
     "test": "pnpm build && node --import tsx --test --test-concurrency=1 tests/*.test.ts",
@@ -30,6 +31,8 @@
     "@cormijs/builder": "workspace:*",
     "@cormijs/plugin-web": "workspace:*",
     "@cormijs/plugin-vite": "workspace:*",
+    "@cormijs/plugin-dev-api": "workspace:*",
+    "@cormijs/create": "workspace:*",
     "@cormijs/routes": "workspace:*",
     "@cormijs/runtime": "workspace:*",
     "@cormijs/plugin-react": "workspace:*",

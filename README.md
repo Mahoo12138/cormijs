@@ -2,9 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P4a 可复用 React 功能插件。** 一个插件可以拥有自己的页面、根 Provider 和公开路由元数据；应用用普通插件配置接入或停用。新增作者位置相对的 clientModule、defineReactFeature、useRouteMatches 和 [可运行示例](examples/features/cormi.config.ts)，详见 [功能插件协议](docs/21-react-features.md)。Windows 验收已按用户决定挂起，不作为当前功能开发前置条件。
+**当前阶段：P4b 项目创建与开发 API。** 独立 create-cormi 从已验证的本地 kit 创建自包含应用；可选 Mock/HTTP 代理以 Cordis 插件接入，dev 启用、build/preview 不提供开发接口。协议与创建示例见 [项目创建和开发 API](docs/23-project-creation-and-dev-api.md)。已有 [功能插件](docs/21-react-features.md) 保持可用，Windows 验收继续挂起。
 
-本轮 macOS arm64 通过 **176 项 Node、12 项浏览器测试**，真实框架 tgz 消费者 44 个检查阶段满足预期，新增功能插件的类型、开发交互、停用与构建预览均有验证。最新证据见 [P4a 结果](docs/22-p4a-results.md) 与 [复核记录](artifacts/p4a-review-validation.json)。本轮未执行 Linux/Windows；历史 [P3c-prep](docs/20-p3c-prep-results.md)、[P3a](docs/16-p3a-results.md)、[P3b](docs/18-p3b-results.md) 和 [P2a](docs/14-p2a-review.md) 原始事实保留，不将此前平台通过或重复执行算作本轮新增结果。
+本轮 macOS arm64 通过 **209 项 Node、13 项浏览器测试**，13 个真实 tgz 的独立消费者共 56 个检查阶段满足预期。创建后的独立应用、Mock 修改恢复、生产接口缺席和慢客户端边界均已验证。最新证据见 [P4b 结果](docs/24-p4b-results.md) 与 [最终记录](artifacts/p4b-final-validation.json)。本轮未执行 Linux/Windows；历史 [P4a](docs/22-p4a-results.md)、[P3c-prep](docs/20-p3c-prep-results.md)、[P3a](docs/16-p3a-results.md)、[P3b](docs/18-p3b-results.md) 和 [P2a](docs/14-p2a-review.md) 原始事实保留，不把平台重跑或负向步骤累加为新测试。
 
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 
@@ -70,13 +70,19 @@ pnpm test:linux
 
 2026-10-18 起暂停原生 Windows 工作，保留以下入口供以后恢复；这不是本轮框架功能的验收前置条件。
 
-`pnpm test:windows --probe` 只探测真实执行环境；Mac/Linux 返回 WINDOWS_NATIVE_REQUIRED、退出 2、原生用例数 0。Windows 版 Node22.14.0 + pnpm10.6.3 下可运行 `pnpm test:windows` 的专项契约，结果仍不等于完整 Windows 支持。MahooPC 在本轮检查时隧道离线，没有未经确认安装虚拟机、切换到 WSL 或上传 CI。
+`pnpm test:windows --probe` 只探测真实执行环境；Mac/Linux 返回 WINDOWS_NATIVE_REQUIRED、退出 2、原生用例数 0。Windows 版 Node22.14.0 + pnpm10.6.3 下可运行 `pnpm test:windows` 的专项契约，结果仍不等于完整 Windows 支持。MahooPC 在 P3c-prep 时探测为隧道离线；后续功能阶段没有继续探测或在其他机器执行原生验收，也未安装虚拟机或上传 CI。
 
 父进程需要程序化正常关闭时，可 fork CLI 并发送 `{version:1,type:'cormi:shutdown'}`，不要把 Windows child.kill('SIGTERM') 当作优雅关闭。普通控制台启动方式不变；详细作用域、退出和待测项见 [协议](docs/19-windows-validation.md)。
 
+## 创建新应用
+
+先运行 `pnpm pack:local` 获取 kit 路径，再执行 `pnpm create:app <尚不存在的新目录> --kit <kit路径> --template react-api`。创建器会把 tarball 和 Cordis 声明补丁复制到新项目 `.cormi-local/`，因此新项目不依赖原 kit 或本仓库位置。进入新目录运行 `pnpm install --ignore-scripts`、`pnpm dev`；停止 dev 后可 `pnpm typecheck`、`pnpm build`、`pnpm preview`。
+
+`react` 模板不包含开发 API，`react-api` 自带可点击的 Mock 请求示例。创建命令不自动安装、不初始化 Git、不覆盖已有目录。当前公共包仍未发布，--kit 是明确的本地交付约束，不是假装 npm create 已可以公开使用。新项目的 pnpm-workspace.yaml 防止外层 workspace 自动接管；下文旧式 kit/app 试用仍需整个 kit 移出框架仓库。
+
 ## 仓库外试用
 
-`pnpm pack:local` 生成全新的 `.cache/cormi-kit-<uuid>`，包含 11 个真实 tgz、声明兼容补丁、上游许可、哈希清单和独立 app 示例。**将整个 kit 移出本 workspace 后，再进入 app 安装**，不要在仓库内的 kit/app 执行 pnpm install。也可以 `pnpm pack:local --out <尚不存在的外部目录>` 直接指定目的地。
+`pnpm pack:local` 生成全新的 `.cache/cormi-kit-<uuid>`，包含 13 个真实 tgz、声明兼容补丁、上游许可、哈希清单和独立 app 示例。**将整个 kit 移出本 workspace 后，再进入 app 安装**，不要在仓库内的 kit/app 执行 pnpm install。也可以 `pnpm pack:local --out <尚不存在的外部目录>` 直接指定目的地。
 
 试用环境固定 pnpm 10.6.3，先 `pnpm install --ignore-scripts`，然后 `pnpm exec cormi typecheck`、`pnpm dev`。build/preview 先停止 dev 再执行。包不包含第三方依赖缓存，首次安装可能需要网络。`pnpm test:package` 自动创建带空格/中文路径的仓库外消费者，离线使用本机下载缓存独立安装，验证 Node/类型/CLI 和实际浏览器行为；缺少缓存或浏览器时明确失败。
 
@@ -93,6 +99,8 @@ packages/
 ├── routes/                  # 路由 IR、约定扫描与冲突验证
 ├── plugin-web/              # Web consumer、应用命令、OrderedHooks、生成队列
 ├── plugin-vite/             # builder 与 vite 服务的 Cordis provider
+├── plugin-dev-api/          # 可选 Node Mock/HTTP 代理；/vite 为专属桥接
+├── create/                  # create-cormi 独立项目创建器
 ├── plugin-react/            # application 编译服务与 react 贡献入口；无 Vite
 ├── runtime/                 # 仅浏览器 React/Router 生命周期
 ├── plugin-react-vite/       # React 原生 Vite 集成和客户端边界
@@ -105,7 +113,7 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 
 ## 文档与记录
 
-[架构 Draft 0.10](docs/02-architecture.md)描述完整目标，[MVP 计划](docs/03-mvp-plan.md)记录进度，[插件优先 ADR](docs/04-plugin-first-adr.md)记录边界原则。[命名和启动协议](docs/06-naming-and-launcher.md)、[路由与 React 协议](docs/08-routes-and-react.md)、[受管发布与检查](docs/10-publication-and-tools.md)和[开发恢复](docs/12-development-recovery.md)描述各层接口。历史 [P0](docs/05-p0-results.md)、[P1a](docs/07-p1a-results.md)、[P1b](docs/09-p1b-results.md)、[P1c](docs/11-p1c-results.md) 保留各阶段实际结果，不改写历史验证 JSON。
+[架构 Draft 0.11](docs/02-architecture.md)描述完整目标，[MVP 计划](docs/03-mvp-plan.md)记录进度，[插件优先 ADR](docs/04-plugin-first-adr.md)记录边界原则。[命名和启动协议](docs/06-naming-and-launcher.md)、[路由与 React 协议](docs/08-routes-and-react.md)、[受管发布与检查](docs/10-publication-and-tools.md)和[开发恢复](docs/12-development-recovery.md)描述各层接口。历史 [P0](docs/05-p0-results.md)、[P1a](docs/07-p1a-results.md)、[P1b](docs/09-p1b-results.md)、[P1c](docs/11-p1c-results.md) 保留各阶段实际结果，不改写历史验证 JSON。
 
 ## 固定依赖与参考
 
@@ -115,7 +123,7 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 | Vite / React Vite plugin | 7.3.2 / 5.1.4 |
 | React / React DOM / React Router | 19.3.1 / 19.3.1 / 7.18.2 |
 | TypeScript / tsx / esbuild | 5.9.3 / 4.23.15 / 0.28.2 |
-| playwright-core / 实测 Edge | 1.58.2 / 155.0.4283.45 |
+| playwright-core / 本轮实测 Edge | 1.58.2 / 155.0.4283.62 |
 
 直接依赖固定版本，间接依赖使用 pnpm-lock.yaml；以上不表示最新版本。Cordis npm 声明文件仍使用仅声明的 pnpm patch，不修改运行时 JavaScript；该补丁已提供本地 pnpm 显式试用配置，但透明公共分发问题尚未解决，包保持 private，见 [补丁说明](patches/README.md)。
 
@@ -129,4 +137,4 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 
 生成集包含 app.tsx、routes.d.ts 和 inspect.jsonc，文件哈希用于发现混合状态，不声称跨文件事务。typecheck 暂不支持 tsconfig solution/project references；build 转译通过不代表类型正确。发布锁和事务目录在崩溃后可能保留，人工恢复前核实所属进程及旧产物位置，不自动删锁或备份。
 
-Linux 验证限定已记录的 Debian 12 / arm64 容器与依赖组合；Windows 原生工作已挂起。下一切片继续标准项目创建、开发请求代理/Mock 插件与配置诊断等框架功能。正式发布前仍须确认项目许可、包名归属和声明兼容策略。SSR/RSC、Windows、Linux x64/musl、真机移动浏览器、断电持久性及长期资源趋势仍无通过保证。
+Linux 验证限定已记录的 Debian 12 / arm64 容器与依赖组合；Windows 原生工作已挂起。项目创建与开发 Mock/HTTP 代理现已交付；下一切片优先完善配置派生、覆盖来源与诊断能力。正式发布前仍须确认项目许可、包名归属和声明兼容策略。SSR/RSC、Windows、Linux x64/musl、真机移动浏览器、断电持久性及长期资源趋势仍无通过保证。

@@ -19,6 +19,12 @@ importers:
       '@cormijs/core':
         specifier: workspace:*
         version: link:packages/core
+      '@cormijs/create':
+        specifier: workspace:*
+        version: link:packages/create
+      '@cormijs/plugin-dev-api':
+        specifier: workspace:*
+        version: link:packages/plugin-dev-api
       '@cormijs/plugin-react':
         specifier: workspace:*
         version: link:packages/plugin-react
@@ -115,6 +121,18 @@ importers:
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
+
+  packages/create: {}
+
+  packages/plugin-dev-api:
+    dependencies:
+      '@cormijs/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@cormijs/plugin-vite':
+        specifier: workspace:*
+        version: link:../plugin-vite
 
   packages/plugin-react:
     dependencies:

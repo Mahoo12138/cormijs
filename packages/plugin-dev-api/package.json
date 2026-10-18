@@ -1,0 +1,9 @@
+{
+  "name":"@cormijs/plugin-dev-api","version":"0.0.1","private":true,"type":"module",
+  "exports":{".":{"types":"./dist/index.d.ts","import":"./dist/index.js"},"./vite":{"types":"./dist/vite.d.ts","import":"./dist/vite.js"}},
+  "files":["dist","src"],"engines":{"node":">=22.14.0"},
+  "dependencies":{"@cormijs/core":"workspace:*"},
+  "peerDependencies":{"@cormijs/plugin-vite":"workspace:*"},
+  "peerDependenciesMeta":{"@cormijs/plugin-vite":{"optional":true}},
+  "devDependencies":{"@cormijs/plugin-vite":"workspace:*"}
+}

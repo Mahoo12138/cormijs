@@ -144,7 +144,7 @@ export const vitePlugin: CordisPlugin.Object<void> = {
           strictPort: true, open: false, fs: { strict: true, allow: [root],
             deny: ['.env', '.env.*', '*.{crt,pem,key,p12,pfx,cer,der}', '.npmrc', '.yarnrc.yml', '**/.git/**',
               '**/.cormi/run-*/**', '**/.cormi.lock/**', '**/cormi.config.*', '**/.cormi/inspect.jsonc', '**/.cormi/*.d.ts',
-              '**/.cormi-publish-*/**', '**/.cormi-publish.lock/**',
+              '**/.cormi-publish-*/**', '**/.cormi-publish.lock/**', '**/.cormi-local/**',
               ...(plan.serverOnlyFiles ?? []).map(file => file.split(sep).join('/').replace(/[?*\[\]{}()!+@]/g, '\\$&'))],
           } },
         preview: { host: plan.server?.host ?? '127.0.0.1', port: plan.server?.port ?? 0, strictPort: true, open: false },
