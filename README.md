@@ -2,9 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P4b 项目创建与开发 API。** 独立 create-cormi 从已验证的本地 kit 创建自包含应用；可选 Mock/HTTP 代理以 Cordis 插件接入，dev 启用、build/preview 不提供开发接口。协议与创建示例见 [项目创建和开发 API](docs/23-project-creation-and-dev-api.md)。已有 [功能插件](docs/21-react-features.md) 保持可用，Windows 验收继续挂起。
+**当前阶段：P4c 配置派生与来源诊断。** 新增可选 applicationConfigPlugin、受管 deriveConfig 和 cormi config --for dev|build；现有 inspect 仍读取旧生成快照。协议见 [配置来源](docs/25-configuration-provenance.md)。下一项明确为真实 [React Admin 模板迁移](docs/26-admin-migration.md)，已拉取固定上游源码，尚未将迁移计作通过；Windows 继续挂起。
 
-本轮 macOS arm64 通过 **209 项 Node、13 项浏览器测试**，13 个真实 tgz 的独立消费者共 56 个检查阶段满足预期。创建后的独立应用、Mock 修改恢复、生产接口缺席和慢客户端边界均已验证。最新证据见 [P4b 结果](docs/24-p4b-results.md) 与 [最终记录](artifacts/p4b-final-validation.json)。本轮未执行 Linux/Windows；历史 [P4a](docs/22-p4a-results.md)、[P3c-prep](docs/20-p3c-prep-results.md)、[P3a](docs/16-p3a-results.md)、[P3b](docs/18-p3b-results.md) 和 [P2a](docs/14-p2a-review.md) 原始事实保留，不把平台重跑或负向步骤累加为新测试。
+本轮 macOS arm64 通过 **222 项 Node、14 项浏览器测试**，13 个真实 tgz 的独立消费者共 57 个检查阶段满足预期。配置来源、实际 staging 页面/构建与诊断不改写生成快照均已验证。最新证据见 [P4c 结果](docs/27-p4c-results.md) 与 [机器记录](artifacts/p4c-validation.json)。本轮未执行 Linux/Windows，Admin 仅完成选型与源码核对；历史 [P4b](docs/24-p4b-results.md)、[P4a](docs/22-p4a-results.md)、[P3b](docs/18-p3b-results.md) 等原始事实保留，不把平台重跑或负向步骤累加为新测试。
 
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 
@@ -46,6 +46,15 @@ pnpm test:browser
 ```
 
 check 包含框架与测试的类型检查、构建和 Node 测试；typecheck:example 检查示例业务源码。browser 测试用 playwright-core 启动独立的无头浏览器，不接入个人浏览器 profile。Mac 默认使用现有 Microsoft Edge，其他环境通过 `CORMI_BROWSER_EXECUTABLE` 指定 Chromium 系可执行文件；未找到时明确失败，不下载浏览器或静默跳过。应用级 `cormi typecheck` 先 prepare，再检查业务及生成代码；即使 tsconfig 排除 .cormi，也会检查必要生成入口。`cormi inspect` 读取上次成功快照，不重新计算源文件，不表示当前源文件已验证。
+
+## 配置来源
+
+```sh
+pnpm cormi config --root examples/features --for dev --json
+pnpm cormi config --root examples/features --for build --mode staging --json
+```
+
+该命令报告当前 preset/user/derive 的字段赋值来源，未知值与 runtime options 默认不展示；不执行目标 build、不改写生成快照。它仍要求配置求值、插件初始化和项目写锁，且不包含构建器内部默认值的完整来源。示例的 staging base 由普通 Cordis 配置派生插件调整为 /staging/。
 
 ## 功能插件示例
 
@@ -137,4 +146,4 @@ core 的物理独立消费者测试验证没有 Vite 仍可运行；React compil
 
 生成集包含 app.tsx、routes.d.ts 和 inspect.jsonc，文件哈希用于发现混合状态，不声称跨文件事务。typecheck 暂不支持 tsconfig solution/project references；build 转译通过不代表类型正确。发布锁和事务目录在崩溃后可能保留，人工恢复前核实所属进程及旧产物位置，不自动删锁或备份。
 
-Linux 验证限定已记录的 Debian 12 / arm64 容器与依赖组合；Windows 原生工作已挂起。项目创建与开发 Mock/HTTP 代理现已交付；下一切片优先完善配置派生、覆盖来源与诊断能力。正式发布前仍须确认项目许可、包名归属和声明兼容策略。SSR/RSC、Windows、Linux x64/musl、真机移动浏览器、断电持久性及长期资源趋势仍无通过保证。
+Linux 验证限定已记录的 Debian 12 / arm64 容器与依赖组合；Windows 原生工作已挂起。项目创建、开发 Mock/HTTP 代理和应用配置来源链路现已交付；下一切片进入固定版本 Material Kit React Admin 迁移，用真实页面和交互检验框架，不继续以抽象完备性拖延应用试用。正式发布前仍须确认项目许可、包名归属和声明兼容策略。SSR/RSC、Windows、Linux x64/musl、真机移动浏览器、断电持久性及长期资源趋势仍无通过保证。

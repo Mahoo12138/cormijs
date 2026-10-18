@@ -155,6 +155,9 @@ try {
   await auditLinks(app);
   report.stages.push({ label: 'relocated-clean-install', oldLocationExists: false, reusedNodeModules: false, lockUnchanged: true });
   await command('react-prepare', app, 'prepare'); await command('react-typecheck', app, 'typecheck'); await command('react-inspect', app, 'inspect', 0, /last-successful-generation/);
+  const generatedBeforeConfig = await readFile(join(app, '.cormi/inspect.jsonc'));
+  await execute('packed-config-build-provenance', app, join(app, 'node_modules/.bin/cormi'), ['config', '--for', 'build', '--json'], 0, /current-config-evaluation/);
+  assert.equal(sha256(await readFile(join(app, '.cormi/inspect.jsonc'))), sha256(generatedBeforeConfig));
   const executablePath = process.env.CORMI_BROWSER_EXECUTABLE ?? '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge';
   assert.ok(existsSync(executablePath), 'Set CORMI_BROWSER_EXECUTABLE to an installed Chromium executable; browser checks are required');
   const { chromium } = await import('playwright-core');

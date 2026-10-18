@@ -1,5 +1,5 @@
 import { definePreset, type Preset } from 'cormijs';
-import { webPlugin, applicationCommandsPlugin, inspectionPlugin } from '@cormijs/plugin-web';
+import { webPlugin, applicationCommandsPlugin, inspectionPlugin, applicationConfigPlugin } from '@cormijs/plugin-web';
 import { vitePlugin } from '@cormijs/plugin-vite';
 import { reactPlugin } from '@cormijs/plugin-react';
 import { reactVitePlugin } from '@cormijs/plugin-react-vite';
@@ -9,6 +9,7 @@ import { typescriptPlugin } from '@cormijs/plugin-typescript';
 export const reactVite: Preset = definePreset({
   id: 'cormi:react-vite',
   plugins: [
+    { id: 'application-config', plugin: applicationConfigPlugin },
     { id: 'web', plugin: webPlugin },
     { id: 'application-commands', plugin: applicationCommandsPlugin },
     { id: 'react', plugin: reactPlugin },

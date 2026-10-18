@@ -1,0 +1,900 @@
+{
+  "phase": "P4c",
+  "started_at": "2026-10-18T13:57:44.162342+00:00",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "node": "v22.14.0",
+  "base_commit": "ad61355bb1986013128faa5488528c6ad5428140",
+  "source_sha256": {
+    ".gitignore": "3cca158907938dbe9ddc2e20cd5ee0751a00c024dbef8ddef25adf64cd90be87",
+    ".npmrc": "d089b05fc08a36af3a3eb500ffd9d2087c0c2517ee6a820980377dc95bede2f9",
+    ".nvmrc": "c989649ac5c541692f22f2e41f5fbc34927c02bf1644e5dcca46bb4c88281f87",
+    "examples/basic/cormi.config.ts": "4e0d200067661fa8cb373725d3886a6e4f60ce9f208c183b715e24ea675983c4",
+    "examples/basic/index.html": "0c205f840d5f7f8691addc6a22b891f63a9e59ea618dcd720cffabadca59db18",
+    "examples/basic/package.json": "049f13856347e194b61f58b46a419706e20e6426ae00b61758971d8dd11c6f41",
+    "examples/basic/src/pages/_layout.tsx": "bbac7a9d61194cbc784331096a3f00b21767590d304bfbfc9a0247ced42aea4f",
+    "examples/basic/src/pages/about.tsx": "6873f7250c512db26f9cda180d947fd5bb4d443992d85f21f233add0a5f28f5e",
+    "examples/basic/src/pages/docs/[...rest].tsx": "701fa4ae30b1d3b2373c297ed54eda3d9494e13ff62f6af9de92eef66e36ca68",
+    "examples/basic/src/pages/index.tsx": "65a53613b6d708da153e6e9abea837468480cb3e354f780ffe6822fc09e51c87",
+    "examples/basic/src/pages/users/[id].tsx": "a4f06c7b6718da0e49dadb71412a07bb04f2a436c46b6611f1772f2660056a5c",
+    "examples/basic/src/pages/users/_layout.tsx": "85f38314daebd7034a8313012c91d8fa2a82a1f27a123b8733def4dfa69a9b2c",
+    "examples/basic/src/runtime.tsx": "23b4e85a742ac8ee8e947ad2d26b920d09e442423730cd97f2ace2168fd38005",
+    "examples/basic/src/style.css": "eaa53d86ef42901a32ed45075c984a6f928b04fa77a82ea621b7fda7458e9bd3",
+    "examples/basic/tsconfig.json": "2980d7a034b338a2d97ce55ad1cea058f9ecf79bb259f51cbb7d6895368d07ba",
+    "examples/features/configuration.ts": "7d7b84fa634380de9472efe396c10043f56cb2d4424dfedd7acb7b5af30aadea",
+    "examples/features/cormi.config.ts": "5a1caf725afcb9a3ad8857b0b11ea65a785c59070701f38c4bcdb77109105b3f",
+    "examples/features/features/status/client/Page.tsx": "096f772facdbd9e9adecd23de8dda6a97c2727e62ac5912bf75f08957109d94b",
+    "examples/features/features/status/client/context.ts": "adbc063fc149f633f08b3e744265d5b74554671a08fb0926ee2da7422c384fb0",
+    "examples/features/features/status/client/runtime.tsx": "5c70cfae0c3144e07aef23eea917ccf52a4cd37a9de902b3763863b1352e4e21",
+    "examples/features/features/status/plugin.ts": "6d8d47c394146bb9fd94e09ad224f86956e73a72b344a2a5b5f7a74958e46e48",
+    "examples/features/index.html": "15745afc9dadd0cb93f19a1b4b1281110932c287a0b8429aae3ca8d3827f4014",
+    "examples/features/src/Home.tsx": "6cff340535adf28d0b19be1bbf69b084dcdd728ae46855a65cbcc05150434b78",
+    "examples/features/src/Layout.tsx": "8f1cd8786e9b9515b6b61bb93085ba08a932247ab747e25297828a667185812a",
+    "examples/features/src/style.css": "5f1a421f0c22e773cd8e07d99425e66c832f9910479f16d4f59e75a9d56bc2a0",
+    "examples/features/tsconfig.json": "aee809b66a418957a0fd5640ba7ecf514927c31a0ecfcea08601346401bab0c7",
+    "examples/p0/cormi.config.ts": "095812bd25b9bcaa8c3074a9e73f70b75678bca4d6a647fa8f7f45d3acdf286b",
+    "examples/p0/index.html": "977f68e405034fd9cc89fea8904d253e28f65b79062a3e66e29f4d61819394bd",
+    "examples/p0/main.ts": "7b106e81fe362567b22af1c792dac2b3a73f7eb5564298c01bb745455cb6f33c",
+    "examples/p0/run.mjs": "651796f3f94ca4787e5f6c3fc4bbd38467c6db2dfc1c36108a8da347a76a2874",
+    "package.json": "bc3c180b5e97027c691ec39642a73b81a749ef7d60aae1a808f379226f972116",
+    "packages/builder/package.json": "9245887a3a0167952041e4b7286eca08d03834a81b48cc381fbb18652e715e80",
+    "packages/builder/src/development.ts": "990ad6fba4ad4fc7c1e1763b7548fbe39cc04ab77d20dfbcbf83fb39bafbcbd8",
+    "packages/builder/src/index.ts": "1f4517f3bdd2d9e663460b32bfb595532ba8413d24875e838f32caee8f31763f",
+    "packages/builder/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+    "packages/core/package.json": "3fa528f98bdaf408531384868936adbeaf07448570420fb6da2c6e3291711462",
+    "packages/core/src/commands.ts": "f928f0cb5f8a222435e920844c8b952bdf0c12fbb73dfdbea79fecc783addfeb",
+    "packages/core/src/config-data.ts": "a9d7a73168c9e45671eec261b2dd017f105947d617d7b849efaad1156bf7aa48",
+    "packages/core/src/index.ts": "f7a5e8e7871f90d42e3e9650a8e03a3080fa7300521637a75f3b8849f0ca46c4",
+    "packages/core/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+    "packages/cormi/package.json": "0b8e34384674057913d5d395658721d1b28316b604d8107a689c930f97637c7f",
+    "packages/cormi/src/cli.ts": "f1f09888f1228708960fd1351178ece481ea6564b17d81708eee0497c7b622f1",
+    "packages/cormi/src/commands.ts": "f29e0b494fe270188b14322bff1d5aa8de73f54d740c373ff8b7cadc4736cd6d",
+    "packages/cormi/src/compiler.ts": "81fd22c57b23857780f7e1b78186828bc21ed53e319d1e9a39d4b524007d01be",
+    "packages/cormi/src/config.ts": "7b14b15c95218ba181f2434586df7f588da56b09ca07fe01f88a54379f7f3c05",
+    "packages/cormi/src/control.ts": "129b30c71602df64137c65ed6de49e03f8870dcc07c19cbdbc2475e64b5795ad",
+    "packages/cormi/src/index.ts": "410185de6b0437666d3dcdd36539486efb856b0502fcd12318aa8a8030b8e324",
+    "packages/cormi/src/inputs.ts": "27d138488a93ac09070e7d07c850310f4c72c485f64e92b58e5abf1974f41d4e",
+    "packages/cormi/src/lock.ts": "3e5f6e3160ab21e86dc7da891f23859c8c237c85ac5cf79f31253b24686fde98",
+    "packages/cormi/src/protocol.ts": "98195bbc71654404e78055ce2daf66472c8e9b5fc62414c1d1c817cf1b0077a7",
+    "packages/cormi/src/supervisor.ts": "2d92c794d57d4fb482dddf971ad522aa3351d3243709bf275f5cce5cc965d795",
+    "packages/cormi/src/worker.ts": "e5f6ab1e8d784fb7ae2ff0e9056cba5146c4e43be3291d0e4a2aa4f562c15f4c",
+    "packages/cormi/tsconfig.json": "179d61257f38a628a52cb296e104d16e9f0b066b52389733bea08b179f4fe983",
+    "packages/create/package.json": "3c4b522275107e59435dd1217c3faa5ce34d5a49a700bc94bea5844f494c0218",
+    "packages/create/src/cli.ts": "4c4bede246f2f6bd5fec3627f8dc3028465253c770da5fc968e83d63fa22e321",
+    "packages/create/src/index.ts": "975460daf314010befdf7986cc86f4a67d1f626dceaed7e0297324aab85f7e76",
+    "packages/create/src/templates.ts": "5b6f3dc0863cd268ca34d073a48a6ef37de5d779ae6dde23cf797498abc4e652",
+    "packages/create/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+    "packages/plugin-dev-api/package.json": "3190b2155fe6975e18976ecc979e2f02955b452cc66d38e35bdf703a2fee7ee8",
+    "packages/plugin-dev-api/src/index.ts": "e3276e876831360e291590932d2780cc6060443e3e0859df5a3cc43c34288c08",
+    "packages/plugin-dev-api/src/vite.ts": "b64a5b7859dcbce72d0b5ca63d89aa2e049d2786d152d1d0030f37f9804b24cc",
+    "packages/plugin-dev-api/tsconfig.json": "b92eb21a0762cd15406863e2a5f07c0622c4faf1e5e786b98a0815efab8143c3",
+    "packages/plugin-react-vite/package.json": "84816ade6202cc56974bb9248f42be1ad3ef99a2aee6a3391ffc4fd642c961dc",
+    "packages/plugin-react-vite/src/index.ts": "1cd03688bdc6285968964b5a9b22e3dc1af67c94056ea4424a5263d4acfa479d",
+    "packages/plugin-react-vite/tsconfig.json": "6dff251ba0e8067dc31ef48390d0615fd7a4f8e17aa7190b9d0be4fe602459a5",
+    "packages/plugin-react/package.json": "435c75b26a172e365c15fa369746407985f9e26240dc6780498b14ebcb3388a2",
+    "packages/plugin-react/src/development.ts": "8d425eff85166c67a4d9fdaea80a57069c23644b22f8b30cb7521ac1fb39a830",
+    "packages/plugin-react/src/feature.ts": "c09e46957f16afde516d74a5bf37050634cf95eabee77d343790694786033e46",
+    "packages/plugin-react/src/generate.ts": "9d84ed1a3c123941a7400bfeec2191ebc432a108d16d7e233bdb037e1d3ce01d",
+    "packages/plugin-react/src/index.ts": "66746168b642c142c15df0ce41fb8d2167b500922c6b3636d388a3d79ef07968",
+    "packages/plugin-react/src/modules.ts": "44e70c94baf649aac8c5279d295449d343e0a438d5e64beb616a58c29ec01082",
+    "packages/plugin-react/src/types.ts": "8a9e5bcee8b5a58a7e0f333f5d54a243735f99bee5d4d7058b26cacb9901493c",
+    "packages/plugin-react/tsconfig.json": "66f54d79216879f555b0ff20f08676fd463819c4059992f30276361e8e346d34",
+    "packages/plugin-typescript/package.json": "8145438f128372a9ab4f38166ee348bfd878c32abd0a90a68c11f53cbc266a30",
+    "packages/plugin-typescript/src/index.ts": "4b9e12755825fb3c51a2a0277439773009d4d2edcd75ce4d1dda8e8b450314c4",
+    "packages/plugin-typescript/tsconfig.json": "e5595878a3ee9605f089f9d1387e097dcc01531cffdbcaa1520f4440d4d4a78f",
+    "packages/plugin-vite/package.json": "de1005a5d44637bdeac1454fcec87c51e088aea9f5a0dfb9fdc60d089d7f7031",
+    "packages/plugin-vite/src/development-client.ts": "cbcb5d03ec2e61dc5690ff4491a73933bd9eb88464ae50361b50750c37fd5133",
+    "packages/plugin-vite/src/development.ts": "c603f305d940c27ad976b3fafdea319c13979d0e8e759168760f173ed4083119",
+    "packages/plugin-vite/src/index.ts": "bec91c2d3ea8f7c25d7cae893f3b9326d749a5c4a41558936a9c5c9adc9e8ac2",
+    "packages/plugin-vite/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+    "packages/plugin-web/package.json": "5e44ddd9b5af7fb9a336366142bda16ae7cd0ad30a903cb345684cc6e4894782",
+    "packages/plugin-web/src/application.ts": "034887f7bf0dd76fe48857e3db0dad926af373d9155872e6ebcc1b9720638c46",
+    "packages/plugin-web/src/commands.ts": "263f457961f86a051f7ce09496035c7574dc4b71d0942fbcf22a9e115303024c",
+    "packages/plugin-web/src/configuration.ts": "6159ce9b616eedadc7142b4a6593c360659047da697b926900a1c4ce0466cf02",
+    "packages/plugin-web/src/generation.ts": "6c3ca0f365717c871ecb09b6151f5fb37aa34a7c4077b809d30d42d289d6c1cd",
+    "packages/plugin-web/src/index.ts": "fc608077ee4e0ec8595996b179894f0327f7811c908f200bd995fa868ab8fa14",
+    "packages/plugin-web/src/inspection.ts": "081be205c89cb5f430d663e3691c66038fcfac03aa10edbdc8e3e745ef7772fa",
+    "packages/plugin-web/src/ordered-hooks.ts": "8bfc9924337b5cc758bf00c3efa0e241945254f6902db2e78c38229d0ac881c7",
+    "packages/plugin-web/src/publication.ts": "50244955eb8f880128b37c49c75a4169a390e6517dc991e72fe8341357cd492e",
+    "packages/plugin-web/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+    "packages/preset-react-vite/package.json": "017381e90b80dcd3fce68d427c748de960c3f06f5a2d7e321806cb6500f5935d",
+    "packages/preset-react-vite/src/index.ts": "07fd9988e12386030189abff43d68884041e0e4205444506b2ad1935fca653fb",
+    "packages/preset-react-vite/tsconfig.json": "3c37c029213990f8b3f91b0b6bbdc043e764e6e62c6722722dbbf63ffd85c4a0",
+    "packages/routes/package.json": "aeef2670ddabaea9be5eb8f39a0457f8aa41eac8fe1187bd4198379451c71bc0",
+    "packages/routes/src/index.ts": "5a32cfb654a7c9080e3ebdc5636ddc70d5b6215cb743887615a55606f126eb41",
+    "packages/routes/src/json.ts": "e8b235572bf965132f0a7fbdedfc442c6a958ee95a8062607453d0a7895f7ff0",
+    "packages/routes/tsconfig.json": "179d61257f38a628a52cb296e104d16e9f0b066b52389733bea08b179f4fe983",
+    "packages/runtime/package.json": "4ae9491115adb2dde225314dde154e43ce62a157ca4610eea445888f5018b0bf",
+    "packages/runtime/src/index.tsx": "113f8f8304f0caedc818ab7713ba635342a2c501e2cd07ab5d0ed163e2f84e45",
+    "packages/runtime/src/route-matches.ts": "cd208e8753ede98a5a56503f4f248d5fe1dd90e3e3a252bda07195d58b6f982d",
+    "packages/runtime/tsconfig.json": "e409e3b42ce86c6d10b739e22d0c8fc049d9a1b4ab816fbb83a739de9eba0dc7",
+    "patches/CORDIS-LICENSE": "034fb52b1d57360ecbae6cb1632a88f86fd7c3d3f5631a5f082710203dda0be7",
+    "patches/README.md": "0c3484f890bcf1f5c4d2c13aa8eaf2253c2d41467be653de20b8d65dde04b3ed",
+    "patches/cordis@4.0.0-rc.11.patch": "11a745abd66488d5cba00b7388beebaf8a70bc0fdd6e998608e511f77358228e",
+    "pnpm-lock.yaml": "b135002b38f12052bcef11b420ff945460eff9ef7789afe95ff8a0688e5f8251",
+    "pnpm-workspace.yaml": "995d2de1cd963f1aaa4dae859bd504d60bbd8b3c5eb4358916a87aa77c671904",
+    "scripts/linux/Dockerfile": "ad44353d111c27e075871d146d5bcfbf2e212abd2b2d0a0499fdf826d651b5a1",
+    "scripts/linux/snapshot.ts": "f87610a332247870ebe0677998988f4a05e513567f0636f6b27bba48d7fc1eb9",
+    "scripts/linux/verify.ts": "c8591836e2a5f733545b3f79f9178f3325e131d50ce65f7c58b705b5a951c915",
+    "scripts/linux/warm-cache.ts": "660311b13595be15efc747d9f54fe7abf2e58271e776c4e08a7136c64b0401aa",
+    "scripts/pack-local.ts": "8248afa00ebe523755544b355287bf67df98076f5e2c6e0668308827e0c1bd17",
+    "scripts/packaging.ts": "f6b233174edfad634be0efb402ac1faab64164b7abd1fd3c836022891509ea07",
+    "scripts/test-linux.ts": "bdf97d0aabb05ee3c92634a7ba3a6577cddf403ee53c54fdfc80adc4286a380d",
+    "scripts/test-package.ts": "850b383f71f0590e873a0b1a6be78961e64de64a626826c895d4bd675b65adce",
+    "scripts/test-windows.ts": "eb3c741166c8c9fa0993c5bc3adbc0c721a18669d4020e2424116a26e6d1eab6",
+    "scripts/tool-command.ts": "ba8755a70d00aa0e98fe80f9b860fa76cb3522e8672f07c4d230153d824a35ee",
+    "scripts/windows/environment.ts": "2f7f4bce1dc9efdbcadda8c9ac7ad21107d39367a2f40cb8f58561e1551c6377",
+    "tests/app-tools.test.ts": "84767164b7baa2c94fe353a1ad1d4e701455596d463dc1697d932c0e054278d9",
+    "tests/application-commands.test.ts": "a676b5a5f21f1f1e5f97f96dcc21d0b8b8f01f58e680ced3ee6b26706b5eaa9f",
+    "tests/browser/configuration.test.ts": "c9a0c4398980e70c7c937d2f05445b2bc9d46d208205bec0c45b983c7335094c",
+    "tests/browser/dev-api.test.ts": "eb04362d9437502efb6599cde823862bc63a1ad82be542de7ea34694559f338a",
+    "tests/browser/development.test.ts": "738eae072993e76e933e31efa6d35cf468500ce478430935bf0b9097776045b9",
+    "tests/browser/features.test.ts": "6e8d2ad4c7beea4cb98749314fdbe0517942e7ac1259edbee77cf47bb46d2f7b",
+    "tests/browser/react.test.ts": "7e2d3871a3561138d641c2ebbd0b7f63d40599ac5713f3d16449f9d0190dbe9a",
+    "tests/commands.test.ts": "c0a7f39b11a9b5d757b40073013df1cc941f8c0da5162cccb48e8fbd5a04aec6",
+    "tests/config.test.ts": "fd9beab2d662977c5425276e653f7673a5ee83c142603a94627a0e7b5c251455",
+    "tests/configuration.test.ts": "16108642d660fb149ebab460a4666161f045bef64b5f0ec972fd7ace3933ecf3",
+    "tests/core.test.ts": "60f68f93e6274cda6fe4a49c55cabc482439f45b350f265bee266d3d48f48ddc",
+    "tests/create.test.ts": "d405cc7308beb46e1be1d7415f16ba2a76b4c09cc816a0c5cf747e2dbf985544",
+    "tests/dev-api-framing.test.ts": "40718733706a42462970f84c87c1cdc2b9cf72070c5270e2fb7c0fdc94e1e769",
+    "tests/dev-api.test.ts": "13d69ef3aed038779d1f5ae5fc918c815776562429065f19399654805400fe92",
+    "tests/development-backend.test.ts": "f895381af5cd0ea615829467d591af2a1b70ce8a510973003e6cec54166b0d07",
+    "tests/development-lifecycle.test.ts": "9946155fa060d26fb36a8ffa5520165be35034611ffff09959870314012706ec",
+    "tests/development-recovery.test.ts": "605258aedfbf6015008eafeeff5f1f74a5a7aa2ab3698b1f4e2012e65b3a104b",
+    "tests/features.test.ts": "76688cb49bdfefd7f69d9e1ce57c98e5651cdfa44982db0eb969a0d530cc045d",
+    "tests/generation.test.ts": "9e25e013fb0dd84af7e13eef1cb66a03e28e26ed961de1f648d924a1fe9b2033",
+    "tests/helpers.ts": "dccaf8e3165920ab038c398697bfcb0db45809915fb40a1b988f1f13942353bc",
+    "tests/hooks.test.ts": "e30de33fb5e3dcca4e6c7a27342c601971cc489d30016118bfaaebde4524d73f",
+    "tests/isolation.test.ts": "36a41ed4ef9654aef81e41fc1660ab82b7066701ddd7702fc675b83c16c13752",
+    "tests/launcher-boundaries.test.ts": "48b1622a60d15b9dc1b41d1226718fe949974c04e8bf68d77c5a7f14b70ab21b",
+    "tests/launcher-control.test.ts": "63420b20b6fba2b02a9e191c9956a8abbf3de5dc034569110f17c18dadb7f455",
+    "tests/launcher-helpers.ts": "ae8f12861f3d3aa72945a29fadf6336aefa7178e708e0bbd5c400d461f6a0308",
+    "tests/launcher-recovery.test.ts": "bca11866d287cb5ad5df3434b316f959efcccbc209de62cf85d69c089d03c667",
+    "tests/launcher.test.ts": "c9cb721dafef1820dcfe7f301cbfcc0d21f0e9cdcf57f68e9827704c29e2c4c0",
+    "tests/linux-snapshot.test.ts": "0e9935d61bdc701e35eeea51fb664c2202bfe1aa84123e7ef14c788f81d1d6cc",
+    "tests/locks.test.ts": "2227e1d24722d712b58952e9971e26c9470a101bcb90aae79f98cbba1ce9a76e",
+    "tests/packaging-boundaries.test.ts": "933ae66fbcc7406d0876f519ce8c4e5f7d0dbc1603d6c3d708c5b9a1034e7d0a",
+    "tests/packaging.test.ts": "ed19554e2fb7b1e512c6c71d63c650cd5444a22d3ea2a82fc99bf6e7fc1d83f9",
+    "tests/providers.test.ts": "089425999a52251d4ac01df27ed3c2a0cb9959cc0ab255b730f85157af0c2986",
+    "tests/publication.test.ts": "0c0168aa9766df4cca0e431b1d6c6d07fa75017d7f0bccacabdf0065d3bbee4c",
+    "tests/react-boundary.test.ts": "b49bf04b4711ac175593c471badbab927647d3fc6c3d0d3d6eaa456594075061",
+    "tests/react-compiler.test.ts": "c8e287a8d21eaf1427a75a8a958b24d4124a36a8c5619d259f6d914c5bb5d183",
+    "tests/routes.test.ts": "ffc720fd8d27d676cd68db4d0f492ca5d76851e65d28912b31977e208b581548",
+    "tests/tool-command.test.ts": "c975b6a608ad06e4ade6d3f937ab61b25b3f952b2a5c384103557bec59902244",
+    "tests/tsconfig.json": "62b7f8530dddcc3bc455f37fa9f0e771b2a7835922001fc08c3e209ee97d88f1",
+    "tests/vite-build.test.ts": "e1165a90659bfcbb240bb0ff66f582bdba651a8c235a4a317b0a3704264c9328",
+    "tests/vite-dev.test.ts": "1949034c527a495ef8b6c442c8cea78c664315a274df2a71a0e67b0ad14edc08",
+    "tests/windows-environment.test.ts": "9c5eb76ad77db8f76bc0bb24af493d1d44e0feaccad9225f3ef7ca99bcc16f60",
+    "tests/windows/native.test.ts": "d78b4f59f3322109a82beaeeed3311ff679b3235085b2168c15038cab514f82a",
+    "tsconfig.base.json": "94d2a15288b0b45c326f56f74d425daf9a8e7e2361d85bb4b12c521458e59c4c",
+    "tsconfig.json": "3dc2b20d3fe968c8474c4cbabb8cded5fcf85f7c0b73e02c79020548e7c83e4f"
+  },
+  "commands": [
+    {
+      "label": "install",
+      "argv": [
+        "pnpm",
+        "install",
+        "--offline",
+        "--frozen-lockfile",
+        "--ignore-scripts"
+      ],
+      "started_at": "2026-10-18T13:57:44.210199+00:00",
+      "exit_code": 0,
+      "log": ".cache/p4c-final-6902bec27b9948b597b533dec4ff0bf5/install.log",
+      "sha256": "a2bace4dce7f1b80c1f83114abfcb0ee29cff9ce3199e7864335881b2b3b6276",
+      "counts": {}
+    },
+    {
+      "label": "check",
+      "argv": [
+        "pnpm",
+        "check"
+      ],
+      "started_at": "2026-10-18T13:57:44.466644+00:00",
+      "exit_code": 0,
+      "log": ".cache/p4c-final-6902bec27b9948b597b533dec4ff0bf5/check.log",
+      "sha256": "af218a63121443da22aa67a43be89247992723037d027989f206a79239132594",
+      "counts": {
+        "tests": 222,
+        "pass": 222,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "label": "browser",
+      "argv": [
+        "pnpm",
+        "test:browser"
+      ],
+      "started_at": "2026-10-18T13:58:28.780454+00:00",
+      "exit_code": 0,
+      "log": ".cache/p4c-final-6902bec27b9948b597b533dec4ff0bf5/browser.log",
+      "sha256": "e7464e105675b05f059db9d7e96c275c6ddbd2d4ac2dccfb67495f668686bf88",
+      "counts": {
+        "tests": 14,
+        "pass": 14,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "label": "packages",
+      "argv": [
+        "pnpm",
+        "test:package"
+      ],
+      "started_at": "2026-10-18T14:00:48.085600+00:00",
+      "exit_code": 0,
+      "log": ".cache/p4c-final-6902bec27b9948b597b533dec4ff0bf5/packages.log",
+      "sha256": "c977e0000899fcf5cd1822b869843dfdd91624d2cbc9d621e106f9e43801238d",
+      "counts": {}
+    },
+    {
+      "label": "config-repeat",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "tests/configuration.test.ts"
+      ],
+      "started_at": "2026-10-18T14:01:19.633693+00:00",
+      "exit_code": 0,
+      "log": ".cache/p4c-final-6902bec27b9948b597b533dec4ff0bf5/config-repeat.log",
+      "sha256": "1f0f5e6570719d24371ec588977ae110c9e5a78a15b94469d9cf948808de2d9c",
+      "counts": {
+        "tests": 13,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "label": "browser-config-repeat",
+      "argv": [
+        "node",
+        "--import",
+        "tsx",
+        "--test",
+        "tests/browser/configuration.test.ts"
+      ],
+      "started_at": "2026-10-18T14:01:21.341672+00:00",
+      "exit_code": 0,
+      "log": ".cache/p4c-final-6902bec27b9948b597b533dec4ff0bf5/browser-config-repeat.log",
+      "sha256": "96ee2b82209243d90366fb66cfc005d48362b85b15f9f92285eeaa2a18b59f2b",
+      "counts": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "label": "features-types",
+      "argv": [
+        "pnpm",
+        "cormi",
+        "typecheck",
+        "--root",
+        "examples/features",
+        "--startup-timeout",
+        "30000"
+      ],
+      "started_at": "2026-10-18T14:01:32.414497+00:00",
+      "exit_code": 0,
+      "log": ".cache/p4c-final-6902bec27b9948b597b533dec4ff0bf5/features-types.log",
+      "sha256": "d193155b9ae4d297325a910c9a120428ae55af392e97331b89930c27c688c448",
+      "counts": {}
+    },
+    {
+      "label": "config-dev",
+      "argv": [
+        "pnpm",
+        "cormi",
+        "config",
+        "--root",
+        "examples/features",
+        "--for",
+        "dev",
+        "--json"
+      ],
+      "started_at": "2026-10-18T14:01:33.344179+00:00",
+      "exit_code": 0,
+      "log": ".cache/p4c-final-6902bec27b9948b597b533dec4ff0bf5/config-dev.log",
+      "sha256": "5f91b6c0f0c1c601b7ee436dfcc42996c9e172ed3b732c1e45e0fe5418c810d2",
+      "counts": {}
+    },
+    {
+      "label": "config-staging",
+      "argv": [
+        "pnpm",
+        "cormi",
+        "config",
+        "--root",
+        "examples/features",
+        "--for",
+        "build",
+        "--mode",
+        "staging",
+        "--json"
+      ],
+      "started_at": "2026-10-18T14:01:33.629430+00:00",
+      "exit_code": 0,
+      "log": ".cache/p4c-final-6902bec27b9948b597b533dec4ff0bf5/config-staging.log",
+      "sha256": "c88beda29e65226b67f7a046ea43b340ed62fa73c39d4df634330ce59ec17b1a",
+      "counts": {}
+    },
+    {
+      "label": "demo",
+      "argv": [
+        "pnpm",
+        "demo"
+      ],
+      "started_at": "2026-10-18T14:01:33.915072+00:00",
+      "exit_code": 0,
+      "log": ".cache/p4c-final-6902bec27b9948b597b533dec4ff0bf5/demo.log",
+      "sha256": "b8b951d0f95d9f89318473bf718e4ca43e1b98f5eb67f283e9c655593cc3fe21",
+      "counts": {}
+    }
+  ],
+  "passed": true,
+  "package_result": {
+    "path": ".cache/package-test-1792332048784/result.json",
+    "sha256": "f00404084d63345e29c95ff8fd68fdb073c671b47666fea7fd78f3945ace9d86",
+    "stages": 57
+  },
+  "packages": [
+    {
+      "name": "@cormijs/builder",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-builder-0.0.1.tgz",
+      "sha256": "5dca11256099cc17808c49b04b74631f2495446cb124a88f0e2eed78a9698f8f",
+      "contentSha256": "307b023eaed503e4cbbf763799cc5c90b415be4fcf121d66257cb6c67b5997b5",
+      "files": 11,
+      "bytes": 2024
+    },
+    {
+      "name": "@cormijs/core",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-core-0.0.1.tgz",
+      "sha256": "44746d833e9f19e8b9d65eb75da7523a2585e23db0bd26273b0e87946b990b40",
+      "contentSha256": "cb646ca96b391141d3b0f45df5378cd84d934dbbf2f3222fa7c8e96a70fb9d06",
+      "files": 16,
+      "bytes": 12353
+    },
+    {
+      "name": "cormijs",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-0.0.1.tgz",
+      "sha256": "a65e0cdfb16685b7096358187339d8d468f96991e41f945cb8b36916d5456b6f",
+      "contentSha256": "62337dddcb41716ece253ca9513f3e23e6760cbafbad6c0b648c031215bbb8ae",
+      "files": 56,
+      "bytes": 32300
+    },
+    {
+      "name": "@cormijs/create",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-create-0.0.1.tgz",
+      "sha256": "4e9fa5f6b0ebf0d2f74b8246279261cb3924749397d8e729a48ab5ebb2079fb6",
+      "contentSha256": "f62523489f89c0a016c1d344b06638f354488d7212537d85652be9014ca3b87d",
+      "files": 16,
+      "bytes": 14487
+    },
+    {
+      "name": "@cormijs/plugin-dev-api",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-plugin-dev-api-0.0.1.tgz",
+      "sha256": "cf85b23575aaeda8c213efb20612b4c5d4a525b117f7babe798121f468b36d48",
+      "contentSha256": "8da1a10ec807ca33affe6fe2a21f569b1a3ae1fc7f725b049d1e0730cd1e2f9c",
+      "files": 11,
+      "bytes": 15935
+    },
+    {
+      "name": "@cormijs/plugin-react",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-plugin-react-0.0.1.tgz",
+      "sha256": "3ceded2feb0526ad29da6af1d0ed029af005a4a199ce0e8dff5e504a5e045a8c",
+      "contentSha256": "9557555506632d67e5452b025b609fe6f7bfe63e087196dee43a4af6e6f3e1b2",
+      "files": 31,
+      "bytes": 25285
+    },
+    {
+      "name": "@cormijs/plugin-react-vite",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-plugin-react-vite-0.0.1.tgz",
+      "sha256": "7750a82e6006b4cdb4cbb7921366cfd18c61932acc5e9a703281b993f346bf4c",
+      "contentSha256": "b4df8df774b873a11e4e1147f0784d53475cc53fb3d707679fb83b75a397a7e2",
+      "files": 6,
+      "bytes": 1737
+    },
+    {
+      "name": "@cormijs/plugin-typescript",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-plugin-typescript-0.0.1.tgz",
+      "sha256": "895ea1bf122cc4ba8cb52d1218c6ebd4f9430209273208747c0a0b4c219711ac",
+      "contentSha256": "272dcb1920b126c2c46b1900fcfd2b42bfe2ce44f2eea0bfd06ee8c6b19429f5",
+      "files": 6,
+      "bytes": 5175
+    },
+    {
+      "name": "@cormijs/plugin-vite",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-plugin-vite-0.0.1.tgz",
+      "sha256": "a281c23c53ef689885f27e0f3d57ec76cde28a183429ac0a633150510fba6689",
+      "contentSha256": "b75f5e486b0d651cfe1ea5637794f63f7ab9a5826facdd15892aeef6e1cfa012",
+      "files": 16,
+      "bytes": 19717
+    },
+    {
+      "name": "@cormijs/plugin-web",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-plugin-web-0.0.1.tgz",
+      "sha256": "7e4b9cdf5f7874737a6ceabb600460df336d065ceae5e7203c2e4ac966bfda1b",
+      "contentSha256": "200cbf8df985ae33e69f06bc31598ee1076e99a889a4d539ac0169386e1faebf",
+      "files": 41,
+      "bytes": 34341
+    },
+    {
+      "name": "@cormijs/preset-react-vite",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-preset-react-vite-0.0.1.tgz",
+      "sha256": "d07d5f47dd8cf41299abe13180e9e5bb2633f686f31c290b6ca657f3732836aa",
+      "contentSha256": "0d8e4e2ab5c19cd3fff8f0d777dc026801bc93ceee8046d6e814c5f48ed37850",
+      "files": 6,
+      "bytes": 1250
+    },
+    {
+      "name": "@cormijs/routes",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-routes-0.0.1.tgz",
+      "sha256": "218378efcb727e6f34b42b458a8f26a1f2bc6f986fc0e95f4e0a6b75357f76ad",
+      "contentSha256": "93e499f2f66a4ff2d69cb076c953490cd31fc3b26e475fe7ff5cc64abe4f8217",
+      "files": 11,
+      "bytes": 13015
+    },
+    {
+      "name": "@cormijs/runtime",
+      "version": "0.0.1",
+      "file": "tarballs/cormijs-runtime-0.0.1.tgz",
+      "sha256": "cf9c4030fb01047478a6acda16643c67face427bfcbaf70aa7f32e9d9bf49374",
+      "contentSha256": "7ba771bf18d11166ae0e23f76f06919751fb4cf91a4a08efd47d8db5ea591121",
+      "files": 11,
+      "bytes": 4442
+    }
+  ],
+  "config-dev": {
+    "basis": "current-config-evaluation",
+    "command": "dev",
+    "mode": "development",
+    "validation": "json-and-derivation-only",
+    "scope": "Application input after preset/user merge and registered derivations; excludes renderer/bundler defaults and private plugin options.",
+    "fields": [
+      {
+        "path": "/base",
+        "present": true,
+        "value": "/workspace/",
+        "redacted": false,
+        "history": [
+          {
+            "kind": "preset",
+            "id": "cormi:react-vite",
+            "operation": "set"
+          },
+          {
+            "kind": "user",
+            "id": "config.app",
+            "operation": "set"
+          }
+        ]
+      },
+      {
+        "path": "/outDir",
+        "present": true,
+        "value": "dist",
+        "redacted": false,
+        "history": [
+          {
+            "kind": "preset",
+            "id": "cormi:react-vite",
+            "operation": "set"
+          }
+        ]
+      },
+      {
+        "path": "/routes",
+        "present": true,
+        "value": "[redacted]",
+        "redacted": true,
+        "history": [
+          {
+            "kind": "user",
+            "id": "config.app",
+            "operation": "set"
+          }
+        ]
+      },
+      {
+        "path": "/server/host",
+        "present": true,
+        "value": "127.0.0.1",
+        "redacted": false,
+        "history": [
+          {
+            "kind": "user",
+            "id": "config.app",
+            "operation": "set"
+          }
+        ]
+      },
+      {
+        "path": "/server/port",
+        "present": true,
+        "value": 8002,
+        "redacted": false,
+        "history": [
+          {
+            "kind": "user",
+            "id": "config.app",
+            "operation": "set"
+          }
+        ]
+      }
+    ],
+    "hooks": [
+      {
+        "id": "example:deployment:base",
+        "owner": "example:deployment",
+        "stage": 0
+      }
+    ],
+    "plugins": [
+      {
+        "id": "application-config",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "web",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "application-commands",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "react",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "vite",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "react-vite",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "inspect",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "typescript",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "status-feature",
+        "source": "plugins",
+        "enabled": true
+      },
+      {
+        "id": "deployment",
+        "source": "plugins",
+        "enabled": true
+      }
+    ]
+  },
+  "config-staging": {
+    "basis": "current-config-evaluation",
+    "command": "build",
+    "mode": "staging",
+    "validation": "json-and-derivation-only",
+    "scope": "Application input after preset/user merge and registered derivations; excludes renderer/bundler defaults and private plugin options.",
+    "fields": [
+      {
+        "path": "/base",
+        "present": true,
+        "value": "/staging/",
+        "redacted": false,
+        "history": [
+          {
+            "kind": "preset",
+            "id": "cormi:react-vite",
+            "operation": "set"
+          },
+          {
+            "kind": "user",
+            "id": "config.app",
+            "operation": "set"
+          },
+          {
+            "kind": "derive",
+            "id": "example:deployment:base",
+            "operation": "set"
+          }
+        ]
+      },
+      {
+        "path": "/outDir",
+        "present": true,
+        "value": "dist",
+        "redacted": false,
+        "history": [
+          {
+            "kind": "preset",
+            "id": "cormi:react-vite",
+            "operation": "set"
+          }
+        ]
+      },
+      {
+        "path": "/routes",
+        "present": true,
+        "value": "[redacted]",
+        "redacted": true,
+        "history": [
+          {
+            "kind": "user",
+            "id": "config.app",
+            "operation": "set"
+          }
+        ]
+      },
+      {
+        "path": "/server/host",
+        "present": true,
+        "value": "127.0.0.1",
+        "redacted": false,
+        "history": [
+          {
+            "kind": "user",
+            "id": "config.app",
+            "operation": "set"
+          }
+        ]
+      },
+      {
+        "path": "/server/port",
+        "present": true,
+        "value": 8002,
+        "redacted": false,
+        "history": [
+          {
+            "kind": "user",
+            "id": "config.app",
+            "operation": "set"
+          }
+        ]
+      }
+    ],
+    "hooks": [
+      {
+        "id": "example:deployment:base",
+        "owner": "example:deployment",
+        "stage": 0
+      }
+    ],
+    "plugins": [
+      {
+        "id": "application-config",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "web",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "application-commands",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "react",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "vite",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "react-vite",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "inspect",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "typescript",
+        "source": "preset(cormi:react-vite).plugins",
+        "enabled": true
+      },
+      {
+        "id": "status-feature",
+        "source": "plugins",
+        "enabled": true
+      },
+      {
+        "id": "deployment",
+        "source": "plugins",
+        "enabled": true
+      }
+    ]
+  },
+  "finished_at": "2026-10-18T14:01:34.380983+00:00",
+  "source_stable": true,
+  "upstream_preparation": {
+    "path": "artifacts/admin-upstream.json",
+    "sha256": "2cc08764a47e5c2a7e886a8186440ded0e8a10d90603b0ea38a580ff72cbf14a",
+    "migration_started": false
+  },
+  "screenshot": {
+    "path": ".cache/cormi-staging-config.png",
+    "sha256": "f7aed6c43ddea3d0e5c2774b5350290005d9ea5348eeef2cc0b2a1095558c9c9",
+    "scope": "existing feature example on derived staging base; not the Admin template"
+  },
+  "prior_evidence": [
+    {
+      "path": ".cache/p4c-final-88320d0cd3504e32be3e8e01102ce111/result.json",
+      "sha256": "d73049e2db2bc6470a038fc627a4b1dcd7d6945620c6008bbad896a1f0ecfad3",
+      "passed": false,
+      "commands": [
+        {
+          "label": "install",
+          "argv": [
+            "pnpm",
+            "install",
+            "--offline",
+            "--frozen-lockfile",
+            "--ignore-scripts"
+          ],
+          "started_at": "2026-10-18T13:47:48.454065+00:00",
+          "exit_code": 0,
+          "log": ".cache/p4c-final-88320d0cd3504e32be3e8e01102ce111/install.log",
+          "sha256": "f7d1057fab535cbbcc9f4e4a4cbccb9e2da96de0f1c28ad8681cad0bbad288e0",
+          "counts": {}
+        },
+        {
+          "label": "check",
+          "argv": [
+            "pnpm",
+            "check"
+          ],
+          "started_at": "2026-10-18T13:47:48.708948+00:00",
+          "exit_code": 2,
+          "log": ".cache/p4c-final-88320d0cd3504e32be3e8e01102ce111/check.log",
+          "sha256": "bfb85978fc04937f8f091c3b4919ea739f7969c39e715c64d4e76cb98f02e915",
+          "counts": {}
+        }
+      ]
+    },
+    {
+      "path": ".cache/p4c-final-7a1c693d4b02454696a12cc9ad12881a/result.json",
+      "sha256": "7aad4e3704fee198587f1fabd83d72ffcce5669f55c18ee497a9b75973d0486c",
+      "passed": false,
+      "commands": [
+        {
+          "label": "install",
+          "argv": [
+            "pnpm",
+            "install",
+            "--offline",
+            "--frozen-lockfile",
+            "--ignore-scripts"
+          ],
+          "started_at": "2026-10-18T13:49:29.507981+00:00",
+          "exit_code": 0,
+          "log": ".cache/p4c-final-7a1c693d4b02454696a12cc9ad12881a/install.log",
+          "sha256": "f7d1057fab535cbbcc9f4e4a4cbccb9e2da96de0f1c28ad8681cad0bbad288e0",
+          "counts": {}
+        },
+        {
+          "label": "check",
+          "argv": [
+            "pnpm",
+            "check"
+          ],
+          "started_at": "2026-10-18T13:49:29.766578+00:00",
+          "exit_code": 0,
+          "log": ".cache/p4c-final-7a1c693d4b02454696a12cc9ad12881a/check.log",
+          "sha256": "4983927989dc992d63d456e07379eb6750e17eb95f4101e132b63ba5c913827f",
+          "counts": {
+            "tests": 222,
+            "pass": 222,
+            "fail": 0,
+            "cancelled": 0,
+            "skipped": 0
+          }
+        },
+        {
+          "label": "browser",
+          "argv": [
+            "pnpm",
+            "test:browser"
+          ],
+          "started_at": "2026-10-18T13:50:13.652296+00:00",
+          "exit_code": 1,
+          "log": ".cache/p4c-final-7a1c693d4b02454696a12cc9ad12881a/browser.log",
+          "sha256": "8e09bfd6fb4b72e28a561e4b9e5c8f8cf1bb7127f67cc76a261236fccb810eac",
+          "counts": {
+            "tests": 14,
+            "pass": 13,
+            "fail": 1,
+            "cancelled": 0,
+            "skipped": 0
+          }
+        }
+      ]
+    },
+    {
+      "path": ".cache/p4c-late-next-red-2f68af937b8645cfad74d551275f96e7.log",
+      "sha256": "a47490ebf590e528af0a2b45ed19dc601dbe21d2afdce15ae88857ea043e6437",
+      "counts": {
+        "tests": "1",
+        "pass": "0",
+        "fail": "1",
+        "cancelled": "0",
+        "skipped": "0"
+      }
+    },
+    {
+      "path": ".cache/p4c-browser-resource-6b6bc36ee24945af88da16c9a5e72013.log",
+      "sha256": "7bddc08afb54cded790b968c35d3233bbcc64f013ae26fac4c88c6bbe20dc13e",
+      "counts": {
+        "tests": "1",
+        "pass": "0",
+        "fail": "1",
+        "cancelled": "0",
+        "skipped": "0"
+      }
+    }
+  ],
+  "packaged_browser_stages": [
+    {
+      "label": "packed-react-dom-fast-refresh-recovery-deep-route",
+      "browser": "155.0.4283.62",
+      "pageerrors": 0
+    },
+    {
+      "label": "packed-feature-page-provider-meta",
+      "browser": "155.0.4283.62",
+      "pageerrors": 0
+    },
+    {
+      "label": "created-app-browser-mock-and-private-inputs",
+      "browser": "155.0.4283.62",
+      "pageerrors": 0
+    }
+  ],
+  "copied_from": {
+    "path": ".cache/p4c-final-6902bec27b9948b597b533dec4ff0bf5/result.json",
+    "sha256": "ac842395c59b2faba2890a0fe39ace07dbc5f492c6f4919ed9d41b5a42002833"
+  }
+}

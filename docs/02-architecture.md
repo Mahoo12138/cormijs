@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.11。修订日期：2026-10-18。
+版本：Draft 0.12。修订日期：2026-10-18。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -17,6 +17,8 @@ P3c-prep 区分平台逻辑准备与 Windows 原生证据。Launcher 为已建�
 P4a 回到应用功能主线，Windows 原生验收按用户决定挂起。React 功能插件可声明自己的客户端模块、路由 meta 与 runtime；显式 from 通过 clientModule 绑定作者位置。defineReactFeature 只生成原生 Cordis 插件，useRouteMatches 读取浏览器路由元数据。精确接口及可运行例子见 [功能插件协议](21-react-features.md)，不要继续把旧章节中的目标接口当成唯一的当前 API。
 
 P4b 增加独立项目创建器与显式开发 API 插件。create-cormi 不依赖目标项目配置或 Cordis 宿主，用本地 kit 生成可重定位应用；Mock/代理主入口为 Node HTTP handler，/vite 桥接才注入 Vite 服务，默认 preset 不强制安装。开发接口不进入 build/preview，详见 [创建与 API 协议](23-project-creation-and-dev-api.md)。
+
+P4c 增加可选 applicationConfigPlugin 及通用命令 middleware。加载器记录 preset/user 的赋值来源；应用插件执行冻结快照的 deriveConfig；config --for 重新解释当前目标命令输入，inspect 保持上次成功生成快照。core 仅定义数据与命令协议，不吸收 Web 默认值或派生策略。报告不含 Vite 内部默认值或私有 plugin options，见 [配置来源协议](25-configuration-provenance.md)。下一步转入 [真实 Admin 迁移](26-admin-migration.md)。
 
 ## 1. 应该做一个什么框架
 

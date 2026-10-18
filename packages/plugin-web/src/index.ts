@@ -1,6 +1,7 @@
 import { assertActive, CormiError, type Context, type Plugin } from '@cormijs/core';
 import type { Builder, BuildPlan, BuildResult, ServerHandle } from '@cormijs/builder';
 export { OrderedHooks } from './ordered-hooks.js';
+export { applicationConfigPlugin, ApplicationConfiguration, type ConfigDerivation, type ConfigReport, type ResolvedAppConfig } from './configuration.js';
 export { webCommandsPlugin, plan as createBuildPlan } from './commands.js';
 export { applicationCommandsPlugin, type ApplicationCompiler, type ApplicationRequest, type PreparedApplication } from './application.js';
 export { AtomicEntry, RevisionQueue, GENERATED_HEADER, type GenerationResult } from './generation.js';

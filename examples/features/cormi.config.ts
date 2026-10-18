@@ -1,10 +1,14 @@
 import { defineConfig } from 'cormijs';
 import reactVite from '@cormijs/preset-react-vite';
 import { statusFeature } from './features/status/plugin';
+import { deployment } from './configuration';
 
 export default defineConfig({
   presets: [reactVite],
-  plugins: [{ id: 'status-feature', enabled: true, plugin: statusFeature({ label: '本地工作台', parentId: 'shell' }) }],
+  plugins: [
+    { id: 'status-feature', enabled: true, plugin: statusFeature({ label: '本地工作台', parentId: 'shell' }) },
+    { id: 'deployment', plugin: deployment },
+  ],
   app: {
     base: '/workspace/',
     server: { host: '127.0.0.1', port: 8002 },

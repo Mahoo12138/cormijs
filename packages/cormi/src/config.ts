@@ -1,4 +1,4 @@
-import { CormiError, type Plugin } from '@cormijs/core';
+import { CormiError, snapshotConfig, mergeConfigData, configLayer, type ConfigData, type ConfigLayer, type ConfigurationContext, type Plugin } from '@cormijs/core';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 
 export interface PluginEntry<T = any> {
@@ -44,32 +44,6 @@ function id(value: unknown, path: string): string {
   if (typeof value !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9:._/-]{0,127}$/.test(value)) invalid(path, 'invalid stable id');
   return value;
 }
-function cloneData(value: unknown, path: string, seen = new Set<object>()): unknown {
-  if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
-  if (typeof value === 'number' && Number.isFinite(value)) return value;
-  if (!value || typeof value !== 'object') invalid(path, 'expected finite JSON data');
-  if (seen.has(value)) invalid(path, 'cyclic application data');
-  seen.add(value);
-  try {
-    if (Array.isArray(value)) return Object.freeze(value.map((v, i) => cloneData(v, `${path}[${i}]`, seen)));
-    const result: Record<string, unknown> = Object.create(null);
-    for (const [key, child] of Object.entries(object(value, path))) {
-      if (['__proto__', 'constructor', 'prototype'].includes(key)) invalid(`${path}.${key}`, 'reserved key');
-      if (child !== undefined) result[key] = cloneData(child, `${path}.${key}`, seen);
-    }
-    return Object.freeze(result);
-  } finally { seen.delete(value); }
-}
-function merge(a: Readonly<Record<string, unknown>>, b: Readonly<Record<string, unknown>>): Record<string, unknown> {
-  const result = { ...a };
-  for (const [key, value] of Object.entries(b)) {
-    const previous = result[key];
-    result[key] = value && previous && typeof value === 'object' && typeof previous === 'object'
-      && !Array.isArray(value) && !Array.isArray(previous)
-      ? merge(previous as Record<string, unknown>, value as Record<string, unknown>) : value;
-  }
-  return result;
-}
 export function projectFile(root: string, file: string): string {
   const absolute = resolve(root, file);
   const path = relative(root, absolute);
@@ -77,12 +51,14 @@ export function projectFile(root: string, file: string): string {
   return absolute;
 }
 export function normalizeConfig(input: unknown, root: string): {
-  plugins: readonly PluginEntry[]; app: Readonly<Record<string, unknown>>; watch: readonly string[];
+  plugins: readonly PluginEntry[]; app: ConfigData; watch: readonly string[];
+  layers: readonly ConfigLayer[]; pluginSources: ConfigurationContext['plugins'];
 } {
   const config = object(input, 'config');
   keys(config, ['plugins', 'presets', 'app', 'watch'], 'config');
   const plugins: PluginEntry[] = []; const ids = new Set<string>(); const presetIds = new Set<string>();
-  const stack = new Set<object>(); let defaults: Record<string, unknown> = {};
+  const stack = new Set<object>(); let defaults: ConfigData = {};
+  const layers: ConfigLayer[] = [], pluginSources: Array<ConfigurationContext['plugins'][number]> = [];
   function add(entries: unknown, path: string): void {
     for (const [i, value] of array(entries, path).entries()) {
       const at = `${path}[${i}]`; const entry = object(value, at);
@@ -93,6 +69,7 @@ export function normalizeConfig(input: unknown, root: string): {
       if (entry.enabled !== undefined && typeof entry.enabled !== 'boolean') invalid(`${at}.enabled`, 'expected boolean');
       if (typeof entry.plugin !== 'function' && !(entry.plugin && typeof entry.plugin === 'object' && typeof (entry.plugin as any).apply === 'function')) invalid(`${at}.plugin`, 'expected native Cordis plugin');
       if (entry.enabled !== false) plugins.push(Object.freeze({ id: name, plugin: entry.plugin as Plugin, options: entry.options }));
+      pluginSources.push(Object.freeze({ id: name, source: path, enabled: entry.enabled !== false }));
     }
   }
   function visit(value: unknown, depth: number): void {
@@ -103,16 +80,20 @@ export function normalizeConfig(input: unknown, root: string): {
     if (presetIds.has(name)) invalid('preset.id', `duplicate preset ${name}`);
     presetIds.add(name); stack.add(preset);
     for (const child of array(preset.presets, 'preset.presets')) visit(child, depth + 1);
-    if (preset.defaults !== undefined) defaults = merge(defaults, cloneData(object(preset.defaults, 'preset.defaults'), 'preset.defaults') as Record<string, unknown>);
+    if (preset.defaults !== undefined) {
+      const patch = snapshotConfig(preset.defaults, `preset(${name}).defaults`), next = mergeConfigData(defaults, patch);
+      layers.push(configLayer(defaults, next, { kind: 'preset', id: name }, patch)); defaults = next;
+    }
     add(preset.plugins, `preset(${name}).plugins`); stack.delete(preset);
   }
   for (const preset of array(config.presets, 'presets')) visit(preset, 0);
   add(config.plugins, 'plugins');
-  const app = cloneData(merge(defaults, config.app === undefined ? {} : cloneData(object(config.app, 'app'), 'app') as Record<string, unknown>), 'app') as Readonly<Record<string, unknown>>;
+  const patch = snapshotConfig(config.app === undefined ? {} : config.app, 'app'), app = snapshotConfig(mergeConfigData(defaults, patch));
+  layers.push(configLayer(defaults, app, { kind: 'user', id: 'config.app' }, patch));
   const watch = array(config.watch, 'watch').map(value => {
     if (typeof value !== 'string' || !value || isAbsolute(value)) invalid('watch', 'expected a project-relative filename');
     return projectFile(root, value);
   });
   if (watch.length > 256) invalid('watch', 'too many files');
-  return { plugins: Object.freeze(plugins), app, watch: Object.freeze(watch) };
+  return { plugins: Object.freeze(plugins), app, watch: Object.freeze(watch), layers: Object.freeze(layers), pluginSources: Object.freeze(pluginSources) };
 }

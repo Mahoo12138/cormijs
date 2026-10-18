@@ -11,6 +11,8 @@ import { wireError, type StartMessage, type WorkerMessage, type WireError } from
 
 export interface LauncherEvent { readonly type: string; readonly [key: string]: unknown }
 export interface LaunchOptions {
+  /** Diagnostic command's target environment; never changes which command handler executes. */
+  readonly configurationCommand?: string;
   readonly root: string; readonly command: string; readonly mode?: string; readonly watch?: boolean;
   readonly signal?: AbortSignal; readonly startupTimeoutMs?: number; readonly shutdownTimeoutMs?: number;
   readonly pollIntervalMs?: number; readonly onEvent?: (event: LauncherEvent) => void;
@@ -35,7 +37,7 @@ function startWorker(start: StartMessage, options: LaunchOptions, watch: (files:
   let exited = false; let failure: CormiError | undefined;
   const child: ChildProcess = fork(fileURLToPath(new URL('./worker.js', import.meta.url)), [], {
     cwd: start.root, execArgv: [], stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-    env: { ...process.env, NODE_ENV: start.command === 'dev' ? 'development' : 'production' },
+    env: { ...process.env, NODE_ENV: (start.configurationCommand ?? start.command) === 'dev' ? 'development' : 'production' },
   });
   child.stdout?.on('data', chunk => options.onLog?.('stdout', String(chunk)));
   child.stderr?.on('data', chunk => options.onLog?.('stderr', String(chunk)));
@@ -80,6 +82,8 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
   const interval = options.pollIntervalMs ?? 200;
   for (const value of [startup, shutdown, interval]) if (!Number.isFinite(value) || value < 20 || value > 120000) throw new RangeError('Invalid launcher timeout/interval');
   if (!/^[a-z][a-z0-9-]*$/.test(options.command)) throw new CormiError('COMMAND_INVALID', 'Invalid command name.');
+  if (options.configurationCommand !== undefined && (options.command !== 'config' || !/^[a-z][a-z0-9-]*$/.test(options.configurationCommand) || options.configurationCommand === 'config')) throw new CormiError('CONFIG_TARGET_INVALID', '--for is only valid for config and requires another command name.');
+  const configurationCommand = options.command === 'config' ? options.configurationCommand ?? 'dev' : options.command;
   const signal = options.signal ?? new AbortController().signal;
   if (signal.aborted) return 0;
   const emit = (event: LauncherEvent) => options.onEvent?.(event);
@@ -131,7 +135,7 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
         await writeFile(module, compiled.code, { flag: 'wx', mode: 0o600 });
         extra = []; extraStamp = await fingerprint(extra); generation++;
         active = startWorker({ version: 1, type: 'start', root, token: lease.token, module,
-          command: options.command, mode: options.mode ?? (options.command === 'dev' ? 'development' : 'production'), timeoutMs: shutdown, serverOnlyFiles: compiled.files }, options,
+          command: options.command, configurationCommand, mode: options.mode ?? (configurationCommand === 'dev' ? 'development' : 'production'), timeoutMs: shutdown, serverOnlyFiles: compiled.files }, options,
           (values, stamp) => { extra = values.map(file => projectFile(root, file)); extraStamp = stamp; });
         emit({ type: 'starting', generation, pid: active.pid });
         try {

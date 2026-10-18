@@ -230,7 +230,7 @@ export async function createReactConsumer(root: string, kit: LocalKit, destinati
   const sources = await filesUnder(join(base, 'src'));
   const template = new Map([...sources].map(([path, bytes]) => ['src/' + path, bytes]));
   if (templateName === 'features') for (const [path, bytes] of await filesUnder(join(base, 'features'))) template.set('features/' + path, bytes);
-  for (const name of ['index.html', 'tsconfig.json', ...(templateName === 'features' ? ['cormi.config.ts'] : [])]) {
+  for (const name of ['index.html', 'tsconfig.json', ...(templateName === 'features' ? ['cormi.config.ts', 'configuration.ts'] : [])]) {
     const file = join(base, name), info = await lstat(file);
     assert.ok(info.isFile() && !info.isSymbolicLink() && info.nlink === 1, 'Example entry must be an independent file');
     assert.ok(info.size <= 1024 * 1024, 'Example entry exceeds copy budget');
@@ -244,7 +244,7 @@ export async function createReactConsumer(root: string, kit: LocalKit, destinati
     await writeFile(target, bytes, { flag: 'wx' });
   }
   const manifest = consumerManifest(kit, 'react');
-  if (templateName === 'features') manifest.dependencies['@cormijs/plugin-react'] = manifest.pnpm.overrides['@cormijs/plugin-react']!;
+  if (templateName === 'features') for (const name of ['@cormijs/plugin-react', '@cormijs/plugin-web', '@cormijs/core']) manifest.dependencies[name] = manifest.pnpm.overrides[name]!;
   await writeFile(join(destination, 'package.json'), JSON.stringify(manifest, null, 2) + '\n');
   await writeFile(join(destination, '.npmrc'), consumerNpmrc);
   if (templateName === 'features') await writeFile(join(destination, 'cormi.config.ts'), template.get('cormi.config.ts')!.toString().replace('port: 8002', 'port: 0'));

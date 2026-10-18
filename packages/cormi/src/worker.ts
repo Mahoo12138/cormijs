@@ -49,7 +49,7 @@ async function run(message: StartMessage): Promise<void> {
   const envFile = join(message.root, '.env');
   if (existsSync(envFile)) process.loadEnvFile(envFile);
   const module = await import(pathToFileURL(message.module).href);
-  const environment = Object.freeze({ root: message.root, command: message.command, mode: message.mode });
+  const environment = Object.freeze({ root: message.root, command: message.configurationCommand ?? message.command, mode: message.mode });
   const raw = typeof module.default === 'function' ? await module.default(environment) : module.default;
   lifetime.signal.throwIfAborted();
   const config = normalizeConfig(raw, message.root);
@@ -60,6 +60,7 @@ async function run(message: StartMessage): Promise<void> {
   await host.ready(); lifetime.signal.throwIfAborted();
   result = await host.ctx.commands.execute(message.command, {
     root: message.root, mode: message.mode, options: config.app, signal: lifetime.signal,
+    configuration: Object.freeze({ command: environment.command, layers: config.layers, plugins: config.pluginSources }),
     serverOnlyFiles: [...message.serverOnlyFiles, ...config.watch],
   });
   if (!result || !['result', 'server'].includes(result.kind)) throw new CormiError('COMMAND_RESULT_INVALID', 'Command returned an invalid result.');
