@@ -1,4 +1,4 @@
-import { createElement, type ComponentType, type PropsWithChildren, type ReactNode } from 'react';
+import { createElement, StrictMode, type ComponentType, type PropsWithChildren, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { createBrowserRouter, type RouteObject, type Location } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
@@ -14,11 +14,25 @@ export interface ApplicationHandle { dispose(): Promise<void> }
 const Loading = () => <p role="status">Loading…</p>;
 const NotFound = () => <main><h1>404</h1><p>Page not found.</p></main>;
 const RouteFailure = () => <main role="alert">This page could not be loaded.</main>;
+// Per-element lease, not a singleton application. Prevent duplicate roots during asynchronous setup.
+const mountedElements = new WeakSet<HTMLElement>();
+
+/** Generated-page adapter: finish lazy resolution, then rethrow the original import failure through the route boundary.
+ * A rejected lazy function can remain pending in the locked router's initial render, hiding a same-route boundary.
+ * No retry, logging suppression, or successful-page fallback is performed here.
+ */
+export async function resolveRouteComponent(load: () => Promise<ComponentType>): Promise<ComponentType> {
+  try { return await load(); }
+  catch (error) { return function RouteImportFailure(): never { throw error; }; }
+}
 
 /** A mount owns its router, root and runtime effects; no module-global application singleton. */
 export async function mountApplication(options: {
-  element: HTMLElement; routes: RouteObject[]; base?: string; plugins?: readonly RuntimeEntry[];
+  element: HTMLElement; routes: RouteObject[]; base?: string; plugins?: readonly RuntimeEntry[]; strict?: boolean;
 }): Promise<ApplicationHandle> {
+  if (options.strict !== undefined && typeof options.strict !== 'boolean') throw new TypeError('strict must be boolean');
+  if (mountedElements.has(options.element)) throw new Error('cormi mount element is already owned');
+  mountedElements.add(options.element);
   const entries = options.plugins ?? [], ids = new Set<string>(), lifetime = new AbortController();
   const cleanups: Array<() => void | Promise<void>> = [];
   let root: Root | undefined, router: ReturnType<typeof createBrowserRouter> | undefined;
@@ -28,6 +42,7 @@ export async function mountApplication(options: {
     for (const close of [() => unsubscribe?.(), () => router?.dispose(), () => root?.unmount(), ...cleanups.reverse()]) {
       try { await close(); } catch (error) { errors.push(error); }
     }
+    mountedElements.delete(options.element);
     if (errors.length) throw new AggregateError(errors, 'Application cleanup failed');
   })();
   try {
@@ -55,6 +70,7 @@ export async function mountApplication(options: {
       const entry = entries[i]!;
       if (entry.plugin.Provider) node = createElement(entry.plugin.Provider, { options: entry.options ?? {} }, node);
     }
+    if (options.strict) node = <StrictMode>{node}</StrictMode>;
     root = createRoot(options.element); root.render(node); notify(lastLocation);
     return Object.freeze({ dispose });
   } catch (error) {

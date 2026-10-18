@@ -20,6 +20,7 @@ export function defineReactFeature(definition: ReactFeature): Plugin.Object<void
   // Validate the complete route graph only after all features have contributed (parents may be external).
   const routes: readonly RouteRecord[] = Object.freeze((definition.routes ?? []).map(route => Object.freeze({
     ...route, ...(route.module ? { module: moduleRef(route.module) } : {}),
+    ...(route.errorBoundary !== undefined ? { errorBoundary: moduleRef(route.errorBoundary) } : {}),
     ...(route.meta !== undefined ? { meta: routeMeta(route.meta) } : {}),
     source: Object.freeze({ ...route.source, pluginId: id }),
   })));

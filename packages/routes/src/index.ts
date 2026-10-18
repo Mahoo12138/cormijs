@@ -18,6 +18,8 @@ export interface RouteRecord {
   readonly path?: string;
   readonly index?: boolean;
   readonly module?: ModuleRef;
+  /** Eager client component, independent of the page's lazy import; receives errors via useRouteError. */
+  readonly errorBoundary?: ModuleRef;
   /** Public browser metadata, never server credentials or executable callbacks. */
   readonly meta?: RouteMeta;
   readonly source: { readonly file?: string; readonly pluginId?: string };
@@ -55,7 +57,7 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
   const routes = input.map((item: unknown): RouteRecord => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) fail('ROUTE_INVALID', 'Expected a route object.');
     const value = item as Record<string, unknown>;
-    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'source', 'meta'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
+    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'errorBoundary', 'source', 'meta'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
     if (typeof value.id !== 'string' || !value.id || value.id.startsWith('cormi:') || byId.has(value.id)) fail('ROUTE_ID_CONFLICT', `Invalid, reserved or duplicate route id: ${value.id}`);
     if (value.parentId !== undefined && (typeof value.parentId !== 'string' || !value.parentId)) fail('ROUTE_INVALID', 'Invalid parent id.', { id: value.id });
     if (value.index !== undefined && typeof value.index !== 'boolean') fail('ROUTE_INVALID', 'index must be boolean.', { id: value.id });
@@ -75,6 +77,7 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
     const route: RouteRecord = Object.freeze({ id: value.id, ...(value.parentId !== undefined ? { parentId: value.parentId as string } : {}),
       ...(path !== undefined ? { path } : {}), ...(value.index === true ? { index: true } : {}),
       ...(value.module !== undefined ? { module: moduleRef(value.module) } : {}),
+      ...(value.errorBoundary !== undefined ? { errorBoundary: moduleRef(value.errorBoundary) } : {}),
       ...(value.meta !== undefined ? { meta: routeMeta(value.meta) } : {}), source: Object.freeze({ ...source }) });
     byId.set(route.id, route); return route;
   });

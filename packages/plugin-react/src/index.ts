@@ -32,9 +32,11 @@ export const reactPlugin: Plugin.Object<void> = {
     ctx.provide('react', { routes, runtime } satisfies ReactCompilation);
     async function create(request: ApplicationRequest): Promise<PreparedApplication> {
       assertActive(ctx);
-      const plan = createBuildPlan(request, ['pages', 'routes', 'runtime', 'mountId']);
+      const plan = createBuildPlan(request, ['pages', 'routes', 'runtime', 'mountId', 'strict']);
       const root = await realpath(request.root), input = request.options;
       const pages = input.pages ?? 'src/pages', mountId = input.mountId ?? 'root', developing = request.command === 'dev';
+      const strict = input.strict === undefined ? false : input.strict;
+      if (typeof strict !== 'boolean') throw new CormiError('CONFIG_INVALID', 'app.strict must be boolean.');
       if (typeof pages !== 'string' || typeof mountId !== 'string' || !mountId || plan.entry !== 'index.html') throw new CormiError('CONFIG_INVALID', 'Invalid React application options.');
       if (!plan.base.startsWith('/') || !plan.base.endsWith('/') || plan.base.startsWith('//') || /[?#%\\]/.test(plan.base) || plan.base.split('/').includes('..')) throw new CormiError('BASE_INVALID', 'base must be a URL path ending with /.');
       const local = new AbortController(), signal = AbortSignal.any([local.signal, request.signal, lifetime.signal]);
@@ -73,10 +75,10 @@ export const reactPlugin: Plugin.Object<void> = {
       const repairFiles = new Set<string>([pages]), anchoredFiles = new Set<string>();
       const rememberModules = (items: unknown) => {
         if (!Array.isArray(items)) return;
-        for (const item of items) {
-          if (!item?.module) continue;
+        for (const item of items) for (const reference of [item?.module, item?.errorBoundary]) {
+          if (!reference) continue;
           try {
-            const file = clientModuleFile(root, item.module);
+            const file = clientModuleFile(root, reference);
             if (!file) continue;
             const local = relative(root, file);
             if (local.startsWith('..') || isAbsolute(local)) anchoredFiles.add(file);
@@ -157,12 +159,13 @@ export const reactPlugin: Plugin.Object<void> = {
             rememberModules(next); phase = 'runtime';
             const plugins = runtimeContributions([...runtimeContributions(input.runtime ?? []), ...await runtime.collect(undefined)]);
             rememberModules(plugins); phase = 'generate';
-            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles);
+            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict);
             await transform(code, { loader: 'tsx', format: 'esm', jsx: 'automatic', logLevel: 'silent' });
             const types = generateRouteTypes(next);
             const hookInfo = (items: readonly { id: string; owner: string; stage?: number }[]) => items.map(({ id, owner, stage }) => ({ id, owner, stage: stage ?? 0 }));
-            const inspection = inspectionManifest(code, types, { renderer: 'react', mode: request.mode, base: plan.base, entry: '.cormi/app.tsx',
-              routes: next.map(route => ({ ...route, ...(route.module ? { module: inspectModule(root, route.module) } : {}) })),
+            const inspection = inspectionManifest(code, types, { renderer: 'react', mode: request.mode, base: plan.base, entry: '.cormi/app.tsx', strict,
+              routes: next.map(route => ({ ...route, ...(route.module ? { module: inspectModule(root, route.module) } : {}),
+                ...(route.errorBoundary ? { errorBoundary: inspectModule(root, route.errorBoundary) } : {}) })),
               runtime: plugins.map(({ id, module }) => ({ id, module: inspectModule(root, module) })),
               hooks: { routes: hookInfo(routeOrder), runtime: hookInfo(runtimeOrder) } });
             if (routes.revision !== routeRevision || runtime.revision !== runtimeRevision) throw new CormiError('CONTRIBUTIONS_CHANGED', 'Plugin contributions changed during compilation; this result cannot be published.');

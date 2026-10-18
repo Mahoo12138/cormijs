@@ -1,6 +1,6 @@
 # Admin 问题登记：不要混淆基线、退化与功能增强
 
-固定上游 `69e780a40c455d664b2e13c525faf1d492a072a7`；关联 [模块台账](00-module-ledger.md)。本文件列的是待处理议题，不将记录问题等同于修复。原版源码保持不变，迁移版尚未执行。
+固定上游 `69e780a40c455d664b2e13c525faf1d492a072a7`；关联 [模块台账](00-module-ledger.md)。本文件分别记录原始问题与后续处理状态，不将记录问题等同于修复。原版源码保持不变；P5b迁移根路径已执行，具体更新见各项及 [结果](../30-p5b-results.md)。
 
 ## UP-01 / AM05：过滤后的分页总数不对应结果
 
@@ -40,12 +40,18 @@ Users的New user没有业务处理，行Edit/Delete只关闭菜单；Sign in对�
 
 ## CF-01 / AM02、AM09：cormi缺少等价的自定义路由错误边界
 
-分类：已由当前框架与上游源码对照识别的迁移阻塞，尚未实现。原版根路由配置errorElement并使用useRouteError；cormi当前路由IR没有相应模块引用，通用RouteFailure不是原界面的等价替代。
+分类：P5a识别的框架迁移阻塞。P5b已新增errorBoundary模块引用和静态导入，原ErrorBoundary文件未改；渲染/求值/网络故障在真实迁移Admin的dev及preview显示原界面并恢复。框架fixture另覆盖嵌套传播、边界自身渲染抛错和StrictMode。接口缺口已补，但静态边界自身加载失败、任意异步错误和完整模块矩阵不在已关闭范围。
 
 关闭要求：设计错误组件引用及生成时机，确保页面lazy导入失败时错误组件已经可用；覆盖渲染错误、模块导入失败、嵌套边界向父冒泡、错误组件本身抛错、开发修复和生产行为；不靠删除原errorElement通过迁移。
+
+## CF-02 / AM02：同路由lazy拒绝后初始白屏（已修正）
+
+P5b网络中止测试与独立memory-router探针复现锁定React Router7.18.2在lazy拒绝后保留标记、渲染退回hydration路径的问题。生成页面导入经resolveRouteComponent保留原错误并在渲染时重抛，不修改路由库内部状态。原失败断言与修复后真实网络故障测试均保留，恢复需显式新页面/重载，不承诺自动清除ESM失败缓存。
 
 ## ADAPT-01 / AM01、AM02、AM10：版本、StrictMode、TS引用和基址
 
 分类：明确待适配事项，不预判为框架bug。原版React/Router与cormi peer范围有差异；原版StrictMode与当前runtime的默认装配不同；原tsconfig包含工具工程reference；静态资源中存在域名根绝对路径。四项分别记录取舍，不能用一次首页成功替它们验收。
 
 关闭要求：独立锁文件与真实包消费、StrictMode生命周期对照、业务/工具类型检查清晰分离、根路径和/admin/的所有已触发资源及深链接对照。具体条件见 [基础设施记录](02-infrastructure.md)。
+
+P5b进展：真实tgz安装、显式StrictMode和应用类型分离已落地；首个迁移安装的MUI传递minor漂移导致3个TS2362，已通过固定原@mui包族而非改业务代码修正。根路径首组通过；/admin/资源仍待，不将四个适配事项一次勾完。详见 [迁移接缝](04-routing-migration.md)。

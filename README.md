@@ -2,11 +2,11 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P5a Admin 模块基线与逐项迁移验收。** 真实 [Admin 迁移](docs/26-admin-migration.md) 已拆成11个模块议题，见 [台账](docs/admin/00-module-ledger.md)、[业务行为](docs/admin/01-business-modules.md)、[基础设施](docs/admin/02-infrastructure.md) 与 [问题登记](docs/admin/03-issue-register.md)。目前完成原版独立运行基线，不等于 cormi 迁移完成；Windows 继续挂起。已有 [配置派生与来源诊断](docs/25-configuration-provenance.md) 保持可用。
+**当前阶段：P5b 自定义错误边界与真实 Admin 迁移版本。** Material Kit React 已通过自己的 cormi tgz 安装完成根路径 dev/typecheck/build/preview、首组业务契约对照及实际错误注入恢复。新增 [路由边界协议](docs/29-routing-boundaries.md) 与 [接缝记录](docs/admin/04-routing-migration.md)；11个议题仍按 [模块台账](docs/admin/00-module-ledger.md) 跟踪，/admin/资源和完整交互尚未全部完成，Windows继续挂起。
 
-P4c 历史结果为 macOS arm64 **222 项 Node、14 项框架浏览器测试**及13包57个消费者阶段，见 [P4c 结果](docs/27-p4c-results.md) 与 [机器记录](artifacts/p4c-validation.json)。P5a 单独运行原版 Admin 的模块契约和框架 Node 回归，不以原版启动代替迁移，也不将先前框架浏览器/包消费成绩重复记作本轮结果。历史 [P4b](docs/24-p4b-results.md)、[P4a](docs/22-p4a-results.md)、[P3b](docs/18-p3b-results.md) 的原始事实保留。
+P5b 最终 macOS arm64 **231项Node、17项框架浏览器测试**通过，13包57个消费者阶段满足预期；迁移Admin的dev/preview各7组38条观察与原版一致，额外错误恢复18阶段通过。运行路径、具体范围和未完成项见 [P5b结果](docs/30-p5b-results.md) 与 [机器证据](artifacts/p5b-validation.json)。未执行Linux/Windows；历史 [P4c](docs/27-p4c-results.md)、[P4b](docs/24-p4b-results.md)、[P3b](docs/18-p3b-results.md) 保持不变，不累加重复测试。
 
-P5a 本轮原版 dev/preview 各7组模块契约满足预期，框架222项 Node回归通过；原版缺陷与占位行为另列，**不是 Admin 迁移完成**。本轮结果见 [原版基线与议题记录](docs/28-p5a-baseline-results.md) 和 [机器证据](artifacts/p5a-baseline-validation.json)。
+原版对照仍固定为 [P5a基线](docs/28-p5a-baseline-results.md)，原缺陷与占位行为独立保留；首组迁移对照通过不代表已经实现真实CRUD、认证或完整产品功能。
 
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 

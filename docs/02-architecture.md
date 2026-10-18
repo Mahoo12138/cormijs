@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.12。修订日期：2026-10-18。
+版本：Draft 0.13。修订轮次：P5b（接续 2026-10-18 Admin 迁移任务）。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -19,6 +19,8 @@ P4a 回到应用功能主线，Windows 原生验收按用户决定挂起。React
 P4b 增加独立项目创建器与显式开发 API 插件。create-cormi 不依赖目标项目配置或 Cordis 宿主，用本地 kit 生成可重定位应用；Mock/代理主入口为 Node HTTP handler，/vite 桥接才注入 Vite 服务，默认 preset 不强制安装。开发接口不进入 build/preview，详见 [创建与 API 协议](23-project-creation-and-dev-api.md)。
 
 P4c 增加可选 applicationConfigPlugin 及通用命令 middleware。加载器记录 preset/user 的赋值来源；应用插件执行冻结快照的 deriveConfig；config --for 重新解释当前目标命令输入，inspect 保持上次成功生成快照。core 仅定义数据与命令协议，不吸收 Web 默认值或派生策略。报告不含 Vite 内部默认值或私有 plugin options，见 [配置来源协议](25-configuration-provenance.md)。下一步转入 [真实 Admin 迁移](26-admin-migration.md)。
+
+P5b 由真实 Admin 迁移补充 RouteRecord.errorBoundary、eager 错误组件生成、lazy 导入异常的保真转交、显式 StrictMode 和挂载元素占用检查。能力位于 routes、React compiler 和浏览器 runtime，core 不依赖模板/UI。默认行为和失败范围见 [边界协议](29-routing-boundaries.md)，真实接缝见 [AM02/AM09](admin/04-routing-migration.md)；根路径首组通过不等于 AM10 子路径及全部业务交互完成。
 
 ## 1. 应该做一个什么框架
 
