@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import type { Page } from 'playwright-core';
 
 export interface Observation { readonly check: string; readonly value: unknown }
-export interface ModuleContext { page: Page; base: string; record(check: string, value: unknown): void }
+export interface ModuleContext { page: Page; base: string; record(check: string, value: unknown): void; capture(name: string): Promise<void> }
 export interface AdminModule { id: string; title: string; path: string; heading: RegExp; verify(ctx: ModuleContext): Promise<void> }
 const userNames = (page: Page) => page.locator('tbody th').allTextContents();
 const productNames = (page: Page) => page.locator('main .MuiCard-root a').allTextContents();

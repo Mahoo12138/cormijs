@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.14。修订轮次：P5c（真实 Admin 部署基址与状态热更新）。
+版本：Draft 0.15。修订轮次：P5d（真实 Admin 交互与生命周期验收；本轮无框架公共协议变更）。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -23,6 +23,8 @@ P4c 增加可选 applicationConfigPlugin 及通用命令 middleware。加载器�
 P5b 由真实 Admin 迁移补充 RouteRecord.errorBoundary、eager 错误组件生成、lazy 导入异常的保真转交、显式 StrictMode 和挂载元素占用检查。能力位于 routes、React compiler 和浏览器 runtime，core 不依赖模板/UI。默认行为和失败范围见 [边界协议](29-routing-boundaries.md)，真实接缝见 [AM02/AM09](admin/04-routing-migration.md)；根路径首组通过不等于 AM10 子路径及全部业务交互完成。
 
 P5c 将部署基址的一致性落在实际Vite provider：原生config hook不能改变已生成应用计划的base，修改基址应通过app配置或派生。Admin动态public资源由应用本地工具适配，不向core增加MUI或模板路径知识。资源字节、根/子路径、状态HMR与失败构建的验证契约见 [Admin部署协议](31-admin-deployment-and-development.md)，实际结果单独记录。
+
+P5d将真实模板Header可访问交互作为显式可选上游修正，不改变core、runtime或默认preset；图表使用原组件验证交互、尺寸和有限卸载循环。原版/忠实迁移/改进副本分别保留自己的契约与差异，见 [Header与图表](33-admin-header-and-charts.md)。模板修复不是新增框架能力，当前样本通过也不是整个可访问性或长期资源审计完成。
 
 ## 1. 应该做一个什么框架
 

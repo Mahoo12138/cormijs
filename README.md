@@ -2,10 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P5c Admin 子路径资源与状态热更新。** Material Kit React 的根路径与 `/admin/` 已完成 dev/typecheck/build/preview、原模块对照及全部public文件/生产资源校验；真实Users/Products保留交互状态的Fast Refresh与失败构建保旧也已验证。见 [部署与开发协议](docs/31-admin-deployment-and-development.md)；11项仍按 [模块台账](docs/admin/00-module-ledger.md) 跟踪，完整键盘/图表交互和配置切换继续，Windows挂起。
+**当前阶段：P5d Header 键盘焦点与图表生命周期。** 新增显式可选的上游Header修正，保留忠实迁移副本；原版、忠实版、改进版分别执行dev/preview的键盘与图表契约。见 [模块协议](docs/33-admin-header-and-charts.md)、[P5d结果](docs/34-p5d-results.md) 与 [模块台账](docs/admin/00-module-ledger.md)。本轮不修改framework packages，不把模板交互修复塞进core；Windows继续挂起。
 
-P5c最终复核在 macOS arm64 重新完成 **246项Node、17项框架浏览器测试**及13包57个消费者阶段；根/子路径四组模块与资源验收全部通过，100份public及53份生产资源逐文件校验，Users/Products状态更新和失败构建流程完整重复两轮。资源改写的五项新增边界断言先失败再修复，固定模板转换输出保持不变。见 [P5c结果](docs/32-p5c-results.md)、[最新复核证据](artifacts/p5c-review-validation.json)；[前期记录](artifacts/p5c-validation.json)和失败日志保留。未执行Linux/Windows；历史 [P5b](docs/30-p5b-results.md)、[P4c](docs/27-p4c-results.md) 不改写，不累加重复测试。
-
+P5d最终 macOS arm64 **249项Node、17项框架浏览器**通过，13包57个独立消费者阶段满足预期。八个图表完成12个tooltip状态、尺寸变化和三轮路由卸载/重挂；Header四组契约在各自基线下通过。精确命令/差异/失败历史见 [机器证据](artifacts/p5d-validation.json)。历史 [P5c](docs/32-p5c-results.md)、[P5b](docs/30-p5b-results.md)、[P4c](docs/27-p4c-results.md) 保留，不将重复执行或观察数当作新增用例。
 原版对照仍固定为 [P5a基线](docs/28-p5a-baseline-results.md)，原缺陷与占位行为独立保留；首组迁移对照通过不代表已经实现真实CRUD、认证或完整产品功能。
 
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。

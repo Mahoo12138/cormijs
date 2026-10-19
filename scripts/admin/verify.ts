@@ -8,6 +8,8 @@ import { parseArgs } from 'node:util';
 import { setTimeout as delay } from 'node:timers/promises';
 import { chromium } from 'playwright-core';
 import { adminModules, type Observation } from './modules.js';
+import { headerModules } from './header-contracts.js';
+import { chartModules } from './chart-contracts.js';
 
 // No Browser skill/runtime is listed in this session. Use the existing isolated Playwright dependency.
 async function visualReady(page: import('playwright-core').Page): Promise<void> {
@@ -38,10 +40,13 @@ async function layoutGeometry(page: import('playwright-core').Page) {
   });
 }
 
-const { values } = parseArgs({ options: { app: { type: 'string' }, kind: { type: 'string' }, command: { type: 'string' }, base: { type: 'string' }, out: { type: 'string' } }, strict: true });
+const { values } = parseArgs({ options: { app: { type: 'string' }, kind: { type: 'string' }, command: { type: 'string' }, base: { type: 'string' }, out: { type: 'string' }, suite: { type: 'string' } }, strict: true });
 assert.ok(values.app && values.out, 'Required: --app <independent app> --out <new evidence directory>');
 const app = await realpath(values.app), out = resolve(values.out), kind = values.kind ?? 'upstream', command = values.command ?? 'dev';
 assert.ok(['upstream', 'cormi'].includes(kind)); assert.ok(['dev', 'preview'].includes(command));
+const suite = values.suite ?? 'modules';
+assert.ok(['modules', 'business', 'header-original', 'header-fixed', 'charts'].includes(suite), 'Unknown Admin suite');
+const modules = suite === 'modules' ? adminModules : suite === 'business' ? adminModules.filter(module => module.id !== 'AM03') : suite === 'charts' ? chartModules : headerModules(suite === 'header-fixed');
 assert.ok(!existsSync(out), 'Evidence output must be a new directory'); await mkdir(out, { recursive: true });
 const executablePath = process.env.CORMI_BROWSER_EXECUTABLE ?? '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge';
 assert.ok(existsSync(executablePath), 'An installed Chromium browser is required');
@@ -68,7 +73,7 @@ try {
   assert.ok(address, 'Server did not become ready: ' + log.slice(-8000));
   const base = new URL(values.base ?? '/', address).href; report.url = base;
   browser = await chromium.launch({ executablePath, headless:true }); report.browser = browser.version();
-  for (const module of adminModules) {
+  for (const module of modules) {
     const page = await browser.newPage({ viewport: { width:1440, height:1000 } }); page.setDefaultTimeout(15000); page.setDefaultNavigationTimeout(25000);
     const observations: Observation[] = [], errors: string[] = [], consoleErrors: string[] = [], consoleWarnings: string[] = [], failedResources: unknown[] = [], external: string[] = [];
     const item: Record<string, unknown> = { id: module.id, title: module.title, observations, errors, consoleErrors, consoleWarnings, failedResources, external, passed:false };
@@ -102,7 +107,10 @@ try {
       // Full-page capture changed the original responsive layout during capture; use fixed viewport evidence.
       await page.screenshot({ path:join(out, module.id + '-desktop.png'), fullPage:false });
       assert.deepEqual(await layoutGeometry(page), geometry, 'Screenshot must not change the measured layout');
-      await module.verify({page,base,record:(check,value)=>observations.push({check,value})});
+      await module.verify({page,base,record:(check,value)=>observations.push({check,value}), capture: async name => {
+         assert.ok(/^[a-z0-9-]+$/.test(name)); await page.evaluate(() => document.fonts.ready);
+         await page.screenshot({path:join(out,module.id+'-'+name+'.png'),fullPage:false});
+       }});
       await page.waitForLoadState('networkidle');
       await page.goto(url); await page.getByRole('heading', {name:module.heading}).first().waitFor();
       if (module.id === 'AM04') await page.waitForFunction(() => document.querySelectorAll('.apexcharts-canvas').length === 8);
@@ -129,7 +137,7 @@ try {
     console.log(JSON.stringify({id:module.id,passed:item.passed,failure:item.failure,observations:observations.length}));
     await writeFile(join(out,'result.json'),JSON.stringify(report,null,2)+'\n');
   }
-  report.passed = report.modules.length === adminModules.length && report.modules.every(item=>item.passed);
+  report.passed = report.modules.length === modules.length && report.modules.every(item=>item.passed);
 } catch (error) { report.fatal = error instanceof Error ? error.message : String(error); }
 finally {
   try { await browser?.close(); }
