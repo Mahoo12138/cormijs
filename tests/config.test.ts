@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeConfig, defineConfig, definePreset } from '../packages/cormi/dist/config.js';
 import { compileConfig, ConfigCompileError } from '../packages/cormi/dist/compiler.js';
+import { environmentFiles, readEnvironment } from '../packages/cormi/dist/environment.js';
+const environmentInput = (root: string) => ({paths:environmentFiles(root,'production'),read:()=>readEnvironment(root,'production')});
 import { writeFile, realpath } from 'node:fs/promises';
 import { join } from 'node:path';
 import { hasCode, fixture } from './helpers.js';
@@ -42,7 +44,7 @@ test('static config compilation follows local dependencies without evaluating to
   try {
     await writeFile(join(root, 'settings.ts'), 'export const value: string = "v1";');
     await writeFile(join(root, 'cormi.config.ts'), `import {value} from './settings'; throw new Error('must not execute'); export default {app:{value, source:import.meta.url}};`);
-    const result = await compileConfig(root);
+    const result = await compileConfig(root, environmentInput(root));
     assert.ok(result.files.includes(join(root, 'settings.ts')));
     assert.match(result.code, /v1/); assert.match(result.code, /cormi.config.ts/);
     assert.equal(result.fingerprint.length, 64);
@@ -53,6 +55,6 @@ test('failed resolution retains missing file candidates for later recovery', { t
   const f = await fixture(); const root = await realpath(f.root);
   try {
     await writeFile(join(root, 'cormi.config.ts'), `import {value} from './missing'; export default {app:{value}};`);
-    await assert.rejects(compileConfig(root), error => error instanceof ConfigCompileError && error.files.includes(join(root, 'missing.ts')));
+    await assert.rejects(compileConfig(root, environmentInput(root)), error => error instanceof ConfigCompileError && error.files.includes(join(root, 'missing.ts')));
   } finally { await f.clean(); }
 });

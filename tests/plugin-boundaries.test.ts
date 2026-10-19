@@ -5,7 +5,7 @@ import { join, resolve, sep } from 'node:path';
 import { forbiddenPackages, literalModuleEdges } from '../scripts/plugin-boundaries.js';
 
 const rules: Record<string, string[]> = {
-  core: ['cordis'], builder: ['cordis'], cormi: ['@cormijs/core','esbuild'],
+  core: ['cordis'], builder: ['cordis'], cormi: ['@cormijs/core','cordis','esbuild'],
   'plugin-web': ['@cormijs/core','@cormijs/builder','cordis'],
   'plugin-react': ['@cormijs/core','@cormijs/builder','@cormijs/routes','@cormijs/plugin-web','cordis','esbuild'],
   runtime: ['react','react-dom','react-router'],

@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.24。修订轮次：P13（插件优先审查、取消边界与有限可靠性基线）。
+版本：Draft 0.25。修订轮次：P14（原生 Cordis 引导插件与启动策略）。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -43,6 +43,8 @@ P11将环境解析放在配置求值前的bootstrap，四层文件与继承覆�
 P12 收敛应用创建的默认类型、生成/诊断命令和开发API条件，复用已有ImportMetaEnv与Cordis功能贡献而不新增容器或包。真实创建器归档产生独立应用，根/子路径完成环境/Mock、严格类型、构建保旧及仅站点文件的静态交付；测试HTTP主机不成为生产运行依赖。当前用户入口见 [应用指南](49-application-guide.md)，实际结果与未关闭门槛见 [P12](50-p12-results.md)。
 
 P13以固定DeepSeek Harness的profile/bundle、能力定义/provider/consumer和可替换HMR为参考，增加持续插件边界检查与显式测试插件。默认20次启停、100批配置/环境和100批React生成分别验证资源回落与最新输入；修复launcher启动通知中同步取消留下无人观察就绪拒绝的问题。watch/env/diagnose引导策略仍有耦合，未伪称全量插件化；有限资源样本不等于长期堆稳定，详见 [插件优先审查](51-plugin-first-reliability.md) 与 [P13记录](52-p13-results.md)。
+
+P14 将 launchPolicy、launchEnvironment、launchReload 提供者放入原生 Cordis 引导组合，载体在应用配置求值之前注入并使用它们。默认CLI继续选择原有策略；公开runCormi可显式替换一个或整个组合，不依赖坏应用配置先成功。进程/锁/代际机制不让渡给另一个更新状态机，异步任务仍由原生消费者排空；未确认引导清理时保留锁。契约与独立环境解析示例见 [引导插件](53-bootstrap-plugins.md)，实际验证见 [P14](54-p14-results.md)。worker中失败诊断的保留执行分支尚未拆出，不将这一步宣称为所有bootstrap策略已经完全可替换。
 
 ## 1. 应该做一个什么框架
 

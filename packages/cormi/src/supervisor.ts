@@ -2,16 +2,19 @@ import { fork, type ChildProcess } from 'node:child_process';
 import { mkdir, mkdtemp, lstat, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { setTimeout as delay } from 'node:timers/promises';
-import { CormiError, deadline } from '@cormijs/core';
+import { CormiError, deadline, type Plugin } from '@cormijs/core';
+import { bootstrapSession } from './bootstrap-session.js';
+import { launchPlan, environmentPaths, environmentSnapshot } from './bootstrap-validation.js';
 import { acquireProject } from './lock.js';
 import { compileConfig, fingerprint, ConfigCompileError } from './compiler.js';
 import { projectFile } from './config.js';
-import { validateMode, environmentFiles } from './environment.js';
+import { validateMode } from './environment.js';
 import { wireError, type StartMessage, type WorkerMessage, type WireError } from './protocol.js';
 
 export interface LauncherEvent { readonly type: string; readonly [key: string]: unknown }
 export interface LaunchOptions {
+  /** Explicit trusted carrier-side Cordis composition; independent of cormi.config.ts. */
+  readonly bootstrap?: Plugin<void>;
   /** Diagnostic command's target environment; never changes which command handler executes. */
   readonly configurationCommand?: string;
   readonly root: string; readonly command: string; readonly mode?: string; readonly watch?: boolean;
@@ -43,7 +46,7 @@ function startWorker(start: StartMessage, options: LaunchOptions, watch: (files:
   let exited = false; let failure: CormiError | undefined;
   const child: ChildProcess = fork(fileURLToPath(new URL('./worker.js', import.meta.url)), [], {
     cwd: start.root, execArgv: [], stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-    env: { ...process.env, NODE_ENV: (start.configurationCommand ?? start.command) === 'dev' ? 'development' : 'production' },
+    env: { ...process.env, NODE_ENV: start.nodeEnv },
   });
   child.stdout?.on('data', chunk => options.onLog?.('stdout', String(chunk)));
   child.stderr?.on('data', chunk => options.onLog?.('stderr', String(chunk)));
@@ -89,19 +92,16 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
   const interval = options.pollIntervalMs ?? 200;
   for (const value of [startup, shutdown, interval]) if (!Number.isFinite(value) || value < 20 || value > 120000) throw new RangeError('Invalid launcher timeout/interval');
   if (!/^[a-z][a-z0-9-]*$/.test(options.command)) throw new CormiError('COMMAND_INVALID', 'Invalid command name.');
-  const inspecting = options.command === 'config' || options.command === 'diagnose';
-  if (options.configurationCommand !== undefined && (!inspecting || !/^[a-z][a-z0-9-]*$/.test(options.configurationCommand) || ['config', 'diagnose'].includes(options.configurationCommand))) throw new CormiError('CONFIG_TARGET_INVALID', '--for is only valid for config/diagnose and requires an application command name.');
-  if (options.command === 'diagnose' && options.watch) throw new CormiError('DIAGNOSIS_WATCH_UNSUPPORTED', 'Diagnosis is a one-shot snapshot.');
-  const configurationCommand = inspecting ? options.configurationCommand ?? 'dev' : options.command;
-  const mode = options.mode ?? (configurationCommand === 'dev' ? 'development' : 'production');
-  validateMode(mode);
-  const signal = options.signal ?? new AbortController().signal;
-  if (signal.aborted) return 0;
+  if (options.mode !== undefined) validateMode(options.mode);
+  const callerSignal = options.signal ?? new AbortController().signal;
+  if (callerSignal.aborted) return 0;
   const emit = (event: LauncherEvent) => options.onEvent?.(event);
   const lease = acquireProject(options.root); const root = lease.root;
-  const cache = join(root, '.cormi'); const watching = options.watch ?? options.command === 'dev';
+  const boot = bootstrapSession(options.bootstrap, Math.max(startup, shutdown));
+  const signal = AbortSignal.any([callerSignal, boot.signal]);
+  const cache = join(root, '.cormi');
   let active: ReturnType<typeof startWorker> | undefined; let activeDirectory: string | undefined;
-  let files: string[] = [join(root, 'cormi.config.ts'), ...environmentFiles(root, mode)]; let previous: string | undefined;
+  let files: string[] = []; let previous: string | undefined;
   let extra: string[] = []; let extraStamp = ''; let generation = 0; let exitCode = 0;
   const inputStamp = async () => `${await fingerprint(files)}:${await fingerprint(extra)}`;
   async function stopActive(): Promise<void> {
@@ -118,6 +118,22 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
     }
   }
   try {
+    const services = await cancellable(deadline(boot.ready(), startup, new CormiError('BOOTSTRAP_START_TIMEOUT','Bootstrap initialization exceeded its deadline.')), signal);
+    const request = Object.freeze({command:options.command,configurationCommand:options.configurationCommand,mode:options.mode,watch:options.watch});
+    // Observe even untyped providers that accidentally return a rejecting Promise.
+    // The public metadata contract is synchronous; all returned work is still owned.
+    const metadata = <T>(operation: () => T) => cancellable(deadline(boot.invoke(operation),startup,
+      new CormiError('BOOTSTRAP_PREPARE_TIMEOUT','Bootstrap metadata preparation exceeded its deadline.')),signal);
+    const plan = launchPlan(await metadata(() => services.policy.resolve(request)), request);
+    const {mode, configurationCommand, watch:watching, nodeEnv} = plan;
+    const envPaths = environmentPaths(root, await metadata(() => services.environment.files(root,plan)));
+    files = [join(root,'cormi.config.ts'), ...envPaths];
+    const pause = async () => {
+      if (signal.aborted) return;
+      const task = boot.invoke(() => services.reload.wait({files:Object.freeze([...new Set([...files,...extra])]),intervalMs:interval,signal}));
+      try { await cancellable(deadline(task,Math.max(startup,interval * 2),new CormiError('BOOTSTRAP_RELOAD_TIMEOUT','Reload wake-up exceeded its deadline.')),signal); }
+      catch (error) { if (!signal.aborted) throw error; }
+    };
     try { await mkdir(cache, { mode: 0o700 }); }
     catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
     const state = await lstat(cache);
@@ -127,14 +143,27 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
       if (previous === undefined || (watching && current !== previous)) {
         let compiled;
         try {
-          compiled = await compileConfig(root, mode); files = [...compiled.files];
+          const task = boot.invoke(() => compileConfig(root, {paths:envPaths, read:async () => {
+            const value = await services.environment.load({root,plan,files:envPaths,signal});
+            signal.throwIfAborted();
+            return environmentSnapshot(value,mode,envPaths);
+          }}));
+          compiled = await cancellable(deadline(task,startup,new CormiError('CONFIG_PREPARE_TIMEOUT','Configuration preparation exceeded its deadline.')),signal);
+          files = [...compiled.files];
           if (signal.aborted) break;
         } catch (error) {
-          if (error instanceof ConfigCompileError) files = [...new Set([...files, ...error.files])];
-          previous = await inputStamp();
+          if (signal.aborted) break;
+          // A timed-out task may still hold resources. Do not admit another preparation
+          // over it: unwind the carrier and join the tracked task during plugin teardown.
+          if (!(error instanceof ConfigCompileError)) throw error;
+          files = [...new Set([...files, ...error.files])];
+          // An unstable read has not consumed the latest on-disk snapshot. Recording that
+          // newer fingerprint as an accepted failure would swallow its only change event.
+          const unstable = error.cause instanceof CormiError && ['CONFIG_CHANGED','ENV_CHANGED'].includes(error.cause.code);
+          previous = unstable ? undefined : await inputStamp();
           emit({ type: 'error', ...wireError(error), servingPrevious: !!active && !active.exited });
           if (!watching) { exitCode = 1; break; }
-          await delay(interval, undefined, { signal }).catch(() => {}); continue;
+          await pause(); continue;
         }
         if (await fingerprint(compiled.files) !== compiled.fingerprint) { previous = undefined; continue; }
         if (active) emit({ type: 'restarting', generation: generation + 1, previousPid: active.pid });
@@ -152,7 +181,7 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
         await writeFile(module, compiled.code, { flag: 'wx', mode: 0o600 });
         extra = []; extraStamp = await fingerprint(extra); generation++;
         active = startWorker({ version: 1, type: 'start', root, token: lease.token, module,
-          command: options.command, configurationCommand, mode, environment: compiled.environment, timeoutMs: shutdown, serverOnlyFiles: compiled.files }, options,
+          command: options.command, configurationCommand, mode, nodeEnv, environment: compiled.environment, timeoutMs: shutdown, serverOnlyFiles: compiled.files }, options,
           (values, stamp) => { extra = values.map(file => projectFile(root, file)); extraStamp = stamp; });
         emit({ type: 'starting', generation, pid: active.pid });
         try {
@@ -189,12 +218,19 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
         if (activeDirectory) { await rm(activeDirectory, { recursive: true, force: true }); activeDirectory = undefined; }
         if (!watching) { exitCode = 1; break; }
       }
-      await delay(interval, undefined, { signal }).catch(() => {});
+      await pause();
     }
+    if (boot.signal.aborted && !callerSignal.aborted) throw new CormiError('BOOTSTRAP_WITHDRAWN','Required bootstrap services were withdrawn.');
+  } catch (error) {
+    if (!callerSignal.aborted) { exitCode = 1; throw error; }
   } finally {
+    boot.cancel();
     try { await stopActive(); }
     catch (error) { exitCode = 1; emit({ type: 'error', ...wireError(error) }); }
-    // Fail closed if termination is unknown: retain the lock rather than admit another writer.
+    // Bootstrap providers run in this process: unknown cleanup cannot be made safe by killing a worker.
+    // Keep the lease if their teardown fails or an admitted task does not actually settle.
+    try { await deadline(boot.close(),shutdown,new CormiError('BOOTSTRAP_CLEANUP_INCOMPLETE','Bootstrap cleanup timed out; project lock retained.')); }
+    catch (cause) { throw new CormiError('BOOTSTRAP_CLEANUP_INCOMPLETE','Bootstrap cleanup failed; project lock retained.',{}, {cause}); }
     if (!active || active.exited) lease.release();
     else throw new CormiError('CLEANUP_INCOMPLETE', 'Worker termination unconfirmed; project lock retained.');
     emit({ type: 'stopped', code: exitCode });

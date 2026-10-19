@@ -2,9 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P13 插件优先审查与开发态可靠性基线。** 新增可复现20次启停/100批真实文件变更工具、依赖边界门禁和根AGENTS约束，修复启动通知中立即取消导致未处理就绪拒绝的问题。参考固定DeepSeek Harness，继续区分原生插件能力与仍需拆分的bootstrap策略。当前应用使用方式见 [应用开发指南](docs/49-application-guide.md)，本轮范围见 [P13结果](docs/52-p13-results.md)。
+**当前阶段：P14 原生 Cordis 引导插件与启动策略。** 命令语义、环境读取和重载唤醒通过launchPolicy/launchEnvironment/launchReload服务装配，公开runCormi可替换原生组合；坏应用配置不阻止引导层恢复。默认CLI使用方式不变，worker失败诊断执行等剩余策略不冒充已全部插件化。当前应用入口见 [应用开发指南](docs/49-application-guide.md)，高级入口见 [引导插件](docs/53-bootstrap-plugins.md)。
 
-最终 macOS arm64 **358项Node、19项框架浏览器**通过；13个tgz消费73阶段、默认插件作者54阶段和新应用37阶段通过，默认可靠性样本完整执行两轮。资源回落不等于堆内存完全持平，有限样本与内存对照详见 [机器证据](artifacts/p13-validation.json) 和 [插件优先审查](docs/51-plugin-first-reliability.md)。不宣称完整1.0、长期无泄漏或公开发布；不扩展Admin业务。
+最终 macOS arm64 **376项Node、19项框架浏览器**通过；13个tgz消费79阶段、默认插件作者54阶段、新应用37阶段和两轮20/100可靠性样本通过。实际范围、异步失败与修正见 [P14结果](docs/54-p14-results.md)，精确源码/日志/归档身份见 [机器证据](artifacts/p14-validation.json)。不宣称完整1.0、长期无泄漏、任意平台兼容或公开发布；Admin继续仅作框架验证负载。
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 
 ## 本地运行

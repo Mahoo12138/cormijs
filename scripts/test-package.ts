@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { writeEnvironmentFixture, verifyEnvironmentPage, privateMarkers } from './environment-fixture.js';
+import { writeEnvironmentFixture, verifyEnvironmentPage, privateMarkers, environmentLiteral } from './environment-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -70,9 +70,11 @@ const coreTypes = `import {ProjectRuntime,type Context} from '@cormijs/core';con
 async function command(label: string, cwd: string, name: string, expected = 0, pattern?: RegExp) {
   return execute(label, cwd, join(cwd, 'node_modules/.bin/cormi'), [name, '--json', '--startup-timeout', '30000'], expected, pattern);
 }
-async function withServer(cwd: string, name: 'dev' | 'preview', action: (url: string) => Promise<void>, args: string[] = []) {
-  const sessionLabel = cwd.split(sep).at(-1) + '-' + name;
-  const child = spawn(join(cwd, 'node_modules/.bin/cormi'), [name, '--json', '--startup-timeout', '30000', ...args], { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
+async function withServer(cwd: string, name: 'dev' | 'preview', action: (url: string) => Promise<void>, args: string[] = [], carrierFile?: string) {
+  const sessionLabel = cwd.split(sep).at(-1) + '-' + name + (carrierFile ? '-bootstrap' : '');
+  const executable = carrierFile ? process.execPath : join(cwd, 'node_modules/.bin/cormi');
+  const argv = carrierFile ? [carrierFile,name] : [name, '--json', '--startup-timeout', '30000', ...args];
+  const child = spawn(executable, argv, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
   const events: Array<Record<string, any>> = []; let stdout = '', stderr = '', buffer = '';
   let resolveReady!: (url: string) => void, rejectReady!: (error: Error) => void;
   const ready = new Promise<string>((resolve, reject) => { resolveReady = resolve; rejectReady = reject; });
@@ -139,6 +141,15 @@ const h=new ProjectRuntime();h.mount('api',DevApiService);h.mount('feature',{inj
   const launcher = await create('launcher', 'launcher'); await install('launcher-install', launcher);
   await execute('launcher-bin', launcher, join(launcher, 'node_modules/.bin/cormi'), ['--help'], 0, /cormi <command>/);
   await writeFile(join(launcher, 'types.mts'), `import {defineConfig,type Diagnosis} from 'cormijs';import {runCormi} from 'cormijs/launcher';void runCormi;defineConfig({plugins:[]});declare const result:Diagnosis;const health:boolean=result.healthy;void health;\n// @ts-expect-error metadata is not any\nconst invalid:number=result.graph.nodes[0]!.state;`);
+  await writeFile(join(launcher, 'bootstrap-types.mts'), `import {createBootstrap,type LaunchPolicy,type LaunchEnvironment,type LaunchReload,readEnvironmentFiles,fingerprintFiles} from 'cormijs/bootstrap';import {runCormi} from 'cormijs/launcher';
+const bootstrap=createBootstrap({environment:{apply(ctx){ctx.provide('launchEnvironment',{files:()=>[],load:({root,plan,files})=>readEnvironmentFiles(root,plan.mode,files)} satisfies LaunchEnvironment);}}});
+void runCormi({root:'.',command:'probe',bootstrap});declare const policy:LaunchPolicy;declare const reload:LaunchReload;
+// @ts-expect-error node environment is not arbitrary or any
+const invalid:'arbitrary'=policy.resolve({command:'probe'}).nodeEnv;
+const stamp:Promise<string>=fingerprintFiles([]);void stamp;
+// @ts-expect-error a wake-up request requires cancellation and file inputs
+reload.wait({intervalMs:200});`);
+  await execute('bootstrap-public-types',launcher,process.execPath,[...typeArguments.slice(0,-1),'bootstrap-types.mts']);
   await execute('launcher-types', launcher, process.execPath, typeArguments);
   await writeFile(join(launcher, 'cormi.config.ts'), `import {defineConfig} from 'cormijs';export default defineConfig({plugins:[{id:'echo',plugin:{inject:['commands'],apply(ctx){ctx.effect(()=>ctx.commands.register('echo',async()=>({kind:'result',data:'PACKED_COMMAND_OK'})))}}}]});`);
   await command('launcher-custom-command', launcher, 'echo', 0, /PACKED_COMMAND_OK/);
@@ -148,6 +159,19 @@ const controller=new AbortController();const code=await runCormi({root:process.c
 onEvent(event){if(event.type==='starting')controller.abort();}});assert.equal(code,0);console.log('PACKED_START_CANCEL_OK');`], 0, /PACKED_START_CANCEL_OK/);
   await execute('packed-diagnose-no-web', launcher, join(launcher, 'node_modules/.bin/cormi'), ['diagnose', '--for', 'echo', '--json'], 0, /cormi:diagnosis:1/);
   const normalLauncherConfig = await readFile(join(launcher, 'cormi.config.ts'), 'utf8');
+  await writeFile(join(launcher,'cormi.config.ts'),`export default ({command,mode,env})=>({plugins:[{id:'echo',plugin:{inject:['commands'],apply(ctx){ctx.effect(()=>ctx.commands.register('echo',async()=>({kind:'result',data:{command,mode,node:env.NODE_ENV,value:env.CORMI_PUBLIC_BOOT}})))}}}]});`);
+  await writeFile(join(launcher,'company.json'),JSON.stringify({title:'installed-custom-provider'}));
+  await writeFile(join(launcher,'.env'),'MUST_NOT_READ="broken');
+  await execute('packed-bootstrap-no-web',launcher,process.execPath,['--input-type=module','-e',`import assert from 'node:assert/strict';import {join} from 'node:path';import {readFile} from 'node:fs/promises';import {runCormi} from 'cormijs/launcher';import {createBootstrap,fingerprintFiles} from 'cormijs/bootstrap';
+let closed=0;const policy={apply(ctx){ctx.provide('launchPolicy',{resolve:()=>({configurationCommand:'echo',mode:'staging',nodeEnv:'development',watch:false})});}};
+const environment={apply(ctx){ctx.effect(()=>()=>{closed++;});ctx.provide('launchEnvironment',{files:root=>[join(root,'company.json')],async load({plan,files,signal}){
+ signal.throwIfAborted();const fingerprint=await fingerprintFiles(files);const text=await readFile(files[0],'utf8');assert.ok(Buffer.byteLength(text)<4096);const input=JSON.parse(text);assert.equal(typeof input.title,'string');signal.throwIfAborted();
+ return {mode:plan.mode,paths:files,fingerprint,files:[{name:'company.json',present:true}],values:{CORMI_PUBLIC_BOOT:input.title},origins:{CORMI_PUBLIC_BOOT:['company.json']}};
+}});}};
+let result;const code=await runCormi({root:process.cwd(),command:'echo',bootstrap:createBootstrap({policy,environment}),onEvent:e=>{if(e.type==='result')result=e.data;}});
+assert.equal(code,0);assert.equal(closed,1);assert.deepEqual(result,{command:'echo',mode:'staging',node:'development',value:'installed-custom-provider'});console.log('PACKED_BOOTSTRAP_OK');`],0,/PACKED_BOOTSTRAP_OK/);
+  await rm(join(launcher,'.env'));await rm(join(launcher,'company.json'));await writeFile(join(launcher,'cormi.config.ts'),normalLauncherConfig);
+
   await writeFile(join(launcher, 'cormi.config.ts'), `export default {plugins:[{id:'missing-feature',plugin:{inject:['missing'],apply(){throw Error('must not activate')}}}]};`);
   await execute('packed-diagnose-missing', launcher, join(launcher, 'node_modules/.bin/cormi'), ['diagnose', '--json'], 1, /DIAGNOSIS_UNHEALTHY/);
   await writeFile(join(launcher, 'cormi.config.ts'), normalLauncherConfig);
@@ -160,7 +184,7 @@ onEvent(event){if(event.type==='starting')controller.abort();}});assert.equal(co
   const sdk = await create('sdk', 'react'); const sdkManifest = consumerManifest(kit, 'react');
   Object.assign(sdkManifest.dependencies, sdkManifest.pnpm.overrides); await writeFile(join(sdk, 'package.json'), JSON.stringify(sdkManifest));
   await install('sdk-install', sdk);
-  const specifiers = kit.packages.map(item => item.name).concat('cormijs/launcher', '@cormijs/builder/development', '@cormijs/plugin-dev-api/vite', '@cormijs/plugin-dev-api/service');
+  const specifiers = kit.packages.map(item => item.name).concat('cormijs/launcher', 'cormijs/bootstrap', '@cormijs/builder/development', '@cormijs/plugin-dev-api/vite', '@cormijs/plugin-dev-api/service');
   await writeFile(join(sdk, 'types.mts'), specifiers.map((specifier, i) => `import * as p${i} from ${JSON.stringify(specifier)};void p${i};`).join('\n'));
   await execute('all-public-types', sdk, process.execPath, typeArguments);
   await writeFile(join(sdk, 'exports.mjs'), `for(const name of ${JSON.stringify(specifiers)}){await import(name); console.log(name)}`);
@@ -287,6 +311,26 @@ onEvent(event){if(event.type==='starting')controller.abort();}});assert.equal(co
     await withServer(environmentConsumer,'preview',async url=>{await verifyEnvironmentPage(page,url,'selected',true);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'environment-preview.png')});},['--mode','staging']);
     assert.deepEqual(await readFile(join(environmentConsumer,'.cormi/app.tsx')),generatedEnvironment);
     report.stages.push({label:'installed-environment-mode-node-client-html-production',privateMarkersAbsent:true,previewRegenerated:false});
+    const defaultEnv=await readFile(join(environmentConsumer,'.env'));
+    const customFile=join(environmentConsumer,'company.vars'),carrierFile=join(environmentConsumer,'bootstrap-carrier.mjs');
+    await writeFile(customFile,`CORMI_PUBLIC_VALUE=custom-bootstrap\nCORMI_PUBLIC_LITERAL=${environmentLiteral}\nCORMI_PRIVATE_VALUE=${privateMarkers[0]}\n`);
+    await writeFile(join(environmentConsumer,'.env'),'UNSELECTED_DEFAULT="broken');
+    await writeFile(carrierFile,`import {join} from 'node:path';import {runCormi} from 'cormijs/launcher';import {createBootstrap,readEnvironmentFiles} from 'cormijs/bootstrap';
+const controller=new AbortController(),stop=()=>controller.abort();process.once('SIGINT',stop);process.once('SIGTERM',stop);
+const environment={apply(ctx){ctx.provide('launchEnvironment',{files:root=>[join(root,'company.vars')],load:({root,plan,files})=>readEnvironmentFiles(root,plan.mode,files)});}};
+try{process.exitCode=await runCormi({root:process.cwd(),command:process.argv[2],mode:'staging',startupTimeoutMs:30000,bootstrap:createBootstrap({environment}),signal:controller.signal,onEvent:e=>console.log(JSON.stringify(e))});}
+finally{process.off('SIGINT',stop);process.off('SIGTERM',stop);}`);
+    try {
+      await withServer(environmentConsumer,'dev',async url=>{await verifyEnvironmentPage(page,url,'custom-bootstrap',false);assert.equal((await fetch(new URL('company.vars?raw',url))).status,403);assert.deepEqual(errors,[]);},[],carrierFile);
+      await execute('bootstrap-environment-build',environmentConsumer,process.execPath,[carrierFile,'build']);
+      for(const name of await readdir(join(environmentConsumer,'dist/assets')))for(const marker of privateMarkers)assert.equal((await readFile(join(environmentConsumer,'dist/assets',name))).includes(Buffer.from(marker)),false);
+      const generated=await readFile(join(environmentConsumer,'.cormi/app.tsx'));
+      await writeFile(customFile,`CORMI_PUBLIC_VALUE=after-custom-build\nCORMI_PUBLIC_LITERAL=${environmentLiteral}\n`);
+      await withServer(environmentConsumer,'preview',async url=>{await verifyEnvironmentPage(page,url,'custom-bootstrap',true);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'bootstrap-environment-preview.png')});},[],carrierFile);
+      assert.deepEqual(await readFile(join(environmentConsumer,'.cormi/app.tsx')),generated);
+      report.stages.push({label:'installed-custom-bootstrap-node-html-client-static',unusedBrokenDotenvIgnored:true,privateInputDenied:true});
+    }finally{await writeFile(join(environmentConsumer,'.env'),defaultEnv);await rm(customFile);await rm(carrierFile);}
+
   } finally { await browser.close(); }
   report.passed = true;
 } catch (error) {

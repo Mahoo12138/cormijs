@@ -64,8 +64,7 @@ async function run(message: StartMessage): Promise<void> {
   timeout = message.timeoutMs;
   verifyLease(message.root, message.token);
   // Consume the preflighted bytes, not a second on-disk read. No environment values are written to the config cache.
-  const resolvedEnv = resolveEnvironment(message.environment, process.env,
-    (message.configurationCommand ?? message.command) === 'dev' ? 'development' : 'production');
+  const resolvedEnv = resolveEnvironment(message.environment, process.env, message.nodeEnv);
   for (const [key, value] of Object.entries(resolvedEnv.env)) process.env[key] = value;
   const module = await import(pathToFileURL(message.module).href);
   const environment = Object.freeze({ root: message.root, command: message.configurationCommand ?? message.command, mode: message.mode, env: resolvedEnv.env });

@@ -1,6 +1,7 @@
 import type { Diagnosis } from './diagnose.js';
 import type { EnvironmentSnapshot } from './environment.js';
 export interface StartMessage {
+  readonly nodeEnv: 'development' | 'production';
   readonly environment: EnvironmentSnapshot;
   readonly version: 1; readonly type: 'start'; readonly root: string; readonly token: string;
   readonly module: string; readonly command: string; readonly mode: string; readonly timeoutMs: number;

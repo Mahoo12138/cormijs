@@ -1,6 +1,6 @@
 import { constants } from 'node:fs';
 import { lstat, open } from 'node:fs/promises';
-import { basename, join } from 'node:path';
+import { basename, join, relative, isAbsolute, sep } from 'node:path';
 import { parseEnv } from 'node:util';
 import { CormiError, type EnvironmentSummary } from '@cormijs/core';
 import { fingerprint } from './inputs.js';
@@ -85,7 +85,19 @@ async function readEnvironmentFile(path: string): Promise<string | undefined> {
 }
 /** Private in-memory bootstrap snapshot. Never written into generated code or diagnostic output. */
 export async function readEnvironment(root: string, mode: string): Promise<EnvironmentSnapshot> {
-  const paths = environmentFiles(root, mode), initial = await fingerprint(paths);
+  return readEnvironmentFiles(root, mode, environmentFiles(root, mode));
+}
+/** Exact project-root files chosen by a bootstrap provider; same framing and byte budgets. */
+export async function readEnvironmentFiles(root: string, mode: string, selected: readonly string[]): Promise<EnvironmentSnapshot> {
+  validateMode(mode);
+  if (!Array.isArray(selected) || selected.length > 16) throw new CormiError('ENV_PATHS_INVALID','At most sixteen environment files are supported.');
+  const paths = Object.freeze(Array.from(selected, path => {
+    if (typeof path !== 'string' || !isAbsolute(path) || !relative(root,path) || relative(root,path).includes(sep)
+      || relative(root,path) === '..' || isAbsolute(relative(root,path))) throw new CormiError('ENV_PATHS_INVALID','Environment files must be direct project-root files.');
+    return path;
+  }));
+  if (new Set(paths).size !== paths.length) throw new CormiError('ENV_PATHS_INVALID','Duplicate environment candidates.');
+  const initial = await fingerprint(paths);
   const values: Record<string, string> = Object.create(null), origins: Record<string, string[]> = Object.create(null);
   const files: Array<{ name: string; present: boolean }> = [];
   for (const path of paths) {
