@@ -24,11 +24,16 @@ function remoteError(error: WireError): CormiError {
   return new CormiError(error.code, error.message, {}, error.cause ? { cause: remoteError(error.cause) } : undefined);
 }
 function cancellable<T>(task: Promise<T>, signal: AbortSignal): Promise<T> {
-  if (signal.aborted) return Promise.reject(new CormiError('STOP_REQUESTED', 'Launcher stopped.'));
   return new Promise((resolve, reject) => {
     const abort = () => reject(new CormiError('STOP_REQUESTED', 'Launcher stopped.'));
-    signal.addEventListener('abort', abort, { once: true });
-    task.then(resolve, reject).finally(() => signal.removeEventListener('abort', abort));
+    // Cancellation stops this wait, not the underlying task. Observe its settlement
+    // even when a carrier already cancelled synchronously from the starting event.
+    if (signal.aborted) abort();
+    else signal.addEventListener('abort', abort, { once: true });
+    void task.then(
+      value => { signal.removeEventListener('abort', abort); resolve(value); },
+      error => { signal.removeEventListener('abort', abort); reject(error); },
+    );
   });
 }
 function startWorker(start: StartMessage, options: LaunchOptions, watch: (files: string[], fingerprint: string) => void) {

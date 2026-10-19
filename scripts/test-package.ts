@@ -142,6 +142,10 @@ const h=new ProjectRuntime();h.mount('api',DevApiService);h.mount('feature',{inj
   await execute('launcher-types', launcher, process.execPath, typeArguments);
   await writeFile(join(launcher, 'cormi.config.ts'), `import {defineConfig} from 'cormijs';export default defineConfig({plugins:[{id:'echo',plugin:{inject:['commands'],apply(ctx){ctx.effect(()=>ctx.commands.register('echo',async()=>({kind:'result',data:'PACKED_COMMAND_OK'})))}}}]});`);
   await command('launcher-custom-command', launcher, 'echo', 0, /PACKED_COMMAND_OK/);
+  await execute('packed-starting-cancellation', launcher, process.execPath, ['--unhandled-rejections=strict', '--input-type=module', '-e',
+    `import assert from 'node:assert/strict';import {runCormi} from 'cormijs/launcher';
+const controller=new AbortController();const code=await runCormi({root:process.cwd(),command:'echo',signal:controller.signal,
+onEvent(event){if(event.type==='starting')controller.abort();}});assert.equal(code,0);console.log('PACKED_START_CANCEL_OK');`], 0, /PACKED_START_CANCEL_OK/);
   await execute('packed-diagnose-no-web', launcher, join(launcher, 'node_modules/.bin/cormi'), ['diagnose', '--for', 'echo', '--json'], 0, /cormi:diagnosis:1/);
   const normalLauncherConfig = await readFile(join(launcher, 'cormi.config.ts'), 'utf8');
   await writeFile(join(launcher, 'cormi.config.ts'), `export default {plugins:[{id:'missing-feature',plugin:{inject:['missing'],apply(){throw Error('must not activate')}}}]};`);

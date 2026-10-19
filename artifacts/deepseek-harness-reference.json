@@ -1,0 +1,99 @@
+{
+  "format": "cormi:source-reference:1",
+  "observedAt": "2026-10-19T15:46:12.675442+00:00",
+  "repository": "https://github.com/deepseek-ai/deepseek-harness.git",
+  "localPath": "references/deepseek-harness",
+  "commit": "687f282e8625c6b8d11ff58211a90524be2e4317",
+  "clean": true,
+  "shallow": true,
+  "installed": false,
+  "upstreamScriptsExecuted": false,
+  "files": [
+    {
+      "path": "docs/architecture.md",
+      "readRanges": [
+        [
+          1,
+          150
+        ]
+      ],
+      "bytes": 18900,
+      "sha256": "95a7722c7096d665d8adedeb733b8f5ad7740e67cb5c6e9dc91ec05f430cb760"
+    },
+    {
+      "path": "vendor/README.md",
+      "readRanges": [
+        [
+          1,
+          56
+        ]
+      ],
+      "bytes": 20473,
+      "sha256": "463f0475336df70f35805c60ea897b94d15cdd295595d8a50074dedd4555d311"
+    },
+    {
+      "path": "packages/boot/hmr/src/index.ts",
+      "readRanges": [
+        [
+          1,
+          90
+        ],
+        [
+          205,
+          308
+        ]
+      ],
+      "bytes": 49737,
+      "sha256": "acea180d2f2dcd386aa80c4676025364db64f271436cc1a0558e520d78c1b944"
+    },
+    {
+      "path": "packages/core/scope/README.md",
+      "readRanges": [
+        [
+          1,
+          80
+        ]
+      ],
+      "bytes": 6320,
+      "sha256": "a78f5ea99004e168a32e096b06d45c661736828c414123eba7f6104b55d64280"
+    },
+    {
+      "path": "LICENSE",
+      "readRanges": [
+        [
+          1,
+          21
+        ]
+      ],
+      "bytes": 1065,
+      "sha256": "ebb4f09972aee8608be255debaf78451a68e95c290f55c240dec2ecfa16ea6be"
+    },
+    {
+      "path": "vendor/cordis/package.json",
+      "readRanges": [
+        [
+          1,
+          35
+        ]
+      ],
+      "bytes": 1237,
+      "sha256": "b2426a9e1970d1b4a1702544e74d23a750fbebcfa132fbb8980549d2f484eee8"
+    }
+  ],
+  "cordis": {
+    "cormiNpm": "4.0.0-rc.11",
+    "harnessManifest": {
+      "name": "@deepseek-ai/cordis",
+      "version": "4.0.5",
+      "license": "MIT"
+    },
+    "harnessDocumentedUpstreamBase": "4.0.0-rc.7",
+    "harnessHasRuntimeModifications": true,
+    "cormiRuntimePatchIntroduced": false
+  },
+  "limits": [
+    "fixed-checkout-static-review",
+    "not-an-upstream-test-run",
+    "not-a-direct-plugin-compatibility-claim"
+  ]
+}

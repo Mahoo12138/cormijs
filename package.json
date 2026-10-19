@@ -18,6 +18,7 @@
     "test:package": "pnpm build && node --import tsx scripts/test-package.ts",
     "test:plugin": "pnpm build && node --import tsx scripts/test-plugin-author.ts",
     "test:application": "pnpm build && node --import tsx scripts/test-application.ts",
+    "test:reliability": "pnpm build && node --expose-gc --import tsx scripts/test-reliability.ts",
     "test:linux": "node --import tsx scripts/test-linux.ts",
     "test:windows": "node --import tsx scripts/test-windows.ts",
     "check": "pnpm typecheck && pnpm test"
