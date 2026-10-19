@@ -150,6 +150,14 @@ const stamp:Promise<string>=fingerprintFiles([]);void stamp;
 // @ts-expect-error a wake-up request requires cancellation and file inputs
 reload.wait({intervalMs:200});`);
   await execute('bootstrap-public-types',launcher,process.execPath,[...typeArguments.slice(0,-1),'bootstrap-types.mts']);
+  await writeFile(join(launcher,'worker-types.mts'),`import {defineConfig} from 'cormijs';import {createWorkerProfile,type WorkerExecution} from 'cormijs/worker';import {runCormiCli} from 'cormijs/cli';
+const worker=createWorkerProfile({execution:{apply(ctx){ctx.provide('workerExecution',{async run({application,command,report}){const result=await application.initialize();report({type:'execution-report',name:'check',data:{command,ok:result.ok}});return {kind:'result',data:result.ok};}} satisfies WorkerExecution);}}});defineConfig({worker});void runCormiCli;
+declare const execution:WorkerExecution;
+// @ts-expect-error runtime execution needs its full request and application context
+execution.run({command:'check'});
+// @ts-expect-error worker must remain a native plugin, not arbitrary JSON
+const invalid=defineConfig({worker:'builtin'});`);
+  await execute('worker-profile-public-types',launcher,process.execPath,[...typeArguments.slice(0,-1),'worker-types.mts']);
   await execute('launcher-types', launcher, process.execPath, typeArguments);
   await writeFile(join(launcher, 'cormi.config.ts'), `import {defineConfig} from 'cormijs';export default defineConfig({plugins:[{id:'echo',plugin:{inject:['commands'],apply(ctx){ctx.effect(()=>ctx.commands.register('echo',async()=>({kind:'result',data:'PACKED_COMMAND_OK'})))}}}]});`);
   await command('launcher-custom-command', launcher, 'echo', 0, /PACKED_COMMAND_OK/);
@@ -175,6 +183,13 @@ assert.equal(code,0);assert.equal(closed,1);assert.deepEqual(result,{command:'ec
   await writeFile(join(launcher, 'cormi.config.ts'), `export default {plugins:[{id:'missing-feature',plugin:{inject:['missing'],apply(){throw Error('must not activate')}}}]};`);
   await execute('packed-diagnose-missing', launcher, join(launcher, 'node_modules/.bin/cormi'), ['diagnose', '--json'], 1, /DIAGNOSIS_UNHEALTHY/);
   await writeFile(join(launcher, 'cormi.config.ts'), normalLauncherConfig);
+  await writeFile(join(launcher,'cormi.config.ts'),`import {createWorkerProfile,diagnosticExecutionPlugin} from 'cormijs/worker';export default {worker:createWorkerProfile({execution:diagnosticExecutionPlugin}),plugins:[{id:'missing',plugin:{inject:['absent'],apply(){throw Error('NEVER_RUN')}}}]};`);
+  await execute('packed-worker-audit-failure',launcher,join(launcher,'node_modules/.bin/cormi'),['audit','--json'],1,/DIAGNOSIS_UNHEALTHY/);
+  await writeFile(join(launcher,'cormi.config.ts'),`import {createWorkerProfile,commandExecutionPlugin} from 'cormijs/worker';export default {worker:createWorkerProfile({execution:commandExecutionPlugin,diagnostics:false}),plugins:[{id:'diagnose-command',plugin:{inject:['commands'],apply(ctx){if(ctx.get('diagnostics'))throw Error('UNEXPECTED_DIAGNOSTICS');ctx.effect(()=>ctx.commands.register('diagnose',async()=>({kind:'result',data:'PACKED_BUSINESS_DIAGNOSE'})));}}}]};`);
+  await execute('packed-worker-business-diagnose',launcher,join(launcher,'node_modules/.bin/cormi'),['diagnose','--json'],0,/PACKED_BUSINESS_DIAGNOSE/);
+  await writeFile(join(launcher,'cormi.config.ts'),`export default {worker:{apply(ctx){ctx.provide('workerExecution',{async run({command,report}){report({type:'execution-report',name:'example:worker',data:{command}});return {kind:'result',data:'PACKED_WORKER_PROFILE'};}});}}};`);
+  await execute('packed-worker-cli-carrier',launcher,process.execPath,['--input-type=module','-e',`import assert from 'node:assert/strict';import {runCormiCli} from 'cormijs/cli';let out='';const listeners=process.listenerCount('SIGTERM');const code=await runCormiCli(['probe','--json'],{stdout:text=>{out+=text}});assert.equal(code,0);const events=out.trim().split('\\n').map(line=>JSON.parse(line));assert.equal(events.find(e=>e.type==='execution-report').name,'example:worker');assert.equal(events.find(e=>e.type==='result').data,'PACKED_WORKER_PROFILE');assert.equal(process.listenerCount('SIGTERM'),listeners);console.log('PACKED_CLI_CARRIER_OK');`],0,/PACKED_CLI_CARRIER_OK/);
+  await writeFile(join(launcher,'cormi.config.ts'),normalLauncherConfig);
   await execute('launcher-no-vite', launcher, process.execPath, ['--input-type=module', '-e', `import {createRequire} from 'node:module';import assert from 'node:assert/strict';const r=createRequire(import.meta.url);assert.throws(()=>r.resolve('vite'),{code:'MODULE_NOT_FOUND'});assert.throws(()=>r.resolve('@cormijs/core/dist/index.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});`]);
   await auditLinks(launcher);
   const missing = await create('missing-peer', 'react');
@@ -184,7 +199,7 @@ assert.equal(code,0);assert.equal(closed,1);assert.deepEqual(result,{command:'ec
   const sdk = await create('sdk', 'react'); const sdkManifest = consumerManifest(kit, 'react');
   Object.assign(sdkManifest.dependencies, sdkManifest.pnpm.overrides); await writeFile(join(sdk, 'package.json'), JSON.stringify(sdkManifest));
   await install('sdk-install', sdk);
-  const specifiers = kit.packages.map(item => item.name).concat('cormijs/launcher', 'cormijs/bootstrap', '@cormijs/builder/development', '@cormijs/plugin-dev-api/vite', '@cormijs/plugin-dev-api/service');
+  const specifiers = kit.packages.map(item => item.name).concat('cormijs/launcher', 'cormijs/bootstrap', 'cormijs/worker', 'cormijs/cli', '@cormijs/builder/development', '@cormijs/plugin-dev-api/vite', '@cormijs/plugin-dev-api/service');
   await writeFile(join(sdk, 'types.mts'), specifiers.map((specifier, i) => `import * as p${i} from ${JSON.stringify(specifier)};void p${i};`).join('\n'));
   await execute('all-public-types', sdk, process.execPath, typeArguments);
   await writeFile(join(sdk, 'exports.mjs'), `for(const name of ${JSON.stringify(specifiers)}){await import(name); console.log(name)}`);
@@ -315,11 +330,14 @@ assert.equal(code,0);assert.equal(closed,1);assert.deepEqual(result,{command:'ec
     const customFile=join(environmentConsumer,'company.vars'),carrierFile=join(environmentConsumer,'bootstrap-carrier.mjs');
     await writeFile(customFile,`CORMI_PUBLIC_VALUE=custom-bootstrap\nCORMI_PUBLIC_LITERAL=${environmentLiteral}\nCORMI_PRIVATE_VALUE=${privateMarkers[0]}\n`);
     await writeFile(join(environmentConsumer,'.env'),'UNSELECTED_DEFAULT="broken');
-    await writeFile(carrierFile,`import {join} from 'node:path';import {runCormi} from 'cormijs/launcher';import {createBootstrap,readEnvironmentFiles} from 'cormijs/bootstrap';
-const controller=new AbortController(),stop=()=>controller.abort();process.once('SIGINT',stop);process.once('SIGTERM',stop);
+    await writeFile(carrierFile,`import {join} from 'node:path';import {runCormiCli} from 'cormijs/cli';import {createBootstrap,readEnvironmentFiles} from 'cormijs/bootstrap';
 const environment={apply(ctx){ctx.provide('launchEnvironment',{files:root=>[join(root,'company.vars')],load:({root,plan,files})=>readEnvironmentFiles(root,plan.mode,files)});}};
-try{process.exitCode=await runCormi({root:process.cwd(),command:process.argv[2],mode:'staging',startupTimeoutMs:30000,bootstrap:createBootstrap({environment}),signal:controller.signal,onEvent:e=>console.log(JSON.stringify(e))});}
-finally{process.off('SIGINT',stop);process.off('SIGTERM',stop);}`);
+process.exitCode=await runCormiCli([...process.argv.slice(2),'--mode','staging','--startup-timeout','30000','--json'],{bootstrap:createBootstrap({environment})});`);
+    const configFile=join(environmentConsumer,'cormi.config.ts'),originalConfig=await readFile(configFile,'utf8');
+    assert.ok(originalConfig.includes('return {presets:[preset]'));
+    await writeFile(configFile,`import {createWorkerProfile} from 'cormijs/worker';
+const measuredExecution={name:'fixture:worker-execution',inject:['commands'],apply(ctx){ctx.provide('workerExecution',{async run({application,command,request,report}){const readiness=await application.initialize();if(!readiness.ok)throw readiness.error;report({type:'execution-report',name:'fixture:worker',data:{command,ready:true}});return ctx.commands.execute(command,request);}});}};
+`+originalConfig.replace('return {presets:[preset]','return {worker:createWorkerProfile({execution:measuredExecution}),presets:[preset]'));
     try {
       await withServer(environmentConsumer,'dev',async url=>{await verifyEnvironmentPage(page,url,'custom-bootstrap',false);assert.equal((await fetch(new URL('company.vars?raw',url))).status,403);assert.deepEqual(errors,[]);},[],carrierFile);
       await execute('bootstrap-environment-build',environmentConsumer,process.execPath,[carrierFile,'build']);
@@ -329,7 +347,10 @@ finally{process.off('SIGINT',stop);process.off('SIGTERM',stop);}`);
       await withServer(environmentConsumer,'preview',async url=>{await verifyEnvironmentPage(page,url,'custom-bootstrap',true);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'bootstrap-environment-preview.png')});},[],carrierFile);
       assert.deepEqual(await readFile(join(environmentConsumer,'.cormi/app.tsx')),generated);
       report.stages.push({label:'installed-custom-bootstrap-node-html-client-static',unusedBrokenDotenvIgnored:true,privateInputDenied:true});
-    }finally{await writeFile(join(environmentConsumer,'.env'),defaultEnv);await rm(customFile);await rm(carrierFile);}
+      const devLog=await readFile(join(logRoot,'environment-dev-bootstrap-server.log'),'utf8'),previewLog=await readFile(join(logRoot,'environment-preview-bootstrap-server.log'),'utf8');
+      for(const log of [devLog,previewLog])assert.match(log,/"type":"execution-report","data":\{"command":"(?:dev|preview)","ready":true\}/);
+      report.stages.push({label:'installed-native-worker-execution-with-cli-carrier',development:true,build:true,preview:true});
+    }finally{await writeFile(configFile,originalConfig);await writeFile(join(environmentConsumer,'.env'),defaultEnv);await rm(customFile);await rm(carrierFile);}
 
   } finally { await browser.close(); }
   report.passed = true;

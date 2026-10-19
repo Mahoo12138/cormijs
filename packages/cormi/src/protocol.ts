@@ -1,4 +1,4 @@
-import type { Diagnosis } from './diagnose.js';
+import type { WorkerReport } from './worker-profile.js';
 import type { EnvironmentSnapshot } from './environment.js';
 export interface StartMessage {
   readonly nodeEnv: 'development' | 'production';
@@ -16,7 +16,7 @@ export function wireError(error: unknown, depth = 0): WireError {
     ...(error.cause !== undefined && depth < 4 ? { cause: wireError(error.cause, depth + 1) } : {}) };
 }
 export type WorkerMessage =
-  | { version: 1; type: 'diagnosis'; data: Diagnosis }
+  | (WorkerReport & { readonly version: 1 })
   | { version: 1; type: 'watch'; files: string[]; fingerprint: string }
   | { version: 1; type: 'ready'; url: string; applicationStatus?: 'ready' | 'error' }
   | { version: 1; type: 'result'; data: unknown }

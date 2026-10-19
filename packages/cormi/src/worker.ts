@@ -1,9 +1,8 @@
-import { ProjectRuntime, DiagnosticService, CormiError, type CommandResult } from '@cormijs/core';
-import { diagnose } from './diagnose.js';
+import { ProjectRuntime, CormiError, type CommandResult } from '@cormijs/core';
+import { executionSession } from './execution-session.js';
 import { pathToFileURL } from 'node:url';
 import { resolveEnvironment } from './environment.js';
 import { normalizeConfig } from './config.js';
-import { commandPlugin } from './commands.js';
 import { verifyLease } from './lock.js';
 import { fingerprint } from './inputs.js';
 import { wireError, type StartMessage, type WorkerMessage } from './protocol.js';
@@ -11,6 +10,7 @@ import { wireError, type StartMessage, type WorkerMessage } from './protocol.js'
 let started = false; let stopping = false; let host: ProjectRuntime | undefined;
 let main: Promise<void> = Promise.resolve(); let closing: Promise<void> | undefined;
 let result: CommandResult | undefined; let timeout = 3000;
+let execution: ReturnType<typeof executionSession> | undefined;
 const lifetime = new AbortController();
 const deliveries = new Set<Promise<void>>();
 let deliveryFailed = false;
@@ -33,16 +33,19 @@ async function flushDeliveries(): Promise<void> {
 function report(error: unknown): void { send({ version: 1, type: 'error', error: wireError(error) }); }
 function shutdown(code: number): Promise<void> {
   if (closing) return closing;
-  stopping = true; lifetime.abort(new CormiError('STOP_REQUESTED', 'Worker is stopping.'));
-  // This is a failure-only last resort, never the normal success path.
-  const watchdog = setTimeout(() => {
-    report(new CormiError('CLEANUP_INCOMPLETE', 'Worker shutdown timed out.'));
-    process.exit(1);
-  }, timeout);
-  closing = (async () => {
+  stopping = true;
+  // Abort listeners are synchronous and may request shutdown again. Publish the
+  // single closing task before dispatch, not after entering plugin callbacks.
+  closing = Promise.resolve().then(async () => {
+    lifetime.abort(new CormiError('STOP_REQUESTED', 'Worker is stopping.'));
+    // This is a failure-only last resort, never the normal success path.
+    const watchdog = setTimeout(() => {
+      report(new CormiError('CLEANUP_INCOMPLETE', 'Worker shutdown timed out.'));
+      process.exit(1);
+    }, timeout);
     try {
       await main.catch(() => {});
-      if (result?.kind === 'server') await result.handle.close();
+      await execution?.close();
     } catch (error) { code = 1; report(error); }
     try { await host?.dispose(); }
     catch (error) { code = 1; report(error); }
@@ -57,7 +60,7 @@ function shutdown(code: number): Promise<void> {
     process.exitCode = deliveryFailed ? 1 : code;
     clearTimeout(watchdog);
     if (process.connected) process.disconnect();
-  })();
+  });
   return closing;
 }
 async function run(message: StartMessage): Promise<void> {
@@ -73,35 +76,19 @@ async function run(message: StartMessage): Promise<void> {
   const config = normalizeConfig(raw, message.root);
   send({ version: 1, type: 'watch', files: [...config.watch], fingerprint: await fingerprint(config.watch) });
   host = new ProjectRuntime(timeout);
-  // Install optional observation infrastructure before application plugins register metadata.
-  host.mount('cormi:diagnostics', DiagnosticService); await host.ready();
-  host.mount('cormi:commands', commandPlugin);
-  let failure: unknown;
-  try {
-    for (const entry of config.plugins) host.mount(entry.id, entry.plugin, entry.options);
-    await host.ready();
-  } catch (error) { if (message.command !== 'diagnose') throw error; failure = error; }
-  lifetime.signal.throwIfAborted();
-  if (message.command === 'diagnose') {
-    const data = diagnose(host, config.pluginSources, environment.command, message.mode, failure);
-    if (!data.healthy) {
-      send({ version: 1, type: 'diagnosis', data });
-      throw new CormiError('DIAGNOSIS_UNHEALTHY', 'Plugin readiness or diagnostic collection failed; see the diagnosis snapshot.');
-    }
-    result = { kind: 'result', data }; return;
-  }
-  result = await host.ctx.commands.execute(message.command, {
+  // Native execution composition owns application activation and observation policy.
+  execution = executionSession(host, config, message.command, {
     root: message.root, mode: message.mode, options: config.app, signal: lifetime.signal,
     publicEnv: resolvedEnv.publicEnv,
     configuration: Object.freeze({ command: environment.command, layers: config.layers, plugins: config.pluginSources, environment: resolvedEnv.summary }),
     serverOnlyFiles: [...message.serverOnlyFiles, ...config.watch],
+  }, observation => send({ version: 1, ...observation }), error => {
+    if (!stopping) { report(error); void shutdown(1); }
   });
-  if (!result || !['result', 'server'].includes(result.kind)) throw new CormiError('COMMAND_RESULT_INVALID', 'Command returned an invalid result.');
-  if (result.kind === 'server') {
-    if (!result.handle || typeof result.handle.close !== 'function' || typeof result.handle.url !== 'string') throw new CormiError('COMMAND_RESULT_INVALID', 'Invalid server handle.');
+  result = await execution.run();
+  if (result.kind === 'server' && !stopping) {
     const status = result.handle.applicationStatus;
-    if (status !== undefined && status !== 'ready' && status !== 'error') throw new CormiError('COMMAND_RESULT_INVALID', 'Invalid application status.');
-    if (!stopping) send({ version: 1, type: 'ready', url: result.handle.url, ...(status ? { applicationStatus: status } : {}) });
+    send({ version: 1, type: 'ready', url: result.handle.url, ...(status ? { applicationStatus: status } : {}) });
   }
 }
 process.on('message', (message: unknown) => {

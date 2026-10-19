@@ -63,7 +63,9 @@ function startWorker(start: StartMessage, options: LaunchOptions, watch: (files:
     if (message.type === 'error') { failure = remoteError(message.error); rejectFirst(failure); }
     else if (message.type === 'ready' || message.type === 'result') resolveFirst(message);
     else if (message.type === 'watch') watch(message.files, message.fingerprint);
-    else if (message.type === 'diagnosis') options.onEvent?.({ type: 'diagnosis', data: message.data, pid: child.pid });
+    else if (message.type === 'diagnosis' || message.type === 'execution-report') options.onEvent?.({
+      type: message.type, data: message.data, pid: child.pid, ...(message.type === 'execution-report' ? { name: message.name } : {}),
+    });
   });
   child.send(start, error => { if (error) rejectFirst(error); });
   let stopping: Promise<Exit> | undefined;

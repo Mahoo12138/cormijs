@@ -14,7 +14,7 @@ export const commandPlugin: Plugin.Object<void> = {
         return () => { if (middleware.get(id) === entry) middleware.delete(id); };
       },
       register(name, handler) {
-        if (name === 'diagnose' || !/^[a-z][a-z0-9-]*$/.test(name) || handlers.has(name)) throw new CormiError('COMMAND_CONFLICT', `Duplicate or invalid command: ${name}`);
+        if (!/^[a-z][a-z0-9-]*$/.test(name) || handlers.has(name)) throw new CormiError('COMMAND_CONFLICT', `Duplicate or invalid command: ${name}`);
         handlers.set(name, handler);
         return () => { if (handlers.get(name) === handler) handlers.delete(name); };
       },

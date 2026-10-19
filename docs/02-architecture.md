@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.25。修订轮次：P14（原生 Cordis 引导插件与启动策略）。
+版本：Draft 0.26。修订轮次：P15（原生 worker 执行策略与可复用 CLI 入口）。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -45,6 +45,8 @@ P12 收敛应用创建的默认类型、生成/诊断命令和开发API条件，
 P13以固定DeepSeek Harness的profile/bundle、能力定义/provider/consumer和可替换HMR为参考，增加持续插件边界检查与显式测试插件。默认20次启停、100批配置/环境和100批React生成分别验证资源回落与最新输入；修复launcher启动通知中同步取消留下无人观察就绪拒绝的问题。watch/env/diagnose引导策略仍有耦合，未伪称全量插件化；有限资源样本不等于长期堆稳定，详见 [插件优先审查](51-plugin-first-reliability.md) 与 [P13记录](52-p13-results.md)。
 
 P14 将 launchPolicy、launchEnvironment、launchReload 提供者放入原生 Cordis 引导组合，载体在应用配置求值之前注入并使用它们。默认CLI继续选择原有策略；公开runCormi可显式替换一个或整个组合，不依赖坏应用配置先成功。进程/锁/代际机制不让渡给另一个更新状态机，异步任务仍由原生消费者排空；未确认引导清理时保留锁。契约与独立环境解析示例见 [引导插件](53-bootstrap-plugins.md)，实际验证见 [P14](54-p14-results.md)。worker中失败诊断的保留执行分支尚未拆出，不将这一步宣称为所有bootstrap策略已经完全可替换。
+
+P15 将 worker 的命令/失败诊断选择拆到原生 workerExecution 提供者，默认组合仍保留旧命令体验，但可复用同一诊断器处理自定义 audit，也可由应用普通命令接管 diagnose。配置新增 worker 原生组合，先于应用插件激活；执行消费者负责一次性准入、结果句柄和退出排空，不建立第二套插件生命周期。cormijs/cli 公开标准参数与信号载体，避免每个自定义 bootstrap 复制 CLI。协议和限制见 [worker 执行](55-worker-execution.md)，实际验证见 [P15](56-p15-results.md)。
 
 ## 1. 应该做一个什么框架
 

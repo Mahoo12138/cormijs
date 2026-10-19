@@ -1,5 +1,6 @@
 import { CormiError, snapshotConfig, mergeConfigData, configLayer, type ConfigData, type ConfigLayer, type ConfigurationContext, type Plugin } from '@cormijs/core';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
+import type { WorkerProfileOptions } from './worker-profile.js';
 
 export interface PluginEntry<T = any> {
   readonly id: string;
@@ -14,6 +15,8 @@ export interface Preset {
   readonly defaults?: Readonly<Record<string, unknown>>;
 }
 export interface CormiConfig {
+  /** Explicit native worker infrastructure, initialized before application plugins. */
+  readonly worker?: Plugin<WorkerProfileOptions>;
   readonly presets?: readonly Preset[];
   readonly plugins?: readonly PluginEntry[];
   /** Application-specific data is interpreted by the command provider, not the launcher. */
@@ -55,11 +58,13 @@ export function projectFile(root: string, file: string): string {
   return absolute;
 }
 export function normalizeConfig(input: unknown, root: string): {
-  plugins: readonly PluginEntry[]; app: ConfigData; watch: readonly string[];
+  worker?: Plugin<WorkerProfileOptions>; plugins: readonly PluginEntry[]; app: ConfigData; watch: readonly string[];
   layers: readonly ConfigLayer[]; pluginSources: ConfigurationContext['plugins'];
 } {
   const config = object(input, 'config');
-  keys(config, ['plugins', 'presets', 'app', 'watch'], 'config');
+  keys(config, ['plugins', 'presets', 'app', 'watch', 'worker'], 'config');
+  if (config.worker !== undefined && typeof config.worker !== 'function'
+    && !(config.worker && typeof config.worker === 'object' && typeof (config.worker as {apply?:unknown}).apply === 'function')) invalid('worker', 'expected a native worker profile plugin');
   const plugins: PluginEntry[] = []; const ids = new Set<string>(); const presetIds = new Set<string>();
   const stack = new Set<object>(); let defaults: ConfigData = {};
   const layers: ConfigLayer[] = [], pluginSources: Array<ConfigurationContext['plugins'][number]> = [];
@@ -68,7 +73,7 @@ export function normalizeConfig(input: unknown, root: string): {
       const at = `${path}[${i}]`; const entry = object(value, at);
       keys(entry, ['id', 'plugin', 'options', 'enabled'], at);
       const name = id(entry.id, `${at}.id`);
-      if (ids.has(name) || ['cormi:commands', 'cormi:diagnostics'].includes(name)) invalid(`${at}.id`, `duplicate or reserved id ${name}`);
+      if (ids.has(name) || ['cormi:commands', 'cormi:diagnostics', 'cormi:worker-profile', 'cormi:execution-consumer'].includes(name)) invalid(`${at}.id`, `duplicate or reserved id ${name}`);
       ids.add(name);
       if (entry.enabled !== undefined && typeof entry.enabled !== 'boolean') invalid(`${at}.enabled`, 'expected boolean');
       if (typeof entry.plugin !== 'function' && !(entry.plugin && typeof entry.plugin === 'object' && typeof (entry.plugin as any).apply === 'function')) invalid(`${at}.plugin`, 'expected native Cordis plugin');
@@ -99,5 +104,5 @@ export function normalizeConfig(input: unknown, root: string): {
     return projectFile(root, value);
   });
   if (watch.length > 256) invalid('watch', 'too many files');
-  return { plugins: Object.freeze(plugins), app, watch: Object.freeze(watch), layers: Object.freeze(layers), pluginSources: Object.freeze(pluginSources) };
+  return { worker: config.worker as Plugin<WorkerProfileOptions> | undefined, plugins: Object.freeze(plugins), app, watch: Object.freeze(watch), layers: Object.freeze(layers), pluginSources: Object.freeze(pluginSources) };
 }
