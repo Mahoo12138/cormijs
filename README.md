@@ -2,10 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P7 原生服务依赖与贡献诊断。** 新增 `cormi diagnose --for dev|build`，在新worker内观察真实Cordis插件、服务和贡献身份；支持缺失依赖/失败时输出结构化诊断，不执行目标应用命令。见 [诊断协议](docs/39-plugin-diagnostics.md) 与 [P7结果](docs/40-p7-results.md)。生态参考继续保留，Admin仅为框架测试负载。
+**当前阶段：P8 插件作者工作区与独立交付。** `create-cormi --template plugin-react` 可生成原生Cordis Node/client插件库及源码联调应用，完成严格类型、源码热更新、真实tgz与独立消费者链路；core不增加新宿主或后端策略。见 [作者指南](docs/41-plugin-authoring.md) 与 [P8结果](docs/42-p8-results.md)。Admin只作已有框架测试负载，本轮未修改。
 
-最终 macOS arm64 **287项Node、17项框架浏览器**通过，13包64个独立消费者阶段满足预期；Admin诊断两轮五组、原开发API五组回归通过。新增18项通用回归，当前证据见 [机器记录](artifacts/p7-validation.json)。诊断不是运行中dev的在线视图，也不替代typecheck/build；Windows仍挂起。
-名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
+最终 macOS arm64 **298项Node、17项既有框架浏览器**通过，13包64个独立消费者阶段满足预期；新增 `pnpm test:plugin` 两轮各26阶段通过，另有21项创建/打包预检定向回归。11项新增Node与实际失败修正见 [机器证据](artifacts/p8-validation.json)。当前模板仅打包TS/JS资源，仍需本地kit与Cordis声明补丁；Windows继续挂起。名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 
 ## 本地运行
 

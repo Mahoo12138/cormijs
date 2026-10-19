@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { lstat, mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { templateFiles, type Template } from './templates.js';
+import { pluginManifest } from './plugin-template.js';
 export type { Template } from './templates.js';
 export class CreateError extends Error { constructor(readonly code: string, message: string) { super(message); this.name = 'CreateError'; } }
 export interface CreateOptions { readonly directory: string; readonly kit: string; readonly template?: Template; readonly name?: string; readonly signal?: AbortSignal }
@@ -20,13 +21,14 @@ async function boundedFile(root: string, name: string, budget = 16 * 1024 * 1024
 /** Read and validate all inputs before admitting an exclusive new project. Never installs or executes code. */
 export async function createProject(options: CreateOptions): Promise<{ directory: string; template: Template; files: readonly string[]; packageCount: number; installed: false }> {
   const template = options.template ?? 'react';
-  if (!['react','react-api'].includes(template)) throw new CreateError('CREATE_TEMPLATE_INVALID', 'Choose react or react-api.');
+  if (!['react','react-api','plugin-react'].includes(template)) throw new CreateError('CREATE_TEMPLATE_INVALID', 'Choose react, react-api or plugin-react.');
   const target = resolve(options.directory), parent = dirname(target);
   if (await realpath(parent) !== parent) throw new CreateError('CREATE_PATH_INVALID', 'Destination parent must exist without symlink aliases.');
   try { await lstat(target); throw new CreateError('CREATE_TARGET_EXISTS', 'Destination already exists; no files were changed.'); }
   catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
   const name = options.name ?? (basename(target).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/^-+|-+$/g, '') || 'cormi-app');
-  if (!/^[a-z0-9][a-z0-9-]{0,99}$/.test(name)) throw new CreateError('CREATE_NAME_INVALID', 'Use a lowercase npm-compatible project name.');
+  if (typeof name !== 'string' || name.length > 100 || !(template === 'plugin-react' ? /^(?:@[a-z0-9][a-z0-9-]{0,49}\/)?[a-z0-9][a-z0-9-]{0,99}$/ : /^[a-z0-9][a-z0-9-]{0,99}$/).test(name)
+    || template === 'plugin-react' && (name === 'cormijs' || name.startsWith('@cormijs/'))) throw new CreateError('CREATE_NAME_INVALID', 'Use a lowercase name of at most 100 characters; plugin packages may use a non-framework scope.');
   options.signal?.throwIfAborted();
   const kit = await realpath(options.kit);
   const manifestBytes = await boundedFile(kit, 'manifest.json', 1024 * 1024);
@@ -34,6 +36,7 @@ export async function createProject(options: CreateOptions): Promise<{ directory
   try { raw = JSON.parse(manifestBytes.toString()); } catch { fail('Kit manifest is not JSON.'); }
   if (!raw! || raw!.format !== 'cormi:local-kit:1' || !Array.isArray(raw!.packages) || raw!.packages.length < 1 || raw!.packages.length > 64) fail('Unsupported local kit manifest.');
   const files = new Map<string, Buffer>(), refs: Record<string,string> = Object.create(null), names = new Set<string>(), paths = new Set<string>();
+  const versions: Record<string, string> = Object.create(null);
   let total = 0;
   for (const entry of raw!.packages as PackageItem[]) {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)
@@ -41,12 +44,12 @@ export async function createProject(options: CreateOptions): Promise<{ directory
       || !(entry.name === 'cormijs' || /^@cormijs\/[a-z-]+$/.test(entry.name)) || !/^\d+\.\d+\.\d+(?:-[a-z0-9.-]+)?$/.test(entry.version)
       || !localPath(entry.file) || !/^tarballs\/[A-Za-z0-9._-]+\.tgz$/.test(entry.file) || !/^[a-f0-9]{64}$/.test(entry.sha256)
       || names.has(entry.name) || paths.has(entry.file)) fail('Invalid or duplicate tarball entry.');
-    names.add(entry.name); paths.add(entry.file);
+    names.add(entry.name); paths.add(entry.file); versions[entry.name] = entry.version;
     const bytes = await boundedFile(kit, entry.file); total += bytes.length;
     if (total > 64 * 1024 * 1024 || hash(bytes) !== entry.sha256) fail('Tarball checksum or byte budget mismatch.');
     const local = '.cormi-local/' + entry.file; files.set(local, bytes); refs[entry.name] = 'file:./' + local;
   }
-  const required = ['cormijs','@cormijs/preset-react-vite','@cormijs/runtime', ...(template==='react-api' ? ['@cormijs/plugin-dev-api','@cormijs/plugin-vite'] : [])];
+  const required = ['cormijs','@cormijs/preset-react-vite','@cormijs/runtime', ...(template !== 'react' ? ['@cormijs/plugin-dev-api','@cormijs/plugin-vite'] : []), ...(template === 'plugin-react' ? ['@cormijs/core','@cormijs/plugin-react'] : [])];
   for (const name of required) if (!refs[name]) fail('Kit does not contain required package: ' + name);
   const compatibility = raw!.compatibility;
   if (!compatibility || compatibility.package !== 'cordis@4.0.0-rc.11' || compatibility.patch !== 'compatibility/cordis.patch' || typeof compatibility.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(compatibility.sha256) || compatibility.runtimeModified !== false) fail('Unsupported declaration compatibility strategy.');
@@ -55,8 +58,8 @@ export async function createProject(options: CreateOptions): Promise<{ directory
   files.set('.cormi-local/compatibility/cordis.patch', patch);
   files.set('.cormi-local/compatibility/CORDIS-LICENSE', await boundedFile(kit, 'compatibility/CORDIS-LICENSE', 1024 * 1024));
   files.set('.cormi-local/manifest.json', manifestBytes);
-  for (const [path, text] of Object.entries(templateFiles(template))) files.set(path, Buffer.from(text));
-  files.set('package.json', Buffer.from(JSON.stringify({ name, private:true, type:'module', packageManager:'pnpm@10.6.3', engines:{node:'>=22.14.0'},
+  for (const [path, text] of Object.entries(templateFiles(template, name))) files.set(path, Buffer.from(text));
+  files.set('package.json', Buffer.from(JSON.stringify(template === 'plugin-react' ? pluginManifest(name, refs, versions) : { name, private:true, type:'module', packageManager:'pnpm@10.6.3', engines:{node:'>=22.14.0'},
     scripts:{ dev:'cormi dev', build:'cormi build', preview:'cormi preview', typecheck:'cormi typecheck', inspect:'cormi inspect' },
     dependencies:{ ...Object.fromEntries(required.map(name=>[name,refs[name]])), react:'19.3.1','react-dom':'19.3.1','react-router':'7.18.2' },
     devDependencies:{typescript:'5.9.3','@types/node':'22.13.10','@types/react':'19.2.0','@types/react-dom':'19.2.0'},

@@ -7,6 +7,15 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createProject } from '@cormijs/create';
 const sha=(text:string)=>createHash('sha256').update(text).digest('hex');
+async function pluginKit(t: TestContext) {
+  const f = await fixture(t);
+  for (const [i, name] of ['@cormijs/core', '@cormijs/plugin-react'].entries()) {
+    const file = 'tarballs/extra-' + i + '.tgz', text = 'opaque extra ' + i;
+    await writeFile(join(f.kit, file), text); f.manifest.packages.push({ name, version: '0.0.1', file, sha256: sha(text) });
+  }
+  await f.save(); return f;
+}
+
 // Malformed local manifests must fail before admitting any destination directory.
 
 async function fixture(t:TestContext){
@@ -63,4 +72,60 @@ test('destination parent aliases and linked kit ancestors fail without writing t
   await rename(original, moved); await symlink(moved, original, 'dir');
   await assert.rejects(createProject({ directory: f.target, kit: f.kit }), { code: 'CREATE_KIT_INVALID' });
   assert.equal(existsSync(f.target), false);
+});
+
+test('plugin template creates explicit Node/client exports and isolated author tooling without installation', async t => {
+  const f = await pluginKit(t);
+  const result = await createProject({ directory: f.target, kit: f.kit, template: 'plugin-react', name: '@example/hello' });
+  assert.equal(result.template, 'plugin-react'); assert.equal(result.installed, false);
+  const p = JSON.parse(await readFile(join(f.target, 'package.json'), 'utf8'));
+  assert.equal(p.name, '@example/hello'); assert.equal(p.private, true);
+  assert.deepEqual(Object.keys(p.exports), ['.', './api', './client', './page']);
+  for (const entry of Object.values(p.exports) as Array<{types:string;import:string}>) { assert.match(entry.types, /^\.\/dist\/.+\.d\.ts$/); assert.match(entry.import, /^\.\/dist\/.+\.js$/); }
+  assert.equal(p.peerDependencies['@cormijs/core'], '0.0.1'); assert.equal(p.dependencies, undefined);
+  assert.ok(p.scripts['pack:plugin']); assert.equal(p.scripts.postinstall, undefined); assert.equal(p.scripts.prepare, undefined);
+  assert.ok(!existsSync(join(f.target, 'node_modules')) && !existsSync(join(f.target, 'dist')) && !existsSync(join(f.target, '.git')));
+});
+test('plugin template keeps Node and client graphs separate and requires explicit command context', async t => {
+  const f = await pluginKit(t); await createProject({ directory: f.target, kit: f.kit, template: 'plugin-react', name: 'hello-plugin' });
+  const node = await readFile(join(f.target, 'src/index.ts'), 'utf8'), api = await readFile(join(f.target, 'src/api.ts'), 'utf8');
+  assert.match(node, /ctx\.plugin\(defineReactFeature/); assert.match(node, /if \(options\.development\) ctx\.plugin/); assert.match(node, /~standard/);
+  assert.match(api, /inject: \['devApi'\]/); assert.doesNotMatch(api, /vite/);
+  for (const file of ['src/client.tsx','src/page.tsx','src/context.ts']) assert.doesNotMatch(await readFile(join(f.target, file),'utf8'), /node:|from ['"]@cormijs\/(?:core|plugin-)/);
+  const config = await readFile(join(f.target, 'cormi.config.ts'),'utf8'); assert.match(config,/command === 'dev'/); assert.match(config,/hello-plugin\/page/);
+});
+test('plugin peer versions follow the supplied kit, not workspace hardcoded versions', async t => {
+  const f = await pluginKit(t); f.manifest.packages.find(p => p.name === '@cormijs/core')!.version = '0.0.2'; await f.save();
+  await createProject({ directory: f.target, kit: f.kit, template: 'plugin-react' });
+  const p = JSON.parse(await readFile(join(f.target, 'package.json'),'utf8')); assert.equal(p.peerDependencies['@cormijs/core'],'0.0.2');
+});
+test('scoped plugin names fit the generated contribution identity budget', async t => {
+  const f = await pluginKit(t);
+  const tooLong = '@' + 's'.repeat(49) + '/' + 'x'.repeat(100);
+  await assert.rejects(createProject({ directory: f.target, kit: f.kit, template: 'plugin-react', name: tooLong }), { code: 'CREATE_NAME_INVALID' });
+  assert.equal(existsSync(f.target), false);
+  const boundary = '@scope/' + 'x'.repeat(93); assert.equal(boundary.length, 100);
+  await createProject({ directory: f.target, kit: f.kit, template: 'plugin-react', name: boundary });
+  const expectedId = 'plugin:' + boundary.slice(1).replace('/', '.') + ':api';
+  assert.ok(expectedId.length <= 128);
+  assert.ok((await readFile(join(f.target, 'src/api.ts'), 'utf8')).includes(JSON.stringify(expectedId)));
+});
+test('plugin templates reject framework-owned names and malformed scoped names before creating a directory', async t => {
+  const f = await pluginKit(t);
+  for (const name of ['cormijs','@cormijs/test','@scope/../bad','@scope/Bad','x;touch-pwned','@a/b/c',['coerced']] as unknown[]) {
+    await assert.rejects(createProject({ directory: f.target, kit: f.kit, template: 'plugin-react', name: name as string }), { code: 'CREATE_NAME_INVALID' });
+    assert.equal(existsSync(f.target),false);
+  }
+});
+test('plugin template rejects an incomplete kit before writing source files', async t => {
+  const f = await fixture(t); await assert.rejects(createProject({ directory: f.target, kit: f.kit, template: 'plugin-react' }), { code: 'CREATE_KIT_INVALID' });
+  assert.equal(existsSync(f.target),false);
+});
+test('author template source and local delivery are independent when relocated away from the kit', async t => {
+  const f = await pluginKit(t); await createProject({ directory: f.target, kit: f.kit, template: 'plugin-react', name: 'relocated-plugin' });
+  const original = await readFile(join(f.target, 'src/index.ts')); await rm(f.kit,{recursive:true});
+  const moved = join(f.root, 'author 中文 moved'); await rename(f.target,moved);
+  assert.deepEqual(await readFile(join(moved,'src/index.ts')),original);
+  assert.equal(await readFile(join(moved,'pnpm-workspace.yaml'),'utf8'),'packages: []\n');
+  assert.match(await readFile(join(moved,'scripts/pack.mjs'),'utf8'),/mkdtemp/);
 });
