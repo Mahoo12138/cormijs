@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.22。修订轮次：P11（环境输入快照、公开变量与变更恢复）。
+版本：Draft 0.23。修订轮次：P12（应用创建收敛与独立静态交付）。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -39,6 +39,8 @@ P9在插件作者模板中提供有界资源快照、普通库构建复制和全
 P10 在React领域增加纯身份工具createFeatureNamespace，并在作者模板区分配置id、领域instance和激活Fiber身份；每实例路由meta明确选择Provider中的公开配置，页面切换重置局部状态避免串用。原生退出与配置worker重启保持不同语义。另修复worker关闭IPC前未等待较大结果发送完成的问题，不增加消息重放。协议与限制见 [多实例](45-plugin-instances.md)，实际Node/浏览器/分发证据见 [P10记录](46-p10-results.md)。
 
 P11将环境解析放在配置求值前的bootstrap，四层文件与继承覆盖生成私有Node快照和有限公开快照，后者经CommandRequest/BuildPlan传递到后端。core只增加数据协议，Vite不再独立加载.env或接受公开define缺失；config报告来源而非值。坏文件预检、worker代际与静态preview各维持原语义，见 [环境配置](47-environment-configuration.md) 与 [P11结果](48-p11-results.md)。
+
+P12 收敛应用创建的默认类型、生成/诊断命令和开发API条件，复用已有ImportMetaEnv与Cordis功能贡献而不新增容器或包。真实创建器归档产生独立应用，根/子路径完成环境/Mock、严格类型、构建保旧及仅站点文件的静态交付；测试HTTP主机不成为生产运行依赖。当前用户入口见 [应用指南](49-application-guide.md)，实际结果与未关闭门槛见 [P12](50-p12-results.md)。
 
 ## 1. 应该做一个什么框架
 

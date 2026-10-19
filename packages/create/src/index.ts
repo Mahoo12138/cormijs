@@ -60,7 +60,7 @@ export async function createProject(options: CreateOptions): Promise<{ directory
   files.set('.cormi-local/manifest.json', manifestBytes);
   for (const [path, text] of Object.entries(templateFiles(template, name))) files.set(path, Buffer.from(text));
   files.set('package.json', Buffer.from(JSON.stringify(template === 'plugin-react' ? pluginManifest(name, refs, versions) : { name, private:true, type:'module', packageManager:'pnpm@10.6.3', engines:{node:'>=22.14.0'},
-    scripts:{ dev:'cormi dev', build:'cormi build', preview:'cormi preview', typecheck:'cormi typecheck', inspect:'cormi inspect' },
+    scripts:{ dev:'cormi dev', build:'cormi build', preview:'cormi preview', typecheck:'cormi typecheck', inspect:'cormi inspect', 'prepare:app':'cormi prepare', 'config:app':'cormi config', diagnose:'cormi diagnose' },
     dependencies:{ ...Object.fromEntries(required.map(name=>[name,refs[name]])), react:'19.3.1','react-dom':'19.3.1','react-router':'7.18.2' },
     devDependencies:{typescript:'5.9.3','@types/node':'22.13.10','@types/react':'19.2.0','@types/react-dom':'19.2.0'},
     pnpm:{ overrides:refs, patchedDependencies:{'cordis@4.0.0-rc.11':'.cormi-local/compatibility/cordis.patch'} },

@@ -2,10 +2,11 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P11 统一环境快照与变更恢复。** mode对应的四层环境文件在配置求值前校验，Node私有env与CORMI_PUBLIC_公开快照分开；dev/build/HTML使用同一代输入，坏文件保留旧开发服务，修复后自动恢复。见 [环境协议](docs/47-environment-configuration.md) 和 [P11结果](docs/48-p11-results.md)。
+**当前阶段：P12 应用创建收敛与独立静态交付。** 新模板默认严格检查依赖声明，提供资产类型及prepare/config/diagnose脚本；Mock只在dev注册并使用同一base。新应用通过真实创建器/框架归档，从原生插件、环境/Mock、类型检查到脱离cormi服务器的静态副本完成根/子路径验收。先读 [应用开发指南](docs/49-application-guide.md)，实际范围见 [P12结果](docs/50-p12-results.md)。
 
-最终 macOS arm64 **348项Node、18项框架浏览器**通过，13个框架tgz的72个消费阶段满足预期；默认插件作者54阶段及环境领域重复验证通过。精确输入与失败记录见 [机器证据](artifacts/p11-validation.json)。公开值不做美元符号展开，mode与NODE_ENV分别决定业务文件和编译语义；仍需本地kit与消费者Cordis声明补丁。Windows挂起，不扩展Admin业务。名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
-## 本地运行
+最终 macOS arm64 **352项Node、19项框架浏览器**通过，13个tgz的72个既有消费阶段与默认插件作者54阶段通过；新应用两轮各37阶段，精确输入和失败记录见 [机器证据](artifacts/p12-validation.json)。这是本地React SPA功能链路，不是完整1.0或公共发布认证；Cordis根声明补丁、平台/长期稳定性等门槛仍保留，不扩展Admin业务。
+
+名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。## 本地运行
 
 本机使用 Node 22.14.0、pnpm 10.6.3、macOS arm64；`.nvmrc` 固定当前实验 Node，不修改全局环境。
 

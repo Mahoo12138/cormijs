@@ -1,0 +1,173 @@
+# cormi 应用开发指南：从创建到独立静态交付
+
+日期：2026-10-19。本文面向使用框架开发应用的人，而不是修改框架内部的开发者。当前应用模式是 React SPA，默认后端由 React–Vite preset 组合提供，Cordis 管理 Node 插件。以下流程使用本地 kit；不是已经发布到公共 npm 的安装指南。实际验收以 P12 结果记录为准。
+
+## 1. 创建一个有开发接口的应用
+
+在框架仓库准备本地交付包；两个目标目录均须不存在，父目录须真实存在。下面的命令不会发布到 registry 或部署到线上：
+
+```sh
+cd /Users/mahoo/Projects/cormijs
+nvm use
+pnpm pack:local --out /Users/mahoo/Projects/cormi-local-kit
+pnpm create:app /Users/mahoo/Projects/cormi-first-app \
+  --kit /Users/mahoo/Projects/cormi-local-kit --template react-api
+
+cd /Users/mahoo/Projects/cormi-first-app
+pnpm install --ignore-scripts
+pnpm prepare:app
+pnpm dev
+```
+
+普通 React 应用可改用 `--template react`；插件作者项目使用 `plugin-react`，其库构建与应用构建的区别见 [作者指南](41-plugin-authoring.md)。首次第三方依赖安装可能联网。`prepare:app` 不是安装钩子：它是你明确执行的生成命令，先生成路由类型和浏览器入口，再让编辑器识别 `.cormi`。
+
+应用自己的 `.cormi-local/` 包含经过哈希检查的框架归档、Cordis 声明补丁与许可。移动开发项目时保留它，提交/分享时注意其中是本地交付包而非注册表依赖；不要把归档目录挂成静态站点。不能只搬 `src` 并期待本地 file: 依赖仍能解析。
+
+## 2. 日常操作与命令边界
+
+默认开发入口是 `127.0.0.1:8000`。同项目同时只能运行一个 CLI，会话结束后再运行检查或构建。不同项目可独立开发，但端口不能冲突。
+
+| 命令 | 职责 |
+| --- | --- |
+| `pnpm prepare:app` | 根据当前配置和贡献生成入口与路由类型，不启动服务器 |
+| `pnpm dev` | 生成、开发服务、组件更新和配置重载 |
+| `pnpm typecheck` | 生成并检查应用/配置/客户端类型；不输出业务 JS |
+| `pnpm build` | 生成、转译、构建，验证成功后替换本项目受管产物 |
+| `pnpm preview` | 本地预览已有构建，不替你重新构建或提供 Mock |
+| `pnpm run config:app --for build --json` | 当前配置派生与环境覆盖来源 |
+| `pnpm diagnose --for dev --json` | 新 worker 内的原生插件/服务和贡献诊断 |
+| `pnpm inspect --json` | 上一次成功生成结果，不重新扫描源码 |
+
+`pnpm config` 是包管理器的内建命令，所以使用明确的 `config:app`，或直接 `pnpm exec cormi config`。`build` 转译成功不能替代 `typecheck`；CI 至少分别运行这两项。`diagnose` 也不是正在运行的 dev 进程的在线监视器。
+
+## 3. 添加页面、布局和静态资源
+
+默认 `src/pages` 使用有限约定：`index.tsx` 为首页，`users/[id].tsx` 为参数页，`_layout.tsx` 为当前目录布局。布局必须渲染 `Outlet`，页面内部使用 `Link`，不要新建第二个 Router 或 React root。
+
+```tsx
+// src/pages/_layout.tsx
+import { Link, Outlet } from 'react-router';
+
+export default function Layout() {
+  return <>
+    <nav><Link to="/">首页</Link> | <Link to="/users/42">用户详情</Link></nav>
+    <Outlet />
+  </>;
+}
+```
+
+```tsx
+// src/pages/users/[id].tsx
+import { useParams } from 'react-router';
+
+export default function User() {
+  return <main><h1>User {useParams().id}</h1></main>;
+}
+```
+
+显式设置 `app.routes` 会关闭约定扫描；插件仍可贡献 IR。不要把二者不加区分地叠加为两套路由。不能用同路径页面覆盖原贡献，冲突会被拒绝。
+
+`src/assets.d.ts` 提供 CSS Modules、SVG、PNG 的有限模块声明。页面使用静态 `import styles from './page.module.css'` 和 `import image from './mark.svg'`，由后端处理资源。环境/路由类型来自 `.cormi/routes.d.ts`，默认 tsconfig 包含 `.cormi`，依赖声明检查默认开启。缺失图片仍可能通过类型声明检查，因此实际 `build` 和浏览器验收不能省略。
+
+这份资产声明应保持为没有顶层 import/export 的声明脚本；增加顶层模块标记会改变 ambient module 的含义。关于这一 TypeScript 规则的外部依据见 [官方模块参考](https://www.typescriptlang.org/docs/handbook/modules/reference.html#ambient-modules)。不提供 `declare module '*'` 这样的全量 any 回退。
+
+## 4. 环境和 Mock 使用同一个部署前缀
+
+创建 `.env.staging`：
+
+```dotenv
+CORMI_PUBLIC_TITLE=cormi MVP staging
+MY_PRIVATE_SERVICE_TOKEN=replace-with-your-private-value
+```
+
+执行 `pnpm dev --mode staging` 或 `pnpm build --mode staging` 选择该环境。前者仍是开发语义，后者仍是生产代码；客户端可读 `import.meta.env.CORMI_PUBLIC_TITLE`，未明确声明存在的公开项类型为 `string | undefined`，应设置回退值。私有值只能留在 Node 配置/插件，不要展开进 runtime、meta 或日志。覆盖与失败恢复详见 [环境协议](47-environment-configuration.md)。
+
+生成的配置中只改 `const base = '/'` 为 `const base = '/workbench/'`，即可同步改变 Router 和模板开发 API 前缀。Mock provider 使用 `base + 'api'`，页面使用 `import.meta.env.BASE_URL + 'api/hello'`。这只是模板自己的接口约定，框架不会自动修改你写死的第三方后端 URL。
+
+开发接口由可选 Cordis 插件提供，配置中 `enabled: command === 'dev'` 明确关闭非开发目标的实例；页面在生产模式禁用演示请求按钮。Mock 错误、格式不对的响应应表现为错误，不能把 HTML 200 当成 JSON 成功。模板会校验响应 message 类型、支持重新请求，并在页面卸载时取消自己的请求；实际后端的取消语义仍需要它自己实现。
+
+## 5. 把一项应用功能组织为 Cordis 插件
+
+先明确添加所用 SDK，而不是借用依赖提升。当前本地试用包可执行：
+
+```sh
+pnpm add @cormijs/plugin-react@file:./.cormi-local/tarballs/cormijs-plugin-react-0.0.1.tgz --ignore-scripts
+```
+
+新增 `features/status/plugin.ts`，让插件声明自己的客户端页面位置，而不是由消费者复制其文件：
+
+```ts
+import { defineReactFeature, clientModule } from '@cormijs/plugin-react';
+
+export default defineReactFeature({
+  id: 'application:status',
+  routes: [{
+    id: 'application:status:page',
+    path: 'status',
+    module: clientModule('./Page.tsx', import.meta.url),
+  }],
+});
+```
+
+```tsx
+// features/status/Page.tsx
+import { Link } from 'react-router';
+export default function Status() {
+  return <main><h1>状态页面</h1><Link to="/">回到首页</Link></main>;
+}
+```
+
+在原配置中 import 此插件，并向已有 `plugins` 数组追加 `{ id: 'status', plugin: statusFeature }`；保留原 preset 和开发 API。向 tsconfig.include 加入 `features`，检查业务扩展代码。`clientModule` 只记录模块引用，不在 Node 执行页面源码。停用插件后其路由贡献会撤回，配置改动仍按已有 worker 重启策略执行。
+
+多个领域能力可通过原生 `ctx.plugin()` 组合为父插件；需要 API 的子插件声明 `inject: ['devApi']` 并调用 `ctx.devApi.add()`，作用域释放由 Cordis 和领域服务共同承担。不要另建一套 enable/disable 状态机。生态来源和 Node/client 分离见 [生态契约](37-cordis-ecosystem.md)，真正可分发、多实例插件见 [作者指南](41-plugin-authoring.md) 和 [实例协议](45-plugin-instances.md)。
+
+## 6. 类型失败与构建失败要能阻止错误交付
+
+先运行 `pnpm typecheck --mode staging`，再运行 `pnpm build --mode staging`。类型错误应非零退出；路由冲突、编译失败或输出被篡改时，不能替换旧成功产物。已有未知 `dist` 不会被清空接管；旧版本没有 `.cormi-build.json` 的目录，应先保管或改用新输出位置。
+
+原 `dist/.cormi-build.json` 是本机输出所有权信息，保留在原输出中供下次受管替换。它不是部署服务器必须消费的文件。不要为了不公开元数据而直接删除原文件，应该只在部署副本中排除它。
+
+## 7. 交付静态文件，不部署开发工具链
+
+生产站点只需要构建后的 HTML、JS、CSS 和资产。将所选站点文件复制到独立目录，排除点文件元数据；不要把应用根目录、`.env`、`.cormi-local`、`.cormi`、源码和 `node_modules` 当作发布目录。`preview` 只是本地检查工具，不是线上服务器。
+
+对于 `/workbench/` 部署，服务器应将该前缀的页面导航回退到 `/workbench/index.html`，资源与后端 API 则有各自规则。缺失 `.js`、`.css`、图片和 API 必须返回真正的 404 或由真实后端处理，不能全部返回首页 HTML；否则 HTTP 200 并不能证明模块加载成功。
+
+以下为待按实际服务器核验的 NGINX 示例：假设部署文件已经放在 `/srv/www/workbench/`，并在 `http` 中包含标准 `mime.types`。本轮**没有执行 NGINX 或部署线上服务**；其 root/try_files 的外部依据见 [NGINX 官方文档](https://nginx.org/en/docs/http/ngx_http_core_module.html#try_files)。
+
+```nginx
+server {
+    listen 8080;
+    server_name localhost;
+    root /srv/www;
+    index index.html;
+
+    location = /workbench { return 308 /workbench/; }
+    location ~ /\. { return 404; }
+    location = /workbench/api { return 404; }
+    location ^~ /workbench/api/ { return 404; } # 替换为已配置的真实后端。
+    location ~* ^/workbench/.*\.(?:js|mjs|css|map|svg|png|jpe?g|gif|webp|ico|woff2?|ttf|otf|json)$ {
+        try_files $uri =404;
+    }
+    location /workbench/ {
+        try_files $uri $uri/ /workbench/index.html;
+    }
+    location / { return 404; }
+}
+```
+
+SPA 页面 404 是客户端路由结果，不一定等于文档请求 HTTP 404；资源和 API 的缺失不应套用这一规则。实际部署还需独立配置 TLS、缓存、访问控制、真实 API、日志和回滚，不属于这里的静态字节交付验证。
+
+## 8. 可复现的整条验收入口
+
+在框架仓库运行：
+
+```sh
+pnpm test:application
+```
+
+脚本从真实 tgz 安装创建器，新建应用，再显式装配应用内原生 feature；它不是调用原先已安装的演示项目。应用与 kit 重定位后删除自己的依赖，冻结锁文件重装；依次验证根/子路径开发、Mock、类型、三种诊断、重复构建和失败保旧。最后复制纯站点文件、将整个源应用移离原路径，用不引用 cormi/Vite 的测试 HTTP 主机运行页面、插件、动态路由与资产。
+
+`--out <不存在的目录> --keep` 可保存独立应用和日志，默认成功后回收自己的临时应用。测试主机只负责可控验收，不作为框架新增生产服务器，不证明 NGINX/CDN/全部浏览器或长期运维可用。脚本和结果不应包含真实开发者密钥。
+
+当前可用性范围是本地 React SPA 开发和静态交付。公共 npm 的许可/包归属、Cordis 根声明补丁、最新代码的跨平台全回归、长期资源趋势、自动中断发布恢复和 TypeScript 项目引用仍单独列为门槛，不能因为这条应用流程通过就宣称整个框架 1.0 或生产认证完成。
