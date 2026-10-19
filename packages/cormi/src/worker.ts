@@ -13,8 +13,23 @@ let started = false; let stopping = false; let host: ProjectRuntime | undefined;
 let main: Promise<void> = Promise.resolve(); let closing: Promise<void> | undefined;
 let result: CommandResult | undefined; let timeout = 3000;
 const lifetime = new AbortController();
+const deliveries = new Set<Promise<void>>();
+let deliveryFailed = false;
 function send(message: WorkerMessage): void {
-  if (process.connected) process.send?.(message, (error: Error | null) => { if (error && !stopping) void shutdown(1); });
+  if (!process.connected) return;
+  const delivery = new Promise<void>((resolve, reject) => {
+    process.send!(message, (error: Error | null) => error ? reject(error) : resolve());
+  });
+  deliveries.add(delivery);
+  void delivery.then(() => deliveries.delete(delivery), () => {
+    deliveries.delete(delivery); deliveryFailed = true;
+    if (!stopping) void shutdown(1);
+  });
+}
+async function flushDeliveries(): Promise<void> {
+  // send() can enqueue beyond the IPC pipe capacity. Disconnect only after its callbacks settle.
+  // This observes transport completion, not an application-level acknowledgement from the parent.
+  while (deliveries.size) await Promise.allSettled([...deliveries]);
 }
 function report(error: unknown): void { send({ version: 1, type: 'error', error: wireError(error) }); }
 function shutdown(code: number): Promise<void> {
@@ -36,8 +51,11 @@ function shutdown(code: number): Promise<void> {
       try { JSON.stringify(result.data); send({ version: 1, type: 'result', data: result.data }); }
       catch (error) { code = 1; report(error); }
     }
+    await flushDeliveries();
+    if (deliveryFailed) code = 1;
     send({ version: 1, type: 'stopped', code });
-    process.exitCode = code;
+    await flushDeliveries();
+    process.exitCode = deliveryFailed ? 1 : code;
     clearTimeout(watchdog);
     if (process.connected) process.disconnect();
   })();

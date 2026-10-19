@@ -2,10 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P9 插件样式与静态资源交付。** 插件作者模板已将CSS Modules、图片和可选字体贯通到源码开发、库构建、真实tgz和独立消费者；资源属于插件，不要求复制到应用public。原生Cordis Node/client组合、服务与诊断继续复用，不修改Admin业务。见 [作者指南](docs/41-plugin-authoring.md)、[资源协议](docs/43-plugin-assets.md) 和 [P9结果](docs/44-p9-results.md)。
+**当前阶段：P10 配对插件多实例与结果交付可靠性。** 原生Cordis同一插件对象可按显式instance贡献独立route/runtime/API；模板按路由身份选择Provider配置，覆盖单实例撤回、冲突拒绝与真实tgz消费。另修复较大worker结果未发完就断开IPC的问题。见 [多实例协议](docs/45-plugin-instances.md)、[P10结果](docs/46-p10-results.md) 与 [作者指南](docs/41-plugin-authoring.md)。
 
-最终 macOS arm64 **311项Node、17项框架浏览器**通过，13个框架tgz的64个消费阶段满足预期；插件作者完整链路分别按默认与显式字体输入执行，两轮各38阶段。13项新增Node、资源/输出边界与复核记录见 [机器证据](artifacts/p9-validation.json)。默认模板不附带第三方字体，仍需本地kit和消费者Cordis声明补丁；Windows继续挂起。
-
+最终 macOS arm64 **325项Node、17项框架浏览器**通过，13个框架tgz的64个消费阶段满足预期；插件作者默认/字体两轮各54阶段，14项新增Node及完整命令见 [机器证据](artifacts/p10-validation.json)。配置修改仍重启整个worker，原生Fiber退出才是细粒度撤回；不承诺任意旧插件自动多实例化、状态持久化或服务安全隔离。仍需本地kit与消费者Cordis声明补丁，Windows挂起，Admin不扩展业务。
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 ## 本地运行
 

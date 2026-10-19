@@ -12,6 +12,7 @@ import { chromium, type Page } from 'playwright-core';
 import { packWorkspace, run, checked, filesUnder, sha256, packagePath } from './packaging.js';
 import { listen, close, assertPortFree } from '../tests/helpers.js';
 import { preparePluginAssets, verifyPluginAssets } from './plugin-assets-verify.js';
+import { verifyPluginInstances } from './plugin-instances-verify.js';
 
 // Flow: installed creator -> source plugin playground -> real tgz -> relocated independent application.
 // Existing Playwright harness; the in-app Browser skill/runtime is not available in this session.
@@ -44,8 +45,10 @@ async function installedCli(cwd: string, command: string, args: string[] = [], e
     [join(cwd, 'node_modules/cormijs/dist/cli.js'), command, '--json', '--startup-timeout', '30000', ...args], expected);
 }
 interface Event { type: string; url?: string; generation?: number; code?: string | number; data?: any }
+let serverSequence = 0;
 async function server(cwd: string, command: 'dev' | 'preview', action: (url: string, wait: (predicate: (event: Event) => boolean) => Promise<Event>) => Promise<void>) {
   const events: Event[] = []; let stdout = '', stderr = '', buffer = '';
+  const serverLog = (cwd === author ? 'author' : 'consumer') + '-' + command + '-' + (++serverSequence) + '-server.log';
   const child = fork(join(cwd, 'node_modules/cormijs/dist/cli.js'), [command, '--json', '--startup-timeout', '30000'], { cwd, env, execArgv: [], stdio: ['ignore', 'pipe', 'pipe', 'ipc'] });
   const done = new Promise<number | null>((resolveDone, reject) => { child.once('error', reject); child.once('close', resolveDone); }); void done.catch(() => {});
   child.stderr!.on('data', data => { stderr += String(data); });
@@ -66,7 +69,7 @@ async function server(cwd: string, command: 'dev' | 'preview', action: (url: str
     if (child.connected) child.send({ version: 1, type: 'cormi:shutdown' });
     const timer = setTimeout(() => child.kill('SIGKILL'), 10000);
     try { assert.equal(await done, 0, JSON.stringify(events) + stderr); }
-    finally { clearTimeout(timer); await writeFile(join(out, (cwd === author ? 'author' : 'consumer') + '-' + command + '-server.log'), stdout + stderr); }
+    finally { clearTimeout(timer); await writeFile(join(out, serverLog), stdout + stderr); }
     assert.equal(existsSync(join(cwd, '.cormi.lock')), false);
     if (url) await assertPortFree(Number(new URL(url).port));
   }
@@ -229,6 +232,11 @@ export default defineConfig(({command})=>({presets:[preset],plugins:[{id:'api',p
   await writeFile(join(consumer,'cormi.config.ts'),customerConfig);
   await installedCli(consumer,'build');
   assert.deepEqual(errors,[]);
+  await verifyPluginInstances({ consumer, name, page, out, port: await freePort(), record,
+    cli: (command, args, expected) => installedCli(consumer, command, args, expected),
+    server: (command, action) => server(consumer, command, action),
+  });
+  assert.deepEqual(errors, []);
   report.passed = true;
 } catch (error) { report.error = String(error); process.exitCode = 1; }
 finally {

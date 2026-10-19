@@ -53,7 +53,7 @@ pnpm dev
 
 前端示例通过 Provider 取得 label/apiBase/development。只有这些明确公开数据进入 runtime；服务端配置、handler 和 Node 对象不会被序列化。示例请求支持 AbortController，重复请求替换前一个，组件卸载取消请求，只允许当前未取消请求更新结果。这不是通用生产 HTTP 客户端、鉴权方案或第三方插件沙箱。
 
-默认贡献 ID 与 `/plugin` 路由只适合一个实例。要同时启用多个实例，作者应设计实例 ID、路径和 provider 隔离，不能仅改变最外层配置 id 就宣称多实例完成。
+P10 增加显式 `instance`、`routePath`、`apiPath`。省略 instance 保持 default 实例的 `/plugin` 与 `/hello`；alpha/beta 分别默认贡献 `plugin/alpha`、`plugin/beta` 和 `/alpha/hello`、`/beta/hello`。外层配置 id 负责配置项身份，instance 负责此包的贡献命名，两者不能互相代替。Provider 按 runtimeId 组合每个实例的公开配置，页面按路由元数据选取，并在实例变化时重建局部状态、取消旧请求。精确的命名、冲突与撤回边界见 [多实例协议](45-plugin-instances.md)。
 
 ## 4. 源码联调与发布入口分开
 

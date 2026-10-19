@@ -28,44 +28,63 @@ export function pluginTemplateFiles(name: string): Record<string, string> {
   const id = 'plugin:' + name.replace(/^@/, '').replace('/', '.');
   return {
     'src/index.ts': `import type { Plugin } from '@cormijs/core';
-import { defineReactFeature } from '@cormijs/plugin-react';
+import { createFeatureNamespace, defineReactFeature } from '@cormijs/plugin-react';
 import api from './api.js';
 
-export interface Options { development: boolean; label: string; apiBase: string }
+export interface Options {
+  development: boolean; label: string; apiBase: string;
+  instance?: string; routePath?: string; apiPath?: string;
+}
 // Cordis validates options. Do not infer command mode from process-global mutable state.
 const Config: NonNullable<Plugin.Object<Options>['Config']> = {
   '~standard': { version: 1, vendor: 'cormi-plugin-template', validate(input: unknown) {
     if (!input || typeof input !== 'object' || Array.isArray(input)) return { issues: [{ message: 'Expected plugin options' }] };
     const value = input as Record<string, unknown>;
-    if (Object.keys(value).some(key => !['development', 'label', 'apiBase'].includes(key))
+    if (Object.keys(value).some(key => !['development', 'label', 'apiBase', 'instance', 'routePath', 'apiPath'].includes(key))
       || typeof value.development !== 'boolean' || typeof value.label !== 'string' || !value.label || value.label.length > 100
       || typeof value.apiBase !== 'string' || !/^\\/(?:[a-zA-Z0-9_-]+\\/)*[a-zA-Z0-9_-]+$/.test(value.apiBase)) {
       return { issues: [{ message: 'Expected development:boolean, bounded label, and an absolute API path without trailing slash' }] };
     }
-    return { value: { development: value.development, label: value.label, apiBase: value.apiBase } };
+    const instance = value.instance === undefined ? 'default' : value.instance;
+    if (typeof instance !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,47}$/.test(instance)) return { issues: [{ message: 'Invalid instance key' }] };
+    const routePath = value.routePath === undefined ? (instance === 'default' ? 'plugin' : 'plugin/' + instance) : value.routePath;
+    const apiPath = value.apiPath === undefined ? (instance === 'default' ? '/hello' : '/' + instance + '/hello') : value.apiPath;
+    if (typeof routePath !== 'string' || routePath.length > 128 || !/^[a-zA-Z0-9_-]+(?:\\/[a-zA-Z0-9_-]+)*$/.test(routePath)
+      || typeof apiPath !== 'string' || apiPath.length > 128 || !/^\\/[a-zA-Z0-9_-]+(?:\\/[a-zA-Z0-9_-]+)*$/.test(apiPath)) {
+      return { issues: [{ message: 'Expected relative routePath and absolute API-relative apiPath, without trailing slash' }] };
+    }
+    try { const ns = createFeatureNamespace(${JSON.stringify(id)}, instance); ns.key('runtime'); }
+    catch { return { issues: [{ message: 'Instance namespace exceeds the identity budget' }] }; }
+    return { value: { development: value.development, label: value.label, apiBase: value.apiBase, instance, routePath, apiPath } };
   } },
 };
 const feature: Plugin.Object<Options> = {
   name: ${JSON.stringify(id)}, Config, inject: ['react'],
   apply(ctx, options) {
-    ctx.plugin(defineReactFeature({ id: ${JSON.stringify(id + ':client')},
-      routes: [{ id: ${JSON.stringify(id + ':page')}, path: 'plugin', module: { specifier: ${JSON.stringify(name + '/page')}, exportName: 'default' } }],
-      runtime: [{ id: ${JSON.stringify(id + ':runtime')}, module: { specifier: ${JSON.stringify(name + '/client')}, exportName: 'default' },
-        options: { label: options.label, apiBase: options.apiBase, development: options.development } }],
+    const instance = options.instance ?? 'default';
+    const ns = createFeatureNamespace(${JSON.stringify(id)}, instance);
+    const runtimeId = ns.key('runtime');
+    const routePath = options.routePath ?? (instance === 'default' ? 'plugin' : 'plugin/' + instance);
+    const apiPath = options.apiPath ?? (instance === 'default' ? '/hello' : '/' + instance + '/hello');
+    ctx.plugin(defineReactFeature({ id: ns.id,
+      routes: [{ id: ns.key('page'), path: routePath, module: { specifier: ${JSON.stringify(name + '/page')}, exportName: 'default' },
+        meta: { ${JSON.stringify(id)}: runtimeId } }],
+      runtime: [{ id: runtimeId, module: { specifier: ${JSON.stringify(name + '/client')}, exportName: 'default' },
+        options: { instance, runtimeId, label: options.label, apiBase: options.apiBase, apiPath, development: options.development } }],
     }));
-    if (options.development) ctx.plugin(api, { label: options.label });
+    if (options.development) ctx.plugin(api, { id: ns.key('api'), path: apiPath, label: options.label });
   },
 };
 export default feature;
 `,
     'src/api.ts': `import type { Plugin } from '@cormijs/core';
 import type {} from '@cormijs/plugin-dev-api/service';
-export interface ApiOptions { label: string }
+export interface ApiOptions { id: string; path: string; label: string }
 const api: Plugin.Object<ApiOptions> = {
   name: ${JSON.stringify(id + ':api')}, inject: ['devApi'],
   apply(ctx, options) {
     // add() binds this contribution to the calling Cordis scope and retracts it on disposal.
-    ctx.devApi.add(${JSON.stringify(id + ':api')}, { mocks: [{ method: 'GET', path: '/hello',
+    ctx.devApi.add(options.id, { mocks: [{ method: 'GET', path: options.path,
       handle: ({ signal }) => { signal.throwIfAborted(); return { body: { message: 'Hello, ' + options.label + '!' } }; },
     }] });
   },
@@ -73,30 +92,48 @@ const api: Plugin.Object<ApiOptions> = {
 export default api;
 `,
     'src/context.ts': `import { createContext, useContext } from 'react';
-export interface PublicOptions { label: string; apiBase: string; development: boolean }
-export const Settings = createContext<PublicOptions | null>(null);
+import { useRouteMatches } from '@cormijs/runtime';
+export interface PublicOptions { instance: string; runtimeId: string; label: string; apiBase: string; apiPath: string; development: boolean }
+// Context contains immutable per-mount values. There is no module-global mutable instance registry.
+export const Settings = createContext<ReadonlyMap<string, PublicOptions> | null>(null);
 export function usePluginOptions(): PublicOptions {
-  const value = useContext(Settings);
-  if (!value) throw new Error('Plugin Provider is missing');
-  return value;
+  const values = useContext(Settings);
+  const matches = useRouteMatches();
+  for (let i = matches.length - 1; i >= 0; i--) {
+    const key = matches[i]!.meta[${JSON.stringify(id)}];
+    if (typeof key !== 'string') continue;
+    const value = values?.get(key);
+    if (!value) throw new Error('Plugin Provider is missing for ' + key);
+    return value;
+  }
+  throw new Error('Plugin route instance metadata is missing');
 }
 `,
-    'src/client.tsx': `import type { PropsWithChildren } from 'react';
+    'src/client.tsx': `import { useContext, useMemo, type PropsWithChildren } from 'react';
 import type { RuntimePlugin } from '@cormijs/runtime';
 import { Settings, type PublicOptions } from './context.js';
 function Provider({ children, options }: PropsWithChildren<{ options: unknown }>) {
-  const value = options as PublicOptions;
-  return <Settings.Provider value={value}>{children}</Settings.Provider>;
+  const inherited = useContext(Settings);
+  const values = useMemo(() => {
+    const value = Object.freeze({ ...options as PublicOptions });
+    if (!value.runtimeId || inherited?.has(value.runtimeId)) throw new Error('Invalid or duplicate plugin runtime identity');
+    const next = new Map(inherited); next.set(value.runtimeId, value); return next;
+  }, [inherited, options]);
+  return <Settings.Provider value={values}>{children}</Settings.Provider>;
 }
 const runtime: RuntimePlugin = { Provider };
 export default runtime;
 `,
     'src/page.tsx': `import { useEffect, useRef, useState } from 'react';
-import { usePluginOptions } from './context.js';
+import { usePluginOptions, type PublicOptions } from './context.js';
 import styles from './page.module.css';
 import illustration from './assets/plugin-mark.svg';
 export default function PluginPage() {
   const options = usePluginOptions();
+  // The router may reuse the same module component between two route IDs. Reset local state explicitly.
+  return <PluginInstancePage key={options.runtimeId} options={options} />;
+}
+function PluginInstancePage({ options }: { options: PublicOptions }) {
   const [count, setCount] = useState(0), [result, setResult] = useState('尚未请求');
   const request = useRef<AbortController | null>(null);
   useEffect(() => () => request.current?.abort(), []);
@@ -104,7 +141,7 @@ export default function PluginPage() {
     request.current?.abort();
     const control = new AbortController(); request.current = control; setResult('请求中…');
     try {
-      const response = await fetch(options.apiBase + '/hello', { signal: control.signal });
+      const response = await fetch(options.apiBase + options.apiPath, { signal: control.signal });
       if (!response.ok) throw new Error('HTTP ' + response.status);
       const data: unknown = await response.json();
       if (!data || typeof data !== 'object' || !('message' in data) || typeof data.message !== 'string') throw new Error('Invalid API response');
@@ -167,7 +204,7 @@ export default function Home() { return <main><h1>cormi 插件工作区</h1><Lin
     'scripts/pack.mjs': packScript,
     'scripts/resources.mjs': assetToolsScript,
     'scripts/build.mjs': buildPluginScript,
-    'PACKAGE.md': `# ${name}\n\n本地 cormi 功能插件。请在已有 cormi 应用中安装此 tgz 并显式提供 peerDependencies。\n\n从 ${name} 导入默认 feature，在 defineConfig 的 plugins 中登记它，options 为 { development: command === 'dev', label: 'My plugin', apiBase: '/api' }。开发环境还需配置 DevApiService 与传输桥接，prefix 等于 apiBase；生产保留客户端而不安装开发 API。页面为 /plugin（受应用 base 影响）。\n\nNode 根入口 /api 与浏览器 /client、/page 分开。不得从浏览器代码导入根入口。缺少 provider 时使用 cormi diagnose --for dev；配置变化会重启 worker，不承诺所有状态保留。\n\n当前 private:true，仅作本地评估；仍需消费者自己的 Cordis RC.11 声明补丁。未选择许可证、未公开发布，也不包含作者的联调应用或本地框架归档。\n`,
+    'PACKAGE.md': `# ${name}\n\n本地 cormi 功能插件。请在已有 cormi 应用中安装此 tgz 并显式提供 peerDependencies。\n\n从 ${name} 导入默认 feature，在 defineConfig 的 plugins 中登记它，options 为 { development: command === 'dev', label: 'My plugin', apiBase: '/api' }。开发环境还需配置 DevApiService 与传输桥接，prefix 等于 apiBase；生产保留客户端而不安装开发 API。省略 instance 时页面为 /plugin（受应用 base 影响）。多实例分别设置 options.instance:'alpha'、'beta'，默认路径为 plugin/alpha、plugin/beta，API 相对路径为 /alpha/hello、/beta/hello；routePath 与 apiPath 可单独覆盖。不同外层配置 id 不自动代表不同实例。实例切换重置页面局部状态，不承诺全局 CSS 或服务可见域隔离。\n\nNode 根入口 /api 与浏览器 /client、/page 分开。不得从浏览器代码导入根入口。缺少 provider 时使用 cormi diagnose --for dev；配置变化会重启 worker，不承诺所有状态保留。\n\n当前 private:true，仅作本地评估；仍需消费者自己的 Cordis RC.11 声明补丁。未选择许可证、未公开发布，也不包含作者的联调应用或本地框架归档。\n`,
     'README.md': `# ${name}
 
 这是一个 cormi 插件作者工作区，不是已公开发布的 npm 包。
@@ -188,7 +225,7 @@ export default function Home() { return <main><h1>cormi 插件工作区</h1><Lin
 
 目标应用应有自己的 cormi 安装及明确的 peers。将 tgz 复制到目标内，再显式安装。例如将 \`feature\` 从 \`${name}\` 导入，在 \`defineConfig(({ command }) => ...)\` 的 plugins 中登记 \`{ id: 'my-feature', plugin: feature, options: { development: command === 'dev', label: 'My plugin', apiBase: '/api' } }\`。仅在 dev 配置 \`DevApiService\` 加桥接或现有 \`devApiVitePlugin\`（prefix 应等于 apiBase）。生产不注册 API 子插件；/plugin 页面仍可使用 Provider。
 
-同一作用域本模板只安装一个实例；多个实例需要作者显式设计唯一贡献 ID 与路由，不能仅改外层实例 ID。\`diagnose\` 是新 worker 的一次性观察，不是在线监控。生产 preview 不模拟后端。
+多实例在各配置项 options 中显式填写 instance:'alpha'、instance:'beta'；它与外层配置 id 是不同身份。默认页面为 plugin/alpha、plugin/beta，API 相对路径为 /alpha/hello、/beta/hello；routePath 和 apiPath 可显式覆盖但不能冲突。省略 instance 保留 /plugin 与 /hello 的单实例默认。实例命名生成独立贡献 ID；Provider 用每次应用挂载内的不可变 Map 组合配置，页面按路由元数据选取实例，不靠最后一个 Provider 覆盖所有页面。切换实例会重建页面局部 state 并取消旧请求，不承诺跨页面保留计数。配置启停仍重启整个 worker；同宿主的原生 Fiber.dispose 才只撤回该实例。\`diagnose\` 是新 worker 的一次性观察，不是在线监控。生产 preview 不模拟后端。
 
 ## 当前交付边界
 

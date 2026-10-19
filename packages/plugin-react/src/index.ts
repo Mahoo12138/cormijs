@@ -12,6 +12,7 @@ import { developmentDiagnostic, recoverable, repairSignature } from './developme
 import { clientModuleFile, inspectModule } from './modules.js';
 export { clientModule } from './modules.js';
 export { defineReactFeature, type ReactFeature } from './feature.js';
+export { createFeatureNamespace, type FeatureNamespace } from './namespace.js';
 export type { ModuleRef, RouteMeta, RouteRecord } from '@cormijs/routes';
 export { generateApplication, runtimeContributions, type RuntimeContribution } from './generate.js';
 export { generateRouteTypes } from './types.js';
