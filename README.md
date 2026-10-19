@@ -2,9 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P5b 自定义错误边界与真实 Admin 迁移版本。** Material Kit React 已通过自己的 cormi tgz 安装完成根路径 dev/typecheck/build/preview、首组业务契约对照及实际错误注入恢复。新增 [路由边界协议](docs/29-routing-boundaries.md) 与 [接缝记录](docs/admin/04-routing-migration.md)；11个议题仍按 [模块台账](docs/admin/00-module-ledger.md) 跟踪，/admin/资源和完整交互尚未全部完成，Windows继续挂起。
+**当前阶段：P5c Admin 子路径资源与状态热更新。** Material Kit React 的根路径与 `/admin/` 已完成 dev/typecheck/build/preview、原模块对照及全部public文件/生产资源校验；真实Users/Products保留交互状态的Fast Refresh与失败构建保旧也已验证。见 [部署与开发协议](docs/31-admin-deployment-and-development.md)；11项仍按 [模块台账](docs/admin/00-module-ledger.md) 跟踪，完整键盘/图表交互和配置切换继续，Windows挂起。
 
-P5b 最终 macOS arm64 **231项Node、17项框架浏览器测试**通过，13包57个消费者阶段满足预期；迁移Admin的dev/preview各7组38条观察与原版一致，额外错误恢复18阶段通过。运行路径、具体范围和未完成项见 [P5b结果](docs/30-p5b-results.md) 与 [机器证据](artifacts/p5b-validation.json)。未执行Linux/Windows；历史 [P4c](docs/27-p4c-results.md)、[P4b](docs/24-p4b-results.md)、[P3b](docs/18-p3b-results.md) 保持不变，不累加重复测试。
+P5c最终复核在 macOS arm64 重新完成 **246项Node、17项框架浏览器测试**及13包57个消费者阶段；根/子路径四组模块与资源验收全部通过，100份public及53份生产资源逐文件校验，Users/Products状态更新和失败构建流程完整重复两轮。资源改写的五项新增边界断言先失败再修复，固定模板转换输出保持不变。见 [P5c结果](docs/32-p5c-results.md)、[最新复核证据](artifacts/p5c-review-validation.json)；[前期记录](artifacts/p5c-validation.json)和失败日志保留。未执行Linux/Windows；历史 [P5b](docs/30-p5b-results.md)、[P4c](docs/27-p4c-results.md) 不改写，不累加重复测试。
 
 原版对照仍固定为 [P5a基线](docs/28-p5a-baseline-results.md)，原缺陷与占位行为独立保留；首组迁移对照通过不代表已经实现真实CRUD、认证或完整产品功能。
 

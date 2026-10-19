@@ -159,6 +159,10 @@ export const vitePlugin: CordisPlugin.Object<void> = {
             if (managedUpdates.get(update.server)?.has(update.file.split(sep).join('/'))) return [];
           },
           configResolved(resolved) {
+            if (resolved.base !== plan.base) {
+              throw new CormiError('VITE_RESERVED_CONFIG', 'Native plugins cannot override app.base; use application configuration or derivation.',
+                { field: 'base', expected: plan.base, actual: resolved.base });
+            }
             if (resolve(resolved.root) !== root || resolve(resolved.build.outDir) !== output
               || resolved.build.emptyOutDir || resolved.build.watch || resolve(resolved.cacheDir) !== cache) {
               throw new CormiError('VITE_RESERVED_CONFIG', 'Native plugin changed framework-owned paths or build mode.');

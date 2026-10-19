@@ -83,7 +83,7 @@ try {
     page.on('requestfailed', request => { failedResources.push({url:request.url(),error:request.failure()?.errorText}); });
     await page.route('**/*', async route => {
       const url = new URL(route.request().url());
-      if (url.origin === new URL(base).origin || ['data:','blob:'].includes(url.protocol)) await route.continue();
+      if (['data:','blob:'].includes(url.protocol) || url.origin === new URL(base).origin && url.pathname.startsWith(new URL(base).pathname)) await route.continue();
       else { external.push(url.origin + url.pathname); await route.abort('blockedbyclient'); }
     });
     try {

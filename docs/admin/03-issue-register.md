@@ -55,3 +55,19 @@ P5b网络中止测试与独立memory-router探针复现锁定React Router7.18.2�
 关闭要求：独立锁文件与真实包消费、StrictMode生命周期对照、业务/工具类型检查清晰分离、根路径和/admin/的所有已触发资源及深链接对照。具体条件见 [基础设施记录](02-infrastructure.md)。
 
 P5b进展：真实tgz安装、显式StrictMode和应用类型分离已落地；首个迁移安装的MUI传递minor漂移导致3个TS2362，已通过固定原@mui包族而非改业务代码修正。根路径首组通过；/admin/资源仍待，不将四个适配事项一次勾完。详见 [迁移接缝](04-routing-migration.md)。
+
+## ADAPT-02 / AM10：动态public地址仍指向域名根
+
+P5c先对一个新的P5b副本只修改base，真实浏览器复现头像、商品、导航遮罩、404插图和登录CSS背景的域名根请求失败。新的迁移适配处理10个文件的26处资产表达式，通过应用内publicAsset工具读取后端的当前base；原public文件、路由Link和SVG片段引用不改。目标是根路径与/admin/使用相同语义，不新增域名根资源映射掩盖错误。完整验收协议见 [部署与开发](../31-admin-deployment-and-development.md)，最终结果见 [P5c](../32-p5c-results.md)。
+
+## CF-03 / AM10：原生Vite配置能拆分路由和资源基址
+
+P5c审查发现原生config hook能返回与BuildPlan不一致的base。dev、build、preview三个拒绝用例在修复前都报告Missing expected rejection；问题属于框架配置所有权缺口，不是业务资产表达式适配。
+
+现在provider在configResolved检查实际base等于计划base，不一致报VITE_RESERVED_CONFIG；相同值的扩展仍可用。修改部署位置必须通过app配置或派生，让路由与后端消费同一值。补充测试同时检查缓存清理与原preview产物未改。此项不是对任意可信插件私自修改服务器的安全沙箱。
+
+## TOOL-01 / AM10：资源改写的模块引用与绑定识别
+
+P5c复核新增五项回归，原实现均先失败：遗漏let/var、参数与解构等helper同名绑定；把动态import当成普通资源地址；已适配文件追加新地址后重复导入helper；将注释和说明字符串误判为声明；把无有效导入或来自其他模块的同名helper调用当作已适配。
+
+修正为AST绑定检查与模块引用识别，复用且仅复用来源正确的非type-only helper导入。五项新增与既有十项资源/基址回归一起通过；固定上游的两个迁移副本分别对照124份客户端源码，10文件26处转换结果仍逐字一致，不为纠正工具边界改变模板业务行为。完整回归与最新证据另见P5c结果，不以本段定向通过代替整体验收。

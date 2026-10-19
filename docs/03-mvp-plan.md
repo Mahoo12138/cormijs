@@ -216,7 +216,8 @@ Mock、请求、权限、国际化与 UI 库可作为后续第一批产品插件
 - [x] 选定并浅克隆 Material Kit React 免费版固定提交，核对许可、启动/路由/主题/Users/Sign in 源码，见 [迁移计划](26-admin-migration.md)。
 - [x] P5a 将 Admin 迁移分为11个模块议题，建立未修改源码的原版安装/类型/构建和交互基线；占位控件、上游缺陷与框架接入缺口分别登记，见 [模块台账](admin/00-module-ledger.md)。这不是迁移完成。
 - [x] P5b实现自定义路由错误边界、显式StrictMode与重复挂载保护；真实Admin独立tgz迁移的根路径dev/typecheck/build/preview、首组业务对照及错误恢复通过，见 [结果](30-p5b-results.md)。
-- [ ] P5继续按模块推进：实际Admin的/admin/资源、完整键盘/tooltip/状态HMR和配置/构建失败组合仍待，首组对照不等于整个迁移验收关闭。
+- [x] P5c完成真实Admin根/子路径public与生产资源校验、Users/Products状态HMR和失败build保旧，补充Vite基址所有权约束，见 [结果](32-p5c-results.md)。
+- [ ] P5继续逐模块验收：Header键盘/焦点、图表完整tooltip/尺寸/销毁、Admin配置切换与结构更新组合仍待；不因资源矩阵通过关闭全部迁移议题。
 - [ ] 完成 P0-A 到 P0-E 的全部退出条件：跨平台、完整依赖图诊断和长期资源趋势仍待验证。
 - [x] P1 基础应用纵切已交付：CLI/config/preset、生成、React dev/build/preview 与失败 fixture；P4a 补齐独立状态功能插件示例。完整发布与长期稳定性仍单独验收。
 - [ ] 完成 P2 更新可靠性测试。

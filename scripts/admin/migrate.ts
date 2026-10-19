@@ -7,15 +7,18 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { createProject } from '@cormijs/create';
 import ts from 'typescript';
+import { adaptAssetReferences, publicAssetModule, type AssetEdit } from './assets.js';
 
 // Migration of one reviewed upstream snapshot, not a general repository importer.
 const repositoryRoot=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const hash=(value:Buffer|string)=>createHash('sha256').update(value).digest('hex');
 const sha='69e780a40c455d664b2e13c525faf1d492a072a7';
-const {values}=parseArgs({strict:true,options:{upstream:{type:'string'},kit:{type:'string'},out:{type:'string'}}});
+const {values}=parseArgs({strict:true,options:{upstream:{type:'string'},kit:{type:'string'},out:{type:'string'},base:{type:'string'}}});
 assert.ok(values.kit&&values.out,'Required: --kit <verified local kit> --out <new independent application>');
 const source=await realpath(values.upstream??join(repositoryRoot,'.cache/admin-upstream-material-kit'));
 const destination=resolve(values.out);
+const base=values.base??'/admin/';
+assert.ok(/^\/(?:[A-Za-z0-9_-]+\/)*$/.test(base),'Expected an absolute deployment path ending with /');
 assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:source,encoding:'utf8'}).trim(),sha,'Wrong upstream revision');
 const ledger=JSON.parse(await readFile(join(repositoryRoot,'artifacts/admin-upstream.json'),'utf8')) as {commit:string;source_files:Record<string,{bytes:number;sha256:string}>};
 assert.equal(ledger.commit,sha);
@@ -63,8 +66,8 @@ import { fileURLToPath } from 'node:url';
 const alias: Plugin.Object<void> = { name:'admin:source-alias', inject:['vite'], apply(ctx) {
   ctx.effect(()=>ctx.vite.add('admin:source-alias',()=>({name:'admin:source-alias',config(){return {resolve:{alias:{src:fileURLToPath(new URL('./src',import.meta.url))}}}}})));
 }};
-// Root deployment first. /admin/ assets remain a separately tracked AM10 task.
-export default defineConfig({presets:[preset],plugins:[{id:'admin-alias',plugin:alias}],app:{strict:true,base:'/',server:{host:'127.0.0.1',port:3039},routes:${JSON.stringify(routes,null,2)}}});
+// Assets read the same resolved base through import.meta.env.BASE_URL; router links remain router-relative.
+export default defineConfig({presets:[preset],plugins:[{id:'admin-alias',plugin:alias}],app:{strict:true,base:${JSON.stringify(base)},server:{host:'127.0.0.1',port:3039},routes:${JSON.stringify(routes,null,2)}}});
 `;
 const parsedConfig=ts.parseConfigFileTextToJson('tsconfig.json',input.get('tsconfig.json')!.toString());
 assert.equal(parsedConfig.error,undefined,'Invalid upstream tsconfig');
@@ -80,13 +83,17 @@ const write=async(name:string,content:Buffer|string)=>{
   await mkdir(dirname(join(destination,name)),{recursive:true});await writeFile(join(destination,name),content);
 };
 const copied:string[]=[],modified:Record<string,{before:string;after:string}>={};
+const assetEdits:Record<string,readonly AssetEdit[]>={};
 for(const [name,bytes] of input){
   if(!/^(src|public)\//.test(name)||name==='src/main.tsx'||name==='src/routes/sections.tsx') continue;
-  await write(name,bytes);copied.push(name);
+  const adapted=name.startsWith('src/')&&/\.[jt]sx?$/.test(name)?adaptAssetReferences(name,bytes.toString()):undefined;
+  if(adapted?.edits.length){await write(name,adapted.code);modified[name]={before:hash(bytes),after:hash(adapted.code)};assetEdits[name]=adapted.edits;}
+  else {await write(name,bytes);copied.push(name);}
 }
 await write('src/routes/sections.tsx',adaptedSections);modified['src/routes/sections.tsx']={before:hash(sections),after:hash(adaptedSections)};
 await write('src/cormi-root.tsx',"import { Outlet } from 'react-router';\nimport App from './app';\nexport default function CormiRoot(){return <App><Outlet /></App>;}\n");
-await write('index.html',input.get('index.html')!.toString().replace('/src/main.tsx','/.cormi/app.tsx'));
+await write('index.html',input.get('index.html')!.toString().replace('/src/main.tsx','/.cormi/app.tsx').replace('href="/favicon.ico"','href="%BASE_URL%favicon.ico"'));
+await write('src/utils/public-asset.ts',publicAssetModule);
 await write('LICENSE-UPSTREAM.md',input.get('LICENSE.md')!);
 await write('cormi.config.ts',config);await write('tsconfig.json',JSON.stringify(tsconfig,null,2)+'\n');
 const targetPackage=JSON.parse(await readFile(join(destination,'package.json'),'utf8'));
@@ -96,6 +103,6 @@ targetPackage.version=originalPackage.version;targetPackage.description='Materia
 targetPackage.dependencies={...dependencies,...targetPackage.dependencies,'react-router-dom':'7.18.2','@cormijs/core':refs['@cormijs/core'],'@cormijs/plugin-vite':refs['@cormijs/plugin-vite']};
 targetPackage.scripts={dev:'cormi dev --startup-timeout 60000',build:'cormi build --startup-timeout 60000',preview:'cormi preview',typecheck:'cormi typecheck --startup-timeout 60000',inspect:'cormi inspect'};
 await write('package.json',JSON.stringify(targetPackage,null,2)+'\n');
-await write('MIGRATION.md',`# Material Kit React → cormi\n\nUpstream: ${sha}. Copyright and permission: LICENSE-UPSTREAM.md.\n\nThe original business components and assets are preserved. cormi owns createRoot, RouterProvider and the route graph. src/cormi-root.tsx keeps App inside the router; original lazy page exports and Dashboard Suspense remain. The custom error boundary is an eager route reference. StrictMode is enabled. src/main.tsx and the old Vite launch configuration are not executed/copied.\n\nThe application tsconfig removes the obsolete Vite-tools project reference and explicitly maps src/*. Strict remains enabled. React/React DOM are 19.3.1 and React Router/DOM 7.18.2 to match cormi's tested peers; remaining direct UI packages and the transitive @mui family are pinned from the original lock. The first unpinned system minor changed borderRadius to string-or-number and caused three real type errors; preserving the original family avoids source casts or weakened checks. The new dependency lock must be retained after installation.\n\nRun pnpm install --ignore-scripts, pnpm typecheck, pnpm dev. Stop dev before build/preview. The entire directory is self-contained with .cormi-local. No backend auth/CRUD added; Products/Blog controls retain their original demonstration semantics. Root deployment only so far; /admin/ assets and remaining AM issues are not declared complete.\n`);
-await write('migration.json',JSON.stringify({format:'cormi:admin-migration:1',upstream:sha,sourceFiles:copied,modified,omitted:['src/main.tsx'],newFiles:['src/cormi-root.tsx','cormi.config.ts'],installationPerformed:false,moduleAcceptanceComplete:false},null,2)+'\n');
+await write('MIGRATION.md',`# Material Kit React → cormi\n\nUpstream: ${sha}. Copyright and permission: LICENSE-UPSTREAM.md.\n\nThe original business components and assets are preserved. cormi owns createRoot, RouterProvider and the route graph. src/cormi-root.tsx keeps App inside the router; original lazy page exports and Dashboard Suspense remain. The custom error boundary is an eager route reference. StrictMode is enabled. src/main.tsx and the old Vite launch configuration are not executed/copied.\n\nThe application tsconfig removes the obsolete Vite-tools project reference and explicitly maps src/*. Strict remains enabled. React/React DOM are 19.3.1 and React Router/DOM 7.18.2 to match cormi's tested peers; remaining direct UI packages and the transitive @mui family are pinned from the original lock. The first unpinned system minor changed borderRadius to string-or-number and caused three real type errors; preserving the original family avoids source casts or weakened checks. The new dependency lock must be retained after installation.\n\nRun pnpm install --ignore-scripts, pnpm typecheck, pnpm dev. Stop dev before build/preview. The entire directory is self-contained with .cormi-local. No backend auth/CRUD added; Products/Blog controls retain their original demonstration semantics. Configured deployment base: ${base}. Public asset expressions are adapted with a local utility using the chosen Vite backend BASE_URL. Source assets and browser routes are not prefixed twice. See migration.json for every changed source; module acceptance is recorded separately.\n`);
+await write('migration.json',JSON.stringify({format:'cormi:admin-migration:1',upstream:sha,base,sourceFiles:copied,modified,assetEdits,omitted:['src/main.tsx'],newFiles:['src/cormi-root.tsx','src/utils/public-asset.ts','cormi.config.ts'],installationPerformed:false,moduleAcceptanceComplete:false},null,2)+'\n');
 console.log(JSON.stringify({directory:destination,copied:copied.length,modified:Object.keys(modified),installed:false}));

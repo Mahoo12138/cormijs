@@ -1,6 +1,6 @@
 # cormi：真实 React Admin 迁移验收计划
 
-计划起始日期：2026-10-18。P5b状态：已生成并安装真实cormi迁移副本，根路径dev/typecheck/build/preview、首组业务对照及原错误界面故障恢复通过；/admin/资源与完整模块细节仍待。精确范围见 [P5b结果](30-p5b-results.md)、[议题台账](admin/00-module-ledger.md) 和 [接缝记录](admin/04-routing-migration.md)。P5不以Windows为前置条件。
+计划起始日期：2026-10-18。当前P5c状态：真实cormi迁移副本的根路径与/admin/ dev/typecheck/build/preview、原模块对照、全部public和生产资源已验证；Users/Products状态热更新及失败build保旧通过。完整键盘/焦点、图表细节与配置切换继续，精确范围见 [P5c结果](32-p5c-results.md)、[议题台账](admin/00-module-ledger.md) 和 [部署协议](31-admin-deployment-and-development.md)。P5b路由/错误边界历史见 [接缝记录](admin/04-routing-migration.md)，不以Windows为前置条件。
 
 ## 1. 选择的真实项目
 
