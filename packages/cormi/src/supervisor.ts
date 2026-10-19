@@ -130,6 +130,12 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
         // Compilation succeeds before the old worker is stopped. Runtime validation still occurs in the new worker.
         await stopActive();
         if (signal.aborted) break;
+        // Disposal may await plugins for seconds. Do not start the candidate compiled before
+        // that wait if its inputs have since changed (including a newly broken config).
+        if (watching && await fingerprint(compiled.files) !== compiled.fingerprint) {
+          emit({ type: 'superseded', phase: 'before-start', nextGeneration: generation + 1 });
+          previous = undefined; continue;
+        }
         activeDirectory = await mkdtemp(join(cache, 'run-'));
         const module = join(activeDirectory, 'config.mjs');
         await writeFile(module, compiled.code, { flag: 'wx', mode: 0o600 });
@@ -140,6 +146,14 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
         emit({ type: 'starting', generation, pid: active.pid });
         try {
           const first = await cancellable(deadline(active.first, startup, new CormiError('WORKER_START_TIMEOUT', 'Worker startup/command exceeded its deadline.')), signal);
+          // Startup is another asynchronous boundary. A ready message only describes this
+          // worker's snapshot, not necessarily the current input. One-shot commands are not
+          // replayed: they may already have performed externally visible work.
+          if (watching && first.type === 'ready' && await inputStamp() !== `${compiled.fingerprint}:${extraStamp}`) {
+            emit({ type: 'superseded', phase: 'before-ready', generation, pid: active.pid });
+            await stopActive(); previous = undefined; continue;
+          }
+          if (signal.aborted) break;
           emit({ type: first.type, generation, pid: active.pid, ...(first.type === 'ready' ? { url: first.url, ...(first.applicationStatus ? { applicationStatus: first.applicationStatus } : {}) } : { data: first.data }) });
           if (first.type === 'result') { await stopActive(); break; }
         } catch (error) {

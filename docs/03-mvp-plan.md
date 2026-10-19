@@ -218,7 +218,8 @@ Mock、请求、权限、国际化与 UI 库可作为后续第一批产品插件
 - [x] P5b实现自定义路由错误边界、显式StrictMode与重复挂载保护；真实Admin独立tgz迁移的根路径dev/typecheck/build/preview、首组业务对照及错误恢复通过，见 [结果](30-p5b-results.md)。
 - [x] P5c完成真实Admin根/子路径public与生产资源校验、Users/Products状态HMR和失败build保旧，补充Vite基址所有权约束，见 [结果](32-p5c-results.md)。
 - [x] P5d完成Header四组键盘/焦点契约与可选上游修正，以及八图表12个tooltip状态、尺寸和三轮卸载重挂对照；详见 [结果](34-p5d-results.md)。不代表所有数据点、辅助技术或长期内存无泄漏。
-- [ ] P5继续：真实Admin配置失败/修复与结构更新组合，Users筛选分页/全选语义、其他尚未验收控件；不因若干子范围通过关闭全部迁移议题。
+- [x] P5e修正配置在worker清理/初始化期间变化的准入与就绪竞态；五项通用回归及真实Admin配置/插件/路由七组工作流通过，见 [结果](36-p5e-results.md)。
+- [ ] P5按 [框架能力矩阵](35-framework-validation.md) 继续：Admin仅验证cormi配置重载、插件贡献、路由生成、运行时、构建与开发接口。模板原分页/全选、Header/UI、商品/文章业务不作为框架任务；保留历史记录但停止支线扩展。
 - [ ] 完成 P0-A 到 P0-E 的全部退出条件：跨平台、完整依赖图诊断和长期资源趋势仍待验证。
 - [x] P1 基础应用纵切已交付：CLI/config/preset、生成、React dev/build/preview 与失败 fixture；P4a 补齐独立状态功能插件示例。完整发布与长期稳定性仍单独验收。
 - [ ] 完成 P2 更新可靠性测试。

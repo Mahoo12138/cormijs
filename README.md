@@ -2,10 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P5d Header 键盘焦点与图表生命周期。** 新增显式可选的上游Header修正，保留忠实迁移副本；原版、忠实版、改进版分别执行dev/preview的键盘与图表契约。见 [模块协议](docs/33-admin-header-and-charts.md)、[P5d结果](docs/34-p5d-results.md) 与 [模块台账](docs/admin/00-module-ledger.md)。本轮不修改framework packages，不把模板交互修复塞进core；Windows继续挂起。
+**当前阶段：P5e 配置重载准入与框架功能验收。** Admin只作为cormi真实测试负载，不再扩展模板UI/业务修复。本轮修正worker清理/初始化期间配置再次变化时启动过期候选或误报ready的问题，并完成真实应用配置、插件贡献和路由恢复链路。见 [框架能力矩阵](docs/35-framework-validation.md) 与 [P5e结果](docs/36-p5e-results.md)。
 
-P5d最终 macOS arm64 **249项Node、17项框架浏览器**通过，13包57个独立消费者阶段满足预期。八个图表完成12个tooltip状态、尺寸变化和三轮路由卸载/重挂；Header四组契约在各自基线下通过。精确命令/差异/失败历史见 [机器证据](artifacts/p5d-validation.json)。历史 [P5c](docs/32-p5c-results.md)、[P5b](docs/30-p5b-results.md)、[P4c](docs/27-p4c-results.md) 保留，不将重复执行或观察数当作新增用例。
-原版对照仍固定为 [P5a基线](docs/28-p5a-baseline-results.md)，原缺陷与占位行为独立保留；首组迁移对照通过不代表已经实现真实CRUD、认证或完整产品功能。
+最终macOS arm64 **254项Node、17项框架浏览器**通过；13包57个消费者阶段、两轮Admin七组框架工作流均满足预期。五项新增最小回归不依赖Admin；业务src/public未改。原始命令与输入哈希见 [机器证据](artifacts/p5e-validation.json)。历史P5a–P5d报告与可选Header修正保留，但不作为继续开发Admin产品的任务清单；Windows仍挂起。
 
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 
