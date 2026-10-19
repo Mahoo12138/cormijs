@@ -17,7 +17,7 @@ export function plan(request: CommandRequest, extraFields: readonly string[] = [
   }
   return { root: request.root, mode: request.mode, entry: input.entry as string ?? 'index.html',
     base: input.base as string ?? '/', outDir: input.outDir as string ?? 'dist',
-    server: server as BuildPlan['server'], serverOnlyFiles: request.serverOnlyFiles };
+    server: server as BuildPlan['server'], serverOnlyFiles: request.serverOnlyFiles, publicEnv: request.publicEnv };
 }
 /** Command policy is a plugin; the launcher neither imports Web nor switches on bundler names. */
 export const webCommandsPlugin: Plugin.Object<void> = {

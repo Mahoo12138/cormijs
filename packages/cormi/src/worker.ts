@@ -1,8 +1,7 @@
 import { ProjectRuntime, DiagnosticService, CormiError, type CommandResult } from '@cormijs/core';
 import { diagnose } from './diagnose.js';
 import { pathToFileURL } from 'node:url';
-import { join } from 'node:path';
-import { existsSync } from 'node:fs';
+import { resolveEnvironment } from './environment.js';
 import { normalizeConfig } from './config.js';
 import { commandPlugin } from './commands.js';
 import { verifyLease } from './lock.js';
@@ -64,11 +63,12 @@ function shutdown(code: number): Promise<void> {
 async function run(message: StartMessage): Promise<void> {
   timeout = message.timeoutMs;
   verifyLease(message.root, message.token);
-  // Environment is loaded in this fresh process only. Existing inherited values win.
-  const envFile = join(message.root, '.env');
-  if (existsSync(envFile)) process.loadEnvFile(envFile);
+  // Consume the preflighted bytes, not a second on-disk read. No environment values are written to the config cache.
+  const resolvedEnv = resolveEnvironment(message.environment, process.env,
+    (message.configurationCommand ?? message.command) === 'dev' ? 'development' : 'production');
+  for (const [key, value] of Object.entries(resolvedEnv.env)) process.env[key] = value;
   const module = await import(pathToFileURL(message.module).href);
-  const environment = Object.freeze({ root: message.root, command: message.configurationCommand ?? message.command, mode: message.mode });
+  const environment = Object.freeze({ root: message.root, command: message.configurationCommand ?? message.command, mode: message.mode, env: resolvedEnv.env });
   const raw = typeof module.default === 'function' ? await module.default(environment) : module.default;
   lifetime.signal.throwIfAborted();
   const config = normalizeConfig(raw, message.root);
@@ -93,7 +93,8 @@ async function run(message: StartMessage): Promise<void> {
   }
   result = await host.ctx.commands.execute(message.command, {
     root: message.root, mode: message.mode, options: config.app, signal: lifetime.signal,
-    configuration: Object.freeze({ command: environment.command, layers: config.layers, plugins: config.pluginSources }),
+    publicEnv: resolvedEnv.publicEnv,
+    configuration: Object.freeze({ command: environment.command, layers: config.layers, plugins: config.pluginSources, environment: resolvedEnv.summary }),
     serverOnlyFiles: [...message.serverOnlyFiles, ...config.watch],
   });
   if (!result || !['result', 'server'].includes(result.kind)) throw new CormiError('COMMAND_RESULT_INVALID', 'Command returned an invalid result.');

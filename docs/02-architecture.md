@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.21。修订轮次：P10（原生插件多实例、命名空间与worker结果交付）。
+版本：Draft 0.22。修订轮次：P11（环境输入快照、公开变量与变更恢复）。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -37,6 +37,8 @@ P8将Node/client配对方式交付为现有创建器的plugin-react模板：原�
 P9在插件作者模板中提供有界资源快照、普通库构建复制和全新打包目录，保持CSS/图片/字体的相对模块布局；消费后端负责实际资源转换与base。没有向core新增资源服务器、修改Cordis生命周期或全局关闭Vite依赖优化。普通库dist不承诺跨文件事务，具体资源所有权、失败与分发限制见 [资源协议](43-plugin-assets.md)，实际结果见 [P9记录](44-p9-results.md)。
 
 P10 在React领域增加纯身份工具createFeatureNamespace，并在作者模板区分配置id、领域instance和激活Fiber身份；每实例路由meta明确选择Provider中的公开配置，页面切换重置局部状态避免串用。原生退出与配置worker重启保持不同语义。另修复worker关闭IPC前未等待较大结果发送完成的问题，不增加消息重放。协议与限制见 [多实例](45-plugin-instances.md)，实际Node/浏览器/分发证据见 [P10记录](46-p10-results.md)。
+
+P11将环境解析放在配置求值前的bootstrap，四层文件与继承覆盖生成私有Node快照和有限公开快照，后者经CommandRequest/BuildPlan传递到后端。core只增加数据协议，Vite不再独立加载.env或接受公开define缺失；config报告来源而非值。坏文件预检、worker代际与静态preview各维持原语义，见 [环境配置](47-environment-configuration.md) 与 [P11结果](48-p11-results.md)。
 
 ## 1. 应该做一个什么框架
 

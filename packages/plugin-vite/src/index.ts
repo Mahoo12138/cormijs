@@ -5,6 +5,7 @@ import { build as viteBuild, createServer, preview as vitePreview,
 import { lstat, mkdir, mkdtemp, realpath, rm, stat } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { developmentBridge } from './development.js';
+import { applyPublicEnvironment, publicEnvironment } from './environment.js';
 
 export interface ViteExtensions {
   /** Create fresh native plugins per session. Bind the returned unregister to the contributor's ctx.effect. */
@@ -132,13 +133,15 @@ export const vitePlugin: CordisPlugin.Object<void> = {
 
     async function configuration(plan: BuildPlan, forPreview: boolean,
       capture: (server: NativeServer) => void, dev = false): Promise<{ config: InlineConfig; cache: string; output: string; diagnostics?: ReturnType<typeof developmentBridge> }> {
+      const publicValues = publicEnvironment(plan.publicEnv);
       const { root, output } = await validatePlan(plan, forPreview);
       const diagnostics = dev && plan.development ? developmentBridge(root, plan.base, plan.development) : undefined;
       // Factory snapshot taken before creating the Vite session; caller order is explicit.
       const plugins = ordered().map(([, entry]) => entry.create());
       const cache = await mkdtemp(join(root, '.cormi-vite-'));
       const config: InlineConfig = {
-        root, configFile: false, envFile: false, envPrefix: 'CORMI_PUBLIC_', cacheDir: cache,
+        root, configFile: false, envDir: false, envPrefix: [], cacheDir: cache,
+        define: Object.fromEntries(Object.entries(publicValues).map(([key, value]) => ['import.meta.env.' + key, JSON.stringify(value)])),
         base: plan.base, mode: plan.mode, logLevel: 'silent', clearScreen: false,
         server: { host: plan.server?.host ?? '127.0.0.1', port: plan.server?.port ?? 0,
           strictPort: true, open: false, fs: { strict: true, allow: [root],
@@ -159,6 +162,7 @@ export const vitePlugin: CordisPlugin.Object<void> = {
             if (managedUpdates.get(update.server)?.has(update.file.split(sep).join('/'))) return [];
           },
           configResolved(resolved) {
+            applyPublicEnvironment(resolved, plan.mode, publicValues);
             if (resolved.base !== plan.base) {
               throw new CormiError('VITE_RESERVED_CONFIG', 'Native plugins cannot override app.base; use application configuration or derivation.',
                 { field: 'base', expected: plan.base, actual: resolved.base });

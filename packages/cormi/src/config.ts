@@ -20,7 +20,11 @@ export interface CormiConfig {
   readonly app?: Readonly<Record<string, unknown>>;
   readonly watch?: readonly string[];
 }
-export interface ConfigEnvironment { readonly root: string; readonly command: string; readonly mode: string }
+export interface ConfigEnvironment {
+  readonly root: string; readonly command: string; readonly mode: string;
+  /** Immutable Node bootstrap values. Includes private values: never spread this into app/runtime options. */
+  readonly env: Readonly<Record<string, string | undefined>>;
+}
 export type ConfigExport = CormiConfig | ((environment: ConfigEnvironment) => CormiConfig | Promise<CormiConfig>);
 export function defineConfig<T extends ConfigExport>(config: T): T { return config; }
 export function definePreset<T extends Preset>(preset: T): T { return preset; }

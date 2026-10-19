@@ -10,7 +10,7 @@ export { Context, Service } from 'cordis';
 export type { Fiber, Plugin } from 'cordis';
 export type { CommandRequest, CommandResult, CommandHandler, CommandRegistry, CommandMiddleware } from './commands.js';
 export { snapshotConfig, mergeConfigData, configLeaves, configLayer } from './config-data.js';
-export type { ConfigData, ConfigSource, ConfigChange, ConfigLayer, ConfigurationContext } from './config-data.js';
+export type { ConfigData, ConfigSource, ConfigChange, ConfigLayer, ConfigurationContext, EnvironmentSummary } from './config-data.js';
 
 export class CormiError extends Error {
   constructor(

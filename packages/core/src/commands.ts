@@ -3,6 +3,8 @@ import type { ConfigurationContext } from './config-data.js';
 
 /** Host protocol only. Individual plugins own command names and application policy. */
 export interface CommandRequest {
+  /** Explicit browser-public bootstrap values; absent in low-level hosts unless supplied. */
+  readonly publicEnv?: Readonly<Record<string, string>>;
   readonly root: string;
   readonly mode: string;
   readonly options: Readonly<Record<string, unknown>>;

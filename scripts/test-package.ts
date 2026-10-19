@@ -6,6 +6,7 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { writeEnvironmentFixture, verifyEnvironmentPage, privateMarkers } from './environment-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -69,9 +70,9 @@ const coreTypes = `import {ProjectRuntime,type Context} from '@cormijs/core';con
 async function command(label: string, cwd: string, name: string, expected = 0, pattern?: RegExp) {
   return execute(label, cwd, join(cwd, 'node_modules/.bin/cormi'), [name, '--json', '--startup-timeout', '30000'], expected, pattern);
 }
-async function withServer(cwd: string, name: 'dev' | 'preview', action: (url: string) => Promise<void>) {
+async function withServer(cwd: string, name: 'dev' | 'preview', action: (url: string) => Promise<void>, args: string[] = []) {
   const sessionLabel = cwd.split(sep).at(-1) + '-' + name;
-  const child = spawn(join(cwd, 'node_modules/.bin/cormi'), [name, '--json', '--startup-timeout', '30000'], { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(join(cwd, 'node_modules/.bin/cormi'), [name, '--json', '--startup-timeout', '30000', ...args], { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
   const events: Array<Record<string, any>> = []; let stdout = '', stderr = '', buffer = '';
   let resolveReady!: (url: string) => void, rejectReady!: (error: Error) => void;
   const ready = new Promise<string>((resolve, reject) => { resolveReady = resolve; rejectReady = reject; });
@@ -270,6 +271,18 @@ const h=new ProjectRuntime();h.mount('api',DevApiService);h.mount('feature',{inj
       const response=await fetch(new URL('/api/hello',url));assert.doesNotMatch(await response.text(),/"message":"Hello/);
       assert.deepEqual(errors,[]);
     });
+    const environmentConsumer=await create('environment','react');await writeEnvironmentFixture(environmentConsumer);
+    await install('environment-install',environmentConsumer);await auditLinks(environmentConsumer);
+    const environmentBin=join(environmentConsumer,'node_modules/.bin/cormi');
+    for(const name of ['typecheck','config'])await execute('environment-'+name,environmentConsumer,environmentBin,[name,'--mode','staging','--json','--startup-timeout','30000',...(name==='config'?['--for','build']:[])]);
+    await withServer(environmentConsumer,'dev',async url=>{await verifyEnvironmentPage(page,url,'selected',false);assert.deepEqual(errors,[]);},['--mode','staging']);
+    await execute('environment-build',environmentConsumer,environmentBin,['build','--mode','staging','--json','--startup-timeout','30000']);
+    for(const name of await readdir(join(environmentConsumer,'dist/assets')))for(const marker of privateMarkers)assert.equal((await readFile(join(environmentConsumer,'dist/assets',name))).includes(Buffer.from(marker)),false);
+    const generatedEnvironment=await readFile(join(environmentConsumer,'.cormi/app.tsx'));
+    await writeFile(join(environmentConsumer,'.env.staging.local'),'CORMI_PUBLIC_VALUE=after-build');
+    await withServer(environmentConsumer,'preview',async url=>{await verifyEnvironmentPage(page,url,'selected',true);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'environment-preview.png')});},['--mode','staging']);
+    assert.deepEqual(await readFile(join(environmentConsumer,'.cormi/app.tsx')),generatedEnvironment);
+    report.stages.push({label:'installed-environment-mode-node-client-html-production',privateMarkersAbsent:true,previewRegenerated:false});
   } finally { await browser.close(); }
   report.passed = true;
 } catch (error) {

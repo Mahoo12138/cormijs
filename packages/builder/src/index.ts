@@ -3,6 +3,8 @@ import type { DevelopmentPlan, DevelopmentState } from './development.js';
 export type { DevelopmentDiagnostic, DevelopmentPlan, DevelopmentState } from './development.js';
 /** Deliberately backend-neutral. The first implementation supports HTML applications. */
 export interface BuildPlan {
+  /** Explicit public snapshot. Never includes private environment values or process.env as a whole. */
+  readonly publicEnv?: Readonly<Record<string, string>>;
   readonly root: string;
   readonly entry: string;
   readonly outDir: string;

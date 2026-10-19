@@ -10,6 +10,7 @@ export interface ConfigDerivation {
 }
 export interface ResolvedAppConfig { readonly value: ConfigData; readonly layers: readonly ConfigLayer[]; readonly report: ConfigReport }
 export interface ConfigReport {
+  readonly environment?: NonNullable<CommandRequest['configuration']>['environment'];
   readonly basis: 'current-config-evaluation';
   readonly command: string;
   readonly mode: string;
@@ -66,6 +67,7 @@ export class ApplicationConfiguration {
         history: Object.freeze(history.get(path) ?? []),
       }));
       const report: ConfigReport = Object.freeze({ basis: 'current-config-evaluation', command, mode: request.mode,
+        ...(request.configuration?.environment ? { environment: request.configuration.environment } : {}),
         validation: 'json-and-derivation-only', scope: 'Application input after preset/user merge and registered derivations; excludes renderer/bundler defaults and private plugin options.',
         fields: Object.freeze(fields), hooks: Object.freeze(hooks.map(h => Object.freeze({id:h.id,owner:h.owner,stage:h.stage??0}))),
         plugins: Object.freeze([...(request.configuration?.plugins ?? [])]),

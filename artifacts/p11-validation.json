@@ -1,0 +1,2187 @@
+{
+  "format": "cormi:validation:p11",
+  "recorded_at": "2026-10-19T13:32:07.362532+00:00",
+  "final": {
+    "stage": "P11-reviewed",
+    "head": "882720c5affeb811358ce379ee75b6c7d7e83ca8",
+    "passed": true,
+    "source_sha256": {
+      ".npmrc": "d089b05fc08a36af3a3eb500ffd9d2087c0c2517ee6a820980377dc95bede2f9",
+      ".nvmrc": "c989649ac5c541692f22f2e41f5fbc34927c02bf1644e5dcca46bb4c88281f87",
+      "examples/basic/cormi.config.ts": "4e0d200067661fa8cb373725d3886a6e4f60ce9f208c183b715e24ea675983c4",
+      "examples/basic/index.html": "0c205f840d5f7f8691addc6a22b891f63a9e59ea618dcd720cffabadca59db18",
+      "examples/basic/package.json": "049f13856347e194b61f58b46a419706e20e6426ae00b61758971d8dd11c6f41",
+      "examples/basic/src/pages/_layout.tsx": "bbac7a9d61194cbc784331096a3f00b21767590d304bfbfc9a0247ced42aea4f",
+      "examples/basic/src/pages/about.tsx": "6873f7250c512db26f9cda180d947fd5bb4d443992d85f21f233add0a5f28f5e",
+      "examples/basic/src/pages/docs/[...rest].tsx": "701fa4ae30b1d3b2373c297ed54eda3d9494e13ff62f6af9de92eef66e36ca68",
+      "examples/basic/src/pages/index.tsx": "65a53613b6d708da153e6e9abea837468480cb3e354f780ffe6822fc09e51c87",
+      "examples/basic/src/pages/users/[id].tsx": "a4f06c7b6718da0e49dadb71412a07bb04f2a436c46b6611f1772f2660056a5c",
+      "examples/basic/src/pages/users/_layout.tsx": "85f38314daebd7034a8313012c91d8fa2a82a1f27a123b8733def4dfa69a9b2c",
+      "examples/basic/src/runtime.tsx": "23b4e85a742ac8ee8e947ad2d26b920d09e442423730cd97f2ace2168fd38005",
+      "examples/basic/src/style.css": "eaa53d86ef42901a32ed45075c984a6f928b04fa77a82ea621b7fda7458e9bd3",
+      "examples/basic/tsconfig.json": "2980d7a034b338a2d97ce55ad1cea058f9ecf79bb259f51cbb7d6895368d07ba",
+      "examples/features/configuration.ts": "7d7b84fa634380de9472efe396c10043f56cb2d4424dfedd7acb7b5af30aadea",
+      "examples/features/cormi.config.ts": "5a1caf725afcb9a3ad8857b0b11ea65a785c59070701f38c4bcdb77109105b3f",
+      "examples/features/features/status/client/Page.tsx": "096f772facdbd9e9adecd23de8dda6a97c2727e62ac5912bf75f08957109d94b",
+      "examples/features/features/status/client/context.ts": "adbc063fc149f633f08b3e744265d5b74554671a08fb0926ee2da7422c384fb0",
+      "examples/features/features/status/client/runtime.tsx": "5c70cfae0c3144e07aef23eea917ccf52a4cd37a9de902b3763863b1352e4e21",
+      "examples/features/features/status/plugin.ts": "6d8d47c394146bb9fd94e09ad224f86956e73a72b344a2a5b5f7a74958e46e48",
+      "examples/features/index.html": "15745afc9dadd0cb93f19a1b4b1281110932c287a0b8429aae3ca8d3827f4014",
+      "examples/features/src/Home.tsx": "6cff340535adf28d0b19be1bbf69b084dcdd728ae46855a65cbcc05150434b78",
+      "examples/features/src/Layout.tsx": "8f1cd8786e9b9515b6b61bb93085ba08a932247ab747e25297828a667185812a",
+      "examples/features/src/style.css": "5f1a421f0c22e773cd8e07d99425e66c832f9910479f16d4f59e75a9d56bc2a0",
+      "examples/features/tsconfig.json": "aee809b66a418957a0fd5640ba7ecf514927c31a0ecfcea08601346401bab0c7",
+      "examples/p0/cormi.config.ts": "095812bd25b9bcaa8c3074a9e73f70b75678bca4d6a647fa8f7f45d3acdf286b",
+      "examples/p0/index.html": "977f68e405034fd9cc89fea8904d253e28f65b79062a3e66e29f4d61819394bd",
+      "examples/p0/main.ts": "7b106e81fe362567b22af1c792dac2b3a73f7eb5564298c01bb745455cb6f33c",
+      "examples/p0/run.mjs": "651796f3f94ca4787e5f6c3fc4bbd38467c6db2dfc1c36108a8da347a76a2874",
+      "package.json": "819681e3372f92cf4181940a8ad83d625ba9658aa628ce8b50f8ddb84dc253cd",
+      "packages/builder/package.json": "9245887a3a0167952041e4b7286eca08d03834a81b48cc381fbb18652e715e80",
+      "packages/builder/src/development.ts": "990ad6fba4ad4fc7c1e1763b7548fbe39cc04ab77d20dfbcbf83fb39bafbcbd8",
+      "packages/builder/src/index.ts": "16997a67d8a4ae16228ac0c0ad2970742c5e5b71e36aeaaac9a6f3de3d97d91d",
+      "packages/builder/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+      "packages/core/package.json": "3fa528f98bdaf408531384868936adbeaf07448570420fb6da2c6e3291711462",
+      "packages/core/src/commands.ts": "c9b828a9a563ee6d7be02964d37541a3aef6dd7b5bdfbd69bfbe65a73a834ba4",
+      "packages/core/src/config-data.ts": "30b025c44caee976ec343f8b64dabc714669b964c47165756e8ba0046c6c89f0",
+      "packages/core/src/diagnostic-service.ts": "6990beae7f67a260261779816d03097723d3cd65ed87e7d83ed0a60e897131c8",
+      "packages/core/src/graph.ts": "6d2367a94e00d123cb7d35a13a5df83e00e268d827f7287152a544ee0a1edc13",
+      "packages/core/src/index.ts": "4e0ef07c06d334ff62fa7fc66733da98e8c8d89c25d880a5070a9c2106db8e5a",
+      "packages/core/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+      "packages/cormi/package.json": "0b8e34384674057913d5d395658721d1b28316b604d8107a689c930f97637c7f",
+      "packages/cormi/src/cli.ts": "b8124f3bfa0d3f44a59f8558ab95e6e797dcf6fa38200dbe0f9b25b38d20b052",
+      "packages/cormi/src/commands.ts": "71b62194e58c676f6eb4e6eddce79cc7f0a178bffe57264d44bf42772f309b97",
+      "packages/cormi/src/compiler.ts": "2a2d39167fdfd695ed38d0e8e9e46e2c7497e608f3e8c0c42c8d05f6883ae0c2",
+      "packages/cormi/src/config.ts": "6cad6375e446877da6b6c0c4545de0a8d11dadb7ffccd06866afdfff6f006545",
+      "packages/cormi/src/control.ts": "129b30c71602df64137c65ed6de49e03f8870dcc07c19cbdbc2475e64b5795ad",
+      "packages/cormi/src/diagnose.ts": "6c5c92ce501b9c57ac27dcf3703fb09ae0e3e8fdfcf2af4d6a412c21b0cfc6d1",
+      "packages/cormi/src/environment.ts": "4cf78b63445d1aedf5fa8334bff5e2284a28791477afe061d5a02a27ca71bcc2",
+      "packages/cormi/src/index.ts": "e6943b163d3da9f90360fb49e76cdfdc9b4d8c61fcbd16ea7682a9e9c6f13a73",
+      "packages/cormi/src/inputs.ts": "9ffd01c8ff5785b49744e36957a6ab7438439140fd635ea15b9d34f8954e1882",
+      "packages/cormi/src/lock.ts": "3e5f6e3160ab21e86dc7da891f23859c8c237c85ac5cf79f31253b24686fde98",
+      "packages/cormi/src/protocol.ts": "0cd62aeee1f99d819458c759f732e7c1362a0cb2fb29e13a44d03d71c180f8f5",
+      "packages/cormi/src/supervisor.ts": "4e7117f2dc57bb1277d5ea2aefdfd0b42315cd8f0570c7be6229a5e542484531",
+      "packages/cormi/src/worker.ts": "6335914c51444707e636a311d582b305be342f6d598d78397122ed17f85336f8",
+      "packages/cormi/tsconfig.json": "179d61257f38a628a52cb296e104d16e9f0b066b52389733bea08b179f4fe983",
+      "packages/create/package.json": "3c4b522275107e59435dd1217c3faa5ce34d5a49a700bc94bea5844f494c0218",
+      "packages/create/src/cli.ts": "8075dd963d4850b104fdef9498ee1f8f62dfb9103438e8b17d196f55d239cfda",
+      "packages/create/src/index.ts": "e982fbf317ccb35eaa1209f6da4551db0bb29e2fac1ee4e481196727a7bb86b4",
+      "packages/create/src/plugin-assets.ts": "2ec0ae506adc74d1c09628f1491f3b7068a3afe38f3df81c49aab872e10359b6",
+      "packages/create/src/plugin-template.ts": "84adfd6391e2ed909a41c419fe8ffff5ff95b57c5a93b5a1cb5ba0cdb7a78043",
+      "packages/create/src/templates.ts": "fee8dac22c7ac5e63808e1854f2d18e860ea5d19333b232e69d629584af84b4f",
+      "packages/create/tsconfig.json": "776cc7cb1c97d2fefbc7739b3eb42c3c97fc5fe74319239cb806b4bd3ec052fc",
+      "packages/plugin-dev-api/package.json": "1190fa75e92e98fd86c469b8ecf94c00f2036f90efcf17dbd82814e405be34d3",
+      "packages/plugin-dev-api/src/index.ts": "e4d2b45bceae79488e7f887338112f642ee29ef413f903dfa90c513820de2cac",
+      "packages/plugin-dev-api/src/service.ts": "d29e613061a81fc64aa75bf125b47e1cf934808d652d22e6262ea9c67ca8c492",
+      "packages/plugin-dev-api/src/vite.ts": "8e6f658594d76269a7f3b46239f0b4a0aa8b38178c3a6186325ef17a5994f6e3",
+      "packages/plugin-dev-api/tsconfig.json": "b92eb21a0762cd15406863e2a5f07c0622c4faf1e5e786b98a0815efab8143c3",
+      "packages/plugin-react-vite/package.json": "84816ade6202cc56974bb9248f42be1ad3ef99a2aee6a3391ffc4fd642c961dc",
+      "packages/plugin-react-vite/src/index.ts": "1cd03688bdc6285968964b5a9b22e3dc1af67c94056ea4424a5263d4acfa479d",
+      "packages/plugin-react-vite/tsconfig.json": "6dff251ba0e8067dc31ef48390d0615fd7a4f8e17aa7190b9d0be4fe602459a5",
+      "packages/plugin-react/package.json": "435c75b26a172e365c15fa369746407985f9e26240dc6780498b14ebcb3388a2",
+      "packages/plugin-react/src/development.ts": "8d425eff85166c67a4d9fdaea80a57069c23644b22f8b30cb7521ac1fb39a830",
+      "packages/plugin-react/src/feature.ts": "7ab13310f83ce4b18bc45edb22b89808d305bd173dd536d70b9383bf5c228175",
+      "packages/plugin-react/src/generate.ts": "2cc88630e496e2886c8f58da41c47b73462ec13ffd1d5cfd4121e9b6cd357e40",
+      "packages/plugin-react/src/index.ts": "d9b7fa8bc872ca7612917229c3f10070bb9cc64395ec0f362d23d7f1f492b57b",
+      "packages/plugin-react/src/modules.ts": "44e70c94baf649aac8c5279d295449d343e0a438d5e64beb616a58c29ec01082",
+      "packages/plugin-react/src/namespace.ts": "dd9932d53c80780135e978522975dfb0febb1498f0198ecc35262c7d365a1a63",
+      "packages/plugin-react/src/types.ts": "8a9e5bcee8b5a58a7e0f333f5d54a243735f99bee5d4d7058b26cacb9901493c",
+      "packages/plugin-react/tsconfig.json": "66f54d79216879f555b0ff20f08676fd463819c4059992f30276361e8e346d34",
+      "packages/plugin-typescript/package.json": "8145438f128372a9ab4f38166ee348bfd878c32abd0a90a68c11f53cbc266a30",
+      "packages/plugin-typescript/src/index.ts": "4b9e12755825fb3c51a2a0277439773009d4d2edcd75ce4d1dda8e8b450314c4",
+      "packages/plugin-typescript/tsconfig.json": "e5595878a3ee9605f089f9d1387e097dcc01531cffdbcaa1520f4440d4d4a78f",
+      "packages/plugin-vite/package.json": "de1005a5d44637bdeac1454fcec87c51e088aea9f5a0dfb9fdc60d089d7f7031",
+      "packages/plugin-vite/src/development-client.ts": "cbcb5d03ec2e61dc5690ff4491a73933bd9eb88464ae50361b50750c37fd5133",
+      "packages/plugin-vite/src/development.ts": "c603f305d940c27ad976b3fafdea319c13979d0e8e759168760f173ed4083119",
+      "packages/plugin-vite/src/environment.ts": "444e7cb83da695633b8103b691c274b4327f1d35e082c5e86fbb135c67274c3b",
+      "packages/plugin-vite/src/index.ts": "791a850c63938ab8f8fb932a572848d636dc225919c126bf6887b3ec5d4b6402",
+      "packages/plugin-vite/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+      "packages/plugin-web/package.json": "5e44ddd9b5af7fb9a336366142bda16ae7cd0ad30a903cb345684cc6e4894782",
+      "packages/plugin-web/src/application.ts": "034887f7bf0dd76fe48857e3db0dad926af373d9155872e6ebcc1b9720638c46",
+      "packages/plugin-web/src/commands.ts": "ecd7f5e8dae449a1ddac92ed33c59edd06bd13a395f91e41f5af92276b647811",
+      "packages/plugin-web/src/configuration.ts": "9c5b11fd34bdc808bfcebea9f4721d1d9c1d0491d6d6ff88f6c2d1ca2060befb",
+      "packages/plugin-web/src/generation.ts": "6c3ca0f365717c871ecb09b6151f5fb37aa34a7c4077b809d30d42d289d6c1cd",
+      "packages/plugin-web/src/index.ts": "fc608077ee4e0ec8595996b179894f0327f7811c908f200bd995fa868ab8fa14",
+      "packages/plugin-web/src/inspection.ts": "081be205c89cb5f430d663e3691c66038fcfac03aa10edbdc8e3e745ef7772fa",
+      "packages/plugin-web/src/ordered-hooks.ts": "8bfc9924337b5cc758bf00c3efa0e241945254f6902db2e78c38229d0ac881c7",
+      "packages/plugin-web/src/publication.ts": "50244955eb8f880128b37c49c75a4169a390e6517dc991e72fe8341357cd492e",
+      "packages/plugin-web/tsconfig.json": "91ba2c4d0c801eade654ebfb7463f1695f335f7bc4c72b4c92cb2652eaa74443",
+      "packages/preset-react-vite/package.json": "017381e90b80dcd3fce68d427c748de960c3f06f5a2d7e321806cb6500f5935d",
+      "packages/preset-react-vite/src/index.ts": "07fd9988e12386030189abff43d68884041e0e4205444506b2ad1935fca653fb",
+      "packages/preset-react-vite/tsconfig.json": "3c37c029213990f8b3f91b0b6bbdc043e764e6e62c6722722dbbf63ffd85c4a0",
+      "packages/routes/package.json": "aeef2670ddabaea9be5eb8f39a0457f8aa41eac8fe1187bd4198379451c71bc0",
+      "packages/routes/src/index.ts": "de5286fc0ad2e4fb49fde1191ec8798c949222f1453ff2ed9c03301c523fa8d9",
+      "packages/routes/src/json.ts": "e8b235572bf965132f0a7fbdedfc442c6a958ee95a8062607453d0a7895f7ff0",
+      "packages/routes/tsconfig.json": "179d61257f38a628a52cb296e104d16e9f0b066b52389733bea08b179f4fe983",
+      "packages/runtime/package.json": "4ae9491115adb2dde225314dde154e43ce62a157ca4610eea445888f5018b0bf",
+      "packages/runtime/src/index.tsx": "154b25d194d42a23d72a45f3817488a630502b405e8078d60f90ae78f8a9987f",
+      "packages/runtime/src/route-matches.ts": "cd208e8753ede98a5a56503f4f248d5fe1dd90e3e3a252bda07195d58b6f982d",
+      "packages/runtime/tsconfig.json": "e409e3b42ce86c6d10b739e22d0c8fc049d9a1b4ab816fbb83a739de9eba0dc7",
+      "patches/CORDIS-LICENSE": "034fb52b1d57360ecbae6cb1632a88f86fd7c3d3f5631a5f082710203dda0be7",
+      "patches/README.md": "0c3484f890bcf1f5c4d2c13aa8eaf2253c2d41467be653de20b8d65dde04b3ed",
+      "patches/cordis@4.0.0-rc.11.patch": "11a745abd66488d5cba00b7388beebaf8a70bc0fdd6e998608e511f77358228e",
+      "pnpm-lock.yaml": "368ff8389cc354c3f7b20f5979bf5999ebdaea5cd676021397371c491dc5e969",
+      "pnpm-workspace.yaml": "995d2de1cd963f1aaa4dae859bd504d60bbd8b3c5eb4358916a87aa77c671904",
+      "scripts/admin/assets.ts": "e0c38f7cafb22d9285ddaa8b2900f034fddc7bd0fee88375da8a6d1f250c654a",
+      "scripts/admin/chart-contracts.ts": "1f805d52137986ed4ad53ff84a17bee060f0fbe07f80ae1946659d10fad14e63",
+      "scripts/admin/deployment.ts": "cbca7ae04f35b6e63ba8986da1f1f0a4d02f2ea8f31f55b36c098e55def7ce90",
+      "scripts/admin/dev-api.ts": "4c0fd37ac56b3693e9bcf2a3007e2a8b7ee9e9abfbe048b28a26da3300844365",
+      "scripts/admin/development.ts": "6024a0ffc7b7a2a568af0d32d7f70b7bffb34f36d9384538bc5b17bac6541b86",
+      "scripts/admin/diagnose.ts": "de48ba94c9363ba431a21dfe11108ce2a2ec5e9c5bf940bec19c1afe71b19d32",
+      "scripts/admin/errors.ts": "8e7ac2a8caafadee24921e279646045e6ca5368f561b846d2306f6449055984b",
+      "scripts/admin/framework-fixture.ts": "984ace0b27ce90ad3eaf900322a7ca3167cf703190d29dec1c01d0b4a3c6a979",
+      "scripts/admin/framework.ts": "ecafb073f27786a747a53cb12594d03b41dcf1776c8481915b50183e0b7f883d",
+      "scripts/admin/harness.ts": "1e673e370e03e5ddb5d9b8825a18ecc1437363c15e47607ef64b5ca4cf1aeeb2",
+      "scripts/admin/header-contracts.ts": "86e511eba7e79b0456f247795137a869ba6359ced56c2b28ded53a41c159c2f2",
+      "scripts/admin/header-fixes.ts": "067c0a5688f1c02404aed03cb5374da6a1f9a3ab7e23e761d7b583c953b8215b",
+      "scripts/admin/migrate.ts": "c2ecc73575142ddb5e32f8cdecd5f9115169df2de818737aa6e67f35b91a72d1",
+      "scripts/admin/modules.ts": "846196e52c7d97c4287f9c52d22b819de512315cf3703946753869d637f29c67",
+      "scripts/admin/verify.ts": "29b9f7214edf1d751c1b2cf90571e6b96ff99c3ef43cc90e35f6da33067f0414",
+      "scripts/environment-fixture.ts": "13c05aa0a086ba0a7326229b2a05b89d3c4c83942f84369410f75fb2d3484529",
+      "scripts/linux/Dockerfile": "ad44353d111c27e075871d146d5bcfbf2e212abd2b2d0a0499fdf826d651b5a1",
+      "scripts/linux/snapshot.ts": "f87610a332247870ebe0677998988f4a05e513567f0636f6b27bba48d7fc1eb9",
+      "scripts/linux/verify.ts": "c8591836e2a5f733545b3f79f9178f3325e131d50ce65f7c58b705b5a951c915",
+      "scripts/linux/warm-cache.ts": "660311b13595be15efc747d9f54fe7abf2e58271e776c4e08a7136c64b0401aa",
+      "scripts/pack-local.ts": "8248afa00ebe523755544b355287bf67df98076f5e2c6e0668308827e0c1bd17",
+      "scripts/packaging.ts": "f6b233174edfad634be0efb402ac1faab64164b7abd1fd3c836022891509ea07",
+      "scripts/plugin-assets-verify.ts": "88dd58832e478e06ff40c1eb2b445d3b64610710aad6753820e9db2a5ed0bc2c",
+      "scripts/plugin-instances-verify.ts": "79da2014121983679b9c802ad87cd03525896593c30c5b0fc94edbc3b5e3d328",
+      "scripts/test-linux.ts": "bdf97d0aabb05ee3c92634a7ba3a6577cddf403ee53c54fdfc80adc4286a380d",
+      "scripts/test-package.ts": "8f592f88be0238b6bdefaaa16d0be4ab83a0bf97e504cec7a93c4fb1dcb6a263",
+      "scripts/test-plugin-author.ts": "a57b79d62fa3152ffeccc4b1aaec1b8a5f4b7a6c4b9662e3809e222f91197725",
+      "scripts/test-windows.ts": "eb3c741166c8c9fa0993c5bc3adbc0c721a18669d4020e2424116a26e6d1eab6",
+      "scripts/tool-command.ts": "ba8755a70d00aa0e98fe80f9b860fa76cb3522e8672f07c4d230153d824a35ee",
+      "scripts/windows/environment.ts": "2f7f4bce1dc9efdbcadda8c9ac7ad21107d39367a2f40cb8f58561e1551c6377",
+      "tests/admin-assets-review.test.ts": "980ee72c205da1e0f1e889b139d342e35e0a485089f300ecadf7f5a4755a7843",
+      "tests/admin-assets.test.ts": "2f609f862636a1bb9e1644a95a96f8e194bcbce25e4efe233b68a723b7618120",
+      "tests/admin-header.test.ts": "6c9fc787acaaa8b339775aea5321b703fea10c74d803f110371a82c95848e646",
+      "tests/app-tools.test.ts": "84767164b7baa2c94fe353a1ad1d4e701455596d463dc1697d932c0e054278d9",
+      "tests/application-commands.test.ts": "a676b5a5f21f1f1e5f97f96dcc21d0b8b8f01f58e680ced3ee6b26706b5eaa9f",
+      "tests/browser/configuration.test.ts": "c9a0c4398980e70c7c937d2f05445b2bc9d46d208205bec0c45b983c7335094c",
+      "tests/browser/dev-api.test.ts": "eb04362d9437502efb6599cde823862bc63a1ad82be542de7ea34694559f338a",
+      "tests/browser/development.test.ts": "738eae072993e76e933e31efa6d35cf468500ce478430935bf0b9097776045b9",
+      "tests/browser/environment.test.ts": "9284cf573363a4349f3a6b5efcc1dca1bceb132a8a35630160251f3657e90167",
+      "tests/browser/features.test.ts": "6e8d2ad4c7beea4cb98749314fdbe0517942e7ac1259edbee77cf47bb46d2f7b",
+      "tests/browser/react.test.ts": "7e2d3871a3561138d641c2ebbd0b7f63d40599ac5713f3d16449f9d0190dbe9a",
+      "tests/browser/route-boundaries.test.ts": "c75fb93302e353d5890129f87eba6148e13a4055e41ac56577d557f89024b77d",
+      "tests/commands.test.ts": "c0a7f39b11a9b5d757b40073013df1cc941f8c0da5162cccb48e8fbd5a04aec6",
+      "tests/config.test.ts": "fd9beab2d662977c5425276e653f7673a5ee83c142603a94627a0e7b5c251455",
+      "tests/configuration.test.ts": "16108642d660fb149ebab460a4666161f045bef64b5f0ec972fd7ace3933ecf3",
+      "tests/core.test.ts": "60f68f93e6274cda6fe4a49c55cabc482439f45b350f265bee266d3d48f48ddc",
+      "tests/create.test.ts": "4d64b00b6baf4f2e186384e3fda6f1432e69805417690ae665238a6cba595500",
+      "tests/dev-api-close-review.test.ts": "079326bf32b552b7a7fe651eff718adfa75487119823cb11c08c8183d9897632",
+      "tests/dev-api-framing.test.ts": "40718733706a42462970f84c87c1cdc2b9cf72070c5270e2fb7c0fdc94e1e769",
+      "tests/dev-api-service.test.ts": "4cd83ab9e68226904204c2240508168d8ecb0f4a908c9f941d3054dce2b7e41f",
+      "tests/dev-api.test.ts": "13d69ef3aed038779d1f5ae5fc918c815776562429065f19399654805400fe92",
+      "tests/development-backend.test.ts": "f895381af5cd0ea615829467d591af2a1b70ce8a510973003e6cec54166b0d07",
+      "tests/development-lifecycle.test.ts": "9946155fa060d26fb36a8ffa5520165be35034611ffff09959870314012706ec",
+      "tests/development-recovery.test.ts": "605258aedfbf6015008eafeeff5f1f74a5a7aa2ab3698b1f4e2012e65b3a104b",
+      "tests/diagnose-cli.test.ts": "6c48aa4a3590446ef13f7906bf8d6e08fd4223716aced00b5c92fc1e2d3a31f1",
+      "tests/diagnostics.test.ts": "809e4864c664fa4094200ab62f6a7233907e38ba9dbd850a1fc24eb6c7227887",
+      "tests/environment-cli.test.ts": "dfc87a72ffc1727463d9d149bbdc1f35061b228435aae8a60e14d54fe04b35a2",
+      "tests/environment-recovery.test.ts": "45ec771ebf8fe93af2fe5fa4383abb933c50300a8817139c8c5b7b3e3956380b",
+      "tests/environment-review.test.ts": "e6a980df7529658f8898f7fe85d165e70b51cff1c50cb8ab8665b67c46412346",
+      "tests/environment.test.ts": "cf984a8cdfcb2e5b3b141dad41d7e9eec8d9eac9ad4d33509d07b64d939e70de",
+      "tests/feature-namespace.test.ts": "6fbfaee508078b4bd1494392ef94e6ddf197f420072622336e5d10a052473d15",
+      "tests/features.test.ts": "76688cb49bdfefd7f69d9e1ce57c98e5651cdfa44982db0eb969a0d530cc045d",
+      "tests/fixtures/dev-extension/api.d.ts": "6840e595f95bd722c5626e3a41d604631648d7e275369d591c718290d928f1b1",
+      "tests/fixtures/dev-extension/api.js": "dc0413fc32340dd314fac872c2a13ad65c51823c85bd80747a9432cffa90e7f3",
+      "tests/fixtures/dev-extension/client.d.ts": "cd7fc89805b71a1bae47bac6a171947c17ea4644e1bb17e33cee2cb57dd3cfff",
+      "tests/fixtures/dev-extension/client.js": "71815ece0a4778807e4857e361f12231d343bad3513ef516f1ca170c5a154bcb",
+      "tests/fixtures/dev-extension/index.d.ts": "12cf341878f18db193a141e26a1b11bee28ea76a569ae1a6f079ce8d3e5852a6",
+      "tests/fixtures/dev-extension/index.js": "dd8f77813b27761e4095d31f84b53ea90938e839b524657fe25828f62641283a",
+      "tests/fixtures/dev-extension/package.json": "e58e4b65030299c4094cc129ed31b932ead081487d9ad5e3ed1f79ec22fc21a8",
+      "tests/generation.test.ts": "9e25e013fb0dd84af7e13eef1cb66a03e28e26ed961de1f648d924a1fe9b2033",
+      "tests/helpers.ts": "dccaf8e3165920ab038c398697bfcb0db45809915fb40a1b988f1f13942353bc",
+      "tests/hooks.test.ts": "e30de33fb5e3dcca4e6c7a27342c601971cc489d30016118bfaaebde4524d73f",
+      "tests/isolation.test.ts": "36a41ed4ef9654aef81e41fc1660ab82b7066701ddd7702fc675b83c16c13752",
+      "tests/launcher-boundaries.test.ts": "48b1622a60d15b9dc1b41d1226718fe949974c04e8bf68d77c5a7f14b70ab21b",
+      "tests/launcher-control.test.ts": "63420b20b6fba2b02a9e191c9956a8abbf3de5dc034569110f17c18dadb7f455",
+      "tests/launcher-helpers.ts": "ae8f12861f3d3aa72945a29fadf6336aefa7178e708e0bbd5c400d461f6a0308",
+      "tests/launcher-recovery.test.ts": "bca11866d287cb5ad5df3434b316f959efcccbc209de62cf85d69c089d03c667",
+      "tests/launcher-supersession.test.ts": "a3507ed6888ace52ea1f8032938c4fba385c04be2b1e3c6960c5b8c668e84998",
+      "tests/launcher.test.ts": "c9cb721dafef1820dcfe7f301cbfcc0d21f0e9cdcf57f68e9827704c29e2c4c0",
+      "tests/linux-snapshot.test.ts": "0e9935d61bdc701e35eeea51fb664c2202bfe1aa84123e7ef14c788f81d1d6cc",
+      "tests/locks.test.ts": "2227e1d24722d712b58952e9971e26c9470a101bcb90aae79f98cbba1ce9a76e",
+      "tests/multi-instance-lifecycle.test.ts": "dedad10008a2770e94fbb96251715383ce902690110cbe2691f7f69beda6e9b3",
+      "tests/packaging-boundaries.test.ts": "933ae66fbcc7406d0876f519ce8c4e5f7d0dbc1603d6c3d708c5b9a1034e7d0a",
+      "tests/packaging.test.ts": "ed19554e2fb7b1e512c6c71d63c650cd5444a22d3ea2a82fc99bf6e7fc1d83f9",
+      "tests/plugin-assets.test.ts": "465a8d25fb2c97952f780dab56fb1d1f6bc49d66adafed4d6bf9d5bde7c02977",
+      "tests/plugin-author.test.ts": "1bfaf425e55c49299234147098d7117eeeab580003c6acdb43d2aa82bb318ad0",
+      "tests/plugin-instances.test.ts": "0eef89e164cc62fd88307ff74958a57bf1847eba01597cf1babf5abf65c4c32a",
+      "tests/providers.test.ts": "089425999a52251d4ac01df27ed3c2a0cb9959cc0ab255b730f85157af0c2986",
+      "tests/publication.test.ts": "0c0168aa9766df4cca0e431b1d6c6d07fa75017d7f0bccacabdf0065d3bbee4c",
+      "tests/react-boundary.test.ts": "b49bf04b4711ac175593c471badbab927647d3fc6c3d0d3d6eaa456594075061",
+      "tests/react-compiler.test.ts": "c8e287a8d21eaf1427a75a8a958b24d4124a36a8c5619d259f6d914c5bb5d183",
+      "tests/route-boundaries.test.ts": "844ddba39c8af15010f47ac817970c47b83f8742d56aafa0c501029e434d57d2",
+      "tests/route-boundary-types.test.ts": "f39d3396aa1d487c2aa41f34358082788e94b078e66a8f2f8dea75a678ca8d38",
+      "tests/route-import.test.ts": "f4cb08bce6c5e7afedd8f145fa3f904e3f6ccfdefb965fc0c0b3b9a38ddc548f",
+      "tests/routes.test.ts": "ffc720fd8d27d676cd68db4d0f492ca5d76851e65d28912b31977e208b581548",
+      "tests/tool-command.test.ts": "c975b6a608ad06e4ade6d3f937ab61b25b3f952b2a5c384103557bec59902244",
+      "tests/tsconfig.json": "62b7f8530dddcc3bc455f37fa9f0e771b2a7835922001fc08c3e209ee97d88f1",
+      "tests/vite-base.test.ts": "313332a353b8d131126f387f29c57fb0211282bd7031769d6f01ab32df0442f8",
+      "tests/vite-build.test.ts": "e1165a90659bfcbb240bb0ff66f582bdba651a8c235a4a317b0a3704264c9328",
+      "tests/vite-dev.test.ts": "1949034c527a495ef8b6c442c8cea78c664315a274df2a71a0e67b0ad14edc08",
+      "tests/vite-environment.test.ts": "679bd2c5b718ff3cfce310a85c6335fd4d58423d52246a998420fb97850c550b",
+      "tests/windows-environment.test.ts": "9c5eb76ad77db8f76bc0bb24af493d1d44e0feaccad9225f3ef7ca99bcc16f60",
+      "tests/windows/native.test.ts": "d78b4f59f3322109a82beaeeed3311ff679b3235085b2168c15038cab514f82a",
+      "tests/worker-result-delivery.test.ts": "18f0ccfc9f19e6a47e03db9df30588cef4df3fb669ce3c2f2c81bc493dc269a1",
+      "tsconfig.base.json": "94d2a15288b0b45c326f56f74d425daf9a8e7e2361d85bb4b12c521458e59c4c",
+      "tsconfig.json": "3dc2b20d3fe968c8474c4cbabb8cded5fcf85f7c0b73e02c79020548e7c83e4f"
+    },
+    "commands": [
+      {
+        "label": "check",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "check"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs",
+        "exit_code": 0,
+        "seconds": 62.065,
+        "log": ".cache/p11-reviewed-78d075d14f/check.log",
+        "sha256": "7ae41c4742d018159fba4670230dab3f4d550568614d94383ef8dbab61da2c8d",
+        "counts": {
+          "tests": 348,
+          "pass": 348,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "inputs_unchanged": true
+      },
+      {
+        "label": "environment-repeat",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "--test-concurrency=1",
+          "tests/environment.test.ts",
+          "tests/environment-cli.test.ts",
+          "tests/environment-recovery.test.ts",
+          "tests/vite-environment.test.ts",
+          "tests/environment-review.test.ts"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs",
+        "exit_code": 0,
+        "seconds": 5.03,
+        "log": ".cache/p11-reviewed-78d075d14f/environment-repeat.log",
+        "sha256": "31133625537333c8843500aa1e3880110c2266ce68d33b40d33a34e5633c42f5",
+        "counts": {
+          "tests": 23,
+          "pass": 23,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "inputs_unchanged": true
+      },
+      {
+        "label": "browser",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "test:browser"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs",
+        "exit_code": 0,
+        "seconds": 181.453,
+        "log": ".cache/p11-reviewed-78d075d14f/browser.log",
+        "sha256": "256c3b66b6a92ceb7a32925e6de91eec9679104f7fe8c27de0f1270c258f7ab0",
+        "counts": {
+          "tests": 18,
+          "pass": 18,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "inputs_unchanged": true
+      },
+      {
+        "label": "package",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "test:package",
+          "--out",
+          "/Users/mahoo/Projects/cormijs/.cache/p11-reviewed-78d075d14f/package"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs",
+        "exit_code": 0,
+        "seconds": 51.476,
+        "log": ".cache/p11-reviewed-78d075d14f/package.log",
+        "sha256": "23a335d232ff3babf247502fc83fae65931aa9426992e41344eaf756c1d34fb4",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "plugin",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "test:plugin",
+          "--out",
+          "/Users/mahoo/Projects/cormijs/.cache/p11-reviewed-78d075d14f/plugin"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs",
+        "exit_code": 0,
+        "seconds": 47.827,
+        "log": ".cache/p11-reviewed-78d075d14f/plugin.log",
+        "sha256": "c8a06a1b66d95234576cc2152d5da4a63fa5c1d00fa18f506f27f9b7f2fe9a3a",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "environment-browser-repeat",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "--import",
+          "tsx",
+          "--test",
+          "tests/browser/environment.test.ts"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs",
+        "exit_code": 0,
+        "seconds": 10.817,
+        "log": ".cache/p11-reviewed-78d075d14f/environment-browser-repeat.log",
+        "sha256": "d2dd9d0df2ff67c2d70f1245b6a61e6353ba45c700f87978d72c00b50d74787a",
+        "counts": {
+          "tests": 1,
+          "pass": 1,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0
+        },
+        "inputs_unchanged": true
+      },
+      {
+        "label": "frozen-install",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "install",
+          "--offline",
+          "--ignore-scripts",
+          "--frozen-lockfile"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs",
+        "exit_code": 0,
+        "seconds": 0.221,
+        "log": ".cache/p11-reviewed-78d075d14f/frozen-install.log",
+        "sha256": "b468a3998645c48214cf130adde2ce2eb2258f31c07e68b6b24b161b06300ff0",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "trial-kit",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "pack:local",
+          "--out",
+          "/Users/mahoo/Projects/cormijs/.cache/p11-reviewed-78d075d14f/kit"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs",
+        "exit_code": 0,
+        "seconds": 3.006,
+        "log": ".cache/p11-reviewed-78d075d14f/trial-kit.log",
+        "sha256": "b3db51c247ea5de74e090da7ca9ecc45cc9063fe4f96323a71aed2e112816492",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "trial-create",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/Projects/cormijs/packages/create/dist/cli.js",
+          "/Users/mahoo/Projects/cormijs/.cache/environment-p11-78d075d14f",
+          "--kit",
+          "/Users/mahoo/Projects/cormijs/.cache/p11-reviewed-78d075d14f/kit",
+          "--template",
+          "react"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs",
+        "exit_code": 0,
+        "seconds": 0.03,
+        "log": ".cache/p11-reviewed-78d075d14f/trial-create.log",
+        "sha256": "0b2a7d26f319d789904813c54840be4eff2e833a897e8495bd7b087c59d18863",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "trial-fixture-input",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "--import",
+          "tsx",
+          "--input-type=module",
+          "-e",
+          "import {environmentFixture} from './scripts/environment-fixture.ts'; console.log(JSON.stringify(environmentFixture('/stage/',8005))); "
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs",
+        "exit_code": 0,
+        "seconds": 0.069,
+        "log": ".cache/p11-reviewed-78d075d14f/trial-fixture-input.log",
+        "sha256": "22989bcf5717b81a7b4d5c50fddee4b7d4e8810b6f1a54370a4bd0e4ab01b11d",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "trial-install",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "install",
+          "--offline",
+          "--ignore-scripts"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs/.cache/environment-p11-78d075d14f",
+        "exit_code": 0,
+        "seconds": 0.769,
+        "log": ".cache/p11-reviewed-78d075d14f/trial-install.log",
+        "sha256": "bdb120390e501dcabb58df92d5f55855848db9e3494b51d98db64b59c6fc73b4",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "trial-typecheck",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "run",
+          "typecheck"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs/.cache/environment-p11-78d075d14f",
+        "exit_code": 0,
+        "seconds": 2.623,
+        "log": ".cache/p11-reviewed-78d075d14f/trial-typecheck.log",
+        "sha256": "0dba96e10312856043ee9b411a049be5a56c7324b2b6227e64028c22e158e7c8",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "trial-env-config",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "run",
+          "env:config"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs/.cache/environment-p11-78d075d14f",
+        "exit_code": 0,
+        "seconds": 0.283,
+        "log": ".cache/p11-reviewed-78d075d14f/trial-env-config.log",
+        "sha256": "89e4d2d9725acd79f052cd6cebb861eea80b480059797b593e505d77fc66a52b",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "trial-diagnose",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "run",
+          "diagnose"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs/.cache/environment-p11-78d075d14f",
+        "exit_code": 0,
+        "seconds": 0.293,
+        "log": ".cache/p11-reviewed-78d075d14f/trial-diagnose.log",
+        "sha256": "6a7e408b1fbff7d85aa3aebefb01d2b100c1ff38300dda73f0088bcf54351163",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "trial-build",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "run",
+          "build"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs/.cache/environment-p11-78d075d14f",
+        "exit_code": 0,
+        "seconds": 1.13,
+        "log": ".cache/p11-reviewed-78d075d14f/trial-build.log",
+        "sha256": "cf3203ee8aba19f49dbb6f71132c689f7c366aba574afca50e9159701e2dd939",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "trial-repeat-build",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "run",
+          "build"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs/.cache/environment-p11-78d075d14f",
+        "exit_code": 0,
+        "seconds": 0.802,
+        "log": ".cache/p11-reviewed-78d075d14f/trial-repeat-build.log",
+        "sha256": "17ef0897d8208c7304f12c8aea9843211b66aaa97b7956d32c1d62a7f37e9b7b",
+        "counts": {},
+        "inputs_unchanged": true
+      },
+      {
+        "label": "trial-frozen",
+        "args": [
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/bin/node",
+          "/Users/mahoo/.nvm/versions/node/v22.14.0/lib/node_modules/pnpm/bin/pnpm.cjs",
+          "install",
+          "--offline",
+          "--ignore-scripts",
+          "--frozen-lockfile"
+        ],
+        "cwd": "/Users/mahoo/Projects/cormijs/.cache/environment-p11-78d075d14f",
+        "exit_code": 0,
+        "seconds": 0.2,
+        "log": ".cache/p11-reviewed-78d075d14f/trial-frozen.log",
+        "sha256": "5a2905c44ae5b15f43b9df0932fb455b1298805aa498fed6e2cac0623b1db66f",
+        "counts": {},
+        "inputs_unchanged": true
+      }
+    ],
+    "directory": ".cache/p11-reviewed-78d075d14f",
+    "trial": ".cache/environment-p11-78d075d14f",
+    "trial_inputs": {
+      ".cormi-local/compatibility/CORDIS-LICENSE": "034fb52b1d57360ecbae6cb1632a88f86fd7c3d3f5631a5f082710203dda0be7",
+      ".cormi-local/compatibility/cordis.patch": "11a745abd66488d5cba00b7388beebaf8a70bc0fdd6e998608e511f77358228e",
+      ".cormi-local/manifest.json": "e310ede2d56e527cc85500ceaef93459fe6d4a89ce118bfb8aa7a70c936ff27a",
+      ".cormi-local/tarballs/cormijs-0.0.1.tgz": "15f80e48bbcb13e1cd89c790ba1afdb6d413eda06243a11c5620f4fcf2b45f60",
+      ".cormi-local/tarballs/cormijs-builder-0.0.1.tgz": "cfc014ccea729e94c6472ae4b7e0b1553c805dfa3644c2243de468afd2721fd8",
+      ".cormi-local/tarballs/cormijs-core-0.0.1.tgz": "5ca55dc3ca4ffaad795dcaf98556989057f50c3b1cf8738954ec176b56fec999",
+      ".cormi-local/tarballs/cormijs-create-0.0.1.tgz": "986c65dc384c692d731eccd0dac4679ea8df6a4b95a2b9fcb31a56f0961c9b58",
+      ".cormi-local/tarballs/cormijs-plugin-dev-api-0.0.1.tgz": "92799f1bd10e4cdbf11a478638c30de3e7c6dbe43c4454f0b33916dae7c1126d",
+      ".cormi-local/tarballs/cormijs-plugin-react-0.0.1.tgz": "e1ca07f50e0ea05d5a3840930a858d7b6a3f556ce153146911f2a182bae88309",
+      ".cormi-local/tarballs/cormijs-plugin-react-vite-0.0.1.tgz": "c779fa98136aa9124c28edde78600c6d21eeb25fac7cafc189b98332198c78ff",
+      ".cormi-local/tarballs/cormijs-plugin-typescript-0.0.1.tgz": "a5c0cd8584aa104bebc1e442ac5eec77485a4fed9df7b20ceaf9d7c737320e5d",
+      ".cormi-local/tarballs/cormijs-plugin-vite-0.0.1.tgz": "690daec4689c2202b52af35ef10181a7ab958f076e76c922cf86f0983909ebd4",
+      ".cormi-local/tarballs/cormijs-plugin-web-0.0.1.tgz": "f81eef65f7078cd5f9a4482391f85fb8a285971dc12655495902d6028c5548e0",
+      ".cormi-local/tarballs/cormijs-preset-react-vite-0.0.1.tgz": "293f7eb331db9f49d6aeed7ebdb31c14c64c3a479c5981444a40a36753079d9d",
+      ".cormi-local/tarballs/cormijs-routes-0.0.1.tgz": "a7810a38146466cc797cd753063c8070d3b04e6e10ead16dad6b5245f7891eb7",
+      ".cormi-local/tarballs/cormijs-runtime-0.0.1.tgz": "26c9c4cc66b801d056b39175a5becc0f1638c551f9d8ce1c16ab375281030575",
+      ".env": "964dd2463fd935ecd2f19ed8023ca0f8a65b391d592765de362b8b28f67f8377",
+      ".env.local": "c470e88294a3e68b089ec007a9dd61c1ef3f12d1b6baef00f326a912220eb9c5",
+      ".env.staging": "ee55aa46bb24755ef88afab2bd318dfa88073134a23ac569bf3638d40c68c7cc",
+      ".env.staging.local": "3fac52f4ef5a5a986803f9752f3b84f2bd2f46d178185cac25231b121715b3a4",
+      ".gitignore": "a09340e9f310b804dcb415598cdef6e909670e50722479ad8ad9d8bfbae37898",
+      ".npmrc": "4752bcdcb0b289ac9b075132011b7e74438e2a3559514c44f94f779713e71cf6",
+      "README.md": "97bdb32e0c54c4a3561e890df7589d83ef96e81b04662c29388d5718d081c4fa",
+      "cormi.config.ts": "04e3737b29ab929d7b70bea8c91fd0761c69bf0ba86d0f56183a860355cf6a8b",
+      "index.html": "505c6b77762951fa6c23374b67ef25e2ece957261b228cb352ada6f379d49bf0",
+      "package.json": "a1a11a0146bd46c31c45a720ae01937d7e71716d9a5e6ab80eb16b166ce6ab38",
+      "pnpm-lock.yaml": "56e24ac9b030833bfabec90755b46cd5e1b63a0be69e1cce27dd9c95f700b1fe",
+      "pnpm-workspace.yaml": "b379483d4293500af8e9d3e8d83b4b5a2ad1e844911cd7be7f7e274e4bb80666",
+      "src/Probe.tsx": "5bd67b5b27081e52299be15fd2131b1eb45593f37acc7c41e36d6baa1b4fe400",
+      "src/env.d.ts": "3786e951345228f4b9214d7caf56fab323736eb9ac23f2d9c604432ed393c726",
+      "src/pages/index.tsx": "d64ed6715091cebf9d2a0a6cf386698c2dd38bedeea19c75afb873402b5acbb4",
+      "src/runtime.ts": "5a3a8e9ffa429564dd3ff7ca41efada7d18fcbdafff4b474082733442729529b",
+      "src/style.css": "43f757b06423f6726a03b98dde561f771e9f7be06b861bcc6029652c225f5a90",
+      "tsconfig.json": "911cd2df48f1f3900bb280cc5f7159f4c88feffa67b1e485e85a1f3611c4edc3"
+    },
+    "trial_link_count": 163
+  },
+  "package_consumer": {
+    "path": ".cache/package-test-1792416226161/result.json",
+    "sha256": "7ee9d7133ec4bd1307aaa09fb790f9519855a5ab6c1211092640882799cd061a",
+    "result": {
+      "format": "cormi:package-test:1",
+      "startedAt": "2026-10-19T13:23:46.163Z",
+      "node": "v22.14.0",
+      "platform": "darwin-arm64",
+      "passed": true,
+      "stages": [
+        {
+          "label": "archive-exports-imports-maps-bins",
+          "packages": 13
+        },
+        {
+          "label": "raw-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/raw-install.log",
+          "sha256": "c098d260dad1bf24c8dccc7af46326bc615614765b61b1610b26f188f11c60e9"
+        },
+        {
+          "label": "raw-runtime",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/raw-runtime.log",
+          "sha256": "bb38e74b2fea792da01884c1c637ab82857112e2be0fc9ab5992d2301ac570f5"
+        },
+        {
+          "label": "raw-nodenext-expected-failure",
+          "exitCode": 2,
+          "expectedExitCode": 2,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/raw-nodenext-expected-failure.log",
+          "sha256": "d466106d557d6cad852620df74b2acd286b169784863ea6bd7cce471e11fb3e4"
+        },
+        {
+          "label": "isolated-links:raw",
+          "links": 7,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/raw-pnpm-lock.yaml",
+          "lockSha256": "1bf02e98cc21286eee1d256798dacf1b4a46c4e6774ebed23c6515e715c1b9be"
+        },
+        {
+          "label": "core-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/core-install.log",
+          "sha256": "a6d16d532b33f595854d2bf100582ebf1c419a3329b1a194da41319f34ae4f48"
+        },
+        {
+          "label": "core-runtime",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/core-runtime.log",
+          "sha256": "bb38e74b2fea792da01884c1c637ab82857112e2be0fc9ab5992d2301ac570f5"
+        },
+        {
+          "label": "core-strict-types",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/core-strict-types.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "isolated-links:core",
+          "links": 7,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/core-pnpm-lock.yaml",
+          "lockSha256": "47d62599551cd10fa3400caac8418907d746602406650f1d7f1462405b17090d"
+        },
+        {
+          "label": "cordis-runtime-identity",
+          "sha256": "2b5009648dfb64a2b904315e3a577179f6d378507cbbb3965897d94994d78fe9",
+          "unchanged": true
+        },
+        {
+          "label": "dev-api-service-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/dev-api-service-install.log",
+          "sha256": "6c6cc3bca17f5c195aa217687229b03fed0ebe7df7199574cf69cf354d8f7770"
+        },
+        {
+          "label": "dev-api-service-strict-types",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/dev-api-service-strict-types.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "dev-api-service-no-vite-runtime",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/dev-api-service-no-vite-runtime.log",
+          "sha256": "a9a11e8003bd26a21598fa71b03fd1559ce045b0bcd9b5a2119d8ec509ab9e97"
+        },
+        {
+          "label": "isolated-links:dev-api-service",
+          "links": 34,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/dev-api-service-pnpm-lock.yaml",
+          "lockSha256": "e2cb4ed098dae0ed8f4b0525d895581092dfa6a042e0671b0c1db5d2a3262442"
+        },
+        {
+          "label": "launcher-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/launcher-install.log",
+          "sha256": "8983e963529378eb4b8d120a2d5bdf77dcc772d87457d8628be9bba2d9c5df3e"
+        },
+        {
+          "label": "launcher-bin",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/launcher-bin.log",
+          "sha256": "b97a9f0548ae6e3a2f42248f0860208ce6a4065f71a0772316e20dcc54765041"
+        },
+        {
+          "label": "launcher-types",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/launcher-types.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "launcher-custom-command",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/launcher-custom-command.log",
+          "sha256": "90bcb57cfff9f73930f6f8329a3f61f58e375f30d20e82953266be012856d207"
+        },
+        {
+          "label": "packed-diagnose-no-web",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/packed-diagnose-no-web.log",
+          "sha256": "12708d79ff67f1aa3213cf92fd106cd6d9220f2e8a332a88a7a6497ea900e9d8"
+        },
+        {
+          "label": "packed-diagnose-missing",
+          "exitCode": 1,
+          "expectedExitCode": 1,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/packed-diagnose-missing.log",
+          "sha256": "d867264da51cb75f122b6e19d73a1314c798e841c8b37c45300819583ee3eb18"
+        },
+        {
+          "label": "launcher-no-vite",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/launcher-no-vite.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "isolated-links:launcher",
+          "links": 11,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/launcher-pnpm-lock.yaml",
+          "lockSha256": "ef84cd742e8e540ba090ec14cceebdf3aec540752ded5f741c0de7aaa58444e8"
+        },
+        {
+          "label": "missing-peer-rejected",
+          "exitCode": 1,
+          "expectedExitCode": 1,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/missing-peer-rejected.log",
+          "sha256": "16d7cc690a705f37cacc7069aee05ab15c527a2db3c0d5920a99c86f77307d6c"
+        },
+        {
+          "label": "sdk-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/sdk-install.log",
+          "sha256": "2bff822c5429c0c028eb78615637d51ce22ff5ee2102e45bbb257deca5ea171c"
+        },
+        {
+          "label": "all-public-types",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/all-public-types.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "all-public-esm-exports",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/all-public-esm-exports.log",
+          "sha256": "b88985ed6dd3976f5892559b6e14a95c6c9027c68b3b34519d205406f444d450"
+        },
+        {
+          "label": "isolated-links:sdk",
+          "links": 176,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/sdk-pnpm-lock.yaml",
+          "lockSha256": "c4af74a8166f55823f2b3e1a98a92db36b698f26bb019978db57112172061b85"
+        },
+        {
+          "label": "react-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/react-install.log",
+          "sha256": "9ad2391b0de2cc252e25280e6dc9249a4f343e08c183713b05a40107ae9eda21"
+        },
+        {
+          "label": "isolated-links:app",
+          "links": 163,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/app-pnpm-lock.yaml",
+          "lockSha256": "d378baeb6c8fed7a26107e5e011f681f202bed2cc42df1ae13a5e55a7a4f67d6"
+        },
+        {
+          "label": "relocated-frozen-reinstall",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/relocated-frozen-reinstall.log",
+          "sha256": "fc76bc761d8177b1a3f91c66ce171953ec3b48e8af7dd3a4762e025e28d2eaca"
+        },
+        {
+          "label": "isolated-links:app",
+          "links": 163,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/app-pnpm-lock.yaml",
+          "lockSha256": "d378baeb6c8fed7a26107e5e011f681f202bed2cc42df1ae13a5e55a7a4f67d6"
+        },
+        {
+          "label": "relocated-clean-install",
+          "oldLocationExists": false,
+          "reusedNodeModules": false,
+          "lockUnchanged": true
+        },
+        {
+          "label": "react-prepare",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/react-prepare.log",
+          "sha256": "1b440ad2fdbdd54df4c48efc74048826d9c6cd6e4e3b490a6b7dad10684f812d"
+        },
+        {
+          "label": "react-typecheck",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/react-typecheck.log",
+          "sha256": "74f8d6c55b8c754d644453b6d9f00de03b858fb4d6a64471ec0d171934b0657e"
+        },
+        {
+          "label": "react-inspect",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/react-inspect.log",
+          "sha256": "4b9ee873766f2965c5996a340b2a521e63d64a193da06371d5796920f89a39a9"
+        },
+        {
+          "label": "packed-config-build-provenance",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/packed-config-build-provenance.log",
+          "sha256": "4831926f8ec1f4f5436d9a95ac25d7eb040502e0d2c7a1230b9798b4691d6c4c"
+        },
+        {
+          "label": "packed-diagnose-react",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/packed-diagnose-react.log",
+          "sha256": "0f9e06264eadea6577206aafc03cbf27919b89d1527259501179f06d507a8285"
+        },
+        {
+          "label": "packed-react-dom-fast-refresh-recovery-deep-route",
+          "browser": "155.0.4283.62",
+          "pageerrors": 0
+        },
+        {
+          "label": "app-dev-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        },
+        {
+          "label": "react-build",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/react-build.log",
+          "sha256": "cb15ae32128e5c2ffa8ad99e9d0eb621d4aedf546a4f46ca0102ca4bd878df50"
+        },
+        {
+          "label": "react-rebuild",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/react-rebuild.log",
+          "sha256": "a5e45e5ca6ffd0fc8a2569f84e2b50787b9c489e3dee2b5933a0ba6bbbd1fe35"
+        },
+        {
+          "label": "failed-build",
+          "exitCode": 1,
+          "expectedExitCode": 1,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/failed-build.log",
+          "sha256": "c3b6cd1fa7dca3e7cfb542d06f03b552c121e3a9fc0dbd0a05b5fdc6b78be3ad"
+        },
+        {
+          "label": "failed-types",
+          "exitCode": 1,
+          "expectedExitCode": 1,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/failed-types.log",
+          "sha256": "712ebe947a21f287e93d5dd8a0d74204895070d1489a95978e7e75e70e47c9d1"
+        },
+        {
+          "label": "app-preview-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        },
+        {
+          "label": "features-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/features-install.log",
+          "sha256": "949953bd4fca993168157d7f0bba63d55e8e3572066412d62bb431b62f3bf7aa"
+        },
+        {
+          "label": "isolated-links:features",
+          "links": 166,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/features-pnpm-lock.yaml",
+          "lockSha256": "2259a625a28e5ee7260fb138e2c96a227b9fdefb59effb56555dab2655b4bb7d"
+        },
+        {
+          "label": "features-typecheck",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/features-typecheck.log",
+          "sha256": "84e5e89d5a079d20c236b19b9e71101fe74c7e1d3a5729d08fc0ec82153e496d"
+        },
+        {
+          "label": "features-inspect",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/features-inspect.log",
+          "sha256": "6e6430e6cf77b82d52af187e3f67d0d07a3d5aa9f7b75f2f4f320b7961dccb1f"
+        },
+        {
+          "label": "packed-feature-page-provider-meta",
+          "browser": "155.0.4283.62",
+          "pageerrors": 0
+        },
+        {
+          "label": "features-dev-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        },
+        {
+          "label": "features-build",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/features-build.log",
+          "sha256": "8dbd70412be63cfd24851aef94c0ea280967eff2f88b5e9acd87814da73b08cc"
+        },
+        {
+          "label": "features-preview-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        },
+        {
+          "label": "packed-creator-help",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/packed-creator-help.log",
+          "sha256": "ba23c135f495d0e2dd71de12ca7ba98f3b84d59c7ef231078d9f9b46d89cfca7"
+        },
+        {
+          "label": "packed-create-react-api",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/packed-create-react-api.log",
+          "sha256": "ffb4f281ad12a7e99ceba41600b7af28878322815ed83836eda9087db7f2d333"
+        },
+        {
+          "label": "packed-create-refuses-existing",
+          "exitCode": 1,
+          "expectedExitCode": 1,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/packed-create-refuses-existing.log",
+          "sha256": "91e42fe6970dd22a709a8471296a57f2458fc2a56e99d645cde63a9ec29fe12b"
+        },
+        {
+          "label": "created-app-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/created-app-install.log",
+          "sha256": "0f3539efdf22cf5d637ab569e8e4fa52e3f9cabc8f81bee3c900e92ed423961b"
+        },
+        {
+          "label": "isolated-links:created app 移动",
+          "links": 168,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/created app 移动-pnpm-lock.yaml",
+          "lockSha256": "9e74568a7cbe86bc75ae7af3a9c88e9e69b7256e72b2076d686afc4a7eae9eff"
+        },
+        {
+          "label": "created-app-typecheck",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/created-app-typecheck.log",
+          "sha256": "3258608e491e9e8eaa90b3ce8470ba89fc31148ba9c5686a3c355a5cc6cb9b97"
+        },
+        {
+          "label": "created-app-inspect",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/created-app-inspect.log",
+          "sha256": "e1848cd7b321ebfd45294ede45ba71916aa61bf94c516b40646374dcfbd93418"
+        },
+        {
+          "label": "created-app-browser-mock-and-private-inputs",
+          "browser": "155.0.4283.62",
+          "pageerrors": 0
+        },
+        {
+          "label": "created app 移动-dev-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        },
+        {
+          "label": "created-app-build",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/created-app-build.log",
+          "sha256": "6b59e1aa23868245dc33e6b1d1a68d437c6a6f672e0faa94c7acd4a19df442aa"
+        },
+        {
+          "label": "created-app-rebuild",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/created-app-rebuild.log",
+          "sha256": "ada5646ce93c4703701bc12cd788f8bd360ef8d0299f89ca614c0990aff9c4b7"
+        },
+        {
+          "label": "created app 移动-preview-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        },
+        {
+          "label": "environment-install",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/environment-install.log",
+          "sha256": "49cf907eb32658f725a812c40a22c4af243eabf6fe4e3fe0c2a796235dbd322c"
+        },
+        {
+          "label": "isolated-links:environment",
+          "links": 163,
+          "workspaceLinks": 0,
+          "lockFile": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/environment-pnpm-lock.yaml",
+          "lockSha256": "d378baeb6c8fed7a26107e5e011f681f202bed2cc42df1ae13a5e55a7a4f67d6"
+        },
+        {
+          "label": "environment-typecheck",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/environment-typecheck.log",
+          "sha256": "891fcaed2100c4625d550ab11771d68d0a2d2112ab6c98618c4cc0a0e71d5e16"
+        },
+        {
+          "label": "environment-config",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/environment-config.log",
+          "sha256": "7aaf21611d325f91b699b4599b1c6936a2dde3deb42f0aaec37218187240876e"
+        },
+        {
+          "label": "environment-dev-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        },
+        {
+          "label": "environment-build",
+          "exitCode": 0,
+          "expectedExitCode": 0,
+          "log": "/Users/mahoo/Projects/cormijs/.cache/package-test-1792416226161/environment-build.log",
+          "sha256": "e3a59bb25b8829deca360037e49873a8a53b495a4969f9a31a6100b73ed0e7c2"
+        },
+        {
+          "label": "environment-preview-session",
+          "exitCode": 0,
+          "workerStarts": 1
+        },
+        {
+          "label": "installed-environment-mode-node-client-html-production",
+          "privateMarkersAbsent": true,
+          "previewRegenerated": false
+        }
+      ],
+      "packages": [
+        {
+          "name": "@cormijs/builder",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-builder-0.0.1.tgz",
+          "sha256": "cfc014ccea729e94c6472ae4b7e0b1553c805dfa3644c2243de468afd2721fd8",
+          "contentSha256": "4423d21a9893c777ec4934b43de4a4569ebf87a8d6497d18d7262359d77b46d3",
+          "files": 11,
+          "bytes": 2148
+        },
+        {
+          "name": "@cormijs/core",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-core-0.0.1.tgz",
+          "sha256": "5ca55dc3ca4ffaad795dcaf98556989057f50c3b1cf8738954ec176b56fec999",
+          "contentSha256": "a0cf3d58e8a194d5b04bf3157fa7dfba385e5ce3da6e1521cde2a7907390d23a",
+          "files": 26,
+          "bytes": 20591
+        },
+        {
+          "name": "cormijs",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-0.0.1.tgz",
+          "sha256": "15f80e48bbcb13e1cd89c790ba1afdb6d413eda06243a11c5620f4fcf2b45f60",
+          "contentSha256": "3502c72ccdd18ce1ddba4c6e9d6cad49a8208715c79814429a8ab1fd61715eb0",
+          "files": 66,
+          "bytes": 45994
+        },
+        {
+          "name": "@cormijs/create",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-create-0.0.1.tgz",
+          "sha256": "986c65dc384c692d731eccd0dac4679ea8df6a4b95a2b9fcb31a56f0961c9b58",
+          "contentSha256": "2f35e3e6e0571f121bcd7ba44adc8f3d023087ae80dfbd59a42d5a231c8bfb00",
+          "files": 26,
+          "bytes": 37207
+        },
+        {
+          "name": "@cormijs/plugin-dev-api",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-dev-api-0.0.1.tgz",
+          "sha256": "92799f1bd10e4cdbf11a478638c30de3e7c6dbe43c4454f0b33916dae7c1126d",
+          "contentSha256": "0138de498efc106309bcea067cd60e9d9ad0147e8db9b614c2cc1f038511b1da",
+          "files": 16,
+          "bytes": 22599
+        },
+        {
+          "name": "@cormijs/plugin-react",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-react-0.0.1.tgz",
+          "sha256": "a15349507591b419386d6388d9d8190ced5e4238e567881d8b23f0248025dfb4",
+          "contentSha256": "29cae9374a5b090f602d69ebc579646f03bec4dcbc71c914e8281425333cc559",
+          "files": 36,
+          "bytes": 27780
+        },
+        {
+          "name": "@cormijs/plugin-react-vite",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-react-vite-0.0.1.tgz",
+          "sha256": "c779fa98136aa9124c28edde78600c6d21eeb25fac7cafc189b98332198c78ff",
+          "contentSha256": "b4df8df774b873a11e4e1147f0784d53475cc53fb3d707679fb83b75a397a7e2",
+          "files": 6,
+          "bytes": 1736
+        },
+        {
+          "name": "@cormijs/plugin-typescript",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-typescript-0.0.1.tgz",
+          "sha256": "a5c0cd8584aa104bebc1e442ac5eec77485a4fed9df7b20ceaf9d7c737320e5d",
+          "contentSha256": "272dcb1920b126c2c46b1900fcfd2b42bfe2ce44f2eea0bfd06ee8c6b19429f5",
+          "files": 6,
+          "bytes": 5177
+        },
+        {
+          "name": "@cormijs/plugin-vite",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-vite-0.0.1.tgz",
+          "sha256": "636762e56fe97496676bbc46fa8c0f8f7d160fd0b14a7e388f3f25d931d81485",
+          "contentSha256": "533e824fd04df58b98cfc7e0169f4740d31a60f5be48457ad3dce2e17f257ce6",
+          "files": 21,
+          "bytes": 23130
+        },
+        {
+          "name": "@cormijs/plugin-web",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-plugin-web-0.0.1.tgz",
+          "sha256": "f81eef65f7078cd5f9a4482391f85fb8a285971dc12655495902d6028c5548e0",
+          "contentSha256": "07b1c616c8eb620787388f84dea5b6878ffe53106f984002af4420c1fd8aa735",
+          "files": 41,
+          "bytes": 34599
+        },
+        {
+          "name": "@cormijs/preset-react-vite",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-preset-react-vite-0.0.1.tgz",
+          "sha256": "293f7eb331db9f49d6aeed7ebdb31c14c64c3a479c5981444a40a36753079d9d",
+          "contentSha256": "0d8e4e2ab5c19cd3fff8f0d777dc026801bc93ceee8046d6e814c5f48ed37850",
+          "files": 6,
+          "bytes": 1250
+        },
+        {
+          "name": "@cormijs/routes",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-routes-0.0.1.tgz",
+          "sha256": "a7810a38146466cc797cd753063c8070d3b04e6e10ead16dad6b5245f7891eb7",
+          "contentSha256": "986969999fabe2596556fabf9f9015d90c69646dac2f97fcd348e157f7d3720b",
+          "files": 11,
+          "bytes": 13161
+        },
+        {
+          "name": "@cormijs/runtime",
+          "version": "0.0.1",
+          "file": "tarballs/cormijs-runtime-0.0.1.tgz",
+          "sha256": "26c9c4cc66b801d056b39175a5becc0f1638c551f9d8ce1c16ab375281030575",
+          "contentSha256": "b82de5c7c27d337d6eec99e1916e6dd40a1fb54369da9542c2391817a31ff0a4",
+          "files": 11,
+          "bytes": 5125
+        }
+      ],
+      "blockers": [
+        "packages-are-private",
+        "project-license-not-selected",
+        "consumer-root-pnpm-patch-required",
+        "cross-platform-not-validated"
+      ]
+    }
+  },
+  "plugin_author": {
+    "path": ".cache/p11-reviewed-78d075d14f/plugin/result.json",
+    "sha256": "e2f2e3798d905c9c9d22652bbda62a429555197572a3d8e22e213b72508b89cc",
+    "result": {
+      "passed": true,
+      "temporary": "/private/var/folders/h6/gsyfj6fj71x7q6y26yx2twm80000gn/T/cormi plugin author 中文 FMMu4T",
+      "out": "/Users/mahoo/Projects/cormijs/.cache/p11-reviewed-78d075d14f/plugin",
+      "stages": [
+        {
+          "label": "creator-install",
+          "exitCode": 0,
+          "log": "creator-install-0.log",
+          "logSha256": "88e8f7de6d1643e6382cd85903efdff92c6dc4f832ca3efed5aa58d19b9f2ec6"
+        },
+        {
+          "label": "creator-plugin",
+          "exitCode": 0,
+          "log": "creator-plugin-1.log",
+          "logSha256": "df506e83f52b63f6776602f73dd1fde8c6f1fed57576c2cb3d21839f3c2a003f"
+        },
+        {
+          "label": "author-install",
+          "exitCode": 0,
+          "log": "author-install-2.log",
+          "logSha256": "b57dd5a82238be949d9b65562893dba5f7d7c3311662660315ad367e7bde0ab3"
+        },
+        {
+          "label": "isolated-links",
+          "cwd": "/private/var/folders/h6/gsyfj6fj71x7q6y26yx2twm80000gn/T/cormi plugin author 中文 FMMu4T/author",
+          "count": 170
+        },
+        {
+          "label": "author-build",
+          "exitCode": 0,
+          "log": "author-build-4.log",
+          "logSha256": "ca4b068e52dd1fecf9a6e9f61a12a25e2e2efba453f7bffc3a6c360046e0bd3d"
+        },
+        {
+          "label": "author-types",
+          "exitCode": 0,
+          "log": "author-types-5.log",
+          "logSha256": "88711bab5d2f9bab35b73d4d780fb5a7ec1ebdc0a84ee3795054cde361116017"
+        },
+        {
+          "label": "author-app-types",
+          "exitCode": 0,
+          "log": "author-app-types-6.log",
+          "logSha256": "a2826ccce61a628dfbb69614b8d11970fe7a098b98eeaca4e7f03bb2815c2f0a"
+        },
+        {
+          "label": "author-rebuild-removes-owned-resource",
+          "exitCode": 0,
+          "log": "author-rebuild-removes-owned-resource-7.log",
+          "logSha256": "f13e91ccdfd8a5831e259c1964e6ea76569a254ee220c27672a80a2db4966fd9"
+        },
+        {
+          "label": "author-assets",
+          "style": {
+            "className": "_panel_lnge8_2",
+            "border": "2px",
+            "radius": "12px",
+            "background": "url(\"data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e\")"
+          },
+          "resources": [
+            {
+              "kind": "inline",
+              "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e",
+              "sha256": "753adb3694c1dcdf572cf751a80a0aedacedac23338d872b586ff876a638fb86"
+            },
+            {
+              "kind": "url",
+              "url": "http://127.0.0.1:51527/workbench/src/assets/%E5%9B%BE%E7%A4%BA%20space.svg",
+              "sha256": "b69da4bbe4a3ed59bc5b56819fecafebdc81d30b448ddc43e451af819c3a0b51"
+            },
+            {
+              "kind": "url",
+              "url": "http://127.0.0.1:51527/workbench/src/assets/pixel.png",
+              "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460"
+            },
+            {
+              "kind": "inline",
+              "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e",
+              "sha256": "753adb3694c1dcdf572cf751a80a0aedacedac23338d872b586ff876a638fb86"
+            }
+          ],
+          "fontChecked": false
+        },
+        {
+          "label": "css-import-hot-update-preserves-state",
+          "documentUnchanged": true
+        },
+        {
+          "label": "pack-rejects-active-session",
+          "exitCode": 1,
+          "log": "pack-rejects-active-session-10.log",
+          "logSha256": "0f909fa6199cab3456a181b0d371c0da764ac7f20a2da14c55a163ba6f68ee7a"
+        },
+        {
+          "label": "source-hmr-node-reload-disable-enable",
+          "browser": "155.0.4283.62",
+          "pageErrors": 0
+        },
+        {
+          "label": "author-app-build",
+          "exitCode": 0,
+          "log": "author-app-build-12.log",
+          "logSha256": "a6ad585281fccc506059c16a5aa530992264ab2de5f30f16ba6c14f07a2e198d"
+        },
+        {
+          "label": "missing-plugin-asset-rejects-app-build",
+          "exitCode": 1,
+          "log": "missing-plugin-asset-rejects-app-build-13.log",
+          "logSha256": "45da7cf381c99d64b2e469e9b74b58c8cb8471a69f559a77cb3a54517d8d4aa5"
+        },
+        {
+          "label": "repaired-plugin-asset-build",
+          "exitCode": 0,
+          "log": "repaired-plugin-asset-build-14.log",
+          "logSha256": "dfc5ea04f083bd55ad579c203440367dd0d8d0b5d3853cc5064e74dee0db4985"
+        },
+        {
+          "label": "author-diagnose",
+          "exitCode": 0,
+          "log": "author-diagnose-15.log",
+          "logSha256": "2f9930a979994056c0fd058408169614f14458a167dc6973b947c1c132d11a2a"
+        },
+        {
+          "label": "plugin-pack",
+          "exitCode": 0,
+          "log": "plugin-pack-16.log",
+          "logSha256": "7323c7456d4cd0ae59a127ed46facec70d6a84245c90d02b973a8a7ad1f1b045"
+        },
+        {
+          "label": "archive-exports-maps-clean-boundary",
+          "files": 41,
+          "sha256": "ce1fe507c943815ae40854b6d6615c36c19ff2de516fe06ac30ce698f7882919"
+        },
+        {
+          "label": "pack-rejects-private",
+          "exitCode": 1,
+          "log": "pack-rejects-private-18.log",
+          "logSha256": "945d3558dcc927d4abdd9e15942ff871e12d228ba97778f9e4e163c48a4503fe"
+        },
+        {
+          "label": "pack-rejects-link",
+          "exitCode": 1,
+          "log": "pack-rejects-link-19.log",
+          "logSha256": "d190445fa85274d38d1aa89100649832da5cc627a552fbd607aa649176d83cf4"
+        },
+        {
+          "label": "pack-rejects-types",
+          "exitCode": 1,
+          "log": "pack-rejects-types-20.log",
+          "logSha256": "9ed8c16747031227ef9de224e79c93f270c6be1a0104b6002f6fb2bb0b1791e8"
+        },
+        {
+          "label": "create-consumer",
+          "exitCode": 0,
+          "log": "create-consumer-21.log",
+          "logSha256": "19c9605d92f0648d0ec054d809035e93785b879a4b850e4f6a1b0dbe48bf8c0b"
+        },
+        {
+          "label": "consumer-install",
+          "exitCode": 0,
+          "log": "consumer-install-22.log",
+          "logSha256": "3f7a9b0c57845f10957dbbbcb2f8974375124b8da9393b2f097520d97e9eb9fb"
+        },
+        {
+          "label": "isolated-links",
+          "cwd": "/private/var/folders/h6/gsyfj6fj71x7q6y26yx2twm80000gn/T/cormi plugin author 中文 FMMu4T/consumer",
+          "count": 176
+        },
+        {
+          "label": "consumer-relocated-reinstall",
+          "exitCode": 0,
+          "log": "consumer-relocated-reinstall-24.log",
+          "logSha256": "11c99e21530c4594cf12e103b34240c58bfb4451127427401094f16ad2d07c9e"
+        },
+        {
+          "label": "isolated-links",
+          "cwd": "/private/var/folders/h6/gsyfj6fj71x7q6y26yx2twm80000gn/T/cormi plugin author 中文 FMMu4T/consumer",
+          "count": 176
+        },
+        {
+          "label": "consumer-typecheck",
+          "exitCode": 0,
+          "log": "consumer-typecheck-26.log",
+          "logSha256": "7e24db355359dc5850568f900af5144221cb1c922527ae0edfd6bc3ffc8e2868"
+        },
+        {
+          "label": "consumer-diagnose",
+          "exitCode": 0,
+          "log": "consumer-diagnose-27.log",
+          "logSha256": "1ce648d37fabbda8a5e7450a9d44e649e935863ea7243257618268ec5c0f0f6e"
+        },
+        {
+          "label": "consumer-strict-plugin-types",
+          "exitCode": 0,
+          "log": "consumer-strict-plugin-types-28.log",
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "installed-package-dev-assets",
+          "style": {
+            "className": "_panel_lnge8_2",
+            "border": "2px",
+            "radius": "12px",
+            "background": "url(\"data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e\")"
+          },
+          "resources": [
+            {
+              "kind": "inline",
+              "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e",
+              "sha256": "753adb3694c1dcdf572cf751a80a0aedacedac23338d872b586ff876a638fb86"
+            },
+            {
+              "kind": "url",
+              "url": "http://127.0.0.1:51607/customer/node_modules/.pnpm/@example+hello@file+.cormi-local+author.tgz_@cormijs+core@file+.cormi-local+tarballs+co_93d9cf51b0d5b2cc15a8cb45026b27d0/node_modules/@example/hello/dist/assets/%E5%9B%BE%E7%A4%BA%20space.svg",
+              "sha256": "b69da4bbe4a3ed59bc5b56819fecafebdc81d30b448ddc43e451af819c3a0b51"
+            },
+            {
+              "kind": "url",
+              "url": "http://127.0.0.1:51607/customer/node_modules/.pnpm/@example+hello@file+.cormi-local+author.tgz_@cormijs+core@file+.cormi-local+tarballs+co_93d9cf51b0d5b2cc15a8cb45026b27d0/node_modules/@example/hello/dist/assets/pixel.png",
+              "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460"
+            },
+            {
+              "kind": "inline",
+              "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e",
+              "sha256": "753adb3694c1dcdf572cf751a80a0aedacedac23338d872b586ff876a638fb86"
+            }
+          ],
+          "fontChecked": false
+        },
+        {
+          "label": "consumer-build",
+          "exitCode": 0,
+          "log": "consumer-build-30.log",
+          "logSha256": "57da83f7c1a5f48f7b4ee6cbc4fccab6d43f89ca290a4c41488aee6f5851fa96"
+        },
+        {
+          "label": "consumer-build",
+          "exitCode": 0,
+          "log": "consumer-build-31.log",
+          "logSha256": "9cc8ec623fa7c88ceaca5ebaae5858982a582d180f2533ff16cd4e5af41f36a2"
+        },
+        {
+          "label": "installed-package-preview-assets",
+          "style": {
+            "className": "_panel_lnge8_2",
+            "border": "2px",
+            "radius": "12px",
+            "background": "url(\"data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e\")"
+          },
+          "resources": [
+            {
+              "kind": "inline",
+              "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e",
+              "sha256": "753adb3694c1dcdf572cf751a80a0aedacedac23338d872b586ff876a638fb86"
+            },
+            {
+              "kind": "url",
+              "url": "http://127.0.0.1:51607/customer/assets/%E5%9B%BE%E7%A4%BA%20space-D0xvXi7D.svg",
+              "sha256": "b69da4bbe4a3ed59bc5b56819fecafebdc81d30b448ddc43e451af819c3a0b51"
+            },
+            {
+              "kind": "inline",
+              "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+              "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460"
+            },
+            {
+              "kind": "inline",
+              "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e",
+              "sha256": "753adb3694c1dcdf572cf751a80a0aedacedac23338d872b586ff876a638fb86"
+            }
+          ],
+          "fontChecked": false
+        },
+        {
+          "label": "relocated-tgz-consumer-types-diagnosis-dev-rebuild-preview",
+          "sourceFallback": false,
+          "lockUnchanged": true,
+          "pageErrors": 0
+        },
+        {
+          "label": "installed-package-root-dev-assets",
+          "style": {
+            "className": "_panel_lnge8_2",
+            "border": "2px",
+            "radius": "12px",
+            "background": "url(\"data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e\")"
+          },
+          "resources": [
+            {
+              "kind": "inline",
+              "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e",
+              "sha256": "753adb3694c1dcdf572cf751a80a0aedacedac23338d872b586ff876a638fb86"
+            },
+            {
+              "kind": "url",
+              "url": "http://127.0.0.1:51607/node_modules/.pnpm/@example+hello@file+.cormi-local+author.tgz_@cormijs+core@file+.cormi-local+tarballs+co_93d9cf51b0d5b2cc15a8cb45026b27d0/node_modules/@example/hello/dist/assets/%E5%9B%BE%E7%A4%BA%20space.svg",
+              "sha256": "b69da4bbe4a3ed59bc5b56819fecafebdc81d30b448ddc43e451af819c3a0b51"
+            },
+            {
+              "kind": "url",
+              "url": "http://127.0.0.1:51607/node_modules/.pnpm/@example+hello@file+.cormi-local+author.tgz_@cormijs+core@file+.cormi-local+tarballs+co_93d9cf51b0d5b2cc15a8cb45026b27d0/node_modules/@example/hello/dist/assets/pixel.png",
+              "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460"
+            },
+            {
+              "kind": "inline",
+              "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e",
+              "sha256": "753adb3694c1dcdf572cf751a80a0aedacedac23338d872b586ff876a638fb86"
+            }
+          ],
+          "fontChecked": false
+        },
+        {
+          "label": "consumer-build",
+          "exitCode": 0,
+          "log": "consumer-build-35.log",
+          "logSha256": "705de0c373bdebb6b7040a5ad9a55513f477202bbbde702693b541d671f3f91f"
+        },
+        {
+          "label": "installed-package-root-preview-assets",
+          "style": {
+            "className": "_panel_lnge8_2",
+            "border": "2px",
+            "radius": "12px",
+            "background": "url(\"data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e\")"
+          },
+          "resources": [
+            {
+              "kind": "inline",
+              "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e",
+              "sha256": "753adb3694c1dcdf572cf751a80a0aedacedac23338d872b586ff876a638fb86"
+            },
+            {
+              "kind": "url",
+              "url": "http://127.0.0.1:51607/assets/%E5%9B%BE%E7%A4%BA%20space-D0xvXi7D.svg",
+              "sha256": "b69da4bbe4a3ed59bc5b56819fecafebdc81d30b448ddc43e451af819c3a0b51"
+            },
+            {
+              "kind": "inline",
+              "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+              "sha256": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460"
+            },
+            {
+              "kind": "inline",
+              "url": "data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='48'%20height='48'%20viewBox='0%200%2048%2048'%3e%3crect%20x='8'%20y='8'%20width='32'%20height='32'%20rx='8'%20fill='none'%20stroke='%23486582'%20stroke-width='3'/%3e%3cpath%20d='M16%2024h16M24%2016v16'%20stroke='%23486582'%20stroke-width='3'/%3e%3c/svg%3e",
+              "sha256": "753adb3694c1dcdf572cf751a80a0aedacedac23338d872b586ff876a638fb86"
+            }
+          ],
+          "fontChecked": false
+        },
+        {
+          "label": "consumer-build",
+          "exitCode": 0,
+          "log": "consumer-build-37.log",
+          "logSha256": "ce748997abc12c4c8a8d3f1b52fa2c4cfcbcc9fafa003099d514b61bc4efe06d"
+        },
+        {
+          "label": "consumer-typecheck",
+          "exitCode": 0,
+          "log": "consumer-typecheck-38.log",
+          "logSha256": "14e033e5a1b59d5b714c92f7d93bb3e98ec1d15109d1911a0c366c82e6aa4ccb"
+        },
+        {
+          "label": "consumer-diagnose",
+          "exitCode": 0,
+          "log": "consumer-diagnose-39.log",
+          "logSha256": "0a4bc950e47d347a276fcda4495f0ff0057e3352de0e6c1f826b4c1125b80305"
+        },
+        {
+          "label": "two-installed-instances-diagnosed",
+          "ownerUids": [
+            16,
+            18
+          ],
+          "reversedRegistrationOrder": true
+        },
+        {
+          "label": "same-module-client-navigation-isolates-provider-and-local-state",
+          "pageReloaded": false,
+          "perRouteStateRetentionPromised": false
+        },
+        {
+          "label": "one-instance-config-disable-and-restore",
+          "generations": 3,
+          "peerRemainsAvailable": true,
+          "workerRestartExpected": true
+        },
+        {
+          "label": "consumer-build",
+          "exitCode": 0,
+          "log": "consumer-build-43.log",
+          "logSha256": "54ffa1aee0f34518be1a53801572962d14c1b65fa602e810136a30b738f0ff61"
+        },
+        {
+          "label": "consumer-diagnose",
+          "exitCode": 1,
+          "log": "consumer-diagnose-44.log",
+          "logSha256": "ad0646fea06fa2fcc5d695e7c7985687ae2e9cbb0c3c32c2ed7b25a9be93af2f"
+        },
+        {
+          "label": "consumer-build",
+          "exitCode": 1,
+          "log": "consumer-build-45.log",
+          "logSha256": "7892102d2350d308e7de8f7d7a619e542cacc66abd6f7e15d8a0b86cf82ffe7f"
+        },
+        {
+          "label": "consumer-diagnose",
+          "exitCode": 1,
+          "log": "consumer-diagnose-46.log",
+          "logSha256": "a622125f4022b93c3cbea40a6fd954a4ed33737c982962fc2779d1b7fad33c28"
+        },
+        {
+          "label": "namespace-and-URL-conflicts-fail-without-replacing-published-output",
+          "distinctFailures": 3
+        },
+        {
+          "label": "consumer-typecheck",
+          "exitCode": 0,
+          "log": "consumer-typecheck-48.log",
+          "logSha256": "705b316462d9d5fe777c0a5e03406d93950d4e1f864942e5f76318abec09e897"
+        },
+        {
+          "label": "consumer-build",
+          "exitCode": 0,
+          "log": "consumer-build-49.log",
+          "logSha256": "9567f68f5b196496c3e819df1b47f1345ed8d8b0939d8f1a99a49c718f7ea807"
+        },
+        {
+          "label": "consumer-build",
+          "exitCode": 0,
+          "log": "consumer-build-50.log",
+          "logSha256": "98ce4055ff94f8b08948705f6103b75700f5c3f7676cb9de8aa9009492d48c79"
+        },
+        {
+          "label": "consumer-diagnose",
+          "exitCode": 0,
+          "log": "consumer-diagnose-51.log",
+          "logSha256": "99dcbb7a86ca768af457766464cba198fae5044e02676848652a48084425ddf8"
+        },
+        {
+          "label": "two-instance-production-deep-links-and-client-only-runtime",
+          "mockAvailable": false
+        },
+        {
+          "label": "consumer-build",
+          "exitCode": 0,
+          "log": "consumer-build-53.log",
+          "logSha256": "b68249b1a2f111b5b75d72d31ee1fc121fd8d393fa6ecc30ec1cf0833ae3897e"
+        }
+      ]
+    },
+    "font_branch_run": false
+  },
+  "kit": {
+    "format": "cormi:local-kit:1",
+    "packages": [
+      {
+        "name": "@cormijs/builder",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-builder-0.0.1.tgz",
+        "sha256": "cfc014ccea729e94c6472ae4b7e0b1553c805dfa3644c2243de468afd2721fd8",
+        "contentSha256": "4423d21a9893c777ec4934b43de4a4569ebf87a8d6497d18d7262359d77b46d3",
+        "files": 11,
+        "bytes": 2148
+      },
+      {
+        "name": "@cormijs/core",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-core-0.0.1.tgz",
+        "sha256": "5ca55dc3ca4ffaad795dcaf98556989057f50c3b1cf8738954ec176b56fec999",
+        "contentSha256": "a0cf3d58e8a194d5b04bf3157fa7dfba385e5ce3da6e1521cde2a7907390d23a",
+        "files": 26,
+        "bytes": 20591
+      },
+      {
+        "name": "cormijs",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-0.0.1.tgz",
+        "sha256": "15f80e48bbcb13e1cd89c790ba1afdb6d413eda06243a11c5620f4fcf2b45f60",
+        "contentSha256": "3502c72ccdd18ce1ddba4c6e9d6cad49a8208715c79814429a8ab1fd61715eb0",
+        "files": 66,
+        "bytes": 45994
+      },
+      {
+        "name": "@cormijs/create",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-create-0.0.1.tgz",
+        "sha256": "986c65dc384c692d731eccd0dac4679ea8df6a4b95a2b9fcb31a56f0961c9b58",
+        "contentSha256": "2f35e3e6e0571f121bcd7ba44adc8f3d023087ae80dfbd59a42d5a231c8bfb00",
+        "files": 26,
+        "bytes": 37207
+      },
+      {
+        "name": "@cormijs/plugin-dev-api",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-plugin-dev-api-0.0.1.tgz",
+        "sha256": "92799f1bd10e4cdbf11a478638c30de3e7c6dbe43c4454f0b33916dae7c1126d",
+        "contentSha256": "0138de498efc106309bcea067cd60e9d9ad0147e8db9b614c2cc1f038511b1da",
+        "files": 16,
+        "bytes": 22599
+      },
+      {
+        "name": "@cormijs/plugin-react",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-plugin-react-0.0.1.tgz",
+        "sha256": "e1ca07f50e0ea05d5a3840930a858d7b6a3f556ce153146911f2a182bae88309",
+        "contentSha256": "29cae9374a5b090f602d69ebc579646f03bec4dcbc71c914e8281425333cc559",
+        "files": 36,
+        "bytes": 27779
+      },
+      {
+        "name": "@cormijs/plugin-react-vite",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-plugin-react-vite-0.0.1.tgz",
+        "sha256": "c779fa98136aa9124c28edde78600c6d21eeb25fac7cafc189b98332198c78ff",
+        "contentSha256": "b4df8df774b873a11e4e1147f0784d53475cc53fb3d707679fb83b75a397a7e2",
+        "files": 6,
+        "bytes": 1736
+      },
+      {
+        "name": "@cormijs/plugin-typescript",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-plugin-typescript-0.0.1.tgz",
+        "sha256": "a5c0cd8584aa104bebc1e442ac5eec77485a4fed9df7b20ceaf9d7c737320e5d",
+        "contentSha256": "272dcb1920b126c2c46b1900fcfd2b42bfe2ce44f2eea0bfd06ee8c6b19429f5",
+        "files": 6,
+        "bytes": 5177
+      },
+      {
+        "name": "@cormijs/plugin-vite",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-plugin-vite-0.0.1.tgz",
+        "sha256": "690daec4689c2202b52af35ef10181a7ab958f076e76c922cf86f0983909ebd4",
+        "contentSha256": "533e824fd04df58b98cfc7e0169f4740d31a60f5be48457ad3dce2e17f257ce6",
+        "files": 21,
+        "bytes": 23129
+      },
+      {
+        "name": "@cormijs/plugin-web",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-plugin-web-0.0.1.tgz",
+        "sha256": "f81eef65f7078cd5f9a4482391f85fb8a285971dc12655495902d6028c5548e0",
+        "contentSha256": "07b1c616c8eb620787388f84dea5b6878ffe53106f984002af4420c1fd8aa735",
+        "files": 41,
+        "bytes": 34599
+      },
+      {
+        "name": "@cormijs/preset-react-vite",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-preset-react-vite-0.0.1.tgz",
+        "sha256": "293f7eb331db9f49d6aeed7ebdb31c14c64c3a479c5981444a40a36753079d9d",
+        "contentSha256": "0d8e4e2ab5c19cd3fff8f0d777dc026801bc93ceee8046d6e814c5f48ed37850",
+        "files": 6,
+        "bytes": 1250
+      },
+      {
+        "name": "@cormijs/routes",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-routes-0.0.1.tgz",
+        "sha256": "a7810a38146466cc797cd753063c8070d3b04e6e10ead16dad6b5245f7891eb7",
+        "contentSha256": "986969999fabe2596556fabf9f9015d90c69646dac2f97fcd348e157f7d3720b",
+        "files": 11,
+        "bytes": 13161
+      },
+      {
+        "name": "@cormijs/runtime",
+        "version": "0.0.1",
+        "file": "tarballs/cormijs-runtime-0.0.1.tgz",
+        "sha256": "26c9c4cc66b801d056b39175a5becc0f1638c551f9d8ce1c16ab375281030575",
+        "contentSha256": "b82de5c7c27d337d6eec99e1916e6dd40a1fb54369da9542c2391817a31ff0a4",
+        "files": 11,
+        "bytes": 5125
+      }
+    ],
+    "compatibility": {
+      "package": "cordis@4.0.0-rc.11",
+      "patch": "compatibility/cordis.patch",
+      "sha256": "11a745abd66488d5cba00b7388beebaf8a70bc0fdd6e998608e511f77358228e",
+      "runtimeModified": false
+    },
+    "publicationEligible": false,
+    "blockers": [
+      "packages-are-private",
+      "project-license-not-selected",
+      "consumer-root-pnpm-patch-required",
+      "cross-platform-not-validated"
+    ]
+  },
+  "archived_sources": [
+    {
+      "package": "@cormijs/builder",
+      "file": "packages/builder/src/development.ts",
+      "sha256": "990ad6fba4ad4fc7c1e1763b7548fbe39cc04ab77d20dfbcbf83fb39bafbcbd8"
+    },
+    {
+      "package": "@cormijs/builder",
+      "file": "packages/builder/src/index.ts",
+      "sha256": "16997a67d8a4ae16228ac0c0ad2970742c5e5b71e36aeaaac9a6f3de3d97d91d"
+    },
+    {
+      "package": "@cormijs/core",
+      "file": "packages/core/src/commands.ts",
+      "sha256": "c9b828a9a563ee6d7be02964d37541a3aef6dd7b5bdfbd69bfbe65a73a834ba4"
+    },
+    {
+      "package": "@cormijs/core",
+      "file": "packages/core/src/config-data.ts",
+      "sha256": "30b025c44caee976ec343f8b64dabc714669b964c47165756e8ba0046c6c89f0"
+    },
+    {
+      "package": "@cormijs/core",
+      "file": "packages/core/src/diagnostic-service.ts",
+      "sha256": "6990beae7f67a260261779816d03097723d3cd65ed87e7d83ed0a60e897131c8"
+    },
+    {
+      "package": "@cormijs/core",
+      "file": "packages/core/src/graph.ts",
+      "sha256": "6d2367a94e00d123cb7d35a13a5df83e00e268d827f7287152a544ee0a1edc13"
+    },
+    {
+      "package": "@cormijs/core",
+      "file": "packages/core/src/index.ts",
+      "sha256": "4e0ef07c06d334ff62fa7fc66733da98e8c8d89c25d880a5070a9c2106db8e5a"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/cli.ts",
+      "sha256": "b8124f3bfa0d3f44a59f8558ab95e6e797dcf6fa38200dbe0f9b25b38d20b052"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/commands.ts",
+      "sha256": "71b62194e58c676f6eb4e6eddce79cc7f0a178bffe57264d44bf42772f309b97"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/compiler.ts",
+      "sha256": "2a2d39167fdfd695ed38d0e8e9e46e2c7497e608f3e8c0c42c8d05f6883ae0c2"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/config.ts",
+      "sha256": "6cad6375e446877da6b6c0c4545de0a8d11dadb7ffccd06866afdfff6f006545"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/control.ts",
+      "sha256": "129b30c71602df64137c65ed6de49e03f8870dcc07c19cbdbc2475e64b5795ad"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/diagnose.ts",
+      "sha256": "6c5c92ce501b9c57ac27dcf3703fb09ae0e3e8fdfcf2af4d6a412c21b0cfc6d1"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/environment.ts",
+      "sha256": "4cf78b63445d1aedf5fa8334bff5e2284a28791477afe061d5a02a27ca71bcc2"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/index.ts",
+      "sha256": "e6943b163d3da9f90360fb49e76cdfdc9b4d8c61fcbd16ea7682a9e9c6f13a73"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/inputs.ts",
+      "sha256": "9ffd01c8ff5785b49744e36957a6ab7438439140fd635ea15b9d34f8954e1882"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/lock.ts",
+      "sha256": "3e5f6e3160ab21e86dc7da891f23859c8c237c85ac5cf79f31253b24686fde98"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/protocol.ts",
+      "sha256": "0cd62aeee1f99d819458c759f732e7c1362a0cb2fb29e13a44d03d71c180f8f5"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/supervisor.ts",
+      "sha256": "4e7117f2dc57bb1277d5ea2aefdfd0b42315cd8f0570c7be6229a5e542484531"
+    },
+    {
+      "package": "cormijs",
+      "file": "packages/cormi/src/worker.ts",
+      "sha256": "6335914c51444707e636a311d582b305be342f6d598d78397122ed17f85336f8"
+    },
+    {
+      "package": "@cormijs/create",
+      "file": "packages/create/src/cli.ts",
+      "sha256": "8075dd963d4850b104fdef9498ee1f8f62dfb9103438e8b17d196f55d239cfda"
+    },
+    {
+      "package": "@cormijs/create",
+      "file": "packages/create/src/index.ts",
+      "sha256": "e982fbf317ccb35eaa1209f6da4551db0bb29e2fac1ee4e481196727a7bb86b4"
+    },
+    {
+      "package": "@cormijs/create",
+      "file": "packages/create/src/plugin-assets.ts",
+      "sha256": "2ec0ae506adc74d1c09628f1491f3b7068a3afe38f3df81c49aab872e10359b6"
+    },
+    {
+      "package": "@cormijs/create",
+      "file": "packages/create/src/plugin-template.ts",
+      "sha256": "84adfd6391e2ed909a41c419fe8ffff5ff95b57c5a93b5a1cb5ba0cdb7a78043"
+    },
+    {
+      "package": "@cormijs/create",
+      "file": "packages/create/src/templates.ts",
+      "sha256": "fee8dac22c7ac5e63808e1854f2d18e860ea5d19333b232e69d629584af84b4f"
+    },
+    {
+      "package": "@cormijs/plugin-dev-api",
+      "file": "packages/plugin-dev-api/src/index.ts",
+      "sha256": "e4d2b45bceae79488e7f887338112f642ee29ef413f903dfa90c513820de2cac"
+    },
+    {
+      "package": "@cormijs/plugin-dev-api",
+      "file": "packages/plugin-dev-api/src/service.ts",
+      "sha256": "d29e613061a81fc64aa75bf125b47e1cf934808d652d22e6262ea9c67ca8c492"
+    },
+    {
+      "package": "@cormijs/plugin-dev-api",
+      "file": "packages/plugin-dev-api/src/vite.ts",
+      "sha256": "8e6f658594d76269a7f3b46239f0b4a0aa8b38178c3a6186325ef17a5994f6e3"
+    },
+    {
+      "package": "@cormijs/plugin-react",
+      "file": "packages/plugin-react/src/development.ts",
+      "sha256": "8d425eff85166c67a4d9fdaea80a57069c23644b22f8b30cb7521ac1fb39a830"
+    },
+    {
+      "package": "@cormijs/plugin-react",
+      "file": "packages/plugin-react/src/feature.ts",
+      "sha256": "7ab13310f83ce4b18bc45edb22b89808d305bd173dd536d70b9383bf5c228175"
+    },
+    {
+      "package": "@cormijs/plugin-react",
+      "file": "packages/plugin-react/src/generate.ts",
+      "sha256": "2cc88630e496e2886c8f58da41c47b73462ec13ffd1d5cfd4121e9b6cd357e40"
+    },
+    {
+      "package": "@cormijs/plugin-react",
+      "file": "packages/plugin-react/src/index.ts",
+      "sha256": "d9b7fa8bc872ca7612917229c3f10070bb9cc64395ec0f362d23d7f1f492b57b"
+    },
+    {
+      "package": "@cormijs/plugin-react",
+      "file": "packages/plugin-react/src/modules.ts",
+      "sha256": "44e70c94baf649aac8c5279d295449d343e0a438d5e64beb616a58c29ec01082"
+    },
+    {
+      "package": "@cormijs/plugin-react",
+      "file": "packages/plugin-react/src/namespace.ts",
+      "sha256": "dd9932d53c80780135e978522975dfb0febb1498f0198ecc35262c7d365a1a63"
+    },
+    {
+      "package": "@cormijs/plugin-react",
+      "file": "packages/plugin-react/src/types.ts",
+      "sha256": "8a9e5bcee8b5a58a7e0f333f5d54a243735f99bee5d4d7058b26cacb9901493c"
+    },
+    {
+      "package": "@cormijs/plugin-react-vite",
+      "file": "packages/plugin-react-vite/src/index.ts",
+      "sha256": "1cd03688bdc6285968964b5a9b22e3dc1af67c94056ea4424a5263d4acfa479d"
+    },
+    {
+      "package": "@cormijs/plugin-typescript",
+      "file": "packages/plugin-typescript/src/index.ts",
+      "sha256": "4b9e12755825fb3c51a2a0277439773009d4d2edcd75ce4d1dda8e8b450314c4"
+    },
+    {
+      "package": "@cormijs/plugin-vite",
+      "file": "packages/plugin-vite/src/development-client.ts",
+      "sha256": "cbcb5d03ec2e61dc5690ff4491a73933bd9eb88464ae50361b50750c37fd5133"
+    },
+    {
+      "package": "@cormijs/plugin-vite",
+      "file": "packages/plugin-vite/src/development.ts",
+      "sha256": "c603f305d940c27ad976b3fafdea319c13979d0e8e759168760f173ed4083119"
+    },
+    {
+      "package": "@cormijs/plugin-vite",
+      "file": "packages/plugin-vite/src/environment.ts",
+      "sha256": "444e7cb83da695633b8103b691c274b4327f1d35e082c5e86fbb135c67274c3b"
+    },
+    {
+      "package": "@cormijs/plugin-vite",
+      "file": "packages/plugin-vite/src/index.ts",
+      "sha256": "791a850c63938ab8f8fb932a572848d636dc225919c126bf6887b3ec5d4b6402"
+    },
+    {
+      "package": "@cormijs/plugin-web",
+      "file": "packages/plugin-web/src/application.ts",
+      "sha256": "034887f7bf0dd76fe48857e3db0dad926af373d9155872e6ebcc1b9720638c46"
+    },
+    {
+      "package": "@cormijs/plugin-web",
+      "file": "packages/plugin-web/src/commands.ts",
+      "sha256": "ecd7f5e8dae449a1ddac92ed33c59edd06bd13a395f91e41f5af92276b647811"
+    },
+    {
+      "package": "@cormijs/plugin-web",
+      "file": "packages/plugin-web/src/configuration.ts",
+      "sha256": "9c5b11fd34bdc808bfcebea9f4721d1d9c1d0491d6d6ff88f6c2d1ca2060befb"
+    },
+    {
+      "package": "@cormijs/plugin-web",
+      "file": "packages/plugin-web/src/generation.ts",
+      "sha256": "6c3ca0f365717c871ecb09b6151f5fb37aa34a7c4077b809d30d42d289d6c1cd"
+    },
+    {
+      "package": "@cormijs/plugin-web",
+      "file": "packages/plugin-web/src/index.ts",
+      "sha256": "fc608077ee4e0ec8595996b179894f0327f7811c908f200bd995fa868ab8fa14"
+    },
+    {
+      "package": "@cormijs/plugin-web",
+      "file": "packages/plugin-web/src/inspection.ts",
+      "sha256": "081be205c89cb5f430d663e3691c66038fcfac03aa10edbdc8e3e745ef7772fa"
+    },
+    {
+      "package": "@cormijs/plugin-web",
+      "file": "packages/plugin-web/src/ordered-hooks.ts",
+      "sha256": "8bfc9924337b5cc758bf00c3efa0e241945254f6902db2e78c38229d0ac881c7"
+    },
+    {
+      "package": "@cormijs/plugin-web",
+      "file": "packages/plugin-web/src/publication.ts",
+      "sha256": "50244955eb8f880128b37c49c75a4169a390e6517dc991e72fe8341357cd492e"
+    },
+    {
+      "package": "@cormijs/preset-react-vite",
+      "file": "packages/preset-react-vite/src/index.ts",
+      "sha256": "07fd9988e12386030189abff43d68884041e0e4205444506b2ad1935fca653fb"
+    },
+    {
+      "package": "@cormijs/routes",
+      "file": "packages/routes/src/index.ts",
+      "sha256": "de5286fc0ad2e4fb49fde1191ec8798c949222f1453ff2ed9c03301c523fa8d9"
+    },
+    {
+      "package": "@cormijs/routes",
+      "file": "packages/routes/src/json.ts",
+      "sha256": "e8b235572bf965132f0a7fbdedfc442c6a958ee95a8062607453d0a7895f7ff0"
+    },
+    {
+      "package": "@cormijs/runtime",
+      "file": "packages/runtime/src/route-matches.ts",
+      "sha256": "cd208e8753ede98a5a56503f4f248d5fe1dd90e3e3a252bda07195d58b6f982d"
+    },
+    {
+      "package": "@cormijs/runtime",
+      "file": "packages/runtime/src/index.tsx",
+      "sha256": "154b25d194d42a23d72a45f3817488a630502b405e8078d60f90ae78f8a9987f"
+    }
+  ],
+  "reference_checkouts": [
+    {
+      "path": "cordis",
+      "head": "5dac6953d2d993d345d1de9fb0a5926f6d78a7e7",
+      "clean": true
+    },
+    {
+      "path": "umi",
+      "head": "2d368e378d10831e7a56b6eaa6e2ae705b1f3c78",
+      "clean": true
+    },
+    {
+      "path": "references/koishi",
+      "head": "97d5c395750cec37b772e0b94dc63c427e3bb868",
+      "clean": true
+    },
+    {
+      "path": "references/koishi-webui",
+      "head": "1dc5c0e1c76a207c2ec48697d4b56364cfe28dce",
+      "clean": true
+    },
+    {
+      "path": "references/satori",
+      "head": "db22bb3c22f8ee9f6d9d9ecf04fd58b70006956f",
+      "clean": true
+    }
+  ],
+  "history_logs": [
+    {
+      "path": ".cache/p11-browser-env-2.log",
+      "sha256": "09e676058f2ca39ca10d2e713a7b20c50c7f422fa8be19ecd802142aae0a586b"
+    },
+    {
+      "path": ".cache/p11-browser-env.log",
+      "sha256": "5271c8fe4c98ec088133f97b003d1c4f076663ec9ef24698249afc703bf283f9"
+    },
+    {
+      "path": ".cache/p11-contracts-4.log",
+      "sha256": "44e53a3b0e685c8dbe67033f5d06f4d0230b2adc25749c05570b63894d7318c3"
+    },
+    {
+      "path": ".cache/p11-contracts.log",
+      "sha256": "60354668f57496fab1b01389bf07cd56c5ec3a5396f7cab879b510d1ad4424fa"
+    },
+    {
+      "path": ".cache/p11-env-red.log",
+      "sha256": "7e90472943c6e764f45af8b22543765e2efd7ac3b62752bd6b431c41632d6d95"
+    },
+    {
+      "path": ".cache/p11-env-tests-2.log",
+      "sha256": "f597ed03bd20ed97b23a040d1d74cbc551d4ec49efeb91e73e032ac3f7598b46"
+    },
+    {
+      "path": ".cache/p11-review-red.log",
+      "sha256": "17150e9c2292a3953870e4f2a8460dde974cbb12f4d2c8b7351939eb33809519"
+    },
+    {
+      "path": ".cache/p11-review-review.log",
+      "sha256": "d7d95d9e1e7ae065a0c985f3f117b06b6d56d00443f822adee6b95c6ccb24390"
+    },
+    {
+      "path": ".cache/p11-review-types.log",
+      "sha256": "a92eba625b73592eb872a4aeeebd3f9886be3695b2f01f6717a8a8639639070f"
+    },
+    {
+      "path": ".cache/p11-scoped-env-red.log",
+      "sha256": "2f6c777786ed94ccf868fc86430efa01b948e0589f5c40ac56932b1d254da0ca"
+    },
+    {
+      "path": ".cache/p11-types-2.log",
+      "sha256": "a92eba625b73592eb872a4aeeebd3f9886be3695b2f01f6717a8a8639639070f"
+    },
+    {
+      "path": ".cache/p11-types-3.log",
+      "sha256": "a92eba625b73592eb872a4aeeebd3f9886be3695b2f01f6717a8a8639639070f"
+    },
+    {
+      "path": ".cache/p11-types-4.log",
+      "sha256": "a92eba625b73592eb872a4aeeebd3f9886be3695b2f01f6717a8a8639639070f"
+    },
+    {
+      "path": ".cache/p11-types.log",
+      "sha256": "958e51e1aba33752eec24d5c6669edbe5736497e313f4a5eb941bbfbd58d4cd8"
+    },
+    {
+      "path": ".cache/p11-vite-env-probe.log",
+      "sha256": "6b5975a83ad4609f5a061e0ae1a7123921c511dd78f376d9dddca27ef1bfe063"
+    },
+    {
+      "path": ".cache/p11-final-f561d01023/result.json",
+      "sha256": "7e8ec9562eb0429401422aef8c2dc79117a4da1f37f6353f6960a0a489076d9c",
+      "note": "Initial implementation evidence, before additional review tests and removal guards."
+    }
+  ],
+  "review": {
+    "red_log": ".cache/p11-review-red.log",
+    "red_tests": 4,
+    "red_pass": 2,
+    "red_fail": 2,
+    "fix": "Require each explicit public definition in root and client environment tables; reject deletion as well as changed values.",
+    "prior_trial_failure": "pnpm config invoked package manager builtin; use pnpm run env:config. No product parser change."
+  },
+  "cleanup": {
+    "owned_processes": [],
+    "cli_locks": [],
+    "external_author_consumer_trees_intentionally_retained": true
+  },
+  "visual": {
+    "path": ".cache/cormi-environment-preview.png",
+    "sha256": "10fdf4455d784043f424e5a3ca188aa52a33654d9a3a6c78f6903f0a7aeb699e",
+    "opened_for_review": true,
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  "not_run": [
+    "Linux",
+    "Windows",
+    "other browsers",
+    "long-duration trends",
+    "optional font branch",
+    "Admin business regression",
+    "public registry release"
+  ]
+}

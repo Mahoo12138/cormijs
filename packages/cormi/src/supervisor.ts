@@ -7,6 +7,7 @@ import { CormiError, deadline } from '@cormijs/core';
 import { acquireProject } from './lock.js';
 import { compileConfig, fingerprint, ConfigCompileError } from './compiler.js';
 import { projectFile } from './config.js';
+import { validateMode, environmentFiles } from './environment.js';
 import { wireError, type StartMessage, type WorkerMessage, type WireError } from './protocol.js';
 
 export interface LauncherEvent { readonly type: string; readonly [key: string]: unknown }
@@ -87,13 +88,15 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
   if (options.configurationCommand !== undefined && (!inspecting || !/^[a-z][a-z0-9-]*$/.test(options.configurationCommand) || ['config', 'diagnose'].includes(options.configurationCommand))) throw new CormiError('CONFIG_TARGET_INVALID', '--for is only valid for config/diagnose and requires an application command name.');
   if (options.command === 'diagnose' && options.watch) throw new CormiError('DIAGNOSIS_WATCH_UNSUPPORTED', 'Diagnosis is a one-shot snapshot.');
   const configurationCommand = inspecting ? options.configurationCommand ?? 'dev' : options.command;
+  const mode = options.mode ?? (configurationCommand === 'dev' ? 'development' : 'production');
+  validateMode(mode);
   const signal = options.signal ?? new AbortController().signal;
   if (signal.aborted) return 0;
   const emit = (event: LauncherEvent) => options.onEvent?.(event);
   const lease = acquireProject(options.root); const root = lease.root;
   const cache = join(root, '.cormi'); const watching = options.watch ?? options.command === 'dev';
   let active: ReturnType<typeof startWorker> | undefined; let activeDirectory: string | undefined;
-  let files: string[] = [join(root, 'cormi.config.ts')]; let previous: string | undefined;
+  let files: string[] = [join(root, 'cormi.config.ts'), ...environmentFiles(root, mode)]; let previous: string | undefined;
   let extra: string[] = []; let extraStamp = ''; let generation = 0; let exitCode = 0;
   const inputStamp = async () => `${await fingerprint(files)}:${await fingerprint(extra)}`;
   async function stopActive(): Promise<void> {
@@ -119,7 +122,7 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
       if (previous === undefined || (watching && current !== previous)) {
         let compiled;
         try {
-          compiled = await compileConfig(root); files = [...compiled.files];
+          compiled = await compileConfig(root, mode); files = [...compiled.files];
           if (signal.aborted) break;
         } catch (error) {
           if (error instanceof ConfigCompileError) files = [...new Set([...files, ...error.files])];
@@ -144,7 +147,7 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
         await writeFile(module, compiled.code, { flag: 'wx', mode: 0o600 });
         extra = []; extraStamp = await fingerprint(extra); generation++;
         active = startWorker({ version: 1, type: 'start', root, token: lease.token, module,
-          command: options.command, configurationCommand, mode: options.mode ?? (configurationCommand === 'dev' ? 'development' : 'production'), timeoutMs: shutdown, serverOnlyFiles: compiled.files }, options,
+          command: options.command, configurationCommand, mode, environment: compiled.environment, timeoutMs: shutdown, serverOnlyFiles: compiled.files }, options,
           (values, stamp) => { extra = values.map(file => projectFile(root, file)); extraStamp = stamp; });
         emit({ type: 'starting', generation, pid: active.pid });
         try {

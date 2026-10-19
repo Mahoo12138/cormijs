@@ -4,7 +4,15 @@ export type ConfigData = Readonly<Record<string, unknown>>;
 export interface ConfigSource { readonly kind: 'preset' | 'user' | 'derive' | 'input'; readonly id: string }
 export interface ConfigChange { readonly path: string; readonly operation: 'set' | 'delete' }
 export interface ConfigLayer { readonly source: ConfigSource; readonly changes: readonly ConfigChange[] }
+/** Bootstrap metadata only. Values and content fingerprints are deliberately not part of this report. */
+export interface EnvironmentSummary {
+  readonly mode: string;
+  readonly nodeEnv: 'development' | 'production';
+  readonly files: readonly { readonly name: string; readonly present: boolean }[];
+  readonly variables: readonly { readonly name: string; readonly public: boolean; readonly source: string; readonly history: readonly string[] }[];
+}
 export interface ConfigurationContext {
+  readonly environment?: EnvironmentSummary;
   readonly command: string;
   readonly layers: readonly ConfigLayer[];
   readonly plugins: readonly { readonly id: string; readonly source: string; readonly enabled: boolean }[];

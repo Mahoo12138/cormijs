@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { dirname, extname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { CormiError } from '@cormijs/core';
+import { environmentFiles, readEnvironment, type EnvironmentSnapshot } from './environment.js';
 
 export class ConfigCompileError extends CormiError {
   constructor(message: string, readonly files: readonly string[], cause?: unknown) {
@@ -12,16 +13,18 @@ export class ConfigCompileError extends CormiError {
 }
 export { fingerprint } from './inputs.js';
 import { fingerprint } from './inputs.js';
-export interface CompiledConfig { readonly code: string; readonly files: readonly string[]; readonly fingerprint: string }
+export interface CompiledConfig { readonly code: string; readonly files: readonly string[]; readonly fingerprint: string; readonly environment: EnvironmentSnapshot }
 /** Static compilation runs in the supervisor; user configuration is evaluated only in a fresh worker. */
-export async function compileConfig(root: string): Promise<CompiledConfig> {
+export async function compileConfig(root: string, mode = 'production'): Promise<CompiledConfig> {
   const entry = join(root, 'cormi.config.ts');
-  const files = new Set<string>([entry, join(root, 'package.json'), join(root, 'pnpm-lock.yaml'), join(root, '.env')]);
+  const envPaths = environmentFiles(root, mode);
+  const files = new Set<string>([entry, join(root, 'package.json'), join(root, 'pnpm-lock.yaml'), ...envPaths]);
   const loaded = new Map<string, string>();
   function inside(path: string): boolean {
     const rel = relative(root, path); return !!rel && rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
   }
   try {
+    const environment = await readEnvironment(root, mode);
     const result = await build({
       absWorkingDir: root, entryPoints: [entry], bundle: true, packages: 'external', platform: 'node',
       target: 'node22', format: 'esm', write: false, metafile: true, sourcemap: 'inline', sourcesContent: false,
@@ -58,7 +61,8 @@ export async function compileConfig(root: string): Promise<CompiledConfig> {
     if (!code) throw new Error('Compiler produced no config module');
     if (list.length > 4096) throw new Error('Configuration dependency graph is too large');
     if (await fingerprint(list) !== baseline) throw new CormiError('CONFIG_CHANGED', 'Configuration changed during input verification.');
-    return { code, files: list, fingerprint: baseline };
+    if (await fingerprint(environment.paths) !== environment.fingerprint) throw new CormiError('ENV_CHANGED', 'Environment changed during config compilation.');
+    return { code, files: list, fingerprint: baseline, environment };
   } catch (cause) {
     const message = cause instanceof Error ? cause.message : String(cause);
     throw new ConfigCompileError(message, [...files].sort(), cause);
