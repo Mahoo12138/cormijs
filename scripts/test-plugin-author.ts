@@ -11,11 +11,12 @@ import { createServer } from 'node:http';
 import { chromium, type Page } from 'playwright-core';
 import { packWorkspace, run, checked, filesUnder, sha256, packagePath } from './packaging.js';
 import { listen, close, assertPortFree } from '../tests/helpers.js';
+import { preparePluginAssets, verifyPluginAssets } from './plugin-assets-verify.js';
 
 // Flow: installed creator -> source plugin playground -> real tgz -> relocated independent application.
 // Existing Playwright harness; the in-app Browser skill/runtime is not available in this session.
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const { values } = parseArgs({ strict: true, options: { out: { type: 'string' } } });
+const { values } = parseArgs({ strict: true, options: { out: { type: 'string' }, 'font-root': { type: 'string' } } });
 await mkdir(join(root, '.cache'), { recursive: true });
 const out = values.out ? resolve(values.out) : join(root, '.cache', 'plugin-author-' + Date.now());
 await mkdir(out);
@@ -81,7 +82,10 @@ async function auditLinks(cwd: string) {
 async function freePort() { const s = createServer(); const port = await listen(s); await close(s); return port; }
 const parseEvents = (text: string): Event[] => text.trim().split('\n').flatMap(line => { try { return [JSON.parse(line)]; } catch { return []; } });
 async function pageBasics(page: Page, url: string, label: string, development: boolean) {
-  await page.goto(new URL('plugin', url).href);
+  const target = new URL('plugin', url).href;
+  await page.goto(target);
+  assert.equal(page.url(), target);
+  assert.ok((await page.title()).length > 0, 'The application must have a document title');
   await page.getByRole('heading', { name: '插件开发示例', exact: true }).waitFor();
   await page.getByText(label, { exact: true }).waitFor();
   await page.getByRole('button', { name: 'Count: 0', exact: true }).click();
@@ -103,7 +107,12 @@ try {
   await pm('author-install', author, ['install', '--offline', '--ignore-scripts', '--no-frozen-lockfile']); await auditLinks(author);
   const configPath = join(author, 'cormi.config.ts'), generatedConfig = await readFile(configPath, 'utf8');
   const config = generatedConfig.replace('port: 8003', 'port: ' + await freePort()); await writeFile(configPath, config);
+  const assetFixture = await preparePluginAssets(author,values['font-root']);
+  await writeFile(join(author,'src/assets/removed.svg'),'<svg xmlns="http://www.w3.org/2000/svg"/>');
   await pm('author-build', author, ['build']); await pm('author-types', author, ['typecheck']); await pm('author-app-types', author, ['check:app']);
+  assert.ok(existsSync(join(author,'dist/assets/removed.svg')));await rm(join(author,'src/assets/removed.svg'));
+  await pm('author-rebuild-removes-owned-resource',author,['build']);assert.equal(existsSync(join(author,'dist/assets/removed.svg')),false);
+  for(const [path,bytes] of assetFixture.files) assert.deepEqual(await readFile(join(author,'dist',path.slice(4))),bytes);
   const executablePath = process.env.CORMI_BROWSER_EXECUTABLE ?? '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge';
   assert.ok(existsSync(executablePath)); browser = await chromium.launch({ executablePath, headless: true });
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } }); page.setDefaultTimeout(15000);
@@ -115,6 +124,15 @@ try {
     await server(author, 'dev', async (url, wait) => {
       await pageBasics(page, url, 'cormi author', true);
       assert.equal(await page.title(), 'cormi plugin playground');
+      await record({label:'author-assets',...(await verifyPluginAssets(page,url,assetFixture))});
+      const tokenFile=join(author,'src/assets/tokens.css'), originalTokens=await readFile(tokenFile,'utf8');
+      const cssOrigin=await page.evaluate(()=>performance.timeOrigin);
+      try {await writeFile(tokenFile,originalTokens.replace('2px','6px'));
+        await page.waitForFunction(()=>getComputedStyle(document.querySelector('main')!).borderTopWidth==='6px');
+        await page.getByRole('button',{name:'Count: 1',exact:true}).waitFor();assert.equal(await page.evaluate(()=>performance.timeOrigin),cssOrigin);
+      } finally {await writeFile(tokenFile,originalTokens);}
+      await page.waitForFunction(()=>getComputedStyle(document.querySelector('main')!).borderTopWidth==='2px');
+      await record({label:'css-import-hot-update-preserves-state',documentUnchanged:true});
       await pm('pack-rejects-active-session', author, ['pack:plugin'], 1);
       const origin = await page.evaluate(() => performance.timeOrigin);
       await writeFile(pageFile, originalPage.replace('插件开发示例', '插件源码已更新'));
@@ -139,6 +157,13 @@ try {
     });
   } finally { await writeFile(pageFile, originalPage); await writeFile(apiFile, originalApi); await writeFile(configPath, config); }
   assert.deepEqual(errors, []); await record({ label: 'source-hmr-node-reload-disable-enable', browser: browser.version(), pageErrors: errors.length });
+  await pm('author-app-build',author,['build:app']);
+  const goodOutput=await filesUnder(join(author,'app-dist'));
+  const missingAsset=join(author,'src/assets/plugin-mark.svg'),assetBytes=await readFile(missingAsset);
+  try {await rm(missingAsset);await pm('missing-plugin-asset-rejects-app-build',author,['build:app'],1);
+    assert.deepEqual(await filesUnder(join(author,'app-dist')),goodOutput,'Failed asset build changed the last published application');
+  } finally {await writeFile(missingAsset,assetBytes);}
+  await pm('repaired-plugin-asset-build',author,['build:app']);
   const diagnosis = parseEvents(await installedCli(author, 'diagnose')).find(e => e.type === 'result')!.data;
   assert.ok(diagnosis.healthy); assert.ok(diagnosis.contributions.some((s: any) => s.id === 'dev-api' && s.records.length));
   // Stale development output must never enter an archive compiled from a fresh source snapshot.
@@ -153,6 +178,10 @@ try {
   const unpacked = join(temporary, 'unpacked'); await mkdir(unpacked); await checked('tar', ['-xzf', archive.file, '-C', unpacked], temporary);
   const files = await filesUnder(join(unpacked, 'package')), manifest = JSON.parse(files.get('package.json')!.toString());
   assert.equal(manifest.name, name); assert.equal(manifest.private, true);
+  assert.deepEqual(manifest.sideEffects,['**/*.css']);
+  for(const [path,bytes] of assetFixture.files) {assert.deepEqual(files.get(path),bytes);assert.deepEqual(files.get('dist/'+path.slice(4)),bytes);}
+  assert.equal(files.has('dist/assets/removed.svg'),false);
+  if(assetFixture.font)assert.deepEqual(files.get('NOTICE.md'),await readFile(join(author,'NOTICE.md')));
   assert.equal(files.get('LICENSE.md')?.toString(), licenseFixture);
   assert.equal(files.get('README.md')?.toString(), await readFile(join(author, 'PACKAGE.md'), 'utf8'));
   for (const key of ['scripts','devDependencies','pnpm']) assert.equal(manifest[key], undefined);
@@ -181,15 +210,25 @@ export default defineConfig(({command})=>({presets:[preset],plugins:[{id:'api',p
   await installedCli(consumer, 'typecheck'); await installedCli(consumer, 'diagnose');
   await writeFile(join(consumer, 'plugin-types.mts'), `import feature, {type Options} from ${JSON.stringify(name)}; import api from ${JSON.stringify(name + '/api')}; import runtime from ${JSON.stringify(name + '/client')}; import Page from ${JSON.stringify(name + '/page')};\nconst options: Options = {development:true,label:'test',apiBase:'/api'}; void [feature,api,runtime,Page,options];\n// @ts-expect-error invalid public plugin options must remain a type error\nconst invalid: Options = {development:'yes',label:'x',apiBase:'/api'};\n`);
   await execute('consumer-strict-plugin-types', consumer, process.execPath, [join(consumer, 'node_modules/typescript/bin/tsc'), '--noEmit', '--target', 'ES2023', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--strict', '--skipLibCheck', 'false', 'plugin-types.mts']);
-  await server(consumer, 'dev', async url => { await pageBasics(page, url, 'independent consumer', true); });
+  await server(consumer, 'dev', async url => { await pageBasics(page, url, 'independent consumer', true); await record({label:'installed-package-dev-assets',...(await verifyPluginAssets(page,url,assetFixture))}); });
   await installedCli(consumer, 'build'); await installedCli(consumer, 'build');
   for (const [file, bytes] of await filesUnder(join(consumer, 'dist'))) if (/\.(?:js|css|html)$/.test(file)) assert.doesNotMatch(bytes.toString(), /cormi-plugin-template|Expected plugin options|devApi\.add/);
   await server(consumer, 'preview', async url => { await pageBasics(page, url, 'independent consumer', false);
+    await record({label:'installed-package-preview-assets',...(await verifyPluginAssets(page,url,assetFixture))});
     const response = await fetch(new URL('api/hello', url)); assert.doesNotMatch(await response.text(), /Hello, independent consumer/);
     await page.screenshot({ path: join(out, 'consumer-production.png'), fullPage: false });
   });
   assert.deepEqual(errors, []);
   await record({ label: 'relocated-tgz-consumer-types-diagnosis-dev-rebuild-preview', sourceFallback: false, lockUnchanged: true, pageErrors: 0 });
+  // Rebuild the installed package at the origin root as well; no source alias or resource mirror is installed.
+  const customerConfig=await readFile(join(consumer,'cormi.config.ts'),'utf8');
+  await writeFile(join(consumer,'cormi.config.ts'),customerConfig.replace("base:'/customer/'","base:'/'").replaceAll('/customer/api','/api'));
+  await server(consumer,'dev',async url=>{await pageBasics(page,url,'independent consumer',true);await record({label:'installed-package-root-dev-assets',...(await verifyPluginAssets(page,url,assetFixture))});});
+  await installedCli(consumer,'build');
+  await server(consumer,'preview',async url=>{await pageBasics(page,url,'independent consumer',false);await record({label:'installed-package-root-preview-assets',...(await verifyPluginAssets(page,url,assetFixture))});});
+  await writeFile(join(consumer,'cormi.config.ts'),customerConfig);
+  await installedCli(consumer,'build');
+  assert.deepEqual(errors,[]);
   report.passed = true;
 } catch (error) { report.error = String(error); process.exitCode = 1; }
 finally {

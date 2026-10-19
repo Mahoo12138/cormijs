@@ -2,10 +2,11 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P8 插件作者工作区与独立交付。** `create-cormi --template plugin-react` 可生成原生Cordis Node/client插件库及源码联调应用，完成严格类型、源码热更新、真实tgz与独立消费者链路；core不增加新宿主或后端策略。见 [作者指南](docs/41-plugin-authoring.md) 与 [P8结果](docs/42-p8-results.md)。Admin只作已有框架测试负载，本轮未修改。
+**当前阶段：P9 插件样式与静态资源交付。** 插件作者模板已将CSS Modules、图片和可选字体贯通到源码开发、库构建、真实tgz和独立消费者；资源属于插件，不要求复制到应用public。原生Cordis Node/client组合、服务与诊断继续复用，不修改Admin业务。见 [作者指南](docs/41-plugin-authoring.md)、[资源协议](docs/43-plugin-assets.md) 和 [P9结果](docs/44-p9-results.md)。
 
-最终 macOS arm64 **298项Node、17项既有框架浏览器**通过，13包64个独立消费者阶段满足预期；新增 `pnpm test:plugin` 两轮各26阶段通过，另有21项创建/打包预检定向回归。11项新增Node与实际失败修正见 [机器证据](artifacts/p8-validation.json)。当前模板仅打包TS/JS资源，仍需本地kit与Cordis声明补丁；Windows继续挂起。名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
+最终 macOS arm64 **311项Node、17项框架浏览器**通过，13个框架tgz的64个消费阶段满足预期；插件作者完整链路分别按默认与显式字体输入执行，两轮各38阶段。13项新增Node、资源/输出边界与复核记录见 [机器证据](artifacts/p9-validation.json)。默认模板不附带第三方字体，仍需本地kit和消费者Cordis声明补丁；Windows继续挂起。
 
+名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 ## 本地运行
 
 本机使用 Node 22.14.0、pnpm 10.6.3、macOS arm64；`.nvmrc` 固定当前实验 Node，不修改全局环境。

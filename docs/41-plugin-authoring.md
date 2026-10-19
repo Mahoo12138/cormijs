@@ -35,8 +35,9 @@ pnpm dev
 | src/api.ts | 独立开发 API 贡献者，只依赖 devApi 服务 |
 | src/client.tsx、src/context.ts | 浏览器 RuntimePlugin、根 Provider 与公开上下文 |
 | src/page.tsx | 插件提供的示例路由页面 |
+| src/page.module.css、src/assets/、src/assets.d.ts | 插件样式、图片及静态资源类型声明 |
 | playground/Home.tsx、cormi.config.ts、index.html | 作者联调应用，不进入插件分发包 |
-| dist/ | 插件库的 JavaScript、声明和 source map |
+| dist/ | 插件库的 JavaScript、声明、source map 和保持相对布局的 CSS/静态资源 |
 | app-dist/ | 联调应用的静态构建结果，与库 dist 分离 |
 | scripts/pack.mjs | 显式调用的本地打包器，不是安装脚本 |
 | PACKAGE.md | 面向消费者的说明，打包时作为 README.md |
@@ -73,11 +74,11 @@ pnpm preview
 
 ## 5. 从当前源码打包，而不是把旧 dist 装进包
 
-`pnpm pack:plugin` 先要求没有活跃 cormi 会话，再检查 src 的普通文件、链接、路径、文件数、深度及大小预算。点文件、符号链接、硬链接和未知资源扩展会拒绝；当前只交付 TypeScript/JavaScript 源文件，CSS/图片等额外资源需要明确扩展策略。
+`pnpm pack:plugin` 先要求没有活跃 cormi 会话，再检查 src 的普通文件、链接、路径、文件数、深度及大小预算。点文件、符号链接、硬链接和未知资源扩展会拒绝；P9 已增加 CSS、常见图片/字体和 d.ts 的明确资源白名单及受管复制，详见 [插件资源协议](43-plugin-assets.md)。
 
 打包器在独立 `.cormi-package-*` 内创建 src 快照，使用作者安装的 TypeScript 严格编译到全新 dist，强制 noCheck=false、skipLibCheck=false、noEmitOnError=true。不会从开发过程中积累的旧 dist 复制残留模块，也不会清空作者已有 dist。每次成功包位于新的 `artifacts/plugin-*` 中，前次归档不覆盖。
 
-分发清单移除作者 scripts、devDependencies、pnpm overrides 和本地 file/link/workspace 引用，保留独立 exports、运行依赖和 peer 声明。source map 对应的 src 一并交付。PACKAGE.md 作为包 README，存在的 LICENSE/NOTICE 原字节保存；没有替作者选择许可证。默认 private:true，未执行 publish、postinstall 或 prepare。
+分发清单移除作者 scripts、devDependencies、pnpm overrides 和本地 file/link/workspace 引用，保留独立 exports、运行依赖和 peer 声明。source map 对应的 src 一并交付；CSS sideEffects 声明保留，资源按源目录布局进入 dist。PACKAGE.md 作为包 README，存在的 LICENSE/NOTICE 原字节保存；没有替作者选择许可证。默认 private:true，未执行 publish、postinstall 或 prepare。
 
 只清理成功操作自己的 stage，失败保留中间输入供检查。该工具针对可信作者目录和明确本地命令，不承诺敌对同用户文件系统修改下的事务、任意编译器插件隔离或字节级可复现 tarball。开始时的锁检查用于拒绝已有会话，不是与之后新建会话之间的原子互斥。
 
@@ -113,4 +114,4 @@ apiBase 是明确的 API 命名空间，不由插件猜测 app.base；它应与�
 
 仓库新增 `pnpm test:plugin`：实际打包创建器，创建外部作者项目，验证库/应用类型、源码 HMR、Node 重启、整体禁用、真实插件 tgz、旧 dist 排除、私有输入拒绝、消费者重定位后冻结重装、开发与生产行为。它和原 `pnpm test:package` 分开计数；浏览器使用已有 Playwright 和独立无头上下文，不读取个人资料。
 
-这不是插件市场、任意旧生态插件兼容、任意资源打包或 Windows 支持。下一步以真实作者反馈和可复现问题继续缩减配置摩擦，而不是为填满功能列表扩张新宿主。
+默认静态资源采用显式 import 与 CSS url()，消费应用负责实际资源变换；不承诺包内任意 new URL(import.meta.url) 在依赖预构建后仍指向原目录。这不是插件市场、任意旧生态插件兼容、任意资源打包或 Windows 支持。下一步以真实作者反馈和可复现问题继续缩减配置摩擦，而不是为填满功能列表扩张新宿主。

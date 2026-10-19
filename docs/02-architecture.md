@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.19。修订轮次：P8（插件作者模板、源码联调与独立tgz消费）。
+版本：Draft 0.20。修订轮次：P9（插件样式、静态资源与独立消费验证）。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -33,6 +33,8 @@ P6 将开发HTTP规则扩展为DevApiService，通过原生Cordis Service追踪�
 P7 增加 ProjectRuntime.graph() 的实际Cordis状态观察、可选DiagnosticService和保留启动诊断命令diagnose。应用依赖不能就绪时仍输出结构化快照并非零退出；目标命令不执行，服务value/私有options不进入报告。配置来源、当前插件快照、旧生成结果分别由config、diagnose、inspect表达，不把新worker观察冒充运行中dev状态。实现边界见 [插件诊断协议](39-plugin-diagnostics.md)，实际回归另见 [P7结果](40-p7-results.md)。
 
 P8将Node/client配对方式交付为现有创建器的plugin-react模板：原生Cordis子插件组合、独立exports、作者专用源码桥接以及源码快照编译后的tgz。不把作者工具、Vite别名或本地框架归档带给消费者，不修改core生命周期；库dist与示例app-dist分离。实际公开入口和未支持资源范围见 [插件作者指南](41-plugin-authoring.md)。
+
+P9在插件作者模板中提供有界资源快照、普通库构建复制和全新打包目录，保持CSS/图片/字体的相对模块布局；消费后端负责实际资源转换与base。没有向core新增资源服务器、修改Cordis生命周期或全局关闭Vite依赖优化。普通库dist不承诺跨文件事务，具体资源所有权、失败与分发限制见 [资源协议](43-plugin-assets.md)，实际结果见 [P9记录](44-p9-results.md)。
 
 ## 1. 应该做一个什么框架
 
