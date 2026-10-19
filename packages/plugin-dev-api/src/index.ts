@@ -21,6 +21,14 @@ export interface DevApiOptions {
   readonly maxResponseBytes?: number;
   readonly maxConcurrent?: number;
 }
+/** Internal request lease supplied by the optional Cordis service. One lease spans handler AND response. */
+export interface DevApiBinding {
+  readonly mock?: MockRule;
+  readonly proxy?: ProxyRule;
+  readonly signal: AbortSignal;
+  release(): void;
+}
+export interface DevApiRouting { acquire(path: string, method: string): DevApiBinding | undefined }
 interface Reply { status: number; headers: OutgoingHttpHeaders; body: Buffer; contentLength?: string }
 class HttpFailure extends Error { constructor(readonly status: number, readonly code: string) { super(code); } }
 const methods = new Set(['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']);
@@ -117,7 +125,7 @@ export class DevApiSession {
   private readonly pending = new Set<Promise<unknown>>();
   private readonly responses = new Set<Promise<void>>();
   private closing?: Promise<void>;
-  constructor(options: DevApiOptions = {}) { this.options = validateDevApi(options); }
+  constructor(options: DevApiOptions = {}, private readonly routing?: DevApiRouting) { this.options = validateDevApi(options); }
   summary() { return { prefix: this.options.prefix, mocks: this.options.mocks.map(({method,path})=>({method,path})), proxies: this.options.proxies.map(({path})=>({path})) }; }
   readonly middleware = (req: IncomingMessage, res: ServerResponse, next: () => void): void => {
     const raw = req.url ?? '/', rawPath = raw.split('?')[0]!;
@@ -130,7 +138,20 @@ export class DevApiSession {
     }
     const control = new AbortController(); this.active.add(control);
     let responseEnded = false, taskSettled = false, abort = () => {};
-    const release = () => { if (responseEnded && taskSettled) this.active.delete(control); };
+    let ownerRelease: (() => void) | undefined;
+    let unbindOwner: (() => void) | undefined;
+    const bindOwner = (binding: DevApiBinding) => {
+      ownerRelease = binding.release;
+      const withdraw = () => control.abort(new HttpFailure(503, 'DEV_API_WITHDRAWN'));
+      binding.signal.addEventListener('abort', withdraw, { once: true });
+      unbindOwner = () => binding.signal.removeEventListener('abort', withdraw);
+      if (binding.signal.aborted) withdraw();
+    };
+    const release = () => {
+      if (responseEnded && taskSettled && this.active.delete(control)) {
+        unbindOwner?.(); ownerRelease?.();
+      }
+    };
     let resolveResponse!: () => void;
     const responseDone = new Promise<void>(resolve => { resolveResponse = resolve; }); this.responses.add(responseDone);
     const timer = setTimeout(() => control.abort(new HttpFailure(504, 'DEV_API_TIMEOUT')), this.options.timeoutMs);
@@ -149,10 +170,14 @@ export class DevApiSession {
     const writeError = () => { control.abort(new HttpFailure(499, 'CLIENT_DISCONNECTED')); res.destroy(); };
     res.once('finish', finish); res.once('close', disconnected); res.once('error', writeError);
     control.signal.addEventListener('abort', interruptWrite, { once: true });
-    const task = this.respond(req, raw, control.signal); this.pending.add(task);
+    const task = this.respond(req, raw, control.signal, bindOwner); this.pending.add(task);
     const settle = () => { this.pending.delete(task); taskSettled = true; release(); };
     task.then(settle, settle);
-    const cancellation = new Promise<never>((_, reject) => { abort = () => reject(control.signal.reason); control.signal.addEventListener('abort', abort, { once: true }); });
+    const cancellation = new Promise<never>((_, reject) => {
+      abort = () => reject(control.signal.reason);
+      control.signal.addEventListener('abort', abort, { once: true });
+      if (control.signal.aborted) abort();
+    });
     void Promise.race([task, cancellation]).then(reply => {
       if (!res.destroyed) {
         res.writeHead(reply.status, { ...reply.headers, ...(reply.contentLength !== undefined ? { 'content-length': reply.contentLength } : {}) });
@@ -171,7 +196,7 @@ export class DevApiSession {
       // Otherwise finish/close owns release; the deadline also bounds backpressured writes.
     });
   };
-  private async respond(req: IncomingMessage, raw: string, signal: AbortSignal): Promise<Reply> {
+  private async respond(req: IncomingMessage, raw: string, signal: AbortSignal, bindOwner: (binding: DevApiBinding) => void): Promise<Reply> {
     if (raw.length > 8192 || /[\\#\x00-\x20\x7f]/.test(raw)) throw new HttpFailure(400, 'REQUEST_PATH_INVALID');
     let url: URL, path: string;
     try {
@@ -187,10 +212,13 @@ export class DevApiSession {
     // Validate the decoded path above, but retain encoding when matching and forwarding.
     // Decoding %2F or %25 here would change an upstream resource identifier.
     const local = url.pathname.slice(this.options.prefix.length) || '/';
-    const mock = this.options.mocks.find(x=>x.path===local && x.method===method)
+    const binding = this.routing?.acquire(local, method);
+    const mock = this.routing ? binding?.mock : this.options.mocks.find(x=>x.path===local && x.method===method)
       ?? (method==='HEAD' ? this.options.mocks.find(x=>x.path===local && x.method==='GET') : undefined);
-    const route = this.options.proxies.find(x=>x.path==='/' || under(local, x.path));
+    const route = this.routing ? binding?.proxy : this.options.proxies.find(x=>x.path==='/' || under(local, x.path));
     if (!mock && !route) throw new HttpFailure(404, 'DEV_API_NOT_FOUND');
+    if (binding) bindOwner(binding);
+    signal.throwIfAborted();
     const rawBody = await collect(req, this.options.maxBodyBytes, signal);
     if (!mock) return proxy(route!, local, url.search, method, req.headers, rawBody, signal, this.options.maxResponseBytes);
     let body: unknown;
@@ -209,9 +237,11 @@ export class DevApiSession {
       body: Buffer.from(text), contentLength: [204,304].includes(status) ? undefined : String(Buffer.byteLength(text)) };
   }
   close(): Promise<void> {
-    return this.closing ??= (async () => {
+    // Publish the close identity before abort handlers can synchronously call close again.
+    // The assigned promise also closes admission immediately, before this microtask runs.
+    return this.closing ??= Promise.resolve().then(async () => {
       for (const control of this.active) control.abort(new HttpFailure(503, 'DEV_API_CLOSED'));
       await deadline(Promise.allSettled([...this.pending, ...this.responses]), 2000, new CormiError('DEV_API_CLEANUP_TIMEOUT', 'An API handler or response did not settle after cancellation.'));
-    })();
+    });
   }
 }

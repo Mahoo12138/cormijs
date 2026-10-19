@@ -120,6 +120,21 @@ try {
   await execute('core-strict-types', core, process.execPath, typeArguments);
   assert.equal(await cordisRuntimeHash(core), rawHash, 'Declaration patch must not modify upstream JavaScript'); await auditLinks(core);
   report.stages.push({ label: 'cordis-runtime-identity', sha256: rawHash, unchanged: true });
+  const service = await create('dev-api-service', 'core');
+  const serviceManifest = consumerManifest(kit, 'core');
+  serviceManifest.dependencies['@cormijs/plugin-dev-api'] = serviceManifest.pnpm.overrides['@cormijs/plugin-dev-api']!;
+  await writeFile(join(service, 'package.json'), JSON.stringify(serviceManifest));
+  await install('dev-api-service-install', service);
+  await writeFile(join(service, 'types.mts'), `import {ProjectRuntime} from '@cormijs/core';import {DevApiService} from '@cormijs/plugin-dev-api/service';
+const h=new ProjectRuntime();h.mount('api',DevApiService);h.mount('consumer',{inject:['devApi'],apply(ctx){ctx.devApi.add('mine',{mocks:[{method:'GET',path:'/ok',handle:()=>({body:true})}]});
+// @ts-expect-error public rules may not become any
+ctx.devApi.add('invalid',{mocks:[{method:'GET',path:'/bad',handle:123}]});}});await h.dispose();`);
+  await execute('dev-api-service-strict-types', service, process.execPath, typeArguments);
+  await writeFile(join(service, 'service.mjs'), `import assert from 'node:assert/strict';import {createRequire} from 'node:module';import {ProjectRuntime} from '@cormijs/core';import {DevApiService} from '@cormijs/plugin-dev-api/service';
+const require=createRequire(import.meta.url);for(const name of ['vite','react','@cormijs/plugin-vite'])assert.throws(()=>require.resolve(name),{code:'MODULE_NOT_FOUND'});
+const h=new ProjectRuntime();h.mount('api',DevApiService);h.mount('feature',{inject:['devApi'],apply(ctx){ctx.devApi.add('feature',{mocks:[{method:'GET',path:'/ok',handle:()=>({body:true})}]})}});await h.ready();assert.equal(h.ctx.devApi.summary().contributions.length,1);await h.unmount('feature');assert.equal(h.ctx.devApi.summary().contributions.length,0);await h.dispose();console.log('PACKED_SERVICE_NO_VITE_OK');`);
+  await execute('dev-api-service-no-vite-runtime', service, process.execPath, ['service.mjs'], 0, /PACKED_SERVICE_NO_VITE_OK/);
+  await auditLinks(service);
   const launcher = await create('launcher', 'launcher'); await install('launcher-install', launcher);
   await execute('launcher-bin', launcher, join(launcher, 'node_modules/.bin/cormi'), ['--help'], 0, /cormi <command>/);
   await writeFile(join(launcher, 'types.mts'), `import {defineConfig} from 'cormijs';import {runCormi} from 'cormijs/launcher';void runCormi;defineConfig({plugins:[]});`);
@@ -135,7 +150,7 @@ try {
   const sdk = await create('sdk', 'react'); const sdkManifest = consumerManifest(kit, 'react');
   Object.assign(sdkManifest.dependencies, sdkManifest.pnpm.overrides); await writeFile(join(sdk, 'package.json'), JSON.stringify(sdkManifest));
   await install('sdk-install', sdk);
-  const specifiers = kit.packages.map(item => item.name).concat('cormijs/launcher', '@cormijs/builder/development', '@cormijs/plugin-dev-api/vite');
+  const specifiers = kit.packages.map(item => item.name).concat('cormijs/launcher', '@cormijs/builder/development', '@cormijs/plugin-dev-api/vite', '@cormijs/plugin-dev-api/service');
   await writeFile(join(sdk, 'types.mts'), specifiers.map((specifier, i) => `import * as p${i} from ${JSON.stringify(specifier)};void p${i};`).join('\n'));
   await execute('all-public-types', sdk, process.execPath, typeArguments);
   await writeFile(join(sdk, 'exports.mjs'), `for(const name of ${JSON.stringify(specifiers)}){await import(name); console.log(name)}`);

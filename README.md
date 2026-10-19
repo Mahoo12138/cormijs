@@ -2,9 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P5e 配置重载准入与框架功能验收。** Admin只作为cormi真实测试负载，不再扩展模板UI/业务修复。本轮修正worker清理/初始化期间配置再次变化时启动过期候选或误报ready的问题，并完成真实应用配置、插件贡献和路由恢复链路。见 [框架能力矩阵](docs/35-framework-validation.md) 与 [P5e结果](docs/36-p5e-results.md)。
+**当前阶段：P6 作用域开发 API 与独立插件交付。** Koishi/WebUI/Satori 已作为固定源码参考保存到 `references/`；服务的调用者作用域、原生子插件和传输适配器设计已用于cormi开发API。Admin只验证框架请求、取消、插件撤回与生产隔离，不扩展模板业务。见 [生态与接口](docs/37-cordis-ecosystem.md)、[P6结果](docs/38-p6-results.md) 和 [参考清单](artifacts/cordis-ecosystem.json)。
 
-最终macOS arm64 **254项Node、17项框架浏览器**通过；13包57个消费者阶段、两轮Admin七组框架工作流均满足预期。五项新增最小回归不依赖Admin；业务src/public未改。原始命令与输入哈希见 [机器证据](artifacts/p5e-validation.json)。历史P5a–P5d报告与可选Header修正保留，但不作为继续开发Admin产品的任务清单；Windows仍挂起。
+最终 macOS arm64 **269项Node、17项框架浏览器**通过，13个框架tgz的61个独立消费阶段满足预期；另一个真实Node/client测试插件tgz在Admin完成两轮五组集成验收。新增15项通用测试包含同步重入关闭修复，当前完整证据见 [机器记录](artifacts/p6-validation.json)。历史P5e及初批P6结果保留，不将重复执行计入新增数量；Windows仍挂起。
 
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 

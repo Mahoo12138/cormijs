@@ -1,0 +1,18 @@
+{
+  "name": "@cormi-test/dev-extension",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "files": ["*.js", "*.d.ts"],
+  "exports": {
+    ".": {"types": "./index.d.ts", "import": "./index.js"},
+    "./api": {"types": "./api.d.ts", "import": "./api.js"},
+    "./client": {"types": "./client.d.ts", "import": "./client.js"}
+  },
+  "peerDependencies": {
+    "@cormijs/core": "0.0.1",
+    "@cormijs/plugin-react": "0.0.1",
+    "@cormijs/plugin-dev-api": "0.0.1",
+    "@cormijs/runtime": "0.0.1"
+  }
+}

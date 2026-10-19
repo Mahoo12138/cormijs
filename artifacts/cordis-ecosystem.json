@@ -1,0 +1,269 @@
+{
+  "format": "cormi:ecosystem-reference:1",
+  "observedAt": 1792387687.548276,
+  "purpose": "read-only reference; no dependency installation or upstream tests",
+  "references": [
+    {
+      "name": "koishi",
+      "path": "references/koishi",
+      "url": "https://github.com/koishijs/koishi.git",
+      "commit": "97d5c395750cec37b772e0b94dc63c427e3bb868",
+      "tree": "b5b824e9d2f59c9f0bdfe7e572a8099a97f621d9",
+      "branch": "master",
+      "shallow": true,
+      "clean": true,
+      "dependenciesInstalled": false,
+      "upstreamTestsRun": false,
+      "packages": {
+        "package.json": {
+          "sha256": "52516c9530fa19f269baca4b4a868da7e181f471b31dd72c2e8b77e86fbd4203",
+          "name": "@root/koishi",
+          "version": "1.0.0",
+          "license": "MIT",
+          "cordisDependency": null,
+          "satoriDependency": null
+        },
+        "packages/core/package.json": {
+          "sha256": "bdc44a9cb76a3a644d9b709525ee49d7849e173bf76701d6af162fd67cb929b8",
+          "name": "@koishijs/core",
+          "version": "4.18.11",
+          "license": "MIT",
+          "cordisDependency": "^3.18.1",
+          "satoriDependency": "^4.6.0"
+        }
+      },
+      "studiedFiles": {
+        "plugins/mock/src/adapter.ts": {
+          "sha256": "844ffc984fea0ecff520b3108503c5bcb7ac8689261147385c3710e0070b363b",
+          "bytes": 2339,
+          "lineRanges": [
+            [
+              23,
+              31
+            ],
+            [
+              57,
+              80
+            ]
+          ],
+          "fixedSource": "https://github.com/koishijs/koishi/blob/97d5c395750cec37b772e0b94dc63c427e3bb868/plugins/mock/src/adapter.ts"
+        }
+      },
+      "license": {
+        "path": "LICENSE",
+        "sha256": "e60d87e606797ace86cbb510df9f75a9b858b5cc9f9dcfebfe47b31961a7c559",
+        "openingLines": [
+          "MIT License",
+          "",
+          "Copyright (c) 2019-present Shigma",
+          "",
+          "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        ]
+      },
+      "trackedFiles": 186
+    },
+    {
+      "name": "koishi-webui",
+      "path": "references/koishi-webui",
+      "url": "https://github.com/koishijs/webui.git",
+      "commit": "1dc5c0e1c76a207c2ec48697d4b56364cfe28dce",
+      "tree": "79e57b9a7ef7dd207709afae0207cb82c0c36701",
+      "branch": "main",
+      "shallow": true,
+      "clean": true,
+      "dependenciesInstalled": false,
+      "upstreamTestsRun": false,
+      "packages": {
+        "package.json": {
+          "sha256": "8e5d0b7a126df498b0079e425a5baf4e7f363731e96b02f2c4de3242a4d9fa83",
+          "name": "@root/webui",
+          "version": "1.0.0",
+          "license": "MIT",
+          "cordisDependency": null,
+          "satoriDependency": null
+        },
+        "packages/console/package.json": {
+          "sha256": "1c15ebf9f082da420cd64199aa099ada8b1124cb55d2aa1d15fc5887a8d5831a",
+          "name": "@koishijs/console",
+          "version": "5.30.11",
+          "license": "MIT",
+          "cordisDependency": null,
+          "satoriDependency": null
+        },
+        "packages/client/package.json": {
+          "sha256": "603c93ac65d79482198dce7ad58cf7695a98e07ff671161f81f9142c7be3f485",
+          "name": "@koishijs/client",
+          "version": "5.30.11",
+          "license": "AGPL-3.0",
+          "cordisDependency": "^3.18.1",
+          "satoriDependency": null
+        }
+      },
+      "studiedFiles": {
+        "packages/console/src/index.ts": {
+          "sha256": "7edbaec04baf0fa727cb546e86b173edd6775aa4c4067401fa4290c297caa13a",
+          "bytes": 3989,
+          "lineRanges": [
+            [
+              46,
+              120
+            ]
+          ],
+          "fixedSource": "https://github.com/koishijs/webui/blob/1dc5c0e1c76a207c2ec48697d4b56364cfe28dce/packages/console/src/index.ts"
+        },
+        "packages/console/src/service.ts": {
+          "sha256": "18af3236f1400967fc98e1bba3335439b380bd47ce24a130045799652595192f",
+          "bytes": 961,
+          "lineRanges": [
+            [
+              1,
+              40
+            ]
+          ],
+          "fixedSource": "https://github.com/koishijs/webui/blob/1dc5c0e1c76a207c2ec48697d4b56364cfe28dce/packages/console/src/service.ts"
+        },
+        "packages/console/src/entry.ts": {
+          "sha256": "de4134b319e9b539fc52563e1406446fe28e460e86e4eccb0d432e297fd5b428",
+          "bytes": 810,
+          "lineRanges": [
+            [
+              1,
+              32
+            ]
+          ],
+          "fixedSource": "https://github.com/koishijs/webui/blob/1dc5c0e1c76a207c2ec48697d4b56364cfe28dce/packages/console/src/entry.ts"
+        },
+        "packages/client/client/context.ts": {
+          "sha256": "4cab2c8f5db7df5494d4681ed4c8341f188fec9a67a5c6aa898478e96e9c0a90",
+          "bytes": 2390,
+          "lineRanges": [
+            [
+              1,
+              88
+            ]
+          ],
+          "fixedSource": "https://github.com/koishijs/webui/blob/1dc5c0e1c76a207c2ec48697d4b56364cfe28dce/packages/client/client/context.ts"
+        },
+        "packages/client/client/plugins/loader.ts": {
+          "sha256": "7631c699107cd15c4e8123732aa6a78a3ed1e3d89374cd41a4bd1ef4b50f4451",
+          "bytes": 2788,
+          "lineRanges": [
+            [
+              1,
+              100
+            ]
+          ],
+          "fixedSource": "https://github.com/koishijs/webui/blob/1dc5c0e1c76a207c2ec48697d4b56364cfe28dce/packages/client/client/plugins/loader.ts"
+        },
+        "plugins/console/src/node/index.ts": {
+          "sha256": "af7f3be54a4e73dad1543ae88022419acdd3500de813ea42e7ae036446ed7b93",
+          "bytes": 10096,
+          "lineRanges": [
+            [
+              34,
+              125
+            ]
+          ],
+          "fixedSource": "https://github.com/koishijs/webui/blob/1dc5c0e1c76a207c2ec48697d4b56364cfe28dce/plugins/console/src/node/index.ts"
+        }
+      },
+      "license": {
+        "path": "LICENSE",
+        "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+        "openingLines": [
+          "                    GNU AFFERO GENERAL PUBLIC LICENSE",
+          "                       Version 3, 19 November 2007",
+          "",
+          " Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>",
+          " Everyone is permitted to copy and distribute verbatim copies"
+        ]
+      },
+      "trackedFiles": 558
+    },
+    {
+      "name": "satori",
+      "path": "references/satori",
+      "url": "https://github.com/satorijs/satori.git",
+      "commit": "db22bb3c22f8ee9f6d9d9ecf04fd58b70006956f",
+      "tree": "0e7f4de6993b5b736aeef24d4106619ce4e7b988",
+      "branch": "main",
+      "shallow": true,
+      "clean": true,
+      "dependenciesInstalled": false,
+      "upstreamTestsRun": false,
+      "packages": {
+        "package.json": {
+          "sha256": "a5a632626f15a08837ef4da678e3614f44672ac50d604ca191aac2153ca850e7",
+          "name": "@root/satori",
+          "version": "1.0.0",
+          "license": "MIT",
+          "cordisDependency": null,
+          "satoriDependency": null
+        },
+        "packages/core/package.json": {
+          "sha256": "a6c1b89c1ac07ccdbf2bac7c1a83e4bcaef4d2a4cd5e3001a974411abe2ed732",
+          "name": "@satorijs/core",
+          "version": "5.0.0-alpha.0",
+          "license": "MIT",
+          "cordisDependency": "^4.0.0-rc.3",
+          "satoriDependency": null
+        }
+      },
+      "studiedFiles": {
+        "packages/core/src/index.ts": {
+          "sha256": "1d0de1c7fc4b5ff3e90ba1f14033f9be82ce4f219cd70a8c4bf98ed77a0dfb35",
+          "bytes": 7964,
+          "lineRanges": [
+            [
+              78,
+              115
+            ]
+          ],
+          "fixedSource": "https://github.com/satorijs/satori/blob/db22bb3c22f8ee9f6d9d9ecf04fd58b70006956f/packages/core/src/index.ts"
+        },
+        "packages/core/src/internal.ts": {
+          "sha256": "8c07d657250c988b388993ef6115558e62e4eecd288f2c0a4c7c1a4de0e05916",
+          "bytes": 3113,
+          "lineRanges": [
+            [
+              17,
+              48
+            ]
+          ],
+          "fixedSource": "https://github.com/satorijs/satori/blob/db22bb3c22f8ee9f6d9d9ecf04fd58b70006956f/packages/core/src/internal.ts"
+        },
+        "packages/core/src/adapter.ts": {
+          "sha256": "9d1ffc6aeeb2c237aa16e57cd66bffe57e27b8e1650e81b5304072433a83c150",
+          "bytes": 3485,
+          "lineRanges": [
+            [
+              20,
+              118
+            ]
+          ],
+          "fixedSource": "https://github.com/satorijs/satori/blob/db22bb3c22f8ee9f6d9d9ecf04fd58b70006956f/packages/core/src/adapter.ts"
+        }
+      },
+      "license": {
+        "path": "LICENSE",
+        "sha256": "e60d87e606797ace86cbb510df9f75a9b858b5cc9f9dcfebfe47b31961a7c559",
+        "openingLines": [
+          "MIT License",
+          "",
+          "Copyright (c) 2019-present Shigma",
+          "",
+          "Permission is hereby granted, free of charge, to any person obtaining a copy"
+        ]
+      },
+      "trackedFiles": 350
+    }
+  ],
+  "coreReference": {
+    "path": "cordis",
+    "commit": "5dac6953d2d993d345d1de9fb0a5926f6d78a7e7",
+    "serviceSource": "packages/core/src/service.ts",
+    "sourceSha256": "be7868f4a85a75c95a010470ffa2e39043f90eb7fb9533cddd5986687699279c",
+    "installedVersion": "4.0.0-rc.11",
+    "installedVersionIsNotProofOfSameCommit": true
+  }
+}

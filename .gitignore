@@ -1,6 +1,7 @@
 # Reference repositories are independent checkouts, not Cormi implementation.
 /cordis/
 /umi/
+/references/
 
 node_modules/
 .cormi/

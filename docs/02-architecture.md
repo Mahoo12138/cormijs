@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.16。修订轮次：P5e（框架功能验收、配置代际准入与就绪校验）。
+版本：Draft 0.17。修订轮次：P6（Cordis生态参考、作用域开发API与独立Node/client插件）。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -27,6 +27,8 @@ P5c 将部署基址的一致性落在实际Vite provider：原生config hook不�
 P5d将真实模板Header可访问交互作为显式可选上游修正，不改变core、runtime或默认preset；图表使用原组件验证交互、尺寸和有限卸载循环。原版/忠实迁移/改进副本分别保留自己的契约与差异，见 [Header与图表](33-admin-header-and-charts.md)。模板修复不是新增框架能力，当前样本通过也不是整个可访问性或长期资源审计完成。
 
 P5e 按用户明确的主线，将 Admin 作为功能测试负载，不再扩展模板 UI/业务修复。Supervisor 在旧 worker 清理完成与新 server 就绪前校验当前输入，防止连续配置修改激活已过期候选或误报 ready；一次性命令不重放。能力与边界见 [框架验收矩阵](35-framework-validation.md)。
+
+P6 将开发HTTP规则扩展为DevApiService，通过原生Cordis Service追踪调用者并在服务内部绑定effect；独立Vite bridge消费服务，旧组合入口由原生子插件构成。同一测试包的Node/client入口分别交付并经过tgz安装验收。没有向core增加路由注册器或引入Vue控制台；参考源码、不同Cordis版本及许可声明见 [生态协议](37-cordis-ecosystem.md)。动态注册不等于任意Node源码进程内HMR，错误/取消/资源排空仍由领域实现验证。
 
 ## 1. 应该做一个什么框架
 
