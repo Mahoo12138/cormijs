@@ -5,6 +5,7 @@ export const commandPlugin: Plugin.Object<void> = {
   apply: ctx => {
     const handlers = new Map<string, CommandHandler>();
     const middleware = new Map<string, { run: CommandMiddleware }>();
+    ctx.get('diagnostics')?.add('commands', () => [...handlers.keys()].sort().map(id => ({ kind: 'command', id })));
     ctx.provide('commands', {
       use(id, run) {
         assertActive(ctx);
@@ -13,7 +14,7 @@ export const commandPlugin: Plugin.Object<void> = {
         return () => { if (middleware.get(id) === entry) middleware.delete(id); };
       },
       register(name, handler) {
-        if (!/^[a-z][a-z0-9-]*$/.test(name) || handlers.has(name)) throw new CormiError('COMMAND_CONFLICT', `Duplicate or invalid command: ${name}`);
+        if (name === 'diagnose' || !/^[a-z][a-z0-9-]*$/.test(name) || handlers.has(name)) throw new CormiError('COMMAND_CONFLICT', `Duplicate or invalid command: ${name}`);
         handlers.set(name, handler);
         return () => { if (handlers.get(name) === handler) handlers.delete(name); };
       },

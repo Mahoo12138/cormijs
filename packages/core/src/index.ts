@@ -1,5 +1,10 @@
 import { Context, FiberState, type Fiber, type Plugin, type Message } from 'cordis';
 import { setTimeout as delay } from 'node:timers/promises';
+import { runtimeGraph } from './graph.js';
+export { DiagnosticService } from './diagnostic-service.js';
+export type { DiagnosticContribution, DiagnosticSection } from './diagnostic-service.js';
+export type { RuntimeGraph, RuntimeNode, RuntimeService, RuntimeDependency } from './graph.js';
+
 
 export { Context, Service } from 'cordis';
 export type { Fiber, Plugin } from 'cordis';
@@ -87,6 +92,9 @@ export class ProjectRuntime {
       requires: Object.keys(fiber.inject),
     }));
   }
+
+  /** A synchronous observation, not a new lifecycle or a readiness assertion. */
+  graph() { return runtimeGraph(this.ctx, this.mounted, this.phase); }
 
   async ready(): Promise<void> {
     this.assertOpen();

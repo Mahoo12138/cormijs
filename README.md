@@ -2,10 +2,9 @@
 
 以 Cordis 为插件宿主、以 Umi 的应用开发体验为参考的 TypeScript 应用框架。默认 React + Vite 由 preset 组合提供，core 不绑定 React 或 Vite。
 
-**当前阶段：P6 作用域开发 API 与独立插件交付。** Koishi/WebUI/Satori 已作为固定源码参考保存到 `references/`；服务的调用者作用域、原生子插件和传输适配器设计已用于cormi开发API。Admin只验证框架请求、取消、插件撤回与生产隔离，不扩展模板业务。见 [生态与接口](docs/37-cordis-ecosystem.md)、[P6结果](docs/38-p6-results.md) 和 [参考清单](artifacts/cordis-ecosystem.json)。
+**当前阶段：P7 原生服务依赖与贡献诊断。** 新增 `cormi diagnose --for dev|build`，在新worker内观察真实Cordis插件、服务和贡献身份；支持缺失依赖/失败时输出结构化诊断，不执行目标应用命令。见 [诊断协议](docs/39-plugin-diagnostics.md) 与 [P7结果](docs/40-p7-results.md)。生态参考继续保留，Admin仅为框架测试负载。
 
-最终 macOS arm64 **269项Node、17项框架浏览器**通过，13个框架tgz的61个独立消费阶段满足预期；另一个真实Node/client测试插件tgz在Admin完成两轮五组集成验收。新增15项通用测试包含同步重入关闭修复，当前完整证据见 [机器记录](artifacts/p6-validation.json)。历史P5e及初批P6结果保留，不将重复执行计入新增数量；Windows仍挂起。
-
+最终 macOS arm64 **287项Node、17项框架浏览器**通过，13包64个独立消费者阶段满足预期；Admin诊断两轮五组、原开发API五组回归通过。新增18项通用回归，当前证据见 [机器记录](artifacts/p7-validation.json)。诊断不是运行中dev的在线视图，也不替代typecheck/build；Windows仍挂起。
 名称约定：框架、CLI、配置和运行时均为 **cormi**；`cormijs` 仅用于发布包名及 `@cormijs/*` 命名空间。源码 import 使用真实包名；现有项目目录仍为 `/Users/mahoo/Projects/cormijs`。
 
 ## 本地运行

@@ -64,7 +64,7 @@ export function normalizeConfig(input: unknown, root: string): {
       const at = `${path}[${i}]`; const entry = object(value, at);
       keys(entry, ['id', 'plugin', 'options', 'enabled'], at);
       const name = id(entry.id, `${at}.id`);
-      if (ids.has(name) || name === 'cormi:commands') invalid(`${at}.id`, `duplicate or reserved id ${name}`);
+      if (ids.has(name) || ['cormi:commands', 'cormi:diagnostics'].includes(name)) invalid(`${at}.id`, `duplicate or reserved id ${name}`);
       ids.add(name);
       if (entry.enabled !== undefined && typeof entry.enabled !== 'boolean') invalid(`${at}.enabled`, 'expected boolean');
       if (typeof entry.plugin !== 'function' && !(entry.plugin && typeof entry.plugin === 'object' && typeof (entry.plugin as any).apply === 'function')) invalid(`${at}.plugin`, 'expected native Cordis plugin');

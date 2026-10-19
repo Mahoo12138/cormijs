@@ -1,4 +1,5 @@
-import { ProjectRuntime, CormiError, type CommandResult } from '@cormijs/core';
+import { ProjectRuntime, DiagnosticService, CormiError, type CommandResult } from '@cormijs/core';
+import { diagnose } from './diagnose.js';
 import { pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
@@ -55,9 +56,23 @@ async function run(message: StartMessage): Promise<void> {
   const config = normalizeConfig(raw, message.root);
   send({ version: 1, type: 'watch', files: [...config.watch], fingerprint: await fingerprint(config.watch) });
   host = new ProjectRuntime(timeout);
+  // Install optional observation infrastructure before application plugins register metadata.
+  host.mount('cormi:diagnostics', DiagnosticService); await host.ready();
   host.mount('cormi:commands', commandPlugin);
-  for (const entry of config.plugins) host.mount(entry.id, entry.plugin, entry.options);
-  await host.ready(); lifetime.signal.throwIfAborted();
+  let failure: unknown;
+  try {
+    for (const entry of config.plugins) host.mount(entry.id, entry.plugin, entry.options);
+    await host.ready();
+  } catch (error) { if (message.command !== 'diagnose') throw error; failure = error; }
+  lifetime.signal.throwIfAborted();
+  if (message.command === 'diagnose') {
+    const data = diagnose(host, config.pluginSources, environment.command, message.mode, failure);
+    if (!data.healthy) {
+      send({ version: 1, type: 'diagnosis', data });
+      throw new CormiError('DIAGNOSIS_UNHEALTHY', 'Plugin readiness or diagnostic collection failed; see the diagnosis snapshot.');
+    }
+    result = { kind: 'result', data }; return;
+  }
   result = await host.ctx.commands.execute(message.command, {
     root: message.root, mode: message.mode, options: config.app, signal: lifetime.signal,
     configuration: Object.freeze({ command: environment.command, layers: config.layers, plugins: config.pluginSources }),

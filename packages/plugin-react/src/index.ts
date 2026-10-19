@@ -30,6 +30,10 @@ export const reactPlugin: Plugin.Object<void> = {
     const runtime = new OrderedHooks<void, readonly RuntimeContribution[]>('runtime');
     const lifetime = new AbortController(), pending = new Set<Promise<PreparedApplication>>(), sessions = new Set<PreparedApplication>();
     ctx.provide('react', { routes, runtime } satisfies ReactCompilation);
+    ctx.get('diagnostics')?.add('react-hooks', () => [
+      ...routes.snapshot().map(({ id, owner }) => ({ kind: 'route-hook', id, declaredOwner: owner })),
+      ...runtime.snapshot().map(({ id, owner }) => ({ kind: 'runtime-hook', id, declaredOwner: owner })),
+    ]);
     async function create(request: ApplicationRequest): Promise<PreparedApplication> {
       assertActive(ctx);
       const plan = createBuildPlan(request, ['pages', 'routes', 'runtime', 'mountId', 'strict']);

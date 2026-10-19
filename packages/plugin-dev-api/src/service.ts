@@ -10,6 +10,7 @@ export interface DevApiHandle {
 interface Registration {
   readonly id: string;
   readonly owner: string;
+  readonly ownerUid: number | null;
   readonly rules: Required<DevApiRules>;
   readonly controller: AbortController;
   requests: number;
@@ -34,6 +35,11 @@ export class DevApiService extends Service {
     super(ctx, 'devApi');
     this.options = validateDevApi(options);
     ctx.effect(() => () => this.close());
+    ctx.get('diagnostics')?.add('dev-api', () => [...this.state.entries.values()].flatMap(entry => [
+      { kind: 'api-contribution', id: entry.id, ownerUid: entry.ownerUid },
+      ...entry.rules.mocks.map(rule => ({ kind: 'mock', id: `${rule.method} ${this.options.prefix}${rule.path}`, ownerUid: entry.ownerUid })),
+      ...entry.rules.proxies.map(rule => ({ kind: 'proxy', id: `${this.options.prefix}${rule.path}`, ownerUid: entry.ownerUid })),
+    ]));
     if (this.options.mocks.length || this.options.proxies.length) {
       this.add('cormi:configured', { mocks: this.options.mocks, proxies: this.options.proxies });
     }
@@ -53,7 +59,7 @@ export class DevApiService extends Service {
     validateDevApi({ ...this.options,
       mocks: [...entries.flatMap(e => e.rules.mocks), ...checked.mocks],
       proxies: [...entries.flatMap(e => e.rules.proxies), ...checked.proxies] });
-    const entry: Registration = { id, owner: this.ctx.fiber.name ?? 'root', rules: checked,
+    const entry: Registration = { id, owner: this.ctx.fiber.name ?? 'root', ownerUid: this.ctx.fiber.uid, rules: checked,
       controller: new AbortController(), requests: 0 };
     const dispose = this.ctx.effect(() => {
       state.entries.set(id, entry);

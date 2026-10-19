@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.17。修订轮次：P6（Cordis生态参考、作用域开发API与独立Node/client插件）。
+版本：Draft 0.18。修订轮次：P7（原生服务依赖图、可选贡献采集与CLI诊断）。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -29,6 +29,8 @@ P5d将真实模板Header可访问交互作为显式可选上游修正，不改�
 P5e 按用户明确的主线，将 Admin 作为功能测试负载，不再扩展模板 UI/业务修复。Supervisor 在旧 worker 清理完成与新 server 就绪前校验当前输入，防止连续配置修改激活已过期候选或误报 ready；一次性命令不重放。能力与边界见 [框架验收矩阵](35-framework-validation.md)。
 
 P6 将开发HTTP规则扩展为DevApiService，通过原生Cordis Service追踪调用者并在服务内部绑定effect；独立Vite bridge消费服务，旧组合入口由原生子插件构成。同一测试包的Node/client入口分别交付并经过tgz安装验收。没有向core增加路由注册器或引入Vue控制台；参考源码、不同Cordis版本及许可声明见 [生态协议](37-cordis-ecosystem.md)。动态注册不等于任意Node源码进程内HMR，错误/取消/资源排空仍由领域实现验证。
+
+P7 增加 ProjectRuntime.graph() 的实际Cordis状态观察、可选DiagnosticService和保留启动诊断命令diagnose。应用依赖不能就绪时仍输出结构化快照并非零退出；目标命令不执行，服务value/私有options不进入报告。配置来源、当前插件快照、旧生成结果分别由config、diagnose、inspect表达，不把新worker观察冒充运行中dev状态。实现边界见 [插件诊断协议](39-plugin-diagnostics.md)，实际回归另见 [P7结果](40-p7-results.md)。
 
 ## 1. 应该做一个什么框架
 

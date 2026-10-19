@@ -86,6 +86,7 @@ export const applicationConfigPlugin: Plugin.Object<void> = {
   name: 'cormi:application-config', inject: ['commands'],
   apply: ctx => {
     const service = new ApplicationConfiguration(); ctx.provide('appConfig', service);
+    ctx.get('diagnostics')?.add('configuration-hooks', () => service.derive.snapshot().map(({ id, owner }) => ({ kind: 'derive-hook', id, declaredOwner: owner })));
     ctx.effect(() => ctx.commands.use('cormi:application-config', async (name, request, next) => {
       assertActive(ctx);
       // inspect intentionally keeps its last-successful-generation contract.

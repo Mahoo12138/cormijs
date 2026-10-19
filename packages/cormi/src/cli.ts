@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { runCormi } from './supervisor.js';
 import { wireError } from './protocol.js';
 import { bindLauncherControl } from './control.js';
+import { renderDiagnosis, type Diagnosis } from './diagnose.js';
 
 const lifetime = new AbortController();
 const detachControl = bindLauncherControl(lifetime);
@@ -16,7 +17,7 @@ try {
   } });
   json = !!parsed.values.json;
   if (parsed.values.help || !parsed.positionals.length) {
-    console.log('cormi <command> [--root path] [--mode name] [--no-watch] [--json]\nCommands are provided by plugins in cormi.config.ts. Web plugins provide dev/build/preview; the React preset also provides prepare/inspect/typecheck/config. Use config --for dev|build to explain current application inputs without executing that command.');
+    console.log('cormi <command> [--root path] [--mode name] [--no-watch] [--json]\nCommands are provided by plugins in cormi.config.ts. Web plugins provide dev/build/preview; the React preset also provides prepare/inspect/typecheck/config. Use config --for dev|build to explain current application inputs without executing that command. diagnose --for dev|build reports a fresh plugin/service snapshot even when dependencies cannot become ready; it never executes the target command.');
   } else {
     if (parsed.positionals.length !== 1) throw new Error('Expected exactly one command');
     process.exitCode = await runCormi({ root: resolve(parsed.values.root ?? process.cwd()), command: parsed.positionals[0]!,
@@ -30,6 +31,7 @@ try {
         else if (event.type === 'ready') console.log(event.applicationStatus === 'error'
           ? `cormi server listening: ${event.url} (application compilation failed; waiting for repair)`
           : `cormi ready: ${event.url}`);
+        else if (event.type === 'diagnosis' || event.type === 'result' && (event.data as { format?: string })?.format === 'cormi:diagnosis:1') console.log(renderDiagnosis(event.data as Diagnosis));
         else if (event.type === 'error') console.error(`[cormi:${event.code}] ${event.message}`);
         else if (event.type === 'result') console.log(JSON.stringify(event.data, null, 2));
         else if (event.type === 'restarting') console.log('cormi: restarting worker');

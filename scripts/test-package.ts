@@ -137,10 +137,15 @@ const h=new ProjectRuntime();h.mount('api',DevApiService);h.mount('feature',{inj
   await auditLinks(service);
   const launcher = await create('launcher', 'launcher'); await install('launcher-install', launcher);
   await execute('launcher-bin', launcher, join(launcher, 'node_modules/.bin/cormi'), ['--help'], 0, /cormi <command>/);
-  await writeFile(join(launcher, 'types.mts'), `import {defineConfig} from 'cormijs';import {runCormi} from 'cormijs/launcher';void runCormi;defineConfig({plugins:[]});`);
+  await writeFile(join(launcher, 'types.mts'), `import {defineConfig,type Diagnosis} from 'cormijs';import {runCormi} from 'cormijs/launcher';void runCormi;defineConfig({plugins:[]});declare const result:Diagnosis;const health:boolean=result.healthy;void health;\n// @ts-expect-error metadata is not any\nconst invalid:number=result.graph.nodes[0]!.state;`);
   await execute('launcher-types', launcher, process.execPath, typeArguments);
   await writeFile(join(launcher, 'cormi.config.ts'), `import {defineConfig} from 'cormijs';export default defineConfig({plugins:[{id:'echo',plugin:{inject:['commands'],apply(ctx){ctx.effect(()=>ctx.commands.register('echo',async()=>({kind:'result',data:'PACKED_COMMAND_OK'})))}}}]});`);
   await command('launcher-custom-command', launcher, 'echo', 0, /PACKED_COMMAND_OK/);
+  await execute('packed-diagnose-no-web', launcher, join(launcher, 'node_modules/.bin/cormi'), ['diagnose', '--for', 'echo', '--json'], 0, /cormi:diagnosis:1/);
+  const normalLauncherConfig = await readFile(join(launcher, 'cormi.config.ts'), 'utf8');
+  await writeFile(join(launcher, 'cormi.config.ts'), `export default {plugins:[{id:'missing-feature',plugin:{inject:['missing'],apply(){throw Error('must not activate')}}}]};`);
+  await execute('packed-diagnose-missing', launcher, join(launcher, 'node_modules/.bin/cormi'), ['diagnose', '--json'], 1, /DIAGNOSIS_UNHEALTHY/);
+  await writeFile(join(launcher, 'cormi.config.ts'), normalLauncherConfig);
   await execute('launcher-no-vite', launcher, process.execPath, ['--input-type=module', '-e', `import {createRequire} from 'node:module';import assert from 'node:assert/strict';const r=createRequire(import.meta.url);assert.throws(()=>r.resolve('vite'),{code:'MODULE_NOT_FOUND'});assert.throws(()=>r.resolve('@cormijs/core/dist/index.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});`]);
   await auditLinks(launcher);
   const missing = await create('missing-peer', 'react');
@@ -172,6 +177,8 @@ const h=new ProjectRuntime();h.mount('api',DevApiService);h.mount('feature',{inj
   await command('react-prepare', app, 'prepare'); await command('react-typecheck', app, 'typecheck'); await command('react-inspect', app, 'inspect', 0, /last-successful-generation/);
   const generatedBeforeConfig = await readFile(join(app, '.cormi/inspect.jsonc'));
   await execute('packed-config-build-provenance', app, join(app, 'node_modules/.bin/cormi'), ['config', '--for', 'build', '--json'], 0, /current-config-evaluation/);
+  assert.equal(sha256(await readFile(join(app, '.cormi/inspect.jsonc'))), sha256(generatedBeforeConfig));
+  await execute('packed-diagnose-react', app, join(app, 'node_modules/.bin/cormi'), ['diagnose', '--for', 'dev', '--json'], 0, /react-hooks/);
   assert.equal(sha256(await readFile(join(app, '.cormi/inspect.jsonc'))), sha256(generatedBeforeConfig));
   const executablePath = process.env.CORMI_BROWSER_EXECUTABLE ?? '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge';
   assert.ok(existsSync(executablePath), 'Set CORMI_BROWSER_EXECUTABLE to an installed Chromium executable; browser checks are required');

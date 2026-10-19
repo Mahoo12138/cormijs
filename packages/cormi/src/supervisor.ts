@@ -54,6 +54,7 @@ function startWorker(start: StartMessage, options: LaunchOptions, watch: (files:
     if (message.type === 'error') { failure = remoteError(message.error); rejectFirst(failure); }
     else if (message.type === 'ready' || message.type === 'result') resolveFirst(message);
     else if (message.type === 'watch') watch(message.files, message.fingerprint);
+    else if (message.type === 'diagnosis') options.onEvent?.({ type: 'diagnosis', data: message.data, pid: child.pid });
   });
   child.send(start, error => { if (error) rejectFirst(error); });
   let stopping: Promise<Exit> | undefined;
@@ -82,8 +83,10 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
   const interval = options.pollIntervalMs ?? 200;
   for (const value of [startup, shutdown, interval]) if (!Number.isFinite(value) || value < 20 || value > 120000) throw new RangeError('Invalid launcher timeout/interval');
   if (!/^[a-z][a-z0-9-]*$/.test(options.command)) throw new CormiError('COMMAND_INVALID', 'Invalid command name.');
-  if (options.configurationCommand !== undefined && (options.command !== 'config' || !/^[a-z][a-z0-9-]*$/.test(options.configurationCommand) || options.configurationCommand === 'config')) throw new CormiError('CONFIG_TARGET_INVALID', '--for is only valid for config and requires another command name.');
-  const configurationCommand = options.command === 'config' ? options.configurationCommand ?? 'dev' : options.command;
+  const inspecting = options.command === 'config' || options.command === 'diagnose';
+  if (options.configurationCommand !== undefined && (!inspecting || !/^[a-z][a-z0-9-]*$/.test(options.configurationCommand) || ['config', 'diagnose'].includes(options.configurationCommand))) throw new CormiError('CONFIG_TARGET_INVALID', '--for is only valid for config/diagnose and requires an application command name.');
+  if (options.command === 'diagnose' && options.watch) throw new CormiError('DIAGNOSIS_WATCH_UNSUPPORTED', 'Diagnosis is a one-shot snapshot.');
+  const configurationCommand = inspecting ? options.configurationCommand ?? 'dev' : options.command;
   const signal = options.signal ?? new AbortController().signal;
   if (signal.aborted) return 0;
   const emit = (event: LauncherEvent) => options.onEvent?.(event);
