@@ -476,6 +476,16 @@ const crumbs = useBreadcrumb(); // 当前路由匹配的 { title, pathname }[]
 
 示例：`pnpm cormi dev --root examples/menu`，默认监听 `/menu/`。
 
+### 4.11 路由级 access 守卫
+
+在配置路由上添加 `access` key；需要同时启用 `accessPlugin`：
+
+```ts
+{ path: 'admin', component: './src/Admin.tsx', access: 'canAdmin', meta: { title: '管理', access: 'canAdmin' } }
+```
+
+生成器会为该路由创建守卫：`access.canAdmin` 为 true 时加载页面，否则渲染内置 403，不加载页面模块；有 wrappers 时 access 传播到首个 wrapper，守卫覆盖整条链。菜单读取同一个 key 过滤。客户端守卫只保护 UI，不替代后端授权；403 当前不可定制。完整行为见 [F3d route access](72-f3d-route-access.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

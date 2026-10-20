@@ -21,9 +21,9 @@ export interface BreadcrumbItem {
 const MenuContext = createContext<readonly MenuItem[] | null>(null);
 
 const metadata = (route: RouteObject) => {
-  const handle = route.handle as { cormi?: { meta?: Record<string, unknown> } } | undefined;
+  const handle = route.handle as { cormi?: { meta?: Record<string, unknown>; access?: string } } | undefined;
   const value = handle?.cormi?.meta;
-  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  return { meta: value && typeof value === 'object' && !Array.isArray(value) ? value : {}, access: handle?.cormi?.access };
 };
 const pathOf = (parent: string, path: string | undefined) => {
   if (path === undefined || path === '') return parent || '/';
@@ -36,10 +36,10 @@ function build(routes: readonly RouteObject[], parent: string, access: Readonly<
   for (const route of routes) {
     if (!route || typeof route.id !== 'string' || route.path === '*') continue;
     count.value++;
-    const meta = metadata(route);
+    const info = metadata(route), meta = info.meta;
     const title = typeof meta.title === 'string' ? meta.title : typeof meta.name === 'string' ? meta.name : undefined;
     const hidden = meta.hideInMenu === true || meta.hidden === true || meta.menu === false;
-    const rule = typeof meta.access === 'string' ? meta.access : undefined;
+    const rule = typeof meta.access === 'string' ? meta.access : info.access;
     if (hidden || (rule !== undefined && access !== null && access[rule] !== true)) continue;
     const path = route.index ? parent : pathOf(parent, route.path);
     const children = build(route.children ?? [], path, access, depth + 1, count);

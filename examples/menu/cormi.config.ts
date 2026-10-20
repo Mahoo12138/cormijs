@@ -9,7 +9,7 @@ const routes = [{
     { path: 'team', component: './src/Team.tsx', meta: { title: '团队', order: 4 }, routes: [
       { index: true, component: './src/TeamHome.tsx', meta: { title: '概览' } },
     ] },
-    { path: 'admin', component: './src/Admin.tsx', meta: { title: '管理', order: 3, access: 'canAdmin' } },
+    { path: 'admin', component: './src/Admin.tsx', meta: { title: '管理', order: 3, access: 'canAdmin' }, access: 'canAdmin' },
   ],
 }];
 

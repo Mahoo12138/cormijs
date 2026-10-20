@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { Outlet } from 'react-router';
 import type { RuntimeConfig } from './app-config.js';
 import { useInitialState } from './initial-state.js';
 
@@ -34,6 +35,13 @@ export function Access({ accessible, fallback = null, children }: {
   readonly accessible: boolean; readonly fallback?: ReactNode; readonly children?: ReactNode;
 }) {
   return <>{accessible ? children : fallback}</>;
+}
+
+/** Route guard used by generated routes with an access key. */
+export function AccessRoute({ name }: { readonly name: string }) {
+  const access = useAccess();
+  if (access[name] !== true) return <main role="status"><h1>403</h1><p>Access denied.</p></main>;
+  return <Outlet />;
 }
 
 /** Runtime plugin object consumed by the generated entry when accessPlugin is mounted. */

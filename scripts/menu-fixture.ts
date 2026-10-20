@@ -13,7 +13,7 @@ const routes = [{
     { path: 'team', component: './src/Team.tsx', meta: { title: 'Team', order: 4 }, routes: [
       { index: true, component: './src/TeamHome.tsx', meta: { title: 'Overview' } },
     ] },
-    { path: 'admin', component: './src/Admin.tsx', meta: { title: 'Admin', order: 3, access: 'canAdmin' } },
+    { path: 'admin', component: './src/Admin.tsx', meta: { title: 'Admin', order: 3, access: 'canAdmin' }, access: 'canAdmin' },
   ],
 }];
 export default defineConfig({
@@ -64,6 +64,11 @@ export async function verifyMenuPage(page: Page, url: string) {
   assert.deepEqual(await menuText(), ['About', 'Home', 'Team', 'Overview']);
   assert.equal(await page.locator('[data-crumbs]').innerText(), 'Home');
   assert.equal(await page.locator('[data-menu]').getByRole('link', { name: 'Admin', exact: true }).count(), 0);
+
+  await page.goto(new URL('admin', url).href);
+  await page.getByRole('heading', { name: '403', exact: true }).waitFor();
+  assert.equal(await page.getByRole('heading', { name: 'Admin page', exact: true }).count(), 0);
+  await page.goto(url); await page.getByRole('heading', { name: 'Home page', exact: true }).waitFor();
 
   await page.locator('[data-menu]').getByRole('link', { name: 'Team', exact: true }).click();
   await page.getByRole('heading', { name: 'Team overview', exact: true }).waitFor();

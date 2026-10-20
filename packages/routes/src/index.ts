@@ -26,6 +26,8 @@ export interface RouteRecord {
   readonly keepQuery?: boolean;
   /** Opt a top-level route and its descendants out of the optional global layout. */
   readonly layout?: false;
+  /** Access key evaluated by the optional access provider before the page renders. */
+  readonly access?: string;
   /** Public browser metadata, never server credentials or executable callbacks. */
   readonly meta?: RouteMeta;
   readonly source: { readonly file?: string; readonly pluginId?: string };
@@ -47,6 +49,8 @@ export interface ConfigRoute {
   readonly wrappers?: readonly string[];
   /** Opt a top-level route and its descendants out of the optional global layout. */
   readonly layout?: false;
+  /** Access key evaluated by the optional access provider before the page renders. */
+  readonly access?: string;
   readonly meta?: RouteMeta;
   readonly routes?: readonly ConfigRoute[];
 }
@@ -108,11 +112,12 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
   const routes = input.map((item: unknown): RouteRecord => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) fail('ROUTE_INVALID', 'Expected a route object.');
     const value = item as Record<string, unknown>;
-    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'errorBoundary', 'redirect', 'keepQuery', 'layout', 'source', 'meta'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
+    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'errorBoundary', 'redirect', 'keepQuery', 'layout', 'access', 'source', 'meta'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
     if (typeof value.id !== 'string' || !value.id || value.id.startsWith('cormi:') || byId.has(value.id)) fail('ROUTE_ID_CONFLICT', `Invalid, reserved or duplicate route id: ${value.id}`);
     if (value.parentId !== undefined && (typeof value.parentId !== 'string' || !value.parentId)) fail('ROUTE_INVALID', 'Invalid parent id.', { id: value.id });
     if (value.index !== undefined && typeof value.index !== 'boolean') fail('ROUTE_INVALID', 'index must be boolean.', { id: value.id });
     if (value.layout !== undefined && value.layout !== false) fail('ROUTE_LAYOUT_INVALID', 'layout only supports false.', { id: value.id });
+    if (value.access !== undefined && (typeof value.access !== 'string' || !/^[A-Za-z_$][A-Za-z0-9_$.-]{0,127}$/.test(value.access))) fail('ROUTE_ACCESS_INVALID', 'access must be a valid access key.', { id: value.id });
     if (value.path !== undefined && typeof value.path !== 'string') fail('ROUTE_INVALID', 'path must be a string.', { id: value.id });
     if (value.index === true && value.path !== undefined) fail('ROUTE_INVALID', 'An index route cannot have a path.', { id: value.id });
     let path = value.path as string | undefined;
@@ -140,6 +145,7 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
       ...(value.errorBoundary !== undefined ? { errorBoundary: moduleRef(value.errorBoundary) } : {}),
       ...(redirect !== undefined ? { redirect, ...(keepQuery ? { keepQuery: true } : {}) } : {}),
       ...(value.layout === false ? { layout: false as const } : {}),
+      ...(value.access !== undefined ? { access: value.access as string } : {}),
       ...(value.meta !== undefined ? { meta: routeMeta(value.meta) } : {}), source: Object.freeze({ ...source }) });
     byId.set(route.id, route); return route;
   });
@@ -191,7 +197,7 @@ export function applyGlobalLayout(routes: readonly RouteRecord[], layout: { read
   return validateRoutes([record, ...children]);
 }
 
-const configFields = new Set(['id', 'path', 'index', 'component', 'errorBoundary', 'redirect', 'keepQuery', 'wrappers', 'layout', 'meta', 'routes']);
+const configFields = new Set(['id', 'path', 'index', 'component', 'errorBoundary', 'redirect', 'keepQuery', 'wrappers', 'layout', 'access', 'meta', 'routes']);
 function configId(value: unknown): string | undefined {
   if (value === undefined) return undefined;
   if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(value)) fail('ROUTE_CONFIG_INVALID', 'Invalid configured route id.', { id: value });
@@ -238,6 +244,10 @@ export function expandRouteConfig(input: unknown, options: { readonly pluginId?:
       const keepQuery = redirectKeepQuery(redirect, row.keepQuery);
       if (row.layout !== undefined && row.layout !== false) fail('ROUTE_CONFIG_INVALID', 'layout only supports false.', { id: explicitId });
       const noGlobalLayout = row.layout === false;
+      if (row.access !== undefined && (typeof row.access !== 'string' || !/^[A-Za-z_$][A-Za-z0-9_$.-]{0,127}$/.test(row.access))) {
+        fail('ROUTE_CONFIG_INVALID', 'access must be a valid access key.', { id: explicitId });
+      }
+      const access = row.access as string | undefined;
       let path = row.path as string | undefined;
       if (path !== undefined) {
         if (/[\0\r\n?#%\\]/.test(path) || path.length > 512) fail('ROUTE_PATH_INVALID', 'Invalid configured route path.', { id: explicitId, path });
@@ -279,7 +289,8 @@ export function expandRouteConfig(input: unknown, options: { readonly pluginId?:
         if (ids.has(wrapperId)) fail('ROUTE_ID_CONFLICT', `Duplicate configured route id: ${wrapperId}`, { id: wrapperId });
         ids.add(wrapperId);
         records.push(Object.freeze({ id: wrapperId, ...(recordParent !== undefined ? { parentId: recordParent } : {}),
-          ...(recordPath !== undefined ? { path: recordPath } : {}), module: wrappers[i]!, ...(noGlobalLayout ? { layout: false as const } : {}), source }));
+          ...(recordPath !== undefined ? { path: recordPath } : {}), module: wrappers[i]!, ...(noGlobalLayout ? { layout: false as const } : {}),
+          ...(i === 0 && access !== undefined ? { access } : {}), source }));
         recordParent = wrapperId; recordPath = '';
       }
       records.push(Object.freeze({ id, ...(recordParent !== undefined ? { parentId: recordParent } : {}),
@@ -287,6 +298,7 @@ export function expandRouteConfig(input: unknown, options: { readonly pluginId?:
         ...(component ? { module: component } : {}), ...(errorBoundary ? { errorBoundary } : {}),
         ...(redirect !== undefined ? { redirect, ...(keepQuery ? { keepQuery: true } : {}) } : {}),
         ...(noGlobalLayout ? { layout: false as const } : {}),
+        ...(access !== undefined && !wrappers.length ? { access } : {}),
         ...(row.meta !== undefined ? { meta: row.meta as RouteMeta } : {}), source }));
       if (hasChildren) visit(children, id, full, depth + 1);
     }

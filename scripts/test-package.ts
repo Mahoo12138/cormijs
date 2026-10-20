@@ -445,8 +445,9 @@ resolveAppConfig({default:config,setup(){}});
 const config:readonly ConfigRoute[]=[{id:'root',path:'/',component:'./src/pages/Home.tsx',routes:[{index:true,component:'./src/pages/Home.tsx'}]},{path:'legacy/:id',redirect:'/home',keepQuery:true}];
 const wrapped:ConfigRoute={path:'wrapped',component:'./src/pages/Home.tsx',wrappers:['./src/wrappers/Auth.tsx']};
 const bare:ConfigRoute={path:'bare',component:'./src/pages/Home.tsx',layout:false};
+const guarded:ConfigRoute={path:'admin',component:'./src/pages/Home.tsx',access:'canAdmin'};
 const layout:LayoutPluginOptions={id:'consumer:layout',files:['src/layouts/index.tsx']};
-const records=expandRouteConfig(config,{pluginId:'consumer:routes'});const id:string=records[0]!.id;void [id,routeConfigPlugin,layoutPlugin,wrapped,bare,layout];
+const records=expandRouteConfig(config,{pluginId:'consumer:routes'});const id:string=records[0]!.id;void [id,routeConfigPlugin,layoutPlugin,wrapped,bare,guarded,layout];
 // @ts-expect-error unknown configured route fields must not silently become any
 const unknown:ConfigRoute={path:'x',component:'./src/pages/Home.tsx',children:[]};
 // @ts-expect-error component is a project-relative source string
@@ -459,6 +460,8 @@ const badQuery:ConfigRoute={path:'x',redirect:'/y',keepQuery:'yes'};
 const badWrapper:ConfigRoute={path:'x',component:'./src/pages/Home.tsx',wrappers:[1]};
 // @ts-expect-error layout only supports false
 const badLayout:ConfigRoute={path:'x',component:'./src/pages/Home.tsx',layout:true};
+// @ts-expect-error access is a string key
+const badAccess:ConfigRoute={path:'x',component:'./src/pages/Home.tsx',access:1};
 `);
     await execute('config-routes-public-types',routesConsumer,process.execPath,typeArguments);
     await withServer(routesConsumer,'dev',async url=>{await verifyConfigRoutesPage(page,url,false);assert.deepEqual(errors,[]);});

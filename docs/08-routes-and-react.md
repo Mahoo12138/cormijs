@@ -96,6 +96,8 @@ F3b 起，显式启用的 `accessPlugin` 登记 `access` 函数，Provider 从 `
 
 F3c 起，显式启用的 `menuPlugin` 从实际挂载的路由树与 `meta` 生成嵌套菜单；`useBreadcrumb` 从当前匹配生成面包屑；启用 access 时按 `meta.access` 过滤。Runtime plugin Provider 契约新增 `routes` 与 `basename`。UI adapter、选中/折叠 helper 与路由级守卫待后续。详见 [F3c menu](71-f3c-menu.md)。
 
+F3d 起，`ConfigRoute`/`RouteRecord` 的 `access` 在生成入口中变成 `AccessRoute` 守卫：权限不足渲染内置 403，不解析页面模块；有 wrappers 时守卫位于首个 wrapper 外，菜单读取同一 key 过滤。可定制 403 与 `src/access.ts` 约定待后续。详见 [F3d route access](72-f3d-route-access.md)。
+
 当前默认包含加载、路由错误和 404 页面。页面模块懒加载；生产与开发使用相同路由树。不存在 SSR/hydration/RSC 功能承诺。普通完整页面刷新会销毁浏览器文档；显式多 mount 使用者应调用返回的 dispose。
 
 ## 7. 验证与未完成边界

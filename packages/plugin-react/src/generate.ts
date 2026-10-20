@@ -43,20 +43,25 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   const children = new Map<string | undefined, RouteRecord[]>();
   for (const route of routes) { const list = children.get(route.parentId) ?? []; list.push(route); children.set(route.parentId, list); }
   const render = (parent?: string): string => '[' + (children.get(parent) ?? []).map(route => {
-    const fields = [`id:${JSON.stringify(route.id)}`];
-    fields.push(`handle:{cormi:{meta:${JSON.stringify(route.meta ?? {})}}}`);
-    if (route.index) fields.push('index:true'); else if (route.path !== undefined) fields.push(`path:${JSON.stringify(route.path)}`);
-    if (route.redirect) fields.push(`element:<RedirectRoute to=${JSON.stringify(route.redirect)}${route.keepQuery ? ' keepQuery' : ''}/>`);
-    else if (route.module) fields.push(`lazy:async()=>({Component:await resolveRouteComponent(async()=>(await import(${JSON.stringify(routeModules.get(route.id))}))[${JSON.stringify(route.module.exportName)}])})`);
-    if (route.errorBoundary) fields.push(`ErrorBoundary:${boundaryAliases.get(route.id)}[${JSON.stringify(route.errorBoundary.exportName)}]`);
-    if (children.has(route.id)) fields.push(`children:${render(route.id)}`);
-    return '{' + fields.join(',') + '}';
+    const pageFields = [`id:${JSON.stringify(route.id)}`];
+    pageFields.push(`handle:{cormi:{meta:${JSON.stringify(route.meta ?? {})}}}`);
+    if (route.index) pageFields.push('index:true'); else if (route.path !== undefined) pageFields.push(`path:${JSON.stringify(route.access ? '' : route.path)}`);
+    if (route.redirect) pageFields.push(`element:<RedirectRoute to=${JSON.stringify(route.redirect)}${route.keepQuery ? ' keepQuery' : ''}/>`);
+    else if (route.module) pageFields.push(`lazy:async()=>({Component:await resolveRouteComponent(async()=>(await import(${JSON.stringify(routeModules.get(route.id))}))[${JSON.stringify(route.module.exportName)}])})`);
+    if (route.errorBoundary) pageFields.push(`ErrorBoundary:${boundaryAliases.get(route.id)}[${JSON.stringify(route.errorBoundary.exportName)}]`);
+    if (children.has(route.id)) pageFields.push(`children:${render(route.id)}`);
+    if (!route.access) return '{' + pageFields.join(',') + '}';
+    const guard = [`id:${JSON.stringify(route.id + ':access')}`, `handle:{cormi:{meta:{},access:${JSON.stringify(route.access)}}}`];
+    if (!route.index && route.path !== undefined) guard.push(`path:${JSON.stringify(route.path)}`);
+    guard.push(`element:<AccessRoute name=${JSON.stringify(route.access)}/>`, `children:[{${pageFields.join(',')}}]`);
+    return '{' + guard.join(',') + '}';
   }).join(',\n') + ']';
   const hasRedirects = routes.some(route => route.redirect !== undefined);
+  const hasAccess = routes.some(route => route.access !== undefined);
   const modelEntries = models.map((model, index) => `{namespace:${JSON.stringify(model.namespace)},model:model${index}[${JSON.stringify(model.module.exportName)}]}`);
   const modelsOption = modelEntries.length ? ',models' : '';
   return [
-    `import { ${hasRedirects ? 'RedirectRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule ? ', resolveAppConfig' : ''} } from '@cormijs/runtime';`,
+    `import { ${hasRedirects ? 'RedirectRoute, ' : ''}${hasAccess ? 'AccessRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule ? ', resolveAppConfig' : ''} } from '@cormijs/runtime';`,
     ...(appModule ? [`import * as applicationConfig from ${JSON.stringify(appModule)};`] : []),
     ...(loadingModule ? [`import * as applicationLoading from ${JSON.stringify(loadingModule)};`] : []),
     ...modelModules.map((path, i) => `import * as model${i} from ${JSON.stringify(path)};`),

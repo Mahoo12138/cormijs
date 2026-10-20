@@ -132,6 +132,6 @@ export default function Shell() {
 
 ## 7. 下一步
 
-- F3d：路由级 access guard、菜单选中/折叠 helper 与可选 ProLayout/Antd adapter；
+- F3d：路由级 access guard、菜单选中/折叠 helper 与可选 ProLayout/Antd adapter，route guard 已由 [F3d](72-f3d-route-access.md) 交付；
 - F4：Mock 约定、配置/别名、HTML/head、样式与资源、微生成器等日常工程能力；
 - U15 后续：layout:false 与菜单/布局联动的完整验证。
