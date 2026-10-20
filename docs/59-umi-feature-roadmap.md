@@ -49,7 +49,7 @@
 | U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；req/res 兼容与统一代理配置待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c/F4d）：aliasPlugin 支持项目内相对别名与可选内置 `@`→src，definePlugin 在 dev 与 build 替换 JSON 常量；`@@`、环境分层自动映射与 define 类型生成待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
-| U20 | HTML title/metas/links/headScripts/scripts/favicon | 部分已有（F4a）：可选 htmlPlugin 注入 title/lang/meta/link/favicon；headScripts/scripts 与每路由 head 待后续 | HTML/head 插件 | F4 |
+| U20 | HTML title/metas/links/headScripts/scripts/favicon | 部分已有（F4a/F4e）：可选 htmlPlugin 注入 title/lang/meta/link/favicon，并按 Umi 位置约定注入 headScripts/scripts（封闭属性集合、转义与逃逸消解）；每路由 head 与任意 raw head HTML 待后续 | HTML/head 插件 | F4 |
 | U21 | helmet、页面标题/SEO 元数据 | 待实现官方能力；手改 document.title 不算 | head 客户端插件 | F3/F4 |
 | U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有 CSS Modules 与资产；缺完整约定和预处理集成 | 样式/资源插件 + backend adapter | F4 |
 | U23 | Tailwind、UnoCSS、styled-components | 待实现可选集成 | 各生态 adapter | F4 |
@@ -133,6 +133,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F4c 状态（2026-10-20）：** U19 的别名部分已交付：`aliasPlugin` 接受项目内相对路径映射并合并进 Vite 解析器，TypeScript paths 由应用显式对齐。用法、差异与验证见 [F4c alias](76-f4c-alias.md)。
 
 **F4d 状态（2026-10-20）：** U19 的编译期常量与内置别名便利已交付：`definePlugin` 把 JSON 字面量注入 Vite 构建，并在 Vite 不处理 define 的开发阶段由同一插件用 esbuild 完成同名替换，dev/build/preview 结果一致；`aliasPlugin` 的 `builtins` 增加 `@`→`src`，位于显式别名之后且不截获作用域包。define 类型声明、`@@`、环境分层映射、样式与微生成器仍待后续。用法、差异与验证见 [F4d define](77-f4d-define.md)。
+
+**F4e 状态（2026-10-20）：** U20 的 headScripts/scripts 已交付：`htmlPlugin` 接受字符串或对象条目，按 Umi 的位置约定把 head 脚本插在 `<head>` 末尾、body 脚本插在 `</body>` 之前；属性走封闭白名单并转义，内联内容消解 `</script` 逃逸。每路由 head（U21）、CSP/nonce 与函数式贡献仍待后续。用法、差异与验证见 [F4e HTML scripts](78-f4e-html-scripts.md)。
 
 ### F3：权限、布局、菜单和国际化
 

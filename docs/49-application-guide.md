@@ -524,11 +524,13 @@ plugins: [{
     favicon: '/favicon.svg',
     metas: [{ name: 'description', content: '应用描述' }],
     links: [{ rel: 'canonical', href: '/' }],
+    headScripts: [{ src: '/mark.js', defer: true }, 'window.__mark = "inline-head"'],
+    scripts: [{ content: 'window.__tail = "inline-body"' }],
   },
 }]
 ```
 
-`index.html` 仍由应用维护，`htmlPlugin` 只做确定性的 head 替换/注入并转义值；开发、构建与 preview 结果一致。当前不提供 headScripts、inline scripts、每路由 head 或非 Vite 后端。完整规则见 [F4a HTML head](74-f4a-html-head.md)。
+`index.html` 仍由应用维护，`htmlPlugin` 只做确定性的 head/body 替换与注入并转义属性值；开发、构建与 preview 结果一致。`headScripts` 落在 `<head>` 末尾、`scripts` 落在 `</body>` 之前；脚本属性只接受 `src|content|async|defer|type|charset|crossorigin`，内联内容中的 `</script` 会被消解。当前不提供每路由 head、CSP/nonce 或非 Vite 后端。规则见 [F4a HTML head](74-f4a-html-head.md) 与 [F4e HTML scripts](78-f4e-html-scripts.md)。
 
 示例：`pnpm cormi dev --root examples/html`，默认监听 `/html/`。
 

@@ -19,6 +19,8 @@ export default defineConfig({
         { property: 'og:title', content: 'Configured <title>' },
       ],
       links: [{ rel: 'canonical', href: '/html/' }],
+      headScripts: [{ src: '/html/mark.js', defer: true }, 'window.__cormiHead = "inline-head"'],
+      scripts: [{ content: 'window.__cormiBody = "inline-body"', async: true }],
     },
   }],
   app: { base: '/html/', server: { port: 0 } },
@@ -31,6 +33,7 @@ export async function writeHtmlFixture(root: string) {
   const files: Record<string, string> = {
     'index.html': '<!doctype html><html lang="en"><head><meta charset="UTF-8"><title>Original title</title></head><body><div id="root"></div><script type="module" src="/.cormi/app.tsx"></script></body></html>',
     'cormi.config.ts': htmlConfiguration,
+    'public/mark.js': 'window.__cormiMark = "external-mark";',
     'public/favicon.svg': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#35617a"/></svg>',
     'src/pages/index.tsx': 'export default function Home(){return <main><h1>HTML head home</h1></main>;}',
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -49,5 +52,10 @@ export async function verifyHtmlPage(page: Page, url: string) {
   assert.equal(new URL(await page.locator('link[rel="icon"]').getAttribute('href') ?? '', url).pathname, '/html/favicon.svg');
   assert.equal(new URL(await page.locator('link[rel="canonical"]').getAttribute('href') ?? '', url).pathname, '/html/');
   assert.equal(await page.locator('title').count(), 1);
+  assert.equal(await page.evaluate('window.__cormiHead'), 'inline-head');
+  assert.equal(await page.evaluate('window.__cormiMark'), 'external-mark');
+  assert.equal(await page.evaluate('window.__cormiBody'), 'inline-body');
+  assert.equal(await page.evaluate('document.querySelectorAll(\'script[src="/html/mark.js"][defer]\').length'), 1);
+  assert.equal(await page.evaluate('const headScript = document.querySelectorAll(\'script[src="/html/mark.js"]\')[0]; !!(headScript.compareDocumentPosition(document.getElementById("root")) & Node.DOCUMENT_POSITION_FOLLOWING)'), true);
   assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);
 }

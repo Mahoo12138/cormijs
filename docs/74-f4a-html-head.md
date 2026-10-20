@@ -53,7 +53,7 @@ export default defineConfig({
 | 方面 | Umi | cormi F4a |
 | --- | --- | --- |
 | title/lang/meta/link/favicon | 支持 | 支持 |
-| 任意 headScripts/scripts | 支持 | 未交付（避免无审查脚本注入） |
+| 任意 headScripts/scripts | 支持 | F4e 交付受审查子集（封闭属性集合） |
 | 插件位置 | preset/config 内置 | 可选 htmlPlugin |
 | 每个路由 head/helmet | 由插件/文档扩展 | 未交付 |
 | 后端 | 多构建后端 | 仅 React–Vite 桥 |
@@ -63,7 +63,7 @@ export default defineConfig({
 ## 4. 限制
 
 - 仅支持 Vite 后端；其他 builder 需要各自 adapter；
-- 不支持 headScripts、inline scripts、任意 raw head HTML；
+- `headScripts`/`scripts` 由 [F4e](78-f4e-html-scripts.md) 交付；仍不支持任意 raw head HTML；
 - 不支持每路由 title/meta 或 helmet；
 - favicon/link 不自动去重，重复注入由应用配置负责；
 - `index.html` 缺少 `</head>` 时明确失败；
@@ -89,5 +89,5 @@ export default defineConfig({
 ## 6. 下一步
 
 - F4b：Mock 目录约定与开发期自动重载，已由 [F4b](75-f4b-mock.md) 交付；
-- F4c：配置/别名、样式/资源与微生成器；
-- U20 后续：headScripts/scripts（需安全策略）、每路由 head 与多后端 adapter。
+- F4c 别名与 F4d define 已交付，见 [F4c](76-f4c-alias.md)、[F4d](77-f4d-define.md)；样式/资源与微生成器待后续；
+- U20 剩余 headScripts/scripts 已由 [F4e](78-f4e-html-scripts.md) 交付；后续为每路由 head（U21）与多后端 adapter；

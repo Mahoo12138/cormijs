@@ -15,6 +15,8 @@ export default defineConfig({
         { property: 'og:title', content: 'cormi HTML head' },
       ],
       links: [{ rel: 'canonical', href: '/html/' }],
+      headScripts: [{ src: '/html/mark.js', defer: true }, 'window.__cormiHead = "inline-head"'],
+      scripts: [{ content: 'window.__cormiBody = "inline-body"', type: 'text/javascript' }],
     },
   }],
   app: { base: '/html/', server: { host: '127.0.0.1', port: 8016 } },

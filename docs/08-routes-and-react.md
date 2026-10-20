@@ -34,6 +34,8 @@ F4c 起，显式启用的 `aliasPlugin` 把项目内相对别名映射合并进 
 
 F4d 起，`aliasPlugin` 可用 `builtins: true` 增加 `@`→`src`；`definePlugin` 注入编译期常量，构建阶段沿用 Vite 的 define，开发阶段由插件自身的 esbuild 变换补齐（Vite 7 不在客户端 dev 应用 define），TypeScript 侧需自行 `declare`。详见 [F4d define](77-f4d-define.md)。
 
+F4e 起，`htmlPlugin` 还支持 `headScripts`/`scripts`：条目可为 URL 字符串、内联字符串或对象，位置与 Umi 一致，属性走封闭白名单并转义，内联内容的 `</script` 逃逸被消解。详见 [F4e HTML scripts](78-f4e-html-scripts.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic
