@@ -577,6 +577,35 @@ plugins: [{ id: 'alias', plugin: aliasPlugin, options: { aliases: { '@': 'src', 
 
 示例：`pnpm cormi dev --root examples/alias`，默认监听 `/alias/`。
 
+### 4.16 编译期常量
+
+需要把构建信息（版本号、开关、公开模式）烧进客户端代码时，显式加入 `definePlugin`：
+
+```ts
+import { aliasPlugin, definePlugin } from '@cormijs/plugin-react-vite';
+
+plugins: [
+  { id: 'alias', plugin: aliasPlugin, options: { builtins: true } },
+  { id: 'define', plugin: definePlugin, options: { values: {
+    APP_NAME: 'cormi define',
+    APP_FLAGS: { beta: true, retries: 2 },
+    'process.env.APP_MODE': 'example',
+  } } },
+]
+```
+
+值按 JSON 字面量替换（字符串会带引号），`process.env.X` 形式也可用；开发、构建与预览结果一致。TypeScript 需要自行声明：
+
+```ts
+// src/defines.d.ts
+declare const APP_NAME: string;
+declare const APP_FLAGS: { beta: boolean; retries: number };
+```
+
+`builtins: true` 让 `@` 指向 `src`，与显式别名并存且不截获 `@scope/pkg` 形式的作用域包；tsconfig 仍需 `paths: { "@/*": ["./src/*"] }`。规则与边界见 [F4d define](77-f4d-define.md)。
+
+示例：`pnpm cormi dev --root examples/define`，默认监听 `/define/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

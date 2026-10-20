@@ -21,6 +21,7 @@ import { writeMenuFixture, verifyMenuPage } from './menu-fixture.js';
 import { writeHtmlFixture, verifyHtmlPage } from './html-fixture.js';
 import { writeMockFixture, verifyMockPage } from './mock-fixture.js';
 import { writeAliasFixture, verifyAliasPage } from './alias-fixture.js';
+import { writeDefineFixture, verifyDefinePage } from './define-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -679,6 +680,25 @@ const bad:AliasPluginOptions={aliases:{'@':1}};
     await command('alias-build',aliasConsumer,'build');
     await withServer(aliasConsumer,'preview',async url=>{await verifyAliasPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'alias-preview.png')});});
     report.stages.push({label:'installed-alias-resolution-dev-build-and-static-preview',aliases:{'@':'src','@shared':'src/shared'},previewRegenerated:false});
+
+    const defineConsumer=await create('define','react');await writeDefineFixture(defineConsumer);
+    const defineManifest=consumerManifest(kit,'react');
+    defineManifest.dependencies['@cormijs/plugin-react-vite']=defineManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
+    await writeFile(join(defineConsumer,'package.json'),JSON.stringify(defineManifest,null,2));
+    await install('define-install',defineConsumer);await auditLinks(defineConsumer);
+    await command('define-typecheck',defineConsumer,'typecheck');
+    await writeFile(join(defineConsumer,'types.mts'),`import {definePlugin,resolveDefines,mergeDefines,type DefinePluginOptions,type DefineEntry} from '@cormijs/plugin-react-vite';
+const options:DefinePluginOptions={values:{APP_NAME:'cormi'}};
+const entries:readonly DefineEntry[]=resolveDefines({APP_NAME:'cormi'});
+const merged:Record<string,string>=mergeDefines({OTHER:'"keep"'},entries);void [definePlugin,options,merged];
+// @ts-expect-error values is required
+const bad:DefinePluginOptions={};
+`);
+    await execute('define-public-types',defineConsumer,process.execPath,typeArguments);
+    await withServer(defineConsumer,'dev',async url=>{await verifyDefinePage(page,url);assert.deepEqual(errors,[]);});
+    await command('define-build',defineConsumer,'build');
+    await withServer(defineConsumer,'preview',async url=>{await verifyDefinePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'define-preview.png')});});
+    report.stages.push({label:'installed-define-and-builtin-alias-dev-build-and-static-preview',values:{APP_NAME:'cormi define',APP_FLAGS:{beta:true,retries:2},'process.env.APP_MODE':'fixture-mode'},builtins:true,previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

@@ -32,6 +32,8 @@ F4b 起，显式启用的 `mockPlugin` 发现 `mock/**` 的 default-export `METH
 
 F4c 起，显式启用的 `aliasPlugin` 把项目内相对别名映射合并进 Vite 解析器（追加而不覆盖）；TypeScript paths 仍由应用 tsconfig 显式对齐。详见 [F4c alias](76-f4c-alias.md)。
 
+F4d 起，`aliasPlugin` 可用 `builtins: true` 增加 `@`→`src`；`definePlugin` 注入编译期常量，构建阶段沿用 Vite 的 define，开发阶段由插件自身的 esbuild 变换补齐（Vite 7 不在客户端 dev 应用 define），TypeScript 侧需自行 `declare`。详见 [F4d define](77-f4d-define.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

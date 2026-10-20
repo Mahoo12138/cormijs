@@ -1,0 +1,8 @@
+:root { color-scheme: light; font-family: ui-sans-serif, system-ui, sans-serif; background: #f2f3f7; color: #23262f; }
+body { margin: 0; }
+.shell { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; }
+.eyebrow { letter-spacing: .18em; font-size: 12px; color: #3d5a91; }
+h1 { margin: 8px 0 20px; font-size: clamp(32px, 6vw, 52px); }
+p { line-height: 1.8; color: #5b6172; }
+p[data-define] { font-family: ui-monospace, monospace; font-size: 13px; color: #23262f; background: #e6eaf3; padding: 10px 12px; border-radius: 8px; }
+code { font-family: ui-monospace, monospace; background: #e6eaf3; padding: 1px 5px; border-radius: 4px; }

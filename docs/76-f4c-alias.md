@@ -56,10 +56,10 @@ import { sharedMessage } from '@shared/message';
 ## 4. 限制
 
 - 只接受项目内相对替换值；不能指向 node_modules 包或项目外目录；
-- 不提供 `@`/`@@` 框架内置别名；
+- 内置 `@`→`src` 需要 F4d 的 `builtins: true`；不提供 `@@`（生成目录不是公共 API）；
 - 不生成 TypeScript paths；应用需自行维护 tsconfig；
 - 不支持正则别名或 Vite 函数式 alias；
-- define、样式集成、微生成器见路线后续切片。
+- define 见 [F4d](77-f4d-define.md)；样式集成、微生成器见路线后续切片。
 
 ## 5. 验证
 
@@ -80,6 +80,6 @@ import { sharedMessage } from '@shared/message';
 
 ## 6. 下一步
 
-- F4d：define/环境注入便利入口、样式与资源约定、微生成器；
+- F4d 已交付 define 与内置 `@`，见 [F4d define](77-f4d-define.md)；后续为样式与资源约定、微生成器；
 - U19 后续：与 mock/config 的一体化配置入口；
 - F5/F6 按路线继续（加载策略、SSR、生态集成）。

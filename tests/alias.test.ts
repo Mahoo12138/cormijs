@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ProjectRuntime } from '@cormijs/core';
 import { vitePlugin } from '@cormijs/plugin-vite';
-import { aliasPlugin, resolveAliases } from '@cormijs/plugin-react-vite';
+import { aliasEntries, aliasPlugin, resolveAliases } from '@cormijs/plugin-react-vite';
 
 test('resolveAliases maps project-relative replacements and rejects escapes and malformed input', async t => {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'cormi-alias 中文-')));
@@ -15,6 +15,19 @@ test('resolveAliases maps project-relative replacements and rejects escapes and 
   for (const input of [{}, { '@': '../outside' }, { '@': '/abs' }, { '@': 1 }, { '': 'src' }]) {
     assert.throws(() => resolveAliases(root, input), (error: any) => error?.code === 'ALIAS_INVALID');
   }
+});
+
+test('aliasEntries appends the builtin @ below explicit aliases and can run alone', async t => {
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'cormi-alias-builtins 中文-')));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const joined = join(root, 'src');
+  assert.deepEqual(aliasEntries(root, { builtins: true }).map(alias => alias.find), ['@']);
+  assert.equal(aliasEntries(root, { builtins: true })[0]!.replacement, joined);
+  const explicit = aliasEntries(root, { aliases: { '@': 'src/app' }, builtins: true });
+  assert.deepEqual(explicit.map(alias => alias.find), ['@']);
+  assert.equal(explicit[0]!.replacement, join(root, 'src/app'));
+  assert.deepEqual(aliasEntries(root, { aliases: { '@shared': 'src/shared' }, builtins: true }).map(alias => alias.find), ['@shared', '@']);
+  assert.throws(() => aliasEntries(root, { aliases: {} , builtins: true }), (error: any) => error?.code === 'ALIAS_INVALID');
 });
 
 test('alias plugin registers its resolver and withdraws cleanly', async t => {
