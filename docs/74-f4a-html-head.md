@@ -88,6 +88,6 @@ export default defineConfig({
 
 ## 6. 下一步
 
-- F4b：Mock 目录约定与开发期自动重载；
+- F4b：Mock 目录约定与开发期自动重载，已由 [F4b](75-f4b-mock.md) 交付；
 - F4c：配置/别名、样式/资源与微生成器；
 - U20 后续：headScripts/scripts（需安全策略）、每路由 head 与多后端 adapter。

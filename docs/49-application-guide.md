@@ -532,6 +532,32 @@ plugins: [{
 
 示例：`pnpm cormi dev --root examples/html`，默认监听 `/html/`。
 
+### 4.14 Mock 目录约定
+
+开发期需要文件化 Mock 时，显式加入 `mockPlugin` 与 DevApi Vite bridge：
+
+```ts
+import { mockPlugin } from '@cormijs/plugin-dev-api';
+import { devApiVitePlugin } from '@cormijs/plugin-dev-api/vite';
+
+plugins: [
+  { id: 'dev-api', plugin: devApiVitePlugin },
+  { id: 'mock', plugin: mockPlugin, options: { intervalMs: 200 } },
+]
+```
+
+```ts
+// mock/users.ts
+export default {
+  'GET /api/users': { body: { users: ['Ada'] } },
+  'POST /api/echo': request => ({ status: 201, body: request.body }),
+};
+```
+
+默认扫描 `mock/**/*.{ts,tsx,js,jsx}`，路径可带 `/api` prefix（注册时去掉）；值可以是响应对象或返回响应对象的函数。开发期按文件 mtime/size 轮询重载，新文件无效时保留旧规则；生产预览不提供 Mock。Mock 是可执行开发代码，不是安全沙箱。完整语义见 [F4b Mock](75-f4b-mock.md)。
+
+示例：`pnpm cormi dev --root examples/mock`，默认监听 `/mock/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

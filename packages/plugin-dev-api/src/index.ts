@@ -1,6 +1,7 @@
 import { CormiError, deadline } from '@cormijs/core';
 import { request as httpRequest, validateHeaderName, validateHeaderValue, type IncomingMessage, type ServerResponse, type OutgoingHttpHeaders } from 'node:http';
 import { request as httpsRequest } from 'node:https';
+export { mockPlugin, type MockPluginOptions } from './mock.js';
 
 export interface MockRequest {
   readonly method: string;

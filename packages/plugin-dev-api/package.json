@@ -2,7 +2,7 @@
   "name":"@cormijs/plugin-dev-api","version":"0.0.1","private":true,"type":"module",
   "exports":{".":{"types":"./dist/index.d.ts","import":"./dist/index.js"},"./vite":{"types":"./dist/vite.d.ts","import":"./dist/vite.js"},"./service":{"types":"./dist/service.d.ts","import":"./dist/service.js"}},
   "files":["dist","src"],"engines":{"node":">=22.14.0"},
-  "dependencies":{"@cormijs/core":"workspace:*","cordis":"4.0.0-rc.11"},
+  "dependencies":{"@cormijs/core":"workspace:*","cordis":"4.0.0-rc.11","esbuild":"0.28.2"},
   "peerDependencies":{"@cormijs/plugin-vite":"workspace:*"},
   "peerDependenciesMeta":{"@cormijs/plugin-vite":{"optional":true}},
   "devDependencies":{"@cormijs/plugin-vite":"workspace:*"}

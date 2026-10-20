@@ -19,6 +19,7 @@ import { writeLocaleFixture, verifyLocalePage } from './locale-fixture.js';
 import { writeAccessFixture, verifyAccessPage } from './access-fixture.js';
 import { writeMenuFixture, verifyMenuPage } from './menu-fixture.js';
 import { writeHtmlFixture, verifyHtmlPage } from './html-fixture.js';
+import { writeMockFixture, verifyMockPage } from './mock-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -642,6 +643,23 @@ const bad:HtmlPluginOptions={metas:[{name:'description'}]};
     await command('html-build',htmlConsumer,'build');
     await withServer(htmlConsumer,'preview',async url=>{await verifyHtmlPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'html-preview.png')});});
     report.stages.push({label:'installed-html-head-dev-build-and-static-preview',options:'title/lang/meta/link/favicon',previewRegenerated:false});
+
+    const mockConsumer=await create('mock','react');await writeMockFixture(mockConsumer);
+    const mockManifest=consumerManifest(kit,'react');
+    mockManifest.dependencies['@cormijs/plugin-dev-api']=mockManifest.pnpm.overrides['@cormijs/plugin-dev-api']!;
+    await writeFile(join(mockConsumer,'package.json'),JSON.stringify(mockManifest,null,2));
+    await install('mock-install',mockConsumer);await auditLinks(mockConsumer);
+    await command('mock-typecheck',mockConsumer,'typecheck');
+    await writeFile(join(mockConsumer,'types.mts'),`import {mockPlugin,type MockPluginOptions} from '@cormijs/plugin-dev-api';import {devApiVitePlugin} from '@cormijs/plugin-dev-api/vite';
+const options:MockPluginOptions={id:'consumer:mock',intervalMs:200,prefix:'/api'};void [mockPlugin,devApiVitePlugin,options];
+// @ts-expect-error interval must be numeric
+const bad:MockPluginOptions={intervalMs:'fast'};
+`);
+    await execute('mock-public-types',mockConsumer,process.execPath,typeArguments);
+    await withServer(mockConsumer,'dev',async url=>{await verifyMockPage(page,url);assert.deepEqual(errors,[]);});
+    await command('mock-build',mockConsumer,'build');
+    await withServer(mockConsumer,'preview',async url=>{await page.goto(url);await page.getByRole('heading',{name:'Mock home',exact:true}).waitFor();assert.equal(await page.locator('[data-dev]').innerText(),'false');assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'mock-preview.png')});});
+    report.stages.push({label:'installed-mock-convention-dev-build-and-preview',mockDirectory:'mock',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

@@ -1,0 +1,8 @@
+:root { color-scheme: light; font-family: ui-sans-serif, system-ui, sans-serif; background: #f5f3ef; color: #2b2723; }
+body { margin: 0; }
+.shell { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; }
+.eyebrow { letter-spacing: .18em; font-size: 12px; color: #7b5a34; }
+h1 { margin: 8px 0 20px; font-size: clamp(32px, 6vw, 52px); }
+p { max-width: 680px; line-height: 1.8; color: #675f57; }
+code { font-family: ui-monospace, monospace; background: #eee7dd; padding: 1px 5px; border-radius: 4px; }
+button { margin-top: 16px; padding: 8px 14px; border: 1px solid #7b5a34; border-radius: 8px; background: transparent; color: #7b5a34; }

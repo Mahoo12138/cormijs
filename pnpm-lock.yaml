@@ -135,6 +135,9 @@ importers:
       cordis:
         specifier: 4.0.0-rc.11
         version: 4.0.0-rc.11(patch_hash=11a745abd66488d5cba00b7388beebaf8a70bc0fdd6e998608e511f77358228e)
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
     devDependencies:
       '@cormijs/plugin-vite':
         specifier: workspace:*

@@ -28,6 +28,8 @@ export default defineConfig({
 
 当前 preset 导出的是 `definePreset` 对象，不是需要调用的工厂。应用 `index.html` 保留用户所有权，包含挂载点与 `<script type="module" src="/.cormi/app.tsx"></script>`。默认 mountId 为 root；app.mountId 可覆盖。框架不自动改写用户 HTML。F4a 起，显式启用的 `htmlPlugin` 可在 Vite 桥中按配置替换/注入 title、lang、meta、link 与 favicon；应用仍拥有 index.html，未启用时不做任何改写。详见 [F4a HTML head](74-f4a-html-head.md)。
 
+F4b 起，显式启用的 `mockPlugin` 发现 `mock/**` 的 default-export `METHOD /api/path` 映射，注册到既有 DevApiService 并在开发期重载；`ProjectRuntime` 向文件约定插件提供只读 `projectRoot`。Mock 不进入生产预览或安全沙箱。详见 [F4b Mock](75-f4b-mock.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

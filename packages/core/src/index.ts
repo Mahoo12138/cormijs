@@ -47,6 +47,8 @@ export function assertActive(ctx: Context): void {
 }
 
 /** Only owns host admission/readiness/teardown, never application or bundler policy. */
+export interface ProjectRoot { readonly root: string }
+declare module 'cordis' { interface Context { projectRoot: ProjectRoot } }
 export class ProjectRuntime {
   readonly ctx = new Context();
   readonly diagnostics: Message[] = [];
@@ -54,8 +56,12 @@ export class ProjectRuntime {
   private phase: 'open' | 'closing' | 'closed' = 'open';
   private disposal?: Promise<void>;
 
-  constructor(private readonly timeoutMs = 3000) {
+  constructor(private readonly timeoutMs = 3000, root?: string) {
     if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new RangeError('timeoutMs must be positive');
+    if (root !== undefined) {
+      if (typeof root !== 'string' || !root) throw new TypeError('Project root must be a non-empty string.');
+      this.ctx.provide('projectRoot', Object.freeze({ root }));
+    }
     this.ctx.logger.exporter({
       export: message => {
         if (message.type === 'error') this.diagnostics.push(message);

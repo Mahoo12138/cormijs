@@ -75,7 +75,7 @@ async function run(message: StartMessage): Promise<void> {
   lifetime.signal.throwIfAborted();
   const config = normalizeConfig(raw, message.root);
   send({ version: 1, type: 'watch', files: [...config.watch], fingerprint: await fingerprint(config.watch) });
-  host = new ProjectRuntime(timeout);
+  host = new ProjectRuntime(timeout, message.root);
   // Native execution composition owns application activation and observation policy.
   execution = executionSession(host, config, message.command, {
     root: message.root, mode: message.mode, options: config.app, signal: lifetime.signal,
