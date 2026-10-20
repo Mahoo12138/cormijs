@@ -20,6 +20,7 @@ import { writeAccessFixture, verifyAccessPage } from './access-fixture.js';
 import { writeMenuFixture, verifyMenuPage } from './menu-fixture.js';
 import { writeHtmlFixture, verifyHtmlPage } from './html-fixture.js';
 import { writeMockFixture, verifyMockPage } from './mock-fixture.js';
+import { writeAliasFixture, verifyAliasPage } from './alias-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -660,6 +661,24 @@ const bad:MockPluginOptions={intervalMs:'fast'};
     await command('mock-build',mockConsumer,'build');
     await withServer(mockConsumer,'preview',async url=>{await page.goto(url);await page.getByRole('heading',{name:'Mock home',exact:true}).waitFor();assert.equal(await page.locator('[data-dev]').innerText(),'false');assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'mock-preview.png')});});
     report.stages.push({label:'installed-mock-convention-dev-build-and-preview',mockDirectory:'mock',previewRegenerated:false});
+
+    const aliasConsumer=await create('alias','react');await writeAliasFixture(aliasConsumer);
+    const aliasManifest=consumerManifest(kit,'react');
+    aliasManifest.dependencies['@cormijs/plugin-react-vite']=aliasManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
+    await writeFile(join(aliasConsumer,'package.json'),JSON.stringify(aliasManifest,null,2));
+    await install('alias-install',aliasConsumer);await auditLinks(aliasConsumer);
+    await command('alias-typecheck',aliasConsumer,'typecheck');
+    await writeFile(join(aliasConsumer,'types.mts'),`import {aliasPlugin,resolveAliases,type AliasPluginOptions,type ViteAlias} from '@cormijs/plugin-react-vite';
+const options:AliasPluginOptions={aliases:{'@':'src'}};
+const resolved:readonly ViteAlias[]=resolveAliases(process.cwd(),{'@':'src'});void [aliasPlugin,options,resolved];
+// @ts-expect-error alias replacement must be a string
+const bad:AliasPluginOptions={aliases:{'@':1}};
+`);
+    await execute('alias-public-types',aliasConsumer,process.execPath,typeArguments);
+    await withServer(aliasConsumer,'dev',async url=>{await verifyAliasPage(page,url);assert.deepEqual(errors,[]);});
+    await command('alias-build',aliasConsumer,'build');
+    await withServer(aliasConsumer,'preview',async url=>{await verifyAliasPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'alias-preview.png')});});
+    report.stages.push({label:'installed-alias-resolution-dev-build-and-static-preview',aliases:{'@':'src','@shared':'src/shared'},previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

@@ -48,7 +48,7 @@
 | U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a）：localePlugin 提供内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage；消息目录、复数/日期与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
 | U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；req/res 兼容与统一代理配置待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
-| U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有 cormi.config/mode/公开env/派生；缺可组合便捷配置和公共别名 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
+| U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c）：aliasPlugin 支持项目内相对别名映射；define 与 @/@@ 内置别名待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
 | U20 | HTML title/metas/links/headScripts/scripts/favicon | 部分已有（F4a）：可选 htmlPlugin 注入 title/lang/meta/link/favicon；headScripts/scripts 与每路由 head 待后续 | HTML/head 插件 | F4 |
 | U21 | helmet、页面标题/SEO 元数据 | 待实现官方能力；手改 document.title 不算 | head 客户端插件 | F3/F4 |
 | U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有 CSS Modules 与资产；缺完整约定和预处理集成 | 样式/资源插件 + backend adapter | F4 |
@@ -129,6 +129,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F4a 状态（2026-10-20）：** U20 的配置式 HTML head 已交付：可选 `htmlPlugin` 在 React–Vite 桥中替换/注入 title、lang、favicon、meta 与 link，值经过转义和边界校验，index.html 仍归应用所有。headScripts/scripts、每路由 head 与非 Vite 后端仍待后续。用法、差异与验证见 [F4a HTML head](74-f4a-html-head.md)。
 
 **F4b 状态（2026-10-20）：** U18 的 Mock 约定已交付：显式 `mockPlugin` 扫描 `mock/**`，将 default-export 的 `METHOD /api/path` 映射注册到既有 DevApiService，并在开发期轮询重载；新增只读 `projectRoot` 服务供文件约定插件使用。生产预览不提供 Mock，req/res 兼容与代理统一待后续。用法、差异与验证见 [F4b Mock](75-f4b-mock.md)。
+
+**F4c 状态（2026-10-20）：** U19 的别名部分已交付：`aliasPlugin` 接受项目内相对路径映射并合并进 Vite 解析器，TypeScript paths 由应用显式对齐。define、`@`/`@@` 内置别名与样式/生成器仍待后续。用法、差异与验证见 [F4c alias](76-f4c-alias.md)。
 
 ### F3：权限、布局、菜单和国际化
 

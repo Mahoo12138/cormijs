@@ -558,6 +558,25 @@ export default {
 
 示例：`pnpm cormi dev --root examples/mock`，默认监听 `/mock/`。
 
+### 4.15 路径别名
+
+需要 `@`/`@shared` 之类的导入别名时，显式加入 `aliasPlugin`，并在 tsconfig 中对齐 TypeScript paths：
+
+```ts
+import { aliasPlugin } from '@cormijs/plugin-react-vite';
+
+plugins: [{ id: 'alias', plugin: aliasPlugin, options: { aliases: { '@': 'src', '@shared': 'src/shared' } } }]
+```
+
+```jsonc
+// tsconfig.json
+{ "compilerOptions": { "baseUrl": ".", "paths": { "@/*": ["./src/*"], "@shared/*": ["./src/shared/*"] } } }
+```
+
+别名值必须是项目内相对路径；映射在 dev 与 build 中同样生效，插件不修改 tsconfig。完整规则见 [F4c alias](76-f4c-alias.md)。
+
+示例：`pnpm cormi dev --root examples/alias`，默认监听 `/alias/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

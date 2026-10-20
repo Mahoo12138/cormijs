@@ -30,6 +30,8 @@ export default defineConfig({
 
 F4b 起，显式启用的 `mockPlugin` 发现 `mock/**` 的 default-export `METHOD /api/path` 映射，注册到既有 DevApiService 并在开发期重载；`ProjectRuntime` 向文件约定插件提供只读 `projectRoot`。Mock 不进入生产预览或安全沙箱。详见 [F4b Mock](75-f4b-mock.md)。
 
+F4c 起，显式启用的 `aliasPlugin` 把项目内相对别名映射合并进 Vite 解析器（追加而不覆盖）；TypeScript paths 仍由应用 tsconfig 显式对齐。详见 [F4c alias](76-f4c-alias.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic
