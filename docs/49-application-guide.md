@@ -622,6 +622,22 @@ plugins: [{ id: 'styles', plugin: globalStylePlugin, options: { id: 'app:styles'
 
 示例：`pnpm cormi dev --root examples/global-style`，默认监听 `/global-style/`。
 
+### 4.18 `src/access.ts` 权限约定
+
+启用 `accessPlugin` 后，权限函数可以直接放在约定文件里，`src/app.tsx` 只负责初始状态：
+
+```ts
+// src/access.ts
+export default function access(state: unknown) {
+  const user = state as { role?: string } | undefined;
+  return { canAdmin: user?.role === 'admin', canRead: user !== undefined };
+}
+```
+
+约定文件由 `accessPlugin`（默认候选 `src/access.ts`、`src/access.tsx`，可用 `options.files` 覆盖）发现，生成入口以 `applyAccessConvention(resolveAppConfig(...), accessConvention.default)` 合并；如果 `src/app.tsx` 显式提供了 `access`，配置值优先。工厂必须是同步函数，`useAccess()` 返回布尔映射，路由级 `access` 与 `accessForbidden` 的用法不变。规则与边界见 [F4g access 约定](80-f4g-access-convention.md)。
+
+示例：`pnpm cormi dev --root examples/access-convention`，默认监听 `/access-convention/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

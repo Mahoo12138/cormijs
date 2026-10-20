@@ -38,6 +38,8 @@ F4e 起，`htmlPlugin` 还支持 `headScripts`/`scripts`：条目可为 URL 字�
 
 F4f 起，显式启用的 `globalStylePlugin` 发现 `src/global.{css,scss,sass,less}`，由生成入口按 `ctx.react.styles` 的 hook 顺序副作用导入；候选文件变化会触发 dev 重生成。预处理器交给 Vite，cormi 不内置。详见 [F4f 全局样式](79-f4f-global-styles.md)。
 
+F4g 起，`accessPlugin` 可通过 `ctx.react.access` 发现 `src/access.{ts,tsx}` 约定：生成入口以 `applyAccessConvention(resolveAppConfig(...), accessConvention.default)` 合并权限函数，`src/app.tsx` 显式 `access` 优先，候选文件变化参与 dev 观测。详见 [F4g access 约定](80-f4g-access-convention.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

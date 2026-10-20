@@ -73,7 +73,7 @@ Umi 在 `packages/preset-umi/src/features/appData/appData.ts:198` 用 `expandCSS
 
 ## 6. 下一步
 
-- U22 剩余：CSS Modules 与静态资源的公开约定、可选预处理器集成说明；
+- U22 剩余：CSS Modules 与静态资源的公开约定、可选预处理器集成说明；F4g 已交付 `src/access.ts` 权限约定，见 [F4g access 约定](80-f4g-access-convention.md)；
 - U23：Tailwind/UnoCSS/styled-components adapter；U24：图标方案；
 - F4 后续：微生成器（U27）、工程命令（U28）；
 - F5/F6 按路线继续（client loader、预取、SSR、生态集成）。

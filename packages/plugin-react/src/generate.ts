@@ -33,13 +33,13 @@ function styleSpecifier(root: string, file: string): string {
 /** Static imports and JSON string literals only; no user-provided expression interpolation. */
 export async function generateApplication(root: string, routes: readonly RouteRecord[], runtimes: readonly RuntimeContribution[],
   base: string, mountId: string, serverOnlyFiles: readonly string[] = [], strict = false, appRuntime?: AppRuntimePlan, loading?: ModuleRef,
-  history: HistoryType = 'browser', models: readonly ModelPlan[] = [], styles: readonly GlobalStylePlan[] = []): Promise<string> {
+  history: HistoryType = 'browser', models: readonly ModelPlan[] = [], styles: readonly GlobalStylePlan[] = [], access?: ModuleRef): Promise<string> {
   if (typeof strict !== 'boolean') throw new CormiError('CONFIG_INVALID', 'strict must be boolean.');
   routes = validateRoutes(routes); runtimes = runtimeContributions(runtimes);
   const forbidden = new Set(serverOnlyFiles);
   const appModule = appRuntime?.module ? await clientSpecifier(root, appRuntime.module, forbidden) : undefined;
   const appValue = appRuntime?.module?.exportName === '*' ? 'applicationConfig' : `{default:applicationConfig[${JSON.stringify(appRuntime?.module?.exportName)}]}`;
-  const appOption = appModule ? `,appConfig:resolveAppConfig(${appValue},${JSON.stringify(appRuntime?.keys ?? [])})` : '';
+
   const loadingModule = loading ? await clientSpecifier(root, loading, forbidden) : undefined;
   const loadingOption = loadingModule ? `,loading:applicationLoading[${JSON.stringify(loading!.exportName)}]` : '';
   const historyOption = history === 'browser' ? '' : `,history:${JSON.stringify(history)}`;
@@ -73,9 +73,14 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   const modelEntries = models.map((model, index) => `{namespace:${JSON.stringify(model.namespace)},model:model${index}[${JSON.stringify(model.module.exportName)}]}`);
   const modelsOption = modelEntries.length ? ',models' : '';
   const styleImports = styles.map(style => `import ${JSON.stringify(styleSpecifier(root, style.file))};`);
+  const accessModule = access ? await clientSpecifier(root, access, forbidden) : undefined;
+  const configValue = appModule ? `applyAccessConvention(resolveAppConfig(${appValue},${JSON.stringify(appRuntime?.keys ?? [])}),accessConvention.default)` : '';
+  const appOption = accessModule ? (appModule ? `,appConfig:${configValue}`
+    : `,appConfig:applyAccessConvention(resolveAppConfig({},[]),accessConvention.default)`) : appModule ? `,appConfig:resolveAppConfig(${appValue},${JSON.stringify(appRuntime?.keys ?? [])})` : '';
   return [
     ...styleImports,
-    `import { ${hasRedirects ? 'RedirectRoute, ' : ''}${hasAccess ? 'AccessRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule ? ', resolveAppConfig' : ''} } from '@cormijs/runtime';`,
+    ...(accessModule ? [`import * as accessConvention from ${JSON.stringify(accessModule)};`] : []),
+    `import { ${hasRedirects ? 'RedirectRoute, ' : ''}${hasAccess ? 'AccessRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule || accessModule ? ', resolveAppConfig' : ''}${accessModule ? ', applyAccessConvention' : ''} } from '@cormijs/runtime';`,
     ...(appModule ? [`import * as applicationConfig from ${JSON.stringify(appModule)};`] : []),
     ...(loadingModule ? [`import * as applicationLoading from ${JSON.stringify(loadingModule)};`] : []),
     ...modelModules.map((path, i) => `import * as model${i} from ${JSON.stringify(path)};`),

@@ -1,0 +1,11 @@
+:root { color-scheme: light; font-family: ui-sans-serif, system-ui, sans-serif; background: #f4f2f7; color: #23202b; }
+body { margin: 0; }
+.shell { max-width: 720px; margin: 0 auto; padding: 48px 24px 72px; }
+.eyebrow { letter-spacing: .18em; font-size: 12px; color: #6c4c93; }
+h1 { margin: 8px 0 20px; font-size: clamp(30px, 6vw, 48px); }
+p { line-height: 1.8; color: #5c5668; }
+code { font-family: ui-monospace, monospace; background: #e8e3f1; padding: 1px 5px; border-radius: 4px; }
+[data-admin-only] { background: #e3f4e8; border: 1px solid #b7dfc4; padding: 12px; border-radius: 8px; }
+[data-fallback] { background: #fbeaea; border: 1px solid #efc4c4; padding: 12px; border-radius: 8px; }
+.actions { display: flex; gap: 12px; margin-top: 20px; }
+button { padding: 8px 14px; border-radius: 8px; border: 1px solid #cbbdd9; background: #fff; cursor: pointer; }

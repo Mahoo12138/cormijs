@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, type ComponentType, type ReactNode } from 'react';
 import { Outlet } from 'react-router';
-import type { RuntimeConfig } from './app-config.js';
+import type { AccessConfig, RuntimeConfig } from './app-config.js';
 import { useInitialState } from './initial-state.js';
 
 export type Access = Readonly<Record<string, boolean>>;
@@ -21,6 +21,13 @@ export function AccessProvider({ appConfig, children }: { readonly appConfig: Re
     return Object.freeze({ ...value });
   }, [evaluate, initial.data]);
   return <ForbiddenContext.Provider value={forbidden}><AccessContext.Provider value={access}>{children}</AccessContext.Provider></ForbiddenContext.Provider>;
+}
+
+/** `src/access.ts` fills the access factory only when the app configuration module does not provide one. */
+export function applyAccessConvention(config: Readonly<RuntimeConfig>, factory: unknown): Readonly<RuntimeConfig> {
+  if (config.access !== undefined) return config;
+  if (typeof factory !== 'function') throw new TypeError('ACCESS_INVALID: the access convention module must default-export a function');
+  return Object.freeze({ ...config, access: factory as AccessConfig });
 }
 
 export function useAccess(): Access {

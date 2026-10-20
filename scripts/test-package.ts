@@ -23,6 +23,7 @@ import { writeMockFixture, verifyMockPage } from './mock-fixture.js';
 import { writeAliasFixture, verifyAliasPage } from './alias-fixture.js';
 import { writeDefineFixture, verifyDefinePage } from './define-fixture.js';
 import { writeGlobalStyleFixture, verifyGlobalStylePage } from './global-style-fixture.js';
+import { writeAccessConventionFixture, verifyAccessConventionPage } from './access-convention-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -719,6 +720,25 @@ const bad:GlobalStylePluginOptions={files:1};
     await command('global-style-build',styleConsumer,'build');
     await withServer(styleConsumer,'preview',async url=>{await verifyGlobalStylePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'global-style-preview.png')});});
     report.stages.push({label:'installed-global-style-convention-dev-build-and-static-preview',files:['src/global.css'],previewRegenerated:false});
+
+    const accessConvConsumer=await create('access-convention','react');await writeAccessConventionFixture(accessConvConsumer);
+    const accessConvManifest=consumerManifest(kit,'react');
+    accessConvManifest.dependencies['@cormijs/plugin-react']=accessConvManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(accessConvConsumer,'package.json'),JSON.stringify(accessConvManifest,null,2));
+    await install('access-convention-install',accessConvConsumer);await auditLinks(accessConvConsumer);
+    await command('access-convention-typecheck',accessConvConsumer,'typecheck');
+    await writeFile(join(accessConvConsumer,'types.mts'),`import {accessPlugin,accessContributions,resolveAccessPlan,DEFAULT_ACCESS_FILES,type AccessPluginOptions,type AccessContribution} from '@cormijs/plugin-react';
+const options:AccessPluginOptions={id:'app:access',files:['src/access.ts']};
+const contributions:readonly AccessContribution[]=accessContributions([{id:'app:access',files:DEFAULT_ACCESS_FILES}]);
+void [accessPlugin,options,contributions,resolveAccessPlan(process.cwd(),contributions)];
+// @ts-expect-error access files must be a string array
+const bad:AccessPluginOptions={files:1};
+`);
+    await execute('access-convention-public-types',accessConvConsumer,process.execPath,typeArguments);
+    await withServer(accessConvConsumer,'dev',async url=>{await verifyAccessConventionPage(page,url);assert.deepEqual(errors,[]);});
+    await command('access-convention-build',accessConvConsumer,'build');
+    await withServer(accessConvConsumer,'preview',async url=>{await verifyAccessConventionPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'access-convention-preview.png')});});
+    report.stages.push({label:'installed-access-convention-dev-build-and-static-preview',files:['src/access.ts','src/access.tsx'],previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;
