@@ -25,6 +25,11 @@ export function useAccess(): Access {
   return value;
 }
 
+/** Optional reader for features such as menus that can work without accessPlugin. */
+export function useAccessOptional(): Access | null {
+  return useContext(AccessContext);
+}
+
 export function Access({ accessible, fallback = null, children }: {
   readonly accessible: boolean; readonly fallback?: ReactNode; readonly children?: ReactNode;
 }) {
