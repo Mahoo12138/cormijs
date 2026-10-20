@@ -144,7 +144,7 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 
 **F4i 状态（2026-10-20）：** U15 的折叠与目录化标题已交付：`menuPlugin` 的 `collapse` 选项经 RuntimeContribution options 传入 `MenuProvider`，`useMenuCollapse()` 提供 `{collapsed,setCollapsed,toggle}` 并可选 `localStorage` 持久化；菜单与面包屑标题按 `meta.locale` → `meta.title` → `meta.name` 解析，`IntlApi.peek` 保证未命中时不显示原始 key。ProLayout/Antd adapter、图标/徽章与布局插槽仍待后续。用法、差异与验证见 [F4i 菜单折叠与标题](82-f4i-menu-collapse.md)。
 
-**F5a 状态（2026-10-20）：** U13 的核心已交付：`ConfigRoute.clientLoader` 与扁平 IR 校验导出名，`generateApplication` 让该路由一次性解析页面模块并用 `clientLoaderOf` 把同名导出交给 React Router loader，深链接/重载/前进后退都会取数；`@cormijs/runtime` 新增 `useClientLoaderData`、`useRouteLoaderDataFor`、`useClientLoaderError`。约定式路由识别、loader 失败的边界呈现契约（本切片实测该呈现未通过并已回退相应改动）、SSR 数据注水与预取（U31）仍待后续。用法、差异与验证见 [F5a 路由 client loader](83-f5a-client-loader.md)。
+**F5a 状态（2026-10-20）：** U13 的核心已交付：`ConfigRoute.clientLoader` 与扁平 IR 校验导出名，`generateApplication` 让该路由一次性解析页面模块并用 `clientLoaderOf` 把同名导出交给 React Router loader，深链接/重载/前进后退都会取数；`@cormijs/runtime` 新增 `useClientLoaderData`、`useRouteLoaderDataFor`、`useClientLoaderError`。约定式路由识别、loader 失败的边界呈现契约（该呈现实测未挂载，原因尚未定位，故回退相关改动）、SSR 数据注水与预取（U31）仍待后续。用法、差异与验证见 [F5a 路由 client loader](83-f5a-client-loader.md)。
 
 ### F3：权限、布局、菜单和国际化
 

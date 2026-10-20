@@ -1,26 +1,13 @@
 {
   "format": "cormi:f5a-validation:1",
-  "verifiedAt": "2026-10-20T17:41:14.368Z",
-  "base": "49255c86c49ccb7e79f221991cd46c63570b1d31",
+  "verifiedAt": "2026-10-20T17:43:20.391Z",
+  "base": "30e556d7e87384fef748a48441e17a4ea41c2a9b",
   "branch": "main",
   "worktree": {
     "state": "uncommitted",
     "changedFiles": [
-      "M  README.md",
-      "A  artifacts/f5a-validation.json",
-      "M  docs/08-routes-and-react.md",
-      " M docs/49-application-guide.md",
-      "M  docs/59-umi-feature-roadmap.md",
-      "M  docs/82-f4i-menu-collapse.md",
-      "A  docs/83-f5a-client-loader.md",
-      "M  packages/plugin-react/src/generate.ts",
-      "M  packages/routes/src/index.ts",
-      "A  packages/runtime/src/client-loader.tsx",
-      "M  packages/runtime/src/index.tsx",
-      "A  scripts/client-loader-fixture.ts",
-      "M  scripts/test-package.ts",
-      "A  tests/browser/client-loader.test.ts",
-      "A  tests/client-loader.test.ts"
+      "M docs/59-umi-feature-roadmap.md",
+      " M docs/83-f5a-client-loader.md"
     ]
   },
   "environment": {
@@ -599,7 +586,7 @@
     "README.md": "5d8c939a55cf18acdfe98c12056970a5862785ea82a974bfe7a3498b28f373f6",
     "docs/08-routes-and-react.md": "d0fc2d783ddfbfe1511991a8cbd853528851125f15747a247ab6ef8b7d07a591",
     "docs/49-application-guide.md": "555274cc725037f3ed81f6ede49e47a43a10ac14d5b46e162c91933d52ff36ba",
-    "docs/59-umi-feature-roadmap.md": "e8a66d15f58d9037577658836c61df054af6a02f986aa117340abcda9d24be83",
+    "docs/59-umi-feature-roadmap.md": "608dde97862bd4a2c52013b804db8cb3251539377b08e625adb37e27131c9152",
     "docs/60-f1a-app-runtime.md": "8c8ef18afce74c96d21c0cfeb57acb41aa843ca78514d81bc37e41f8138cb1d3",
     "docs/61-f1b-config-routes.md": "674c8679c7ff7c25b0f7748dfcb3674dd71df1a7d3fc46ddeafda5d2b3e092f8",
     "docs/62-f1c-redirects-and-wrappers.md": "6465adb6d14aa8e3c9d9c9898d9279d83499028be9660bf33c3161755098815a",
@@ -623,7 +610,7 @@
     "docs/80-f4g-access-convention.md": "6f135b12e3b3cbb2150691d638cfc679a46bb1779e8b5f1f673b567a186fee60",
     "docs/81-f4h-locale-catalogs.md": "86d13f3c6303b107ac14b2fbf30a20c6f04a2ee1125900f3fe0bd2b50b3d34b6",
     "docs/82-f4i-menu-collapse.md": "798cc91016e7dec45ad046637ac0065a8fe603ed68910292f6bbc48c998c9606",
-    "docs/83-f5a-client-loader.md": "d71a6c31021b9387f89d898ca80c7f7adba543794cc655e232bb2004980624ea"
+    "docs/83-f5a-client-loader.md": "2c2c53f722bf0912dbc6ab880927257b5ae317f0fea9be915bfe6c586bde4c3d"
   },
   "visual": [
     {
