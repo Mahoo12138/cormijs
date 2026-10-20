@@ -1,5 +1,13 @@
 # cormi 工作约束
 
+## 当前优先级：先吸收 Umi 应用功能
+
+2026-10-20 用户明确调整：暂停构建中断恢复等外围深化，以 Umi 4 / Max 的完整应用开发能力清单为主线，利用 Cordis 实现。当前路线见 docs/59-umi-feature-roadmap.md；它优先于历史阶段记录中的“下一步”和早期 MVP 非目标。不要完成一项后又自动转回锁恢复、诊断扩张或通用 bootstrap 重构。
+
+每个开发切片必须对应具体 Umi 功能、明确 cormi 缺口和应用使用方式；优先运行时约定、路由易用性、model/初始状态、request/useRequest、access、布局/菜单、locale，再推进其他工程与渲染能力。SSR/MPA/微前端等纳入后续功能队列，不长期以早期 MVP 排除；吸收能力不等于照搬旧后端内部机制或承诺 Umi 插件二进制兼容。
+
+已有取消、退出、输入一致性和产物保护不能删除；修复本切片真实暴露的阻塞缺陷，执行相应复杂回归，但不把无限扩大可靠性矩阵变成功能开发的前置项目。文档调整不伪装成新增功能或重跑了全部测试。
+
 ## 插件优先是持续审查项
 
 框架名和 CLI 使用 cormi；cormijs 只用于包分发名。产品能力必须说明：契约在哪里、哪个原生 Cordis 插件提供、消费者声明了什么 inject、如何通过组合替换、退出时谁拥有和释放资源。默认 React/Vite 由 preset 组合，不让 core 或 launcher 获得具体渲染器、构建器和业务知识。
@@ -10,7 +18,7 @@
 
 ## 参考与任务范围
 
-优先按需读取 references/deepseek-harness、references/koishi、references/koishi-webui、references/satori 和 cordis 的固定源码。记录实际 commit、读取位置和运行版本差异；DeepSeek Harness 的 vendored Cordis 不能等同于 cormi 的 npm Cordis。不要因为上游自称插件化就照搬产品功能、运行时补丁或全量依赖。
+优先按需读取 references/deepseek-harness、references/koishi、references/koishi-webui、references/satori、references/cordis 和 references/umi 的固定源码。记录实际 commit、读取位置和运行版本差异；DeepSeek Harness 的 vendored Cordis 不能等同于 cormi 的 npm Cordis。不要因为上游自称插件化就照搬产品功能、运行时补丁或全量依赖。
 
 Admin 是 cormi 功能验收负载，不扩展其 UI、CRUD、鉴权或商业产品。Windows 目前挂起。未明确授权不推送、发布、部署，不停止旧试用应用或无关服务。
 

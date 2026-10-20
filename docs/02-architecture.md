@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.27。修订轮次：P16（TypeScript 项目引用与可替换检查器）。
+版本：Draft 0.28。2026-10-20 路线修订：优先吸收 Umi 4 / Max 应用功能；当前产品实现仍截至 P16。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -50,6 +50,8 @@ P15 将 worker 的命令/失败诊断选择拆到原生 workerExecution 提供�
 
 P16 在已有 plugin-typescript 中拆分原生 typechecker 服务、命令消费者和兼容组合；solution/project references 使用官方 SolutionBuilder 与调用期内存声明，保留各项目编译选项和声明依赖边界，不向 core/launcher/Web 添加 TS 分支。生成根只归属唯一明确的项目，歧义通过领域插件 options 解决；不合并全部源码、不借用旧磁盘声明冒充最新检查。prepare 仍拥有 .cormi，TypeScript 本身不写业务输出或持久缓存。契约与边界见 [项目引用](57-typescript-projects.md)，实际验证见 [P16](58-p16-results.md)。
 
+**当前优先级覆盖说明：** 用户在 P16 后明确暂停构建恢复等外围深化，转向 Umi 4 / Max 功能吸收。后续以 [功能路线](59-umi-feature-roadmap.md) 为准；历史段落保留当时结论，不再按其中旧的“下一步”自动推进。保留可靠性基线，但不让继续拆启动抽象取代业务开发能力。
+
 ## 1. 应该做一个什么框架
 
 建议把 Cormi 定位为：**以 Cordis 作为最小插件宿主，由可替换的应用编排插件装配应用，由默认 React + Vite preset 提供开箱即用体验的应用框架。** 默认技术栈属于产品组合，不属于内核硬依赖。
@@ -76,7 +78,7 @@ P16 在已有 plugin-typescript 中拆分原生 typechecker 服务、命令消�
 
 React Router 的 Data Mode 使用 `createBrowserRouter` 与 `RouterProvider`；Vite 提供 `createServer / build / preview` 等 JS 接口。[官方路由说明](https://reactrouter.com/start/data/installation)、[Vite JS API](https://vite.dev/guide/api-javascript.html)。这些是集成基础，不意味着 Cormi 已完成适配。
 
-MVP 不包含 SSR、SSG、RSC、微前端、MFSU、多个 bundler、Vue preset、远程插件市场、Umi API 兼容层或任意插件源码的进程内热替换。未来是否加入，取决于真实使用场景，而不是把 Umi 的功能列表全部复制成待办。
+2026-10-20 起，完整功能规划纳入 Umi / Max 的路由、运行时、数据流、请求、权限、布局、国际化、工程工具，以及 SSR、静态导出、MPA、微前端和构建优化等能力，按应用价值与依赖顺序逐批吸收；不再以早期 MVP 非目标长期排除后几类。Umi 专属后端机制按等价目标提供可选适配，不能在 Vite 上伪造同名兼容；RSC、远程插件市场、任意 Node 源码进程内热替换等不因本次广义目标自动成为近期前置任务。每项区别功能等价、接口差异与真正未实现，详见新矩阵。
 
 本次 Cordis 源码为 `4.0.0-rc.11`，不能把 RC 当作稳定性承诺。P0 必须选择可复现的精确依赖版本或固定源码构建产物，记录锁文件，不直接使用漂移的 `latest` 或跨 RC 范围。Node 候选基线为 22.12 及以上的受支持版本，但最终 engines 与测试矩阵必须按实际锁定的 Vite、React Router、Cordis 版本交集确定，不能沿用 Umi 根包中的旧 Node 下限。[Vite 环境要求](https://vite.dev/guide/)
 

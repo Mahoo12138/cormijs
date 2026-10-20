@@ -1,0 +1,1124 @@
+{
+  "format": "cormi:umi-feature-inventory:1",
+  "createdAt": "2026-10-20T01:49:18.337677+00:00",
+  "kind": "planning-and-static-source-inventory",
+  "productCodeChanged": false,
+  "runtimeTestsRunThisTurn": false,
+  "cormiBaseline": "727b6b978291f2c23491c22b3bed29b0b45aa8ec",
+  "reference": {
+    "path": "references/umi",
+    "head": "2d368e378d10831e7a56b6eaa6e2ae705b1f3c78",
+    "umiPackageVersion": "4.7.25",
+    "sourceBasis": "git objects at exact HEAD",
+    "existingWorkingTreeChangesPreserved": [
+      {
+        "status": " M",
+        "path": "packages/bundler-utils/compiled/@babel/core/index.d.ts",
+        "sha256": "200fa15679d2200052d84df8240f98278c5c24abff7485ec7fa6cb135c2a3bf3"
+      },
+      {
+        "status": " M",
+        "path": "packages/bundler-utils/compiled/@babel/generator/index.d.ts",
+        "sha256": "53aad0d994af3e95cc1aa282e081295cd268c9bc58064824c61312c345f4198e"
+      },
+      {
+        "status": " M",
+        "path": "packages/bundler-utils/compiled/@babel/parser/typings/babel-parser.d.ts",
+        "sha256": "6cfa042c949acf6a1a9fb6c484aa4c9e7b23daf23f46cea61aa702c6feea14c3"
+      },
+      {
+        "status": " M",
+        "path": "packages/bundler-utils/compiled/@babel/template/index.d.ts",
+        "sha256": "c488993c3b7fb83e09fbf71603514f516ebdd3a0433b615451e3a5c25d58c818"
+      },
+      {
+        "status": " M",
+        "path": "packages/bundler-utils/compiled/@babel/traverse/index.d.ts",
+        "sha256": "602f8da48cb5a29f92a8b088c0d0cab32fae4a0c11c93f6ee7e8744c8a32d62b"
+      },
+      {
+        "status": " M",
+        "path": "packages/bundler-webpack/compiled/autoprefixer/postcss/lib/processor.d.ts",
+        "sha256": "e0e0e3c068e145fbb322120979299ff130ffdd39f0dcd0d5aeaa9f3f8a0d01d9"
+      },
+      {
+        "status": " M",
+        "path": "packages/bundler-webpack/compiled/autoprefixer/postcss/lib/result.d.ts",
+        "sha256": "fde91356172e35b9ea68bbdf33721f7c80307a4ce65b82105eac800e9e744995"
+      },
+      {
+        "status": " M",
+        "path": "packages/utils/src/node.ts",
+        "sha256": "6948b3fd308367e3c12c5052573da8f5aa9ed5f64e469d61c4ddf483dc1618a8"
+      }
+    ]
+  },
+  "registrations": [
+    {
+      "source": "packages/preset-umi/src/index.ts",
+      "sha256": "b428a8d1bb115593d15bf35597080fc8692f7614c7c1f5d84dd46d1cb4c9f977",
+      "literalRegistrations": [
+        "./registerMethods",
+        "@umijs/did-you-know/dist/plugin",
+        "./features/404/404",
+        "./features/aiDev/aiDev",
+        "./features/appData/appData",
+        "./features/appData/umiInfo",
+        "./features/check/check",
+        "./features/check/babel722",
+        "./features/codeSplitting/codeSplitting",
+        "./features/configPlugins/configPlugins",
+        "./features/crossorigin/crossorigin",
+        "./features/depsOnDemand/depsOnDemand",
+        "./features/devTool/devTool",
+        "./features/esbuildHelperChecker/esbuildHelperChecker",
+        "./features/esmi/esmi",
+        "./features/exportStatic/exportStatic",
+        "./features/favicons/favicons",
+        "./features/helmet/helmet",
+        "./features/icons/icons",
+        "./features/mock/mock",
+        "./features/mpa/mpa",
+        "./features/okam/okam",
+        "./features/overrides/overrides",
+        "./features/phantomDependency/phantomDependency",
+        "./features/polyfill/polyfill",
+        "./features/polyfill/publicPathPolyfill",
+        "./features/prepare/prepare",
+        "./features/routePrefetch/routePrefetch",
+        "./features/stagewise/stagewise",
+        "./features/terminal/terminal",
+        "./features/tmpFiles/tmpFiles",
+        "./features/clientLoader/clientLoader",
+        "./features/routeProps/routeProps",
+        "./features/ssr/ssr",
+        "./features/tmpFiles/configTypes",
+        "./features/transform/transform",
+        "./features/lowImport/lowImport",
+        "./features/vite/vite",
+        "./features/apiRoute/apiRoute",
+        "./features/monorepo/redirect",
+        "./features/test/test",
+        "./features/clickToComponent/clickToComponent",
+        "./features/legacy/legacy",
+        "./features/classPropertiesLoose/classPropertiesLoose",
+        "./features/webpack/webpack",
+        "./features/swc/swc",
+        "./features/ui/ui",
+        "./features/mako/mako",
+        "./features/reactCompiler/forget",
+        "./features/reactCompiler/reactCompiler",
+        "./features/utoopack/utoopack",
+        "./features/hmrGuardian/hmrGuardian",
+        "./features/routePreloadOnLoad/routePreloadOnLoad",
+        "./features/bundler/bundler",
+        "./commands/build",
+        "./commands/config/config",
+        "./commands/dev/dev",
+        "./commands/help",
+        "./commands/lint",
+        "./commands/setup",
+        "./commands/deadcode",
+        "./commands/version",
+        "./commands/generators/page",
+        "./commands/generators/prettier",
+        "./commands/generators/tsconfig",
+        "./commands/generators/jest",
+        "./commands/generators/tailwindcss",
+        "./commands/generators/dva",
+        "./commands/generators/component",
+        "./commands/generators/mock",
+        "./commands/generators/cypress",
+        "./commands/generators/api",
+        "./commands/generators/precommit",
+        "./commands/plugin",
+        "./commands/verify-commit",
+        "./commands/preview",
+        "./commands/mfsu/mfsu",
+        "@umijs/plugin-run"
+      ],
+      "count": 78,
+      "meaning": "static literal references; not proof of enabled plugins or feature completion"
+    },
+    {
+      "source": "packages/max/src/preset.ts",
+      "sha256": "2369e5939165870af13ab45538141742470cf14a93ebb056fd4964534756f574",
+      "literalRegistrations": [
+        "@umijs/plugins/dist/access",
+        "@umijs/plugins/dist/analytics",
+        "@umijs/plugins/dist/antd",
+        "@umijs/plugins/dist/dva",
+        "@umijs/plugins/dist/initial-state",
+        "@umijs/plugins/dist/layout",
+        "@umijs/plugins/dist/locale",
+        "@umijs/plugins/dist/mf",
+        "@umijs/plugins/dist/model",
+        "@umijs/plugins/dist/moment2dayjs",
+        "@umijs/plugins/dist/qiankun",
+        "@umijs/plugins/dist/react-query",
+        "@umijs/plugins/dist/request",
+        "@umijs/plugins/dist/styled-components",
+        "@umijs/plugins/dist/tailwindcss",
+        "@umijs/plugins/dist/valtio",
+        "./plugins/maxAlias",
+        "./plugins/maxAppData",
+        "./plugins/maxChecker"
+      ],
+      "count": 19,
+      "meaning": "static literal references; not proof of enabled plugins or feature completion"
+    }
+  ],
+  "featureDirectories": [
+    {
+      "directory": "packages/preset-umi/src/features/404",
+      "matrixIds": [
+        "U06"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/aiDev",
+      "matrixIds": [
+        "U42"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/apiRoute",
+      "matrixIds": [
+        "U35"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/appData",
+      "matrixIds": [
+        "U08"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/bundler",
+      "matrixIds": [
+        "U40"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/check",
+      "matrixIds": [
+        "U41"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/classPropertiesLoose",
+      "matrixIds": [
+        "U43"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/clickToComponent",
+      "matrixIds": [
+        "U42"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/clientLoader",
+      "matrixIds": [
+        "U13"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/codeSplitting",
+      "matrixIds": [
+        "U31"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/configPlugins",
+      "matrixIds": [
+        "U19",
+        "U20",
+        "U25"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/crossorigin",
+      "matrixIds": [
+        "U20",
+        "U25"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/depsOnDemand",
+      "matrixIds": [
+        "U39"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/devTool",
+      "matrixIds": [
+        "U42"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/esbuildHelperChecker",
+      "matrixIds": [
+        "U41"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/esmi",
+      "matrixIds": [
+        "U39"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/exportStatic",
+      "matrixIds": [
+        "U33"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/favicons",
+      "matrixIds": [
+        "U20"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/helmet",
+      "matrixIds": [
+        "U21"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/hmrGuardian",
+      "matrixIds": [
+        "U42"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/icons",
+      "matrixIds": [
+        "U24"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/legacy",
+      "matrixIds": [
+        "U26"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/lowImport",
+      "matrixIds": [
+        "U43"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/mako",
+      "matrixIds": [
+        "U40"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/mock",
+      "matrixIds": [
+        "U18"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/monorepo",
+      "matrixIds": [
+        "U30",
+        "U41"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/mpa",
+      "matrixIds": [
+        "U34"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/okam",
+      "matrixIds": [
+        "U43"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/overrides",
+      "matrixIds": [
+        "U41"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/phantomDependency",
+      "matrixIds": [
+        "U41"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/polyfill",
+      "matrixIds": [
+        "U26"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/prepare",
+      "matrixIds": [
+        "U30"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/reactCompiler",
+      "matrixIds": [
+        "U26"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/routePrefetch",
+      "matrixIds": [
+        "U31"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/routePreloadOnLoad",
+      "matrixIds": [
+        "U31"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/routeProps",
+      "matrixIds": [
+        "U13"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/ssr",
+      "matrixIds": [
+        "U32"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/stagewise",
+      "matrixIds": [
+        "U42"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/swc",
+      "matrixIds": [
+        "U26"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/terminal",
+      "matrixIds": [
+        "U42"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/test",
+      "matrixIds": [
+        "U28"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/tmpFiles",
+      "matrixIds": [
+        "U02",
+        "U03",
+        "U08"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/transform",
+      "matrixIds": [
+        "U26"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/ui",
+      "matrixIds": [
+        "U42"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/utoopack",
+      "matrixIds": [
+        "U40"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/vite",
+      "matrixIds": [
+        "U40"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    },
+    {
+      "directory": "packages/preset-umi/src/features/webpack",
+      "matrixIds": [
+        "U40"
+      ],
+      "inspection": "inventory; detailed implementation review required per capability"
+    }
+  ],
+  "otherFeatureRootFiles": [
+    "packages/preset-umi/src/features/__sample.ts"
+  ],
+  "officialPluginEntrypoints": [
+    {
+      "source": "packages/plugins/src/access.ts",
+      "matrixIds": [
+        "U14"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/analytics.ts",
+      "matrixIds": [
+        "U38"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/antd.ts",
+      "matrixIds": [
+        "U17"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/confetti.ts",
+      "matrixIds": [
+        "U38"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/dva.ts",
+      "matrixIds": [
+        "U37"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/initial-state.ts",
+      "matrixIds": [
+        "U10"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/layout.ts",
+      "matrixIds": [
+        "U15"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/locale.ts",
+      "matrixIds": [
+        "U16"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/mf.ts",
+      "matrixIds": [
+        "U36"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/model.ts",
+      "matrixIds": [
+        "U09"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/moment2dayjs.ts",
+      "matrixIds": [
+        "U38"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/qiankun.ts",
+      "matrixIds": [
+        "U36"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/react-query.ts",
+      "matrixIds": [
+        "U37"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/request.ts",
+      "matrixIds": [
+        "U11"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/styled-components.ts",
+      "matrixIds": [
+        "U23"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/tailwindcss.ts",
+      "matrixIds": [
+        "U23"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/unocss.ts",
+      "matrixIds": [
+        "U23"
+      ]
+    },
+    {
+      "source": "packages/plugins/src/valtio.ts",
+      "matrixIds": [
+        "U37"
+      ]
+    }
+  ],
+  "commandSources": [
+    "packages/preset-umi/src/commands/build.ts",
+    "packages/preset-umi/src/commands/config/config.ts",
+    "packages/preset-umi/src/commands/config/list.ts",
+    "packages/preset-umi/src/commands/config/remove.ts",
+    "packages/preset-umi/src/commands/config/set.ts",
+    "packages/preset-umi/src/commands/deadcode.ts",
+    "packages/preset-umi/src/commands/dev/createRouteMiddleware.ts",
+    "packages/preset-umi/src/commands/dev/depBuildWorker/depBuildWorker.ts",
+    "packages/preset-umi/src/commands/dev/depBuildWorker/depBuilder.ts",
+    "packages/preset-umi/src/commands/dev/depBuildWorker/dev-config.ts",
+    "packages/preset-umi/src/commands/dev/depBuildWorker/getConfig.ts",
+    "packages/preset-umi/src/commands/dev/depBuildWorker/workerPreset.ts",
+    "packages/preset-umi/src/commands/dev/dev.ts",
+    "packages/preset-umi/src/commands/dev/faviconMiddleware.ts",
+    "packages/preset-umi/src/commands/dev/getAssetsMap.ts",
+    "packages/preset-umi/src/commands/dev/getBabelOpts.ts",
+    "packages/preset-umi/src/commands/dev/getMarkupArgs.ts",
+    "packages/preset-umi/src/commands/dev/plugins/ViteHtmlPlugin.ts",
+    "packages/preset-umi/src/commands/dev/printMemoryUsage.ts",
+    "packages/preset-umi/src/commands/dev/watch.ts",
+    "packages/preset-umi/src/commands/generators/api.ts",
+    "packages/preset-umi/src/commands/generators/component.ts",
+    "packages/preset-umi/src/commands/generators/cypress.ts",
+    "packages/preset-umi/src/commands/generators/dva.ts",
+    "packages/preset-umi/src/commands/generators/jest.ts",
+    "packages/preset-umi/src/commands/generators/mock.ts",
+    "packages/preset-umi/src/commands/generators/page.ts",
+    "packages/preset-umi/src/commands/generators/precommit.ts",
+    "packages/preset-umi/src/commands/generators/prettier.ts",
+    "packages/preset-umi/src/commands/generators/tailwindcss.ts",
+    "packages/preset-umi/src/commands/generators/tsconfig.ts",
+    "packages/preset-umi/src/commands/generators/utils.ts",
+    "packages/preset-umi/src/commands/help.ts",
+    "packages/preset-umi/src/commands/lint.ts",
+    "packages/preset-umi/src/commands/lint/utlint.ts",
+    "packages/preset-umi/src/commands/mfsu/mfsu.ts",
+    "packages/preset-umi/src/commands/mfsu/util.ts",
+    "packages/preset-umi/src/commands/plugin.ts",
+    "packages/preset-umi/src/commands/preview.ts",
+    "packages/preset-umi/src/commands/setup.ts",
+    "packages/preset-umi/src/commands/verify-commit.ts",
+    "packages/preset-umi/src/commands/version.ts"
+  ],
+  "schemaSources": [
+    {
+      "source": "packages/bundler-vite/src/schema.ts",
+      "sha256": "d7d3a38ea9b5d7e86d3a1f22e9b8eed1b23c10580129da8e4d036ce56aa3ce1b"
+    },
+    {
+      "source": "packages/bundler-webpack/src/schema.test.ts",
+      "sha256": "df9fe480d3b448e0719a312c6080cbe70abe26282c00821ca2dcc02fb6ca5236"
+    },
+    {
+      "source": "packages/bundler-webpack/src/schema.ts",
+      "sha256": "b14f46d166a982ab0e9a892bdecb0e69d9db5a69897abe22948502792b946867"
+    },
+    {
+      "source": "packages/preset-umi/src/features/configPlugins/configPlugins.ts",
+      "sha256": "7ce11e04449122413c2ce5a03109290c65871aa42036a3bd2232742a0f317472"
+    },
+    {
+      "source": "packages/preset-umi/src/features/configPlugins/schema.ts",
+      "sha256": "7541e948c77859160ef0d8df8edcd653263f9643a0bbd61e52d3b93f54c75d7b"
+    }
+  ],
+  "focusedSourceReads": [
+    {
+      "source": "packages/preset-umi/src/index.ts",
+      "gitBlobSha256": "b428a8d1bb115593d15bf35597080fc8692f7614c7c1f5d84dd46d1cb4c9f977",
+      "workingTreeSame": true,
+      "readRanges": [
+        [
+          1,
+          103
+        ]
+      ],
+      "lines": 103
+    },
+    {
+      "source": "packages/max/src/preset.ts",
+      "gitBlobSha256": "2369e5939165870af13ab45538141742470cf14a93ebb056fd4964534756f574",
+      "workingTreeSame": true,
+      "readRanges": [
+        [
+          1,
+          25
+        ]
+      ],
+      "lines": 25
+    },
+    {
+      "source": "packages/plugins/src/model.ts",
+      "gitBlobSha256": "8cb5833d0e81eb273b9edc114369427b439cded75a7250080a481c6f7f699c1c",
+      "workingTreeSame": true,
+      "readRanges": [
+        [
+          1,
+          80
+        ]
+      ],
+      "lines": 100
+    },
+    {
+      "source": "packages/plugins/src/initial-state.ts",
+      "gitBlobSha256": "a9add3479628f6681ff74dc87cee382c9befb3a867a8de062af4b82b5ebce40a",
+      "workingTreeSame": true,
+      "readRanges": [
+        [
+          1,
+          142
+        ]
+      ],
+      "lines": 142
+    },
+    {
+      "source": "packages/plugins/src/access.ts",
+      "gitBlobSha256": "7e0981a422db8c398c0419e88f0ac6ceb585fbb9481717436d4591c735e0b35a",
+      "workingTreeSame": true,
+      "readRanges": [
+        [
+          1,
+          85
+        ]
+      ],
+      "lines": 189
+    },
+    {
+      "source": "packages/plugins/src/request.ts",
+      "gitBlobSha256": "5120639eb18018c8d083418d40f20150181aeea6c3dc84570cd6d35c1a9a1ecf",
+      "workingTreeSame": true,
+      "readRanges": [
+        [
+          1,
+          72
+        ]
+      ],
+      "lines": 359
+    },
+    {
+      "source": "packages/renderer-react/src/browser.tsx",
+      "gitBlobSha256": "7be0d03dd98c33606bf9ddf8544a33419886dcab9781901e556996bebbd31c52",
+      "workingTreeSame": true,
+      "readRanges": [
+        [
+          1,
+          140
+        ]
+      ],
+      "lines": 405
+    },
+    {
+      "source": "packages/preset-umi/src/features/configPlugins/configPlugins.ts",
+      "gitBlobSha256": "7ce11e04449122413c2ce5a03109290c65871aa42036a3bd2232742a0f317472",
+      "workingTreeSame": true,
+      "readRanges": [
+        [
+          1,
+          100
+        ]
+      ],
+      "lines": 108
+    },
+    {
+      "source": "packages/preset-umi/src/features/configPlugins/schema.ts",
+      "gitBlobSha256": "7541e948c77859160ef0d8df8edcd653263f9643a0bbd61e52d3b93f54c75d7b",
+      "workingTreeSame": true,
+      "readRanges": [
+        [
+          1,
+          90
+        ]
+      ],
+      "lines": 109
+    }
+  ],
+  "featurePlan": [
+    {
+      "id": "U01",
+      "umiCapability": "plugins/presets、配置启用、编译扩展",
+      "cormiStatusAndGap": "基础已有：原生插件、preset、贡献；不兼容 Umi PluginAPI",
+      "plannedOwner": "原生 Cordis + 配置/preset",
+      "batch": "保留"
+    },
+    {
+      "id": "U02",
+      "umiCapability": "src/app.ts(x)、defineApp、runtime config keys",
+      "cormiStatusAndGap": "待实现；当前是显式 runtime 清单",
+      "plannedOwner": "应用约定插件 + React runtime 接入",
+      "batch": "F1"
+    },
+    {
+      "id": "U03",
+      "umiCapability": "render、rootContainer、patchClientRoutes、完整 onRouteChange",
+      "cormiStatusAndGap": "部分已有 setup/Provider/位置通知，缺 app 级协议",
+      "plannedOwner": "React 应用 runtime 扩展",
+      "batch": "F1"
+    },
+    {
+      "id": "U04",
+      "umiCapability": "配置式 routes、component、子路由",
+      "cormiStatusAndGap": "部分已有扁平 IR；需面向应用的易用声明与转换",
+      "plannedOwner": "路由配置插件，输出既有 IR",
+      "batch": "F1"
+    },
+    {
+      "id": "U05",
+      "umiCapability": "redirect/keepQuery、wrappers、layout:false",
+      "cormiStatusAndGap": "待实现；不能把手写 Navigate 当成配置支持",
+      "plannedOwner": "路由/布局领域插件",
+      "batch": "F1"
+    },
+    {
+      "id": "U06",
+      "umiCapability": "约定路由、全局 layouts/index、404/loading",
+      "cormiStatusAndGap": "部分已有 [id]/_layout/catch-all/默认404；与 Umi $/layouts/loading 约定不同",
+      "plannedOwner": "可选择的约定扫描插件",
+      "batch": "F1"
+    },
+    {
+      "id": "U07",
+      "umiCapability": "history browser/hash/memory、查询与导航公共入口",
+      "cormiStatusAndGap": "仅 browser Router；缺配置选择和统一应用导航接口",
+      "plannedOwner": "Router 适配插件/客户端 SDK",
+      "batch": "F1"
+    },
+    {
+      "id": "U08",
+      "umiCapability": "runtime 模块/生成导出/类型提示",
+      "cormiStatusAndGap": "部分已有静态模块与路由类型；缺按启用功能生成应用侧导出",
+      "plannedOwner": "应用编译插件，不混合 Node/client barrel",
+      "batch": "F1"
+    },
+    {
+      "id": "U09",
+      "umiCapability": "model/useModel、命名空间、selector、extraModels",
+      "cormiStatusAndGap": "待实现；只有普通 React 局部状态",
+      "plannedOwner": "model 插件 + React Provider",
+      "batch": "F2"
+    },
+    {
+      "id": "U10",
+      "umiCapability": "getInitialState、@@initialState、refresh/setInitialState",
+      "cormiStatusAndGap": "待实现",
+      "plannedOwner": "initial-state 插件，依赖 model/应用 runtime",
+      "batch": "F2"
+    },
+    {
+      "id": "U11",
+      "umiCapability": "request、运行时配置、拦截器、统一错误",
+      "cormiStatusAndGap": "待实现；dev-api 不是该能力",
+      "plannedOwner": "request 契约/客户端实现适配",
+      "batch": "F2"
+    },
+    {
+      "id": "U12",
+      "umiCapability": "useRequest、手动/自动、分页/加载更多等",
+      "cormiStatusAndGap": "待实现；按原库/API逐项验收，不只包一层 fetch",
+      "plannedOwner": "请求 Hooks 插件，可复用成熟库",
+      "batch": "F2"
+    },
+    {
+      "id": "U13",
+      "umiCapability": "clientLoader/useClientLoaderData/routeProps",
+      "cormiStatusAndGap": "待实现；页面懒加载不等于数据加载",
+      "plannedOwner": "路由数据插件",
+      "batch": "F3"
+    },
+    {
+      "id": "U14",
+      "umiCapability": "access.ts/useAccess/Access、路由访问控制",
+      "cormiStatusAndGap": "待实现",
+      "plannedOwner": "access 插件，依赖初始状态与路由扩展",
+      "batch": "F3"
+    },
+    {
+      "id": "U15",
+      "umiCapability": "layout、菜单、面包屑、403/404、插槽",
+      "cormiStatusAndGap": "部分已有布局容器/meta，无应用布局套件",
+      "plannedOwner": "layout/menu 插件，UI adapter 可选",
+      "batch": "F3"
+    },
+    {
+      "id": "U16",
+      "umiCapability": "locale、消息文件、切换/持久化、useIntl/FormattedMessage",
+      "cormiStatusAndGap": "待实现",
+      "plannedOwner": "locale 插件 + 客户端 i18n provider",
+      "batch": "F3"
+    },
+    {
+      "id": "U17",
+      "umiCapability": "Antd/ProLayout、图表集成、主题与 locale 联动",
+      "cormiStatusAndGap": "待实现官方集成；应用可自行依赖 UI/图表库",
+      "plannedOwner": "可选 UI adapter/集成指南，不绑定 core",
+      "batch": "F3"
+    },
+    {
+      "id": "U18",
+      "umiCapability": "Mock 约定发现、目录、方法/路径、代理配置",
+      "cormiStatusAndGap": "部分已有 HTTP 规则/取消/固定代理；缺 Umi 式自动发现等易用性",
+      "plannedOwner": "复用 DevApiService，新增约定/后端 bridge",
+      "batch": "F4"
+    },
+    {
+      "id": "U19",
+      "umiCapability": ".umirc/config、环境分层/覆盖、alias/@/@@、define",
+      "cormiStatusAndGap": "部分已有 cormi.config/mode/公开env/派生；缺可组合便捷配置和公共别名",
+      "plannedOwner": "配置/约定插件 + 后端专属桥接",
+      "batch": "F1/F4"
+    },
+    {
+      "id": "U20",
+      "umiCapability": "HTML title/metas/links/headScripts/scripts/favicon",
+      "cormiStatusAndGap": "可编辑 index.html；缺框架配置注入面",
+      "plannedOwner": "HTML/head 插件",
+      "batch": "F4"
+    },
+    {
+      "id": "U21",
+      "umiCapability": "helmet、页面标题/SEO 元数据",
+      "cormiStatusAndGap": "待实现官方能力；手改 document.title 不算",
+      "plannedOwner": "head 客户端插件",
+      "batch": "F3/F4"
+    },
+    {
+      "id": "U22",
+      "umiCapability": "global 样式、CSS Modules、Less/Sass/PostCSS/SVGR",
+      "cormiStatusAndGap": "部分已有 CSS Modules 与资产；缺完整约定和预处理集成",
+      "plannedOwner": "样式/资源插件 + backend adapter",
+      "batch": "F4"
+    },
+    {
+      "id": "U23",
+      "umiCapability": "Tailwind、UnoCSS、styled-components",
+      "cormiStatusAndGap": "待实现可选集成",
+      "plannedOwner": "各生态 adapter",
+      "batch": "F4"
+    },
+    {
+      "id": "U24",
+      "umiCapability": "icons",
+      "cormiStatusAndGap": "待实现公共图标方案",
+      "plannedOwner": "图标资源/代码生成插件",
+      "batch": "F4"
+    },
+    {
+      "id": "U25",
+      "umiCapability": "publicPath/runtimePublicPath、CDN、hash、copy/externals",
+      "cormiStatusAndGap": "部分已有 base/静态资源与原生 Vite 扩展；无统一完整公开配置",
+      "plannedOwner": "输出/资源策略插件，差异显式",
+      "batch": "F4"
+    },
+    {
+      "id": "U26",
+      "umiCapability": "targets、polyfill、legacy、ReactCompiler/SWC/transform",
+      "cormiStatusAndGap": "可用既有 Vite 原生插件口；未交付对应官方配置面",
+      "plannedOwner": "可选转换 provider/bridge",
+      "batch": "F4/F6"
+    },
+    {
+      "id": "U27",
+      "umiCapability": "page/component/mock/API 等微生成器",
+      "cormiStatusAndGap": "仅新建 app/插件模板；缺项目内增量生成器",
+      "plannedOwner": "generators 插件与模板贡献",
+      "batch": "F4"
+    },
+    {
+      "id": "U28",
+      "umiCapability": "lint/format/test/precommit/deadcode 等工程命令",
+      "cormiStatusAndGap": "框架自身有测试；不是面向用户的完整工具集成",
+      "plannedOwner": "可选命令插件",
+      "batch": "F4"
+    },
+    {
+      "id": "U29",
+      "umiCapability": "request/接口代码生成与类型工作流",
+      "cormiStatusAndGap": "待实现；API generator 入口已登记，具体协议/规范需读实现",
+      "plannedOwner": "API generator 插件",
+      "batch": "F4"
+    },
+    {
+      "id": "U30",
+      "umiCapability": "TypeScript、prepare、导出类型、monorepo",
+      "cormiStatusAndGap": "基础已有至 P16；仍需配合新功能生成类型与别名",
+      "plannedOwner": "既有 TS/prepare + monorepo adapter",
+      "batch": "随功能"
+    },
+    {
+      "id": "U31",
+      "umiCapability": "code splitting、routePrefetch、routePreloadOnLoad",
+      "cormiStatusAndGap": "部分已有页面 lazy；无预取策略/配置面",
+      "plannedOwner": "路由加载插件 + backend bridge",
+      "batch": "F5"
+    },
+    {
+      "id": "U32",
+      "umiCapability": "SSR、服务端 loader/渲染入口",
+      "cormiStatusAndGap": "待实现",
+      "plannedOwner": "独立 SSR renderer/profile，复用可共享契约",
+      "batch": "F5"
+    },
+    {
+      "id": "U33",
+      "umiCapability": "exportStatic/预渲染/静态导出",
+      "cormiStatusAndGap": "当前只有 SPA 静态产物，不等于逐路由预渲染",
+      "plannedOwner": "静态导出插件",
+      "batch": "F5"
+    },
+    {
+      "id": "U34",
+      "umiCapability": "MPA",
+      "cormiStatusAndGap": "待实现多入口应用编排",
+      "plannedOwner": "独立 MPA profile",
+      "batch": "F5"
+    },
+    {
+      "id": "U35",
+      "umiCapability": "apiRoute",
+      "cormiStatusAndGap": "当前只开发 Mock，不是生产 API route",
+      "plannedOwner": "独立服务端路由插件",
+      "batch": "F5"
+    },
+    {
+      "id": "U36",
+      "umiCapability": "qiankun、Module Federation",
+      "cormiStatusAndGap": "待实现",
+      "plannedOwner": "可选主/子应用与 federation adapter",
+      "batch": "F6"
+    },
+    {
+      "id": "U37",
+      "umiCapability": "dva、valtio、react-query",
+      "cormiStatusAndGap": "待实现可选集成，不全塞入默认数据流",
+      "plannedOwner": "各状态库/服务端状态 adapter",
+      "batch": "F6"
+    },
+    {
+      "id": "U38",
+      "umiCapability": "analytics、moment2dayjs、confetti 等官方插件",
+      "cormiStatusAndGap": "登记待细读；不把存在文件当作已移植",
+      "plannedOwner": "独立可选插件",
+      "batch": "F6"
+    },
+    {
+      "id": "U39",
+      "umiCapability": "analyze、MFSU、depsOnDemand、esmi 等优化",
+      "cormiStatusAndGap": "部分有 Vite 原生优化；无 Umi 功能等价结论",
+      "plannedOwner": "构建优化插件，按真实后端分别验证",
+      "batch": "F6"
+    },
+    {
+      "id": "U40",
+      "umiCapability": "webpack/Vite/Mako/Utoopack/bundler 选择",
+      "cormiStatusAndGap": "只有 Vite 实现；契约可替换不等于多后端已实现",
+      "plannedOwner": "独立 builder provider/preset",
+      "batch": "F6"
+    },
+    {
+      "id": "U41",
+      "umiCapability": "monorepo redirect/phantomDependency/overrides/check",
+      "cormiStatusAndGap": "部分已有包边界校验，非 Umi 等价全套",
+      "plannedOwner": "工程/依赖策略插件",
+      "batch": "F4/F6"
+    },
+    {
+      "id": "U42",
+      "umiCapability": "clickToComponent/devTool/terminal/UI/aiDev/stagewise/hmrGuardian",
+      "cormiStatusAndGap": "库存已登记，细节待各项源码/使用流程核对",
+      "plannedOwner": "可选开发工具插件，不进内核",
+      "batch": "F6"
+    },
+    {
+      "id": "U43",
+      "umiCapability": "lowImport/okam/classPropertiesLoose 及其他版本特定入口",
+      "cormiStatusAndGap": "只确认登记，不根据名字猜行为",
+      "plannedOwner": "在该后端/转换领域逐项决定",
+      "batch": "F6"
+    }
+  ],
+  "sources": [
+    "https://umijs.org/docs/max/introduce/",
+    "https://umijs.org/docs/api/runtime-config/",
+    "https://umijs.org/docs/guides/routes/",
+    "https://umijs.org/docs/max/data-flow/",
+    "https://umijs.org/docs/max/request/",
+    "https://umijs.org/docs/max/access/",
+    "https://umijs.org/docs/max/charts/"
+  ],
+  "scopeLimits": [
+    "literal registration inventory is not enablement",
+    "not an exhaustive per-option semantic audit",
+    "upstream code not executed",
+    "no compatibility or completion claim from inventories",
+    "third-party ecosystem outside listed upstream entrypoints requires separate discovery"
+  ],
+  "documentationOnlyIntegrations": [
+    {
+      "matrixId": "U17",
+      "name": "charts",
+      "source": "https://umijs.org/docs/max/charts/",
+      "basis": "official usage recommendation, not a charts registration in the pinned Max preset"
+    }
+  ]
+}
