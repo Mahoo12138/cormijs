@@ -2,6 +2,11 @@ import type { ReactNode } from 'react';
 import type { Location, NavigationType, RouteObject } from 'react-router';
 
 export type HistoryType = 'browser' | 'hash' | 'memory';
+export interface RequestConfig {
+  readonly baseURL?: string;
+  readonly headers?: Readonly<Record<string, string>>;
+  readonly timeout?: number;
+}
 export interface AppRuntimeContext { readonly signal: AbortSignal; readonly basename: string }
 export interface AppRoutesContext extends AppRuntimeContext { readonly routes: RouteObject[] }
 export interface RootContainerContext extends AppRuntimeContext { readonly routes: readonly RouteObject[] }
@@ -27,6 +32,8 @@ export interface RuntimeConfig {
   onRouteChange?(event: RouteChangeEvent): void;
   /** Registered by initialStatePlugin; enable that plugin before using the key. */
   getInitialState?(): unknown | Promise<unknown>;
+  /** Registered by requestPlugin; consumed by the per-mount request client. */
+  request?: RequestConfig;
 }
 export const APP_RUNTIME_KEYS = Object.freeze(['setup', 'render', 'patchClientRoutes', 'rootContainer', 'onRouteChange'] as const);
 type ExactConfig<T> = Record<Exclude<keyof T, keyof RuntimeConfig>, never>;

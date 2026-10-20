@@ -14,6 +14,7 @@ import { writeConventionsFixture, verifyConventionsPage } from './conventions-fi
 import { writeHistoryFixture, verifyHistoryPage } from './history-fixture.js';
 import { writeModelFixture, verifyModelPage } from './model-fixture.js';
 import { writeInitialStateFixture, verifyInitialStatePage } from './initial-state-fixture.js';
+import { writeRequestFixture, verifyRequestPage } from './request-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -538,6 +539,26 @@ const bad:InitialStatePluginOptions={id:42};
     await command('initial-state-build',initialStateConsumer,'build');
     await withServer(initialStateConsumer,'preview',async url=>{await verifyInitialStatePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'initial-state-preview.png')});});
     report.stages.push({label:'installed-initial-state-loading-refresh-and-static-preview',convention:'getInitialState',previewRegenerated:false});
+
+    const requestConsumer=await create('request','react');await writeRequestFixture(requestConsumer);
+    const requestManifest=consumerManifest(kit,'react');
+    requestManifest.dependencies['@cormijs/plugin-react']=requestManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(requestConsumer,'package.json'),JSON.stringify(requestManifest,null,2));
+    await install('request-install',requestConsumer);await auditLinks(requestConsumer);
+    await command('request-typecheck',requestConsumer,'typecheck');
+    await writeFile(join(requestConsumer,'types.mts'),`import {requestPlugin,type RequestPluginOptions} from '@cormijs/plugin-react';import {RequestError,useRequest,type RequestClient,type RequestConfig,type UseRequestResult} from '@cormijs/runtime';
+const config:RequestConfig={baseURL:'/api',headers:{'x-app':'cormi'},timeout:1000};
+const options:RequestPluginOptions={id:'consumer:request'};
+declare const client:RequestClient;declare const result:UseRequestResult<string>;
+void [requestPlugin,options,config,client,result,useRequest,RequestError];
+// @ts-expect-error baseURL must be a string
+const bad:RequestConfig={baseURL:42};
+`);
+    await execute('request-public-types',requestConsumer,process.execPath,typeArguments);
+    await withServer(requestConsumer,'dev',async url=>{await verifyRequestPage(page,url);assert.deepEqual(errors,[]);});
+    await command('request-build',requestConsumer,'build');
+    await withServer(requestConsumer,'preview',async url=>{await verifyRequestPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'request-preview.png')});});
+    report.stages.push({label:'installed-request-useRequest-cancel-errors-and-static-preview',hooks:'useRequest',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

@@ -117,5 +117,5 @@ declare module '@cormijs/runtime' {
 ## 9. 下一步
 
 - F1 已完成：配置式嵌套路由、redirect/wrappers、全局布局/`layout:false`、404/loading 与 history/导航入口已分别在 [F1b](61-f1b-config-routes.md)、[F1c](62-f1c-redirects-and-wrappers.md)、[F1d](63-f1d-global-layout.md)、[F1e](64-f1e-404-and-loading.md)、[F1f](65-f1f-history-and-navigation.md) 交付。
-- F2：在本入口上登记 model/initial-state/request 的运行时 key 和 Provider，验证初始化用户、共享模型、请求与权限的联动。model 基础已由 [F2a](66-f2a-models.md) 交付，初始状态由 [F2b](67-f2b-initial-state.md) 交付。
+- F2：在本入口上登记 model/initial-state/request 的运行时 key 和 Provider，验证初始化用户、共享模型、请求与权限的联动。model 基础已由 [F2a](66-f2a-models.md) 交付，初始状态由 [F2b](67-f2b-initial-state.md) 交付，请求基础由 [F2c](68-f2c-request.md) 交付。
 - 不把本切片扩展成浏览器 Cordis 宿主或 bootstrap 重构；应用配置仍只在浏览器求值，Node 插件继续拥有扫描、校验和生成。

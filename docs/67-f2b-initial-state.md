@@ -106,6 +106,6 @@ Provider 位于 Router 外、模型 Provider 外：
 
 ## 7. 下一步
 
-- F2c：request/useRequest，覆盖传输、拦截器、取消、重试、并发/竞态和分页；
+- F2c：request/useRequest，覆盖传输、拦截器、取消、重试、并发/竞态和分页，基础能力已由 [F2c](68-f2c-request.md) 交付；
 - U10 后续：`@@initialState` 模型集成、首屏阻塞策略与 SSR/hydration；
 - 完成 F2 的真实应用联动：初始化用户 → 共享模型 → 请求 → 权限。
