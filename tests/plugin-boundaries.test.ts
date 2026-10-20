@@ -7,6 +7,7 @@ import { forbiddenPackages, literalModuleEdges } from '../scripts/plugin-boundar
 const rules: Record<string, string[]> = {
   core: ['cordis'], builder: ['cordis'], cormi: ['@cormijs/core','cordis','esbuild'],
   'plugin-web': ['@cormijs/core','@cormijs/builder','cordis'],
+  'plugin-typescript': ['@cormijs/core','@cormijs/plugin-web','cordis','typescript'],
   'plugin-react': ['@cormijs/core','@cormijs/builder','@cormijs/routes','@cormijs/plugin-web','cordis','esbuild'],
   runtime: ['react','react-dom','react-router'],
 };

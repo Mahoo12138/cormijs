@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeEnvironmentFixture, verifyEnvironmentPage, privateMarkers, environmentLiteral } from './environment-fixture.js';
+import { writeTypecheckGraph, compilerFootprint } from './typescript-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -192,6 +193,16 @@ assert.equal(code,0);assert.equal(closed,1);assert.deepEqual(result,{command:'ec
   await writeFile(join(launcher,'cormi.config.ts'),normalLauncherConfig);
   await execute('launcher-no-vite', launcher, process.execPath, ['--input-type=module', '-e', `import {createRequire} from 'node:module';import assert from 'node:assert/strict';const r=createRequire(import.meta.url);assert.throws(()=>r.resolve('vite'),{code:'MODULE_NOT_FOUND'});assert.throws(()=>r.resolve('@cormijs/core/dist/index.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});`]);
   await auditLinks(launcher);
+  const typeOnly = await create('typechecking', 'core'), typeManifest = consumerManifest(kit, 'core');
+  typeManifest.dependencies['@cormijs/plugin-typescript'] = typeManifest.pnpm.overrides['@cormijs/plugin-typescript']!;
+  await writeFile(join(typeOnly, 'package.json'), JSON.stringify(typeManifest));
+  await install('typechecking-no-web-install', typeOnly); await writeTypecheckGraph(typeOnly, false);
+  const typeBefore = await compilerFootprint(typeOnly);
+  await execute('typechecking-no-vite-native-provider', typeOnly, process.execPath, ['--input-type=module','-e',
+    `import assert from 'node:assert/strict';import {createRequire} from 'node:module';import {ProjectRuntime} from '@cormijs/core';import {typescriptServicePlugin} from '@cormijs/plugin-typescript';
+const r=createRequire(import.meta.url);assert.throws(()=>r.resolve('vite'),{code:'MODULE_NOT_FOUND'});assert.throws(()=>r.resolve('react'),{code:'MODULE_NOT_FOUND'});
+const host=new ProjectRuntime();host.mount('compiler',typescriptServicePlugin);try{await host.ready();const result=await host.ctx.typechecker.check(process.cwd(),[],new AbortController().signal);assert.equal(result.mode,'solution');assert.equal(result.projects.length,4);assert.equal(result.virtualDeclarations,1);console.log('PACKED_TS_SOLUTION_OK');}finally{await host.dispose();}`],0,/PACKED_TS_SOLUTION_OK/);
+  assert.deepEqual(await compilerFootprint(typeOnly), typeBefore); await auditLinks(typeOnly);
   const missing = await create('missing-peer', 'react');
   const missingManifest = consumerManifest(kit, 'react'); delete missingManifest.dependencies['react-dom'];
   await writeFile(join(missing, 'package.json'), JSON.stringify(missingManifest));
@@ -202,6 +213,14 @@ assert.equal(code,0);assert.equal(closed,1);assert.deepEqual(result,{command:'ec
   const specifiers = kit.packages.map(item => item.name).concat('cormijs/launcher', 'cormijs/bootstrap', 'cormijs/worker', 'cormijs/cli', '@cormijs/builder/development', '@cormijs/plugin-dev-api/vite', '@cormijs/plugin-dev-api/service');
   await writeFile(join(sdk, 'types.mts'), specifiers.map((specifier, i) => `import * as p${i} from ${JSON.stringify(specifier)};void p${i};`).join('\n'));
   await execute('all-public-types', sdk, process.execPath, typeArguments);
+  await writeFile(join(sdk,'typescript-types.mts'),`import {checkTypes,typescriptPlugin,type TypeChecker,type TypecheckOptions} from '@cormijs/plugin-typescript';import {defineConfig} from 'cormijs';
+const options:TypecheckOptions={generatedProject:'tsconfig.app.json'};defineConfig({plugins:[{id:'types',plugin:typescriptPlugin,options}]});declare const checker:TypeChecker;
+const result=await checker.check('.',[],new AbortController().signal,options);const mode:'single'|'solution'=result.mode;void mode;void checkTypes;
+// @ts-expect-error project selection is not an arbitrary numeric selector
+const invalid:TypecheckOptions={generatedProject:1};
+// @ts-expect-error a check cannot omit its cancellation signal
+checker.check('.',[]);`);
+  await execute('typechecking-public-strict-types',sdk,process.execPath,[...typeArguments.slice(0,-1),'typescript-types.mts']);
   await writeFile(join(sdk, 'exports.mjs'), `for(const name of ${JSON.stringify(specifiers)}){await import(name); console.log(name)}`);
   await execute('all-public-esm-exports', sdk, process.execPath, ['exports.mjs']); await auditLinks(sdk);
   const initialApp = join(delivery, 'app'); await createReactConsumer(root, kit, initialApp);
@@ -351,6 +370,34 @@ const measuredExecution={name:'fixture:worker-execution',inject:['commands'],app
       for(const log of [devLog,previewLog])assert.match(log,/"type":"execution-report","data":\{"command":"(?:dev|preview)","ready":true\}/);
       report.stages.push({label:'installed-native-worker-execution-with-cli-carrier',development:true,build:true,preview:true});
     }finally{await writeFile(configFile,originalConfig);await writeFile(join(environmentConsumer,'.env'),defaultEnv);await rm(customFile);await rm(carrierFile);}
+
+    const solutionConsumer=await create('solution','react');await writeEnvironmentFixture(solutionConsumer,'/solution/');await writeTypecheckGraph(solutionConsumer,true);
+    await install('solution-install',solutionConsumer);await auditLinks(solutionConsumer);
+    const solutionBin=join(solutionConsumer,'node_modules/.bin/cormi');
+    async function solutionCheck(label:string,expected=0,pattern?:RegExp){
+      const before=await compilerFootprint(solutionConsumer);
+      const result=await execute(label,solutionConsumer,solutionBin,['typecheck','--json','--mode','staging','--startup-timeout','30000'],expected,pattern);
+      assert.deepEqual(await compilerFootprint(solutionConsumer),before);assert.equal(existsSync(join(solutionConsumer,'.cormi.lock')),false);return result;
+    }
+    const initialCheck=await solutionCheck('solution-typecheck-clean',0,/"mode":"solution"/);
+    const summary=initialCheck.stdout.split('\n').flatMap(line=>{try{return [JSON.parse(line)]}catch{return []}}).find(event=>event.type==='result')?.data;
+    assert.equal(summary.projects.length,4);assert.equal(summary.virtualDeclarations,1);
+    assert.deepEqual(summary.projects.filter((project:{generated:boolean})=>project.generated).map((project:{config:string})=>project.config),['tsconfig.app.json']);
+    const shared=join(solutionConsumer,'shared/src/index.ts'),tools=join(solutionConsumer,'tools/check.ts'),probe=join(solutionConsumer,'src/Probe.tsx');
+    const sharedSource=await readFile(shared,'utf8'),toolSource=await readFile(tools,'utf8'),probeSource=await readFile(probe,'utf8');
+    await mkdir(join(solutionConsumer,'shared/dist'));await writeFile(join(solutionConsumer,'shared/dist/index.d.ts'),'export declare const sharedValue: number;');
+    await writeFile(join(solutionConsumer,'shared/tsconfig.tsbuildinfo'),'{"version":"old-test-input"}');
+    await writeFile(shared,'export const sharedValue: string = "changed";');
+    await solutionCheck('solution-stale-declarations-rejected',1,/TYPECHECK_FAILED/);await writeFile(shared,sharedSource);
+    await writeFile(tools,'export const invalid: string = 1;');await solutionCheck('solution-node-noCheck-rejected',1,/tools\/check.ts.*TS2322/);await writeFile(tools,toolSource);
+    await writeFile(probe,'export default 123;');await solutionCheck('solution-generated-component-rejected',1,/\.cormi\/app.tsx/);await writeFile(probe,probeSource);
+    await solutionCheck('solution-typecheck-recovered',0,/"mode":"solution"/);
+    await withServer(solutionConsumer,'dev',async url=>{await verifyEnvironmentPage(page,url,'selected',false);assert.equal(await page.locator('#shared-value').innerText(),'Shared value: 42');assert.deepEqual(errors,[]);},['--mode','staging']);
+    await execute('solution-build',solutionConsumer,solutionBin,['build','--mode','staging','--json','--startup-timeout','30000']);
+    const beforePreview=await compilerFootprint(solutionConsumer);
+    await withServer(solutionConsumer,'preview',async url=>{await verifyEnvironmentPage(page,url,'selected',true);assert.equal(await page.locator('#shared-value').innerText(),'Shared value: 42');assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'typescript-solution-preview.png')});},['--mode','staging']);
+    assert.deepEqual(await compilerFootprint(solutionConsumer),beforePreview);
+    report.stages.push({label:'installed-typescript-solution-browser-and-output-isolation',projects:summary.projects.length,virtualDeclarations:summary.virtualDeclarations,unmodifiedSourcesAndCompilerOutputs:true});
 
   } finally { await browser.close(); }
   report.passed = true;

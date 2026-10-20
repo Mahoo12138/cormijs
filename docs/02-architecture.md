@@ -1,6 +1,6 @@
 # Cormi 框架架构设计草案
 
-版本：Draft 0.26。修订轮次：P15（原生 worker 执行策略与可复用 CLI 入口）。
+版本：Draft 0.27。修订轮次：P16（TypeScript 项目引用与可替换检查器）。
 
 **本文是待验证的设计方案，不是已经实现的功能说明。** 框架名称为 cormi；cormijs 仅用于发布包名和 @cormijs 命名空间。未实现的接口仍是拟议协议，不表示 npm 包已发布。上游事实及固定提交见 [源码研究](01-source-study.md)，实施与验证顺序见 [MVP 计划](03-mvp-plan.md)。
 
@@ -47,6 +47,8 @@ P13以固定DeepSeek Harness的profile/bundle、能力定义/provider/consumer�
 P14 将 launchPolicy、launchEnvironment、launchReload 提供者放入原生 Cordis 引导组合，载体在应用配置求值之前注入并使用它们。默认CLI继续选择原有策略；公开runCormi可显式替换一个或整个组合，不依赖坏应用配置先成功。进程/锁/代际机制不让渡给另一个更新状态机，异步任务仍由原生消费者排空；未确认引导清理时保留锁。契约与独立环境解析示例见 [引导插件](53-bootstrap-plugins.md)，实际验证见 [P14](54-p14-results.md)。worker中失败诊断的保留执行分支尚未拆出，不将这一步宣称为所有bootstrap策略已经完全可替换。
 
 P15 将 worker 的命令/失败诊断选择拆到原生 workerExecution 提供者，默认组合仍保留旧命令体验，但可复用同一诊断器处理自定义 audit，也可由应用普通命令接管 diagnose。配置新增 worker 原生组合，先于应用插件激活；执行消费者负责一次性准入、结果句柄和退出排空，不建立第二套插件生命周期。cormijs/cli 公开标准参数与信号载体，避免每个自定义 bootstrap 复制 CLI。协议和限制见 [worker 执行](55-worker-execution.md)，实际验证见 [P15](56-p15-results.md)。
+
+P16 在已有 plugin-typescript 中拆分原生 typechecker 服务、命令消费者和兼容组合；solution/project references 使用官方 SolutionBuilder 与调用期内存声明，保留各项目编译选项和声明依赖边界，不向 core/launcher/Web 添加 TS 分支。生成根只归属唯一明确的项目，歧义通过领域插件 options 解决；不合并全部源码、不借用旧磁盘声明冒充最新检查。prepare 仍拥有 .cormi，TypeScript 本身不写业务输出或持久缓存。契约与边界见 [项目引用](57-typescript-projects.md)，实际验证见 [P16](58-p16-results.md)。
 
 ## 1. 应该做一个什么框架
 

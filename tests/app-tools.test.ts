@@ -100,12 +100,12 @@ export default defineConfig({plugins:[{id:'react',plugin:reactPlugin},{id:'types
   await command(t, f.root, 'typecheck'); await command(t, f.root, 'inspect');
   assert.equal(existsSync(join(f.root, 'dist')), false);
 });
-test('missing tsconfig uses explicit defaults, while referenced solution configs fail clearly', options, async t => {
+test('missing tsconfig uses explicit defaults, while a missing referenced configuration fails clearly', options, async t => {
   const f = await project(t); await unlink(join(f.root, 'tsconfig.json'));
   await command(t, f.root, 'typecheck');
   await f.write('tsconfig.json', JSON.stringify({ files: [], references: [{ path: './referenced' }] }));
   const failed = await command(t, f.root, 'typecheck', 1);
-  assert.ok(failed.events.some(event => event.code === 'TYPECHECK_REFERENCES_UNSUPPORTED'));
+  assert.ok(failed.events.some(event => event.code === 'TYPECHECK_FAILED' && event.message.includes('referenced/tsconfig.json')));
 });
 test('development serves the generated app but refuses inspection, type, staging and transaction files', options, async t => {
   const f = await project(t); await command(t, f.root, 'prepare');

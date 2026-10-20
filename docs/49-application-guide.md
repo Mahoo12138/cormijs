@@ -123,6 +123,8 @@ export default function Status() {
 
 ## 6. 类型失败与构建失败要能阻止错误交付
 
+P16起，TypeScript插件支持根solution和project references。将 `.cormi/**/*` 明确纳入唯一浏览器项目的include，Node工具项目保留自己的环境；需要显式归属时，在TypeScript插件options中设置 `generatedProject`，不要把它写进app。检查按引用关系临时生成内存声明，不落地业务JS/声明或tsbuildinfo；命令的prepare阶段仍会更新受管.cormi。配置示例、原生约束与支持范围见 [TypeScript项目引用](57-typescript-projects.md)。
+
 先运行 `pnpm typecheck --mode staging`，再运行 `pnpm build --mode staging`。类型错误应非零退出；路由冲突、编译失败或输出被篡改时，不能替换旧成功产物。已有未知 `dist` 不会被清空接管；旧版本没有 `.cormi-build.json` 的目录，应先保管或改用新输出位置。
 
 原 `dist/.cormi-build.json` 是本机输出所有权信息，保留在原输出中供下次受管替换。它不是部署服务器必须消费的文件。不要为了不公开元数据而直接删除原文件，应该只在部署副本中排除它。
