@@ -433,10 +433,12 @@ resolveAppConfig({default:config,setup(){}});
     await writeFile(join(routesConsumer,'package.json'),JSON.stringify(routesManifest,null,2));
     await install('config-routes-install',routesConsumer);await auditLinks(routesConsumer);
     await command('config-routes-typecheck',routesConsumer,'typecheck');
-    await writeFile(join(routesConsumer,'types.mts'),`import {routeConfigPlugin,type ConfigRoute} from '@cormijs/plugin-react';import {expandRouteConfig} from '@cormijs/routes';
+    await writeFile(join(routesConsumer,'types.mts'),`import {layoutPlugin,routeConfigPlugin,type ConfigRoute,type LayoutPluginOptions} from '@cormijs/plugin-react';import {expandRouteConfig} from '@cormijs/routes';
 const config:readonly ConfigRoute[]=[{id:'root',path:'/',component:'./src/pages/Home.tsx',routes:[{index:true,component:'./src/pages/Home.tsx'}]},{path:'legacy/:id',redirect:'/home',keepQuery:true}];
 const wrapped:ConfigRoute={path:'wrapped',component:'./src/pages/Home.tsx',wrappers:['./src/wrappers/Auth.tsx']};
-const records=expandRouteConfig(config,{pluginId:'consumer:routes'});const id:string=records[0]!.id;void [id,routeConfigPlugin,wrapped];
+const bare:ConfigRoute={path:'bare',component:'./src/pages/Home.tsx',layout:false};
+const layout:LayoutPluginOptions={id:'consumer:layout',files:['src/layouts/index.tsx']};
+const records=expandRouteConfig(config,{pluginId:'consumer:routes'});const id:string=records[0]!.id;void [id,routeConfigPlugin,layoutPlugin,wrapped,bare,layout];
 // @ts-expect-error unknown configured route fields must not silently become any
 const unknown:ConfigRoute={path:'x',component:'./src/pages/Home.tsx',children:[]};
 // @ts-expect-error component is a project-relative source string
@@ -447,6 +449,8 @@ const badRedirect:ConfigRoute={path:'x',redirect:42};
 const badQuery:ConfigRoute={path:'x',redirect:'/y',keepQuery:'yes'};
 // @ts-expect-error wrappers are source file strings
 const badWrapper:ConfigRoute={path:'x',component:'./src/pages/Home.tsx',wrappers:[1]};
+// @ts-expect-error layout only supports false
+const badLayout:ConfigRoute={path:'x',component:'./src/pages/Home.tsx',layout:true};
 `);
     await execute('config-routes-public-types',routesConsumer,process.execPath,typeArguments);
     await withServer(routesConsumer,'dev',async url=>{await verifyConfigRoutesPage(page,url,false);assert.deepEqual(errors,[]);});

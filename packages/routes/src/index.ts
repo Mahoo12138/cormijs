@@ -24,6 +24,8 @@ export interface RouteRecord {
   readonly redirect?: string;
   /** Append the current search and hash to a redirect target. */
   readonly keepQuery?: boolean;
+  /** Opt a top-level route and its descendants out of the optional global layout. */
+  readonly layout?: false;
   /** Public browser metadata, never server credentials or executable callbacks. */
   readonly meta?: RouteMeta;
   readonly source: { readonly file?: string; readonly pluginId?: string };
@@ -43,6 +45,8 @@ export interface ConfigRoute {
   readonly keepQuery?: boolean;
   /** Outer-to-inner layout components; each must render an Outlet for the route below it. */
   readonly wrappers?: readonly string[];
+  /** Opt a top-level route and its descendants out of the optional global layout. */
+  readonly layout?: false;
   readonly meta?: RouteMeta;
   readonly routes?: readonly ConfigRoute[];
 }
@@ -104,10 +108,11 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
   const routes = input.map((item: unknown): RouteRecord => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) fail('ROUTE_INVALID', 'Expected a route object.');
     const value = item as Record<string, unknown>;
-    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'errorBoundary', 'redirect', 'keepQuery', 'source', 'meta'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
+    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'errorBoundary', 'redirect', 'keepQuery', 'layout', 'source', 'meta'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
     if (typeof value.id !== 'string' || !value.id || value.id.startsWith('cormi:') || byId.has(value.id)) fail('ROUTE_ID_CONFLICT', `Invalid, reserved or duplicate route id: ${value.id}`);
     if (value.parentId !== undefined && (typeof value.parentId !== 'string' || !value.parentId)) fail('ROUTE_INVALID', 'Invalid parent id.', { id: value.id });
     if (value.index !== undefined && typeof value.index !== 'boolean') fail('ROUTE_INVALID', 'index must be boolean.', { id: value.id });
+    if (value.layout !== undefined && value.layout !== false) fail('ROUTE_LAYOUT_INVALID', 'layout only supports false.', { id: value.id });
     if (value.path !== undefined && typeof value.path !== 'string') fail('ROUTE_INVALID', 'path must be a string.', { id: value.id });
     if (value.index === true && value.path !== undefined) fail('ROUTE_INVALID', 'An index route cannot have a path.', { id: value.id });
     let path = value.path as string | undefined;
@@ -134,6 +139,7 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
       ...(value.module !== undefined ? { module: moduleRef(value.module) } : {}),
       ...(value.errorBoundary !== undefined ? { errorBoundary: moduleRef(value.errorBoundary) } : {}),
       ...(redirect !== undefined ? { redirect, ...(keepQuery ? { keepQuery: true } : {}) } : {}),
+      ...(value.layout === false ? { layout: false as const } : {}),
       ...(value.meta !== undefined ? { meta: routeMeta(value.meta) } : {}), source: Object.freeze({ ...source }) });
     byId.set(route.id, route); return route;
   });
@@ -171,7 +177,21 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
   return Object.freeze(routes);
 }
 
-const configFields = new Set(['id', 'path', 'index', 'component', 'errorBoundary', 'redirect', 'keepQuery', 'wrappers', 'meta', 'routes']);
+/** Wrap top-level routes in a pathless global layout; `layout: false` keeps a subtree outside it. */
+export function applyGlobalLayout(routes: readonly RouteRecord[], layout: { readonly module: ModuleRef; readonly pluginId?: string; readonly id?: string }): readonly RouteRecord[] {
+  if (!Array.isArray(routes) || !layout || typeof layout !== 'object' || Array.isArray(layout)) fail('ROUTE_LAYOUT_INVALID', 'Invalid global layout declaration.');
+  const id = layout.id ?? 'layout:global';
+  if (typeof id !== 'string' || !id || id.length > 256 || id.startsWith('cormi:')) fail('ROUTE_LAYOUT_INVALID', 'Invalid global layout route id.', { id });
+  if (routes.some(route => route.id === id)) fail('ROUTE_ID_CONFLICT', `Global layout id conflicts with an existing route: ${id}`, { id });
+  const module = moduleRef(layout.module);
+  const wrapped = routes.some(route => !route.parentId && route.layout !== false);
+  if (!wrapped) return validateRoutes(routes);
+  const children = routes.map(route => !route.parentId && route.layout !== false ? Object.freeze({ ...route, parentId: id }) : route);
+  const record: RouteRecord = Object.freeze({ id, module, source: Object.freeze({ ...(layout.pluginId ? { pluginId: layout.pluginId } : {}) }) });
+  return validateRoutes([record, ...children]);
+}
+
+const configFields = new Set(['id', 'path', 'index', 'component', 'errorBoundary', 'redirect', 'keepQuery', 'wrappers', 'layout', 'meta', 'routes']);
 function configId(value: unknown): string | undefined {
   if (value === undefined) return undefined;
   if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(value)) fail('ROUTE_CONFIG_INVALID', 'Invalid configured route id.', { id: value });
@@ -216,6 +236,8 @@ export function expandRouteConfig(input: unknown, options: { readonly pluginId?:
       }
       const redirect = row.redirect === undefined ? undefined : redirectTarget(row.redirect);
       const keepQuery = redirectKeepQuery(redirect, row.keepQuery);
+      if (row.layout !== undefined && row.layout !== false) fail('ROUTE_CONFIG_INVALID', 'layout only supports false.', { id: explicitId });
+      const noGlobalLayout = row.layout === false;
       let path = row.path as string | undefined;
       if (path !== undefined) {
         if (/[\0\r\n?#%\\]/.test(path) || path.length > 512) fail('ROUTE_PATH_INVALID', 'Invalid configured route path.', { id: explicitId, path });
@@ -257,13 +279,14 @@ export function expandRouteConfig(input: unknown, options: { readonly pluginId?:
         if (ids.has(wrapperId)) fail('ROUTE_ID_CONFLICT', `Duplicate configured route id: ${wrapperId}`, { id: wrapperId });
         ids.add(wrapperId);
         records.push(Object.freeze({ id: wrapperId, ...(recordParent !== undefined ? { parentId: recordParent } : {}),
-          ...(recordPath !== undefined ? { path: recordPath } : {}), module: wrappers[i]!, source }));
+          ...(recordPath !== undefined ? { path: recordPath } : {}), module: wrappers[i]!, ...(noGlobalLayout ? { layout: false as const } : {}), source }));
         recordParent = wrapperId; recordPath = '';
       }
       records.push(Object.freeze({ id, ...(recordParent !== undefined ? { parentId: recordParent } : {}),
         ...(effectiveIndex ? { index: true } : recordPath !== undefined ? { path: recordPath } : {}),
         ...(component ? { module: component } : {}), ...(errorBoundary ? { errorBoundary } : {}),
         ...(redirect !== undefined ? { redirect, ...(keepQuery ? { keepQuery: true } : {}) } : {}),
+        ...(noGlobalLayout ? { layout: false as const } : {}),
         ...(row.meta !== undefined ? { meta: row.meta as RouteMeta } : {}), source }));
       if (hasChildren) visit(children, id, full, depth + 1);
     }

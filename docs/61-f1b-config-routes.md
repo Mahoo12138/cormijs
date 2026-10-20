@@ -1,6 +1,6 @@
 # cormi F1b：配置式嵌套路由
 
-日期：2026-10-20。基于路线提交 `a802e4b` 的工作区（F1a/F1b/F1c 尚未提交）。本切片交付 Umi U04 的第一部分：用 `routes` 嵌套声明页面、布局、index、动态参数、错误边界和 meta，由原生插件展开为既有扁平 `RouteRecord` IR。redirect/keepQuery 与 wrappers 已由后续 [F1c](62-f1c-redirects-and-wrappers.md) 补充；`layout: false`（U05 剩余）、约定 404/loading（U06）与 history 选择（U07）仍未交付。
+日期：2026-10-20。基于路线提交 `a802e4b` 的工作区（F1a/F1b/F1c/F1d 尚未提交）。本切片交付 Umi U04 的第一部分：用 `routes` 嵌套声明页面、布局、index、动态参数、错误边界和 meta，由原生插件展开为既有扁平 `RouteRecord` IR。redirect/keepQuery 与 wrappers 已由后续 [F1c](62-f1c-redirects-and-wrappers.md) 补充；`layout:false` 与全局布局由 [F1d](63-f1d-global-layout.md) 交付；约定 404/loading（U06 剩余）与 history 选择（U07）仍未交付。
 
 ## 1. 使用方式
 
@@ -94,7 +94,7 @@ export default defineConfig({
 | ID | 按遍历顺序分配 | 路径派生稳定 ID，必要时显式 `id` |
 | 顶层绝对路径 | 支持 | 支持并在展开时规范化为相对路径 |
 | 嵌套绝对/末尾斜杠 | 规则更宽松 | 明确拒绝，避免双重规范化 |
-| redirect/wrappers/layout:false | 配置字段 | redirect/keepQuery/wrappers 已由 [F1c](62-f1c-redirects-and-wrappers.md) 交付；`layout:false` 仍待全局 layout |
+| redirect/wrappers/layout:false | 配置字段 | redirect/keepQuery/wrappers 已由 [F1c](62-f1c-redirects-and-wrappers.md) 交付；`layout:false` 与全局布局由 [F1d](63-f1d-global-layout.md) 交付 |
 | meta | 路由 metadata | 公开 JSON，进入 `handle.cormi.meta` |
 
 本切片不承诺 Umi 路由配置的二进制兼容，也不引入 Umi PluginAPI。
@@ -133,7 +133,7 @@ export default defineConfig({
 
 ## 8. 下一步
 
-- U05 剩余：`layout: false` 与全局 layout 一起设计；redirect/keepQuery/wrappers 已由 [F1c](62-f1c-redirects-and-wrappers.md) 交付；
-- U06：可选择的 404/loading 约定，保持默认 404 与懒加载语义；
+- U05 已完成：redirect/keepQuery、wrappers 与 `layout:false` 均已交付；全局布局见 [F1d](63-f1d-global-layout.md)；
+- U06 剩余：`src/pages/404.tsx` 与 `src/loading.*` 约定；
 - U07：browser/hash/memory history 选择与公共导航/查询入口；
 - F2：在 F1a 运行时入口上登记 model/initial-state/request 的 key 与 Provider。

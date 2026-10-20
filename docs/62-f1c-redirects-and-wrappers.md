@@ -1,6 +1,6 @@
 # cormi F1c：redirect、keepQuery 与路由 wrappers
 
-日期：2026-10-20。基于路线提交 `a802e4b` 的工作区（F1a/F1b/F1c 尚未提交）。本切片交付 Umi U05 的前两项：配置路由的 `redirect`/`keepQuery` 与 `wrappers`。两者仍由 `routeConfigPlugin` 展开为既有扁平 `RouteRecord` IR，不引入第二套路由系统。`layout: false` 未交付：cormi 当前没有全局 layout，它应在 U06/F3 的全局布局能力中实现，而不是现在接受一个无效果字段。
+日期：2026-10-20。基于路线提交 `a802e4b` 的工作区（F1a/F1b/F1c 尚未提交）。本切片交付 Umi U05 的前两项：配置路由的 `redirect`/`keepQuery` 与 `wrappers`。两者仍由 `routeConfigPlugin` 展开为既有扁平 `RouteRecord` IR，不引入第二套路由系统。`layout: false` 已由后续 [F1d](63-f1d-global-layout.md) 随可选全局布局插件补齐。
 
 ## 1. 使用方式
 
@@ -121,8 +121,8 @@ wrapper 组件和页面一样按需懒加载，不进入 Node 生成阶段执行
 | wrapper 路径归属 | 首个 wrapper 拥有 path，后续与页面为空 | 相同 |
 | wrapper 顺序 ID | 遍历顺序数字 ID | `<route id>:wrapper:N` |
 | catch-all wrapper | 用 `*` 继续 wrapper 链 | 明确拒绝 |
-| originPath | 记录供 layout 使用 | 未记录；cormi 尚无全局 layout |
-| `layout: false` | 仅退出全局 layout | 未实现，且当前会被当作未知字段拒绝 |
+| originPath | 记录供 layout 使用 | 未记录；当前全局布局实现不需要该字段 |
+| `layout: false` | 仅退出全局 layout | 已由 [F1d](63-f1d-global-layout.md) 交付；配置展开会传播到 wrapper 链 |
 | 约定 wrappers | 约定路由也支持 | 仅配置式声明 |
 | 类型/别名 | 支持别名、省略扩展名 | 项目相对源码文件且必须带运行时扩展名 |
 
@@ -136,7 +136,7 @@ wrapper 组件和页面一样按需懒加载，不进入 Node 生成阶段执行
 - `ROUTE_PARENT_MISSING`、`ROUTE_PATH_INVALID` 等既有校验继续生效；
 - 单次展开上限仍为 10000 条、嵌套深度 64；wrapper 数量限制为每路由 32；
 - 展开错误使本次生成失败，上一次有效产物不被替换；插件卸载后下一次编译不再包含其 redirect/wrapper 记录；
-- 没有为路由声明增加进程内热替换，也没有新增服务器重定向、loader 重定向或全局布局语义。
+- 没有为路由声明增加进程内热替换，也没有新增服务器重定向或 loader 重定向；全局布局与 `layout:false` 由后续 [F1d](63-f1d-global-layout.md) 单独交付。
 
 ## 7. 验证
 
@@ -165,7 +165,7 @@ wrapper 组件和页面一样按需懒加载，不进入 Node 生成阶段执行
 
 ## 8. 下一步
 
-- U05 剩余：`layout: false` 与全局 layout 一起设计，避免提供无效果字段；
-- U06：可选择的 404/loading 约定，保持默认 404 与懒加载语义；
+- U05 已完成：redirect/keepQuery、wrappers、`layout:false` 均已交付；`layout:false` 见 [F1d](63-f1d-global-layout.md)；
+- U06 剩余：`src/pages/404.tsx` 与 `src/loading.*` 约定；
 - U07：browser/hash/memory history 选择与公共导航/查询入口；
 - F2：在 F1a 运行时入口上登记 model/initial-state/request 的 key 与 Provider。

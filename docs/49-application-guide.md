@@ -151,11 +151,51 @@ export default defineConfig({
 });
 ```
 
-`component`/`errorBoundary`/`wrappers` 是项目相对、带运行时扩展名的源码文件，默认导出即组件。顶层 `/` 有子级时是根布局，无子级时是 index；空路径叶子在任意层级都按 index 处理。自动 ID 由完整路径派生，显式 `id` 可消除布局歧义。`redirect` 只接受内部绝对路径，目标参数必须来自当前路由的完整路径；重定向路由不能同时声明页面、错误边界、子路由或 wrappers。`keepQuery: true` 会把当前查询串和 hash 带到目标，且目标自身不能再带查询串或 hash。`wrappers` 按外层到内层展开为普通父路由记录，每个 wrapper 必须渲染 `<Outlet />`；第一个 wrapper 拥有 URL 路径，后续 wrapper 和真实页面使用空路径。`layout: false` 尚未实现，当前会被当作未知字段拒绝。
+`component`/`errorBoundary`/`wrappers` 是项目相对、带运行时扩展名的源码文件，默认导出即组件。顶层 `/` 有子级时是根布局，无子级时是 index；空路径叶子在任意层级都按 index 处理。自动 ID 由完整路径派生，显式 `id` 可消除布局歧义。`redirect` 只接受内部绝对路径，目标参数必须来自当前路由的完整路径；重定向路由不能同时声明页面、错误边界、子路由或 wrappers。`keepQuery: true` 会把当前查询串和 hash 带到目标，且目标自身不能再带查询串或 hash。`wrappers` 按外层到内层展开为普通父路由记录，每个 wrapper 必须渲染 `<Outlet />`；第一个 wrapper 拥有 URL 路径，后续 wrapper 和真实页面使用空路径。`layout: false` 可用于退出显式启用的全局布局，见 4.2。
 
 配置贡献仍通过原生 `ctx.react.routes.tap()` 登记，插件卸载会撤回；与 `app.routes` IR、`defineReactFeature` 及约定扫描的最终校验相同。声明修改按 Node 配置重启生效，页面与 wrapper 组件修改仍走 Fast Refresh。完整字段、限制、Umi 差异和验证见 [F1b 配置式嵌套路由](61-f1b-config-routes.md) 与 [F1c redirect 与 wrappers](62-f1c-redirects-and-wrappers.md)。
 
 示例：`pnpm cormi dev --root examples/config-routes`，默认监听 `/routes/`。
+
+### 4.2 全局布局与 layout:false
+
+需要 Umi 式的全局布局入口时，显式加入 `layoutPlugin`：
+
+```ts
+// cormi.config.ts
+import { layoutPlugin } from '@cormijs/plugin-react';
+
+export default defineConfig({
+  presets: [reactVite],
+  plugins: [{ id: 'application-layout', plugin: layoutPlugin, options: { id: 'application:layout' } }],
+  // ...
+});
+```
+
+```tsx
+// src/layouts/index.tsx
+import { Outlet } from 'react-router';
+
+export default function GlobalLayout() {
+  return <div className="app-shell"><Outlet /></div>;
+}
+```
+
+默认查找 `src/layouts/index.tsx`、`.jsx`、`.ts`、`.js`，可用 `options.files` 覆盖。布局必须渲染 `<Outlet />`；它会在全部路由贡献合并后包住所有未退出的顶层路由，嵌套路由的路径和父子关系不变。布局来源通过原生 `ctx.react.layouts` 贡献，插件卸载即撤回；同一时刻只允许一个实际布局，多个候选以 `LAYOUT_CONFLICT` 失败。
+
+顶层路由可声明 `layout: false` 退出全局布局，其整个子树都不经过该布局：
+
+```ts
+export const routes = [{
+  path: 'login',
+  component: './src/pages/Login.tsx',
+  layout: false,
+}];
+```
+
+配置路由的 `layout: false` 会传播到 wrapper 链。默认 404 仍在应用路由之外；约定 404/loading 尚未交付。完整规则、与 Umi 的差异和验证见 [F1d 全局布局](63-f1d-global-layout.md)。
+
+示例：`pnpm cormi dev --root examples/config-routes`，其中 `/routes/bare` 演示退出全局布局。
 
 ## 5. 环境和 Mock 使用同一个部署前缀
 

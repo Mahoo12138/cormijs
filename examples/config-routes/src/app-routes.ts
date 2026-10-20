@@ -1,6 +1,8 @@
 import type { ConfigRoute } from '@cormijs/plugin-react';
 
 export const routes: readonly ConfigRoute[] = [{
+  path: 'bare', component: './src/pages/Bare.tsx', layout: false,
+}, {
   id: 'shell', path: '/', component: './src/layouts/Shell.tsx', routes: [
     { index: true, component: './src/pages/Home.tsx', meta: { title: '首页' } },
     { path: 'about', component: './src/pages/About.tsx', meta: { title: '关于' }, wrappers: ['./src/wrappers/Trace.tsx', './src/wrappers/Gate.tsx'] },

@@ -33,9 +33,9 @@
 | U01 | plugins/presets、配置启用、编译扩展 | 基础已有：原生插件、preset、贡献；不兼容 Umi PluginAPI | 原生 Cordis + 配置/preset | 保留 |
 | U02 | src/app.ts(x)、defineApp、runtime config keys | 基础已有（F1a）：显式启用的独立约定插件识别单体 app 文件，defineApp 与扩展 key 注册；默认 preset 未内置约定 | 应用约定插件 + React runtime 接入 | F1 |
 | U03 | render、rootContainer、patchClientRoutes、完整 onRouteChange | 基础已有（F1a）：Promise once-only next 的 render、rootContainer、patchClientRoutes、含 routes/clientRoutes 的完整事件；hash/memory history 未实现 | React 应用 runtime 扩展 | F1 |
-| U04 | 配置式 routes、component、子路由 | 基础已有（F1b/F1c）：嵌套 `ConfigRoute` 由原生插件展开为扁平 IR，component/errorBoundary/meta/index/动态参数/redirect/wrappers 可用；稳定路径 ID | 路由配置插件，输出既有 IR | F1 |
-| U05 | redirect/keepQuery、wrappers、layout:false | 部分已有（F1c）：配置和 IR 的 redirect/keepQuery 与 wrappers 已交付；`layout:false` 依赖全局 layout，未实现且会被当作未知字段拒绝 | 路由/布局领域插件 | F1 |
-| U06 | 约定路由、全局 layouts/index、404/loading | 部分已有 [id]/_layout/catch-all/默认404；与 Umi $/layouts/loading 约定不同 | 可选择的约定扫描插件 | F1 |
+| U04 | 配置式 routes、component、子路由 | 基础已有（F1b/F1c/F1d）：嵌套 `ConfigRoute` 由原生插件展开为扁平 IR，component/errorBoundary/meta/index/动态参数/redirect/wrappers/layout:false 可用；稳定路径 ID | 路由配置插件，输出既有 IR | F1 |
+| U05 | redirect/keepQuery、wrappers、layout:false | 基础已有（F1c/F1d）：redirect/keepQuery、wrappers 与 `layout:false` 均已进入配置和扁平 IR；`layout:false` 由可选全局布局插件消费 | 路由/布局领域插件 | F1 |
+| U06 | 约定路由、全局 layouts/index、404/loading | 部分已有（F1d）：可选 `layoutPlugin` 发现 src/layouts/index.* 并包裹顶层路由；约定 404/loading 仍待实现，默认 404 保留 | 可选择的约定扫描插件 | F1 |
 | U07 | history browser/hash/memory、查询与导航公共入口 | 仅 browser Router；缺配置选择和统一应用导航接口 | Router 适配插件/客户端 SDK | F1 |
 | U08 | runtime 模块/生成导出/类型提示 | 部分已有（F1a）：应用配置模块随入口生成、仅在浏览器求值并参与类型检查；按启用功能生成应用侧导出仍待 F2 | 应用编译插件，不混合 Node/client barrel | F1 |
 | U09 | model/useModel、命名空间、selector、extraModels | 待实现；只有普通 React 局部状态 | model 插件 + React Provider | F2 |
@@ -90,7 +90,9 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 
 **F1b 状态（2026-10-20）：** U04 的配置式嵌套路由已交付；`ConfigRoute`/`expandRouteConfig` 输出既有扁平 IR，`routeConfigPlugin` 通过 `inject: ['react']` 与 `ctx.react.routes.tap()` 贡献，卸载撤回。用法、Umi 差异、约定路由关闭方式和验证见 [F1b 配置式嵌套路由](61-f1b-config-routes.md)。
 
-**F1c 状态（2026-10-20）：** U05 的 `redirect`/`keepQuery` 与 `wrappers` 已交付；redirect 生成 `RedirectRoute` 做参数替换与 replace 导航，wrappers 展开为普通父路由记录，二者都进入既有扁平 IR。`layout: false` 需要先有全局 layout，明确留到 U06/F3，当前不会被静默忽略。用法、值与路径规则、Umi 差异和验证见 [F1c redirect 与 wrappers](62-f1c-redirects-and-wrappers.md)。F1 剩余的约定 404/loading、history 选择与公共导航/查询入口尚未开始。
+**F1c 状态（2026-10-20）：** U05 的 `redirect`/`keepQuery` 与 `wrappers` 已交付；redirect 生成 `RedirectRoute` 做参数替换与 replace 导航，wrappers 展开为普通父路由记录，二者都进入既有扁平 IR。用法、值与路径规则、Umi 差异和验证见 [F1c redirect 与 wrappers](62-f1c-redirects-and-wrappers.md)。
+
+**F1d 状态（2026-10-20）：** U06 的全局布局部分已交付：可选 `layoutPlugin` 发现 `src/layouts/index.*`，在全部路由贡献合并后包裹未退出的顶层路由；`layout:false` 已由配置、低层 IR 和 wrapper 链共同支持。约定 404/loading 仍未实现。用法、差异和验证见 [F1d 全局布局](63-f1d-global-layout.md)。F1 剩余的约定 404/loading、history 选择与公共导航/查询入口尚未开始。
 
 验收从真实应用文件出发：app.tsx/tsx 文件冲突、命名/默认导出形式、Hook 次序、异步初始化、路由修改及导航事件、模块停用和源码更新、生产构建、严格类型与独立安装。不是只测试注册表返回了一段字符串。
 

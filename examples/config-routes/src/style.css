@@ -1,10 +1,14 @@
 :root { color-scheme: light; font-family: ui-sans-serif, system-ui, sans-serif; background: #f5f2ea; color: #25221e; }
 body { margin: 0; }
 .shell { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; }
+.global-layout { min-height: 100vh; }
+.global-layout > aside { padding: 10px 24px; background: #25221e; color: #f5f2ea; font-size: 12px; letter-spacing: .12em; }
+.bare { max-width: 760px; margin: 0 auto; padding: 48px 24px; }
 .eyebrow { letter-spacing: .18em; font-size: 12px; color: #8a5a2b; }
 h1 { margin: 8px 0 20px; font-size: clamp(32px, 6vw, 52px); }
-nav { display: flex; gap: 18px; }
+nav { display: flex; gap: 18px; flex-wrap: wrap; }
 nav a { color: #8a5a2b; text-decoration: none; border-bottom: 1px solid currentColor; }
 .route, .location { font-family: ui-monospace, monospace; font-size: 12px; color: #6b655c; margin: 10px 0 0; }
 .content { margin-top: 32px; padding: 24px; background: #fffdf8; border: 1px solid #e3dbcd; border-radius: 12px; }
 footer { margin-top: 32px; font-size: 12px; color: #6b655c; }
+footer a { margin-left: 8px; color: #8a5a2b; }

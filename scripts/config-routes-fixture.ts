@@ -5,6 +5,8 @@ import type { Page } from 'playwright-core';
 
 export const configRoutesSource = `import type { ConfigRoute } from '@cormijs/plugin-react';
 export const routes: readonly ConfigRoute[] = [{
+  path: 'bare', component: './src/pages/Bare.tsx', layout: false,
+}, {
   id: 'shell', path: '/', component: './src/layouts/Shell.tsx',
   routes: [
     { index: true, component: './src/pages/Home.tsx', meta: { title: 'Home' } },
@@ -20,11 +22,14 @@ export const routes: readonly ConfigRoute[] = [{
 `;
 export const configRoutesConfiguration = `import { defineConfig } from 'cormijs';
 import preset from '@cormijs/preset-react-vite';
-import { routeConfigPlugin } from '@cormijs/plugin-react';
+import { layoutPlugin, routeConfigPlugin } from '@cormijs/plugin-react';
 import { routes } from './src/app-routes';
 export default defineConfig({
   presets: [preset],
-  plugins: [{ id: 'application-routes', plugin: routeConfigPlugin, options: { id: 'application:routes', routes } }],
+  plugins: [
+    { id: 'application-layout', plugin: layoutPlugin, options: { id: 'application:layout' } },
+    { id: 'application-routes', plugin: routeConfigPlugin, options: { id: 'application:routes', routes } },
+  ],
   app: { base: '/routes/', routes: [], server: { port: 0 } },
 });
 `;
@@ -34,6 +39,9 @@ export async function writeConfigRoutesFixture(root: string) {
     'index.html': '<!doctype html><html><head><title>cormi config routes</title><link rel="icon" href="data:," /></head><body><div id="root"></div><script type="module" src="/.cormi/app.tsx"></script></body></html>',
     'cormi.config.ts': configRoutesConfiguration,
     'src/app-routes.ts': configRoutesSource,
+    'src/layouts/index.tsx': `import { Outlet, useLocation } from 'react-router';
+export default function GlobalLayout(){const location=useLocation();return <div data-global-layout data-global-path={location.pathname}><aside>Global layout</aside><Outlet /></div>;}`,
+    'src/pages/Bare.tsx': `export default function Bare(){return <main><h2>Bare config</h2><p>This route opts out of the global layout.</p></main>;}`,
     'src/layouts/Shell.tsx': `import { Link, Outlet, useLocation } from 'react-router';
 import { useRouteMatches } from '@cormijs/runtime';
 export default function Shell() {
@@ -68,6 +76,8 @@ export default function Gate(){return <div data-wrapper="gate"><Outlet/></div>;}
 export async function verifyConfigRoutesPage(page: Page, url: string, errorBoundary = true) {
   await page.goto(url); await page.getByRole('heading', { name: 'Config home', exact: true }).waitFor();
   assert.equal(new URL(page.url()).pathname, '/routes/'); assert.equal(await page.title(), 'cormi config routes');
+  assert.equal(await page.locator('[data-global-layout] [data-shell="configured"]').count(), 1);
+  assert.equal(await page.locator('[data-global-layout]').getAttribute('data-global-path'), '/');
   const current = page.locator('[data-route]');
   assert.equal(await current.getAttribute('data-route'), 'config:root:index');
   assert.equal(await current.getAttribute('data-title'), 'Home');
@@ -106,6 +116,10 @@ export async function verifyConfigRoutesPage(page: Page, url: string, errorBound
   assert.equal(await page.locator('[data-wrapper="trace"]').getAttribute('data-wrapper-search'), '?q=alpha');
   await page.goto(new URL('team/beta', url).href); await page.getByRole('heading', { name: 'Member beta', exact: true }).waitFor();
   await page.reload(); await page.getByRole('heading', { name: 'Member beta', exact: true }).waitFor();
+  await page.goto(new URL('bare', url).href); await page.getByRole('heading', { name: 'Bare config', exact: true }).waitFor();
+  assert.equal(new URL(page.url()).pathname, '/routes/bare');
+  assert.equal(await page.locator('[data-global-layout]').count(), 0);
+  assert.equal(await page.locator('[data-shell="configured"]').count(), 0);
   await page.goto(new URL('missing', url).href); await page.getByRole('heading', { name: '404', exact: true }).waitFor();
   await page.goto(url); await page.getByRole('heading', { name: 'Config home', exact: true }).waitFor();
   assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);

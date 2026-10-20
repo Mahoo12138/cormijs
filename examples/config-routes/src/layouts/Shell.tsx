@@ -19,6 +19,6 @@ export default function Shell() {
       <p className="location">{location.pathname}</p>
     </header>
     <main className="content"><Outlet /></main>
-    <footer>声明来自 src/app-routes.ts；贡献由 routeConfigPlugin 通过原生 React 路由 hook 提供。</footer>
+    <footer>声明来自 src/app-routes.ts；贡献由 routeConfigPlugin 通过原生 React 路由 hook 提供。<Link to="/bare">无全局布局页</Link></footer>
   </div>;
 }
