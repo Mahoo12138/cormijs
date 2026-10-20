@@ -20,9 +20,31 @@ export interface RouteRecord {
   readonly module?: ModuleRef;
   /** Eager client component, independent of the page's lazy import; receives errors via useRouteError. */
   readonly errorBoundary?: ModuleRef;
+  /** Internal absolute URL path rendered as a replace navigation; `:params` come from the matched route. */
+  readonly redirect?: string;
+  /** Append the current search and hash to a redirect target. */
+  readonly keepQuery?: boolean;
   /** Public browser metadata, never server credentials or executable callbacks. */
   readonly meta?: RouteMeta;
   readonly source: { readonly file?: string; readonly pluginId?: string };
+}
+/** Application-facing nested route declaration, expanded to the flat RouteRecord IR. */
+export interface ConfigRoute {
+  readonly id?: string;
+  readonly path?: string;
+  readonly index?: boolean;
+  /** Project-relative browser source file; its default export is the route component. */
+  readonly component?: string;
+  /** Project-relative browser source file exporting the route error boundary. */
+  readonly errorBoundary?: string;
+  /** Internal absolute URL path; a route with redirect cannot also define a page. */
+  readonly redirect?: string;
+  /** Keep the current query string and hash when redirecting. */
+  readonly keepQuery?: boolean;
+  /** Outer-to-inner layout components; each must render an Outlet for the route below it. */
+  readonly wrappers?: readonly string[];
+  readonly meta?: RouteMeta;
+  readonly routes?: readonly ConfigRoute[];
 }
 const compare = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0;
 const slash = (path: string) => path.split(sep).join('/');
@@ -49,6 +71,31 @@ export function moduleRef(value: unknown): ModuleRef {
   }
   return Object.freeze({ specifier: ref.specifier, exportName: ref.exportName, ...(ref.from !== undefined ? { from: ref.from as string } : {}) });
 }
+function redirectTarget(value: unknown): string {
+  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//') || value.length > 512 || /[\0\r\n\\]/.test(value)) {
+    fail('ROUTE_REDIRECT_INVALID', 'Redirect must be an internal absolute URL path.');
+  }
+  return value;
+}
+function redirectParams(target: string, params: ReadonlySet<string>): void {
+  const pathname = target.split(/[?#]/, 1)[0]!;
+  for (const part of pathname.split('/')) {
+    if (!part) continue;
+    if (part.startsWith(':')) {
+      if (!/^:[A-Za-z_][A-Za-z0-9_]*$/.test(part) || !params.has(part.slice(1))) {
+        fail('ROUTE_REDIRECT_INVALID', `Redirect target references an unknown parameter: ${part}`, { param: part.slice(1) });
+      }
+    } else if (/[:*]/.test(part)) fail('ROUTE_REDIRECT_INVALID', 'Redirect target has an invalid path segment.', { part });
+  }
+}
+function redirectKeepQuery(redirect: string | undefined, keepQuery: unknown): boolean {
+  if (keepQuery !== undefined && typeof keepQuery !== 'boolean') fail('ROUTE_REDIRECT_INVALID', 'keepQuery must be boolean.');
+  if (keepQuery === true && redirect === undefined) fail('ROUTE_REDIRECT_INVALID', 'keepQuery requires redirect.');
+  if (keepQuery === true && redirect !== undefined && /[?#]/.test(redirect)) {
+    fail('ROUTE_REDIRECT_INVALID', 'A keepQuery redirect cannot define its own query or hash.');
+  }
+  return keepQuery === true;
+}
 
 /** Validate and copy plugin/config output before it becomes executable application code. */
 export function validateRoutes(input: unknown): readonly RouteRecord[] {
@@ -57,7 +104,7 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
   const routes = input.map((item: unknown): RouteRecord => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) fail('ROUTE_INVALID', 'Expected a route object.');
     const value = item as Record<string, unknown>;
-    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'errorBoundary', 'source', 'meta'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
+    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'errorBoundary', 'redirect', 'keepQuery', 'source', 'meta'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
     if (typeof value.id !== 'string' || !value.id || value.id.startsWith('cormi:') || byId.has(value.id)) fail('ROUTE_ID_CONFLICT', `Invalid, reserved or duplicate route id: ${value.id}`);
     if (value.parentId !== undefined && (typeof value.parentId !== 'string' || !value.parentId)) fail('ROUTE_INVALID', 'Invalid parent id.', { id: value.id });
     if (value.index !== undefined && typeof value.index !== 'boolean') fail('ROUTE_INVALID', 'index must be boolean.', { id: value.id });
@@ -70,6 +117,14 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
       if (!part || part === '.' || part === '..' || /[\[\]]/.test(part) || (part.includes(':') && !/^:[A-Za-z_][A-Za-z0-9_]*$/.test(part))
         || (part.includes('*') && part !== '*')) fail('ROUTE_PATH_INVALID', 'Unsupported route segment.', { id: value.id, part });
     }
+    const redirect = value.redirect === undefined ? undefined : redirectTarget(value.redirect);
+    const keepQuery = redirectKeepQuery(redirect, value.keepQuery);
+    if (redirect !== undefined && (value.module !== undefined || value.errorBoundary !== undefined)) {
+      fail('ROUTE_REDIRECT_INVALID', 'A redirect route cannot also define a module or error boundary.', { id: value.id });
+    }
+    if (redirect !== undefined && value.index !== true && value.path === undefined) {
+      fail('ROUTE_REDIRECT_INVALID', 'A redirect route needs a path or index.', { id: value.id });
+    }
     const rawSource = value.source ?? {};
     if (!rawSource || typeof rawSource !== 'object' || Array.isArray(rawSource)) fail('ROUTE_INVALID', 'Invalid source.');
     const source = rawSource as Record<string, unknown>;
@@ -78,6 +133,7 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
       ...(path !== undefined ? { path } : {}), ...(value.index === true ? { index: true } : {}),
       ...(value.module !== undefined ? { module: moduleRef(value.module) } : {}),
       ...(value.errorBoundary !== undefined ? { errorBoundary: moduleRef(value.errorBoundary) } : {}),
+      ...(redirect !== undefined ? { redirect, ...(keepQuery ? { keepQuery: true } : {}) } : {}),
       ...(value.meta !== undefined ? { meta: routeMeta(value.meta) } : {}), source: Object.freeze({ ...source }) });
     byId.set(route.id, route); return route;
   });
@@ -101,7 +157,9 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
     const path = fullPath(route), parts = path ? path.split('/') : [], nested = children.get(route.id)?.length ?? 0;
     if (route.index && nested) fail('ROUTE_INVALID', 'Index route cannot have children.', { id: route.id });
     if (parts.includes('*') && (parts.at(-1) !== '*' || parts.filter(p => p === '*').length !== 1 || nested)) fail('ROUTE_PATH_INVALID', 'Catch-all must be terminal.', { id: route.id });
+    if (route.redirect !== undefined && nested) fail('ROUTE_REDIRECT_INVALID', 'Redirect routes cannot have children.', { id: route.id });
     const params = parts.filter(p => p.startsWith(':'));
+    if (route.redirect !== undefined) redirectParams(route.redirect, new Set(params.map(part => part.slice(1))));
     if (new Set(params).size !== params.length) fail('ROUTE_PATH_INVALID', 'Repeated parameter in one path.', { id: route.id });
     // Layout/container endpoints may share their path with their index child, but page endpoints may not.
     if (nested && !route.index) continue;
@@ -111,6 +169,107 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
     endpoints.set(shape, route);
   }
   return Object.freeze(routes);
+}
+
+const configFields = new Set(['id', 'path', 'index', 'component', 'errorBoundary', 'redirect', 'keepQuery', 'wrappers', 'meta', 'routes']);
+function configId(value: unknown): string | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(value)) fail('ROUTE_CONFIG_INVALID', 'Invalid configured route id.', { id: value });
+  return value;
+}
+function configModule(value: unknown, field: string): ModuleRef | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string' || !value || value.length > 512 || /[\0\r\n?#%\\]/.test(value) || isAbsolute(value)) fail('ROUTE_CONFIG_INVALID', `${field} must be a project-relative source file.`);
+  const file = value.startsWith('./') ? value.slice(2) : value;
+  const parts = file.split('/');
+  if (!file || parts.some(part => !part || part === '.' || part === '..' || part.startsWith('.'))) fail('ROUTE_CONFIG_INVALID', `${field} must be a project-relative source file.`, { file: value });
+  if (!/\.[cm]?[jt]sx?$/.test(file) || /\.d\.[cm]?[jt]sx?$/.test(file)) fail('ROUTE_CONFIG_INVALID', `${field} must be a runtime source file.`, { file: value });
+  return moduleRef({ specifier: './' + file, exportName: 'default' });
+}
+/** Expand nested application routes into the validated flat IR; paths are relative to their parent. */
+export function expandRouteConfig(input: unknown, options: { readonly pluginId?: string } = {}): readonly RouteRecord[] {
+  if (!Array.isArray(input) || input.length > 10000) fail('ROUTE_CONFIG_INVALID', 'Expected at most 10000 configured routes.');
+  if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => key !== 'pluginId')) fail('ROUTE_CONFIG_INVALID', 'Invalid configured route options.');
+  const pluginId = options.pluginId;
+  if (pluginId !== undefined && (typeof pluginId !== 'string' || !pluginId || pluginId.length > 128)) fail('ROUTE_CONFIG_INVALID', 'Invalid configured route source id.');
+  const records: RouteRecord[] = [], ids = new Set<string>();
+  let total = 0;
+  function visit(items: readonly unknown[], parentId: string | undefined, parentPath: string, depth: number): void {
+    if (depth > 64) fail('ROUTE_CONFIG_INVALID', 'Configured route nesting exceeds depth 64.');
+    for (const item of items) {
+      if (++total > 10000) fail('ROUTE_CONFIG_INVALID', 'Configured routes exceed the 10000 route limit.');
+      if (!item || typeof item !== 'object' || Array.isArray(item)) fail('ROUTE_CONFIG_INVALID', 'Expected a configured route object.');
+      const row = item as Record<string, unknown>;
+      for (const key of Object.keys(row)) if (!configFields.has(key)) fail('ROUTE_CONFIG_INVALID', `Unknown configured route field: ${key}`);
+      const explicitId = configId(row.id);
+      if (row.index !== undefined && typeof row.index !== 'boolean') fail('ROUTE_CONFIG_INVALID', 'index must be boolean.', { id: explicitId });
+      if (row.path !== undefined && typeof row.path !== 'string') fail('ROUTE_CONFIG_INVALID', 'path must be a string.', { id: explicitId });
+      if (row.routes !== undefined && (!Array.isArray(row.routes) || !row.routes.length)) fail('ROUTE_CONFIG_INVALID', 'Configured route children must be a non-empty array.', { id: explicitId });
+      const children = (row.routes ?? []) as readonly unknown[], index = row.index === true;
+      const component = configModule(row.component, 'component'), errorBoundary = configModule(row.errorBoundary, 'errorBoundary');
+      const wrappers: ModuleRef[] = [];
+      if (row.wrappers !== undefined) {
+        if (!Array.isArray(row.wrappers) || !row.wrappers.length || row.wrappers.length > 32) {
+          fail('ROUTE_CONFIG_INVALID', 'wrappers must be a non-empty array of at most 32 modules.', { id: explicitId });
+        }
+        for (let i = 0; i < row.wrappers.length; i++) wrappers.push(configModule(row.wrappers[i], `wrappers[${i}]`)!);
+      }
+      const redirect = row.redirect === undefined ? undefined : redirectTarget(row.redirect);
+      const keepQuery = redirectKeepQuery(redirect, row.keepQuery);
+      let path = row.path as string | undefined;
+      if (path !== undefined) {
+        if (/[\0\r\n?#%\\]/.test(path) || path.length > 512) fail('ROUTE_PATH_INVALID', 'Invalid configured route path.', { id: explicitId, path });
+        if (path === '/') { if (parentId !== undefined) fail('ROUTE_PATH_INVALID', 'Nested configured route paths must be relative.', { id: explicitId, path }); path = ''; }
+        else if (path.startsWith('/')) {
+          if (parentId !== undefined) fail('ROUTE_PATH_INVALID', 'Nested configured route paths must be relative.', { id: explicitId, path });
+          if (path.startsWith('//')) fail('ROUTE_PATH_INVALID', 'Invalid configured route path.', { id: explicitId, path });
+          path = path.slice(1);
+        }
+        if (path.endsWith('/')) fail('ROUTE_PATH_INVALID', 'Configured route paths cannot end with /.', { id: explicitId, path });
+      }
+      if (index && path !== undefined) fail('ROUTE_CONFIG_INVALID', 'An index route cannot have a path.', { id: explicitId });
+      const hasChildren = children.length > 0;
+      if (index && hasChildren) fail('ROUTE_CONFIG_INVALID', 'An index route cannot have children.', { id: explicitId });
+      if (index && !component && redirect === undefined) fail('ROUTE_CONFIG_INVALID', 'An index route needs a component or redirect.', { id: explicitId });
+      if (!index && path === undefined && !hasChildren) fail('ROUTE_CONFIG_INVALID', 'A configured route needs a path, index: true, children, or redirect.', { id: explicitId });
+      if (!hasChildren && !component && redirect === undefined) fail('ROUTE_CONFIG_INVALID', 'A leaf configured route needs a component or redirect.', { id: explicitId });
+      if (redirect !== undefined && (component || errorBoundary || hasChildren || wrappers.length)) {
+        fail('ROUTE_REDIRECT_INVALID', 'A redirect route cannot also define a component, error boundary, children or wrappers.', { id: explicitId });
+      }
+      // An empty path is a pathless layout with children and an index route otherwise.
+      const pathless = !index && (path === undefined || path === '') && hasChildren;
+      const effectiveIndex = index || !hasChildren && path === '';
+      const effectivePath = effectiveIndex ? undefined : path;
+      if (wrappers.length && effectivePath !== undefined && effectivePath.split('/').includes('*')) {
+        fail('ROUTE_CONFIG_INVALID', 'wrappers cannot wrap a catch-all route.', { id: explicitId });
+      }
+      const full = [parentPath, effectivePath].filter((part): part is string => !!part).join('/'), base = `config:${full || 'root'}`;
+      const id = explicitId ?? (effectiveIndex ? `${base}:index` : pathless ? `${base}:layout` : base);
+      if (id.length > 256) fail('ROUTE_CONFIG_INVALID', 'Configured route id is too long; set an explicit id.', { id });
+      if (ids.has(id)) fail('ROUTE_ID_CONFLICT', `Duplicate configured route id: ${id}`, { id });
+      ids.add(id);
+      if (redirect !== undefined) redirectParams(redirect, new Set(full.split('/').filter(part => part.startsWith(':')).map(part => part.slice(1))));
+      const source = Object.freeze({ ...(pluginId ? { pluginId } : {}) });
+      let recordParent = parentId, recordPath = effectivePath;
+      for (let i = 0; i < wrappers.length; i++) {
+        const wrapperId = `${id}:wrapper:${i + 1}`;
+        if (wrapperId.length > 256) fail('ROUTE_CONFIG_INVALID', 'Configured route wrapper id is too long; shorten the explicit id.', { id: wrapperId });
+        if (ids.has(wrapperId)) fail('ROUTE_ID_CONFLICT', `Duplicate configured route id: ${wrapperId}`, { id: wrapperId });
+        ids.add(wrapperId);
+        records.push(Object.freeze({ id: wrapperId, ...(recordParent !== undefined ? { parentId: recordParent } : {}),
+          ...(recordPath !== undefined ? { path: recordPath } : {}), module: wrappers[i]!, source }));
+        recordParent = wrapperId; recordPath = '';
+      }
+      records.push(Object.freeze({ id, ...(recordParent !== undefined ? { parentId: recordParent } : {}),
+        ...(effectiveIndex ? { index: true } : recordPath !== undefined ? { path: recordPath } : {}),
+        ...(component ? { module: component } : {}), ...(errorBoundary ? { errorBoundary } : {}),
+        ...(redirect !== undefined ? { redirect, ...(keepQuery ? { keepQuery: true } : {}) } : {}),
+        ...(row.meta !== undefined ? { meta: row.meta as RouteMeta } : {}), source }));
+      if (hasChildren) visit(children, id, full, depth + 1);
+    }
+  }
+  visit(input, undefined, '', 0);
+  return validateRoutes(records);
 }
 
 function routeSegment(part: string): string {

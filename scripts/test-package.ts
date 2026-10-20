@@ -8,6 +8,8 @@ import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeEnvironmentFixture, verifyEnvironmentPage, privateMarkers, environmentLiteral } from './environment-fixture.js';
 import { writeTypecheckGraph, compilerFootprint } from './typescript-fixture.js';
+import { writeAppRuntimeFixture, verifyAppRuntimePage, appRuntimeSource } from './app-runtime-fixture.js';
+import { writeConfigRoutesFixture, verifyConfigRoutesPage } from './config-routes-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -398,6 +400,62 @@ const measuredExecution={name:'fixture:worker-execution',inject:['commands'],app
     await withServer(solutionConsumer,'preview',async url=>{await verifyEnvironmentPage(page,url,'selected',true);assert.equal(await page.locator('#shared-value').innerText(),'Shared value: 42');assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'typescript-solution-preview.png')});},['--mode','staging']);
     assert.deepEqual(await compilerFootprint(solutionConsumer),beforePreview);
     report.stages.push({label:'installed-typescript-solution-browser-and-output-isolation',projects:summary.projects.length,virtualDeclarations:summary.virtualDeclarations,unmodifiedSourcesAndCompilerOutputs:true});
+
+    const runtimeConsumer=await create('app-runtime','react');await writeAppRuntimeFixture(runtimeConsumer);
+    const runtimeManifest=consumerManifest(kit,'react');runtimeManifest.dependencies['@cormijs/plugin-react']=runtimeManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(runtimeConsumer,'package.json'),JSON.stringify(runtimeManifest,null,2));
+    await install('app-runtime-install',runtimeConsumer);await auditLinks(runtimeConsumer);
+    await command('app-runtime-typecheck',runtimeConsumer,'typecheck');
+    await writeFile(join(runtimeConsumer,'types.mts'),`import {defineApp,resolveAppConfig,type RuntimeConfig} from '@cormijs/runtime';import {appRuntimePlugin,type AppConfigContribution} from '@cormijs/plugin-react';
+const config=defineApp({async render(next){await next();},rootContainer:node=>node,onRouteChange({location,isFirst,action}){const path:string=location.pathname;void [isFirst,action,path];}});
+resolveAppConfig({default:config});const row:AppConfigContribution={id:'x',keys:['extensionKey']};void [row,appRuntimePlugin];
+// @ts-expect-error invalid runtime key must not silently become any
+const wrong=defineApp({unknownHook:42});
+// @ts-expect-error mixed named and default exports are not supported
+resolveAppConfig({default:config,setup(){}});
+`);
+    await execute('app-runtime-public-types',runtimeConsumer,process.execPath,typeArguments);
+    await writeFile(join(runtimeConsumer,'src/app.tsx'),'export const unknownHook=42;');
+    await command('app-runtime-invalid-export',runtimeConsumer,'typecheck',1,/TYPECHECK_FAILED/);
+    await writeFile(join(runtimeConsumer,'src/app.tsx'),appRuntimeSource);await command('app-runtime-types-repaired',runtimeConsumer,'typecheck');
+    await withServer(runtimeConsumer,'dev',async url=>{await verifyAppRuntimePage(page,url);assert.deepEqual(errors,[]);});
+    await command('app-runtime-build',runtimeConsumer,'build');
+    const runtimeEntry=await readFile(join(runtimeConsumer,'.cormi/app.tsx'));
+    await writeFile(join(runtimeConsumer,'src/app.tsx'),appRuntimeSource.replaceAll('Application runtime','Unbuilt source'));
+    await withServer(runtimeConsumer,'preview',async url=>{await verifyAppRuntimePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'app-runtime-preview.png')});});
+    assert.deepEqual(await readFile(join(runtimeConsumer,'.cormi/app.tsx')),runtimeEntry);
+    report.stages.push({label:'installed-app-runtime-initialization-routes-and-static-preview',nodeEvaluation:false,events:['POP','PUSH','POP','REPLACE'],convention:'src/app.tsx',previewRegenerated:false});
+
+    const routesConsumer=await create('config-routes','react');await writeConfigRoutesFixture(routesConsumer);
+    const routesManifest=consumerManifest(kit,'react');
+    routesManifest.dependencies['@cormijs/plugin-react']=routesManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    routesManifest.dependencies['@cormijs/routes']=routesManifest.pnpm.overrides['@cormijs/routes']!;
+    await writeFile(join(routesConsumer,'package.json'),JSON.stringify(routesManifest,null,2));
+    await install('config-routes-install',routesConsumer);await auditLinks(routesConsumer);
+    await command('config-routes-typecheck',routesConsumer,'typecheck');
+    await writeFile(join(routesConsumer,'types.mts'),`import {routeConfigPlugin,type ConfigRoute} from '@cormijs/plugin-react';import {expandRouteConfig} from '@cormijs/routes';
+const config:readonly ConfigRoute[]=[{id:'root',path:'/',component:'./src/pages/Home.tsx',routes:[{index:true,component:'./src/pages/Home.tsx'}]},{path:'legacy/:id',redirect:'/home',keepQuery:true}];
+const wrapped:ConfigRoute={path:'wrapped',component:'./src/pages/Home.tsx',wrappers:['./src/wrappers/Auth.tsx']};
+const records=expandRouteConfig(config,{pluginId:'consumer:routes'});const id:string=records[0]!.id;void [id,routeConfigPlugin,wrapped];
+// @ts-expect-error unknown configured route fields must not silently become any
+const unknown:ConfigRoute={path:'x',component:'./src/pages/Home.tsx',children:[]};
+// @ts-expect-error component is a project-relative source string
+const bad:ConfigRoute={path:'x',component:42};
+// @ts-expect-error redirect is an internal absolute path string
+const badRedirect:ConfigRoute={path:'x',redirect:42};
+// @ts-expect-error keepQuery is boolean
+const badQuery:ConfigRoute={path:'x',redirect:'/y',keepQuery:'yes'};
+// @ts-expect-error wrappers are source file strings
+const badWrapper:ConfigRoute={path:'x',component:'./src/pages/Home.tsx',wrappers:[1]};
+`);
+    await execute('config-routes-public-types',routesConsumer,process.execPath,typeArguments);
+    await withServer(routesConsumer,'dev',async url=>{await verifyConfigRoutesPage(page,url,false);assert.deepEqual(errors,[]);});
+    await command('config-routes-build',routesConsumer,'build');
+    const routesEntry=await readFile(join(routesConsumer,'.cormi/app.tsx')),aboutPage=join(routesConsumer,'src/pages/About.tsx'),aboutSource=await readFile(aboutPage,'utf8');
+    await writeFile(aboutPage,aboutSource.replace('About config','Unbuilt route source'));
+    await withServer(routesConsumer,'preview',async url=>{await verifyConfigRoutesPage(page,url,false);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'config-routes-preview.png')});});
+    assert.deepEqual(await readFile(join(routesConsumer,'.cormi/app.tsx')),routesEntry);
+    report.stages.push({label:'installed-config-routes-nested-index-params-and-static-preview',convention:'explicit app.routes',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

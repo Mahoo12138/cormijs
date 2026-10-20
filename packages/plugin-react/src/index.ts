@@ -10,16 +10,20 @@ import { generateApplication, runtimeContributions, type RuntimeContribution } f
 import { generateRouteTypes } from './types.js';
 import { developmentDiagnostic, recoverable, repairSignature } from './development.js';
 import { clientModuleFile, inspectModule } from './modules.js';
+import { appConfigContributions, appRuntimeFiles, resolveAppRuntime, type AppConfigContribution, type AppRuntimePlan } from './app-runtime.js';
+export { appRuntimePlugin, appConfigContributions, resolveAppRuntime, type AppRuntimeOptions, type AppConfigContribution, type AppRuntimePlan } from './app-runtime.js';
 export { clientModule } from './modules.js';
 export { defineReactFeature, type ReactFeature } from './feature.js';
 export { createFeatureNamespace, type FeatureNamespace } from './namespace.js';
-export type { ModuleRef, RouteMeta, RouteRecord } from '@cormijs/routes';
+export { routeConfigPlugin, type RouteConfigOptions } from './route-config.js';
+export type { ConfigRoute, ModuleRef, RouteMeta, RouteRecord } from '@cormijs/routes';
 export { generateApplication, runtimeContributions, type RuntimeContribution } from './generate.js';
 export { generateRouteTypes } from './types.js';
 
 export interface ReactCompilation {
   readonly routes: OrderedHooks<readonly RouteRecord[], readonly RouteRecord[]>;
   readonly runtime: OrderedHooks<void, readonly RuntimeContribution[]>;
+  readonly appConfig: OrderedHooks<void, readonly AppConfigContribution[]>;
 }
 declare module 'cordis' { interface Context { react: ReactCompilation } }
 
@@ -29,15 +33,17 @@ export const reactPlugin: Plugin.Object<void> = {
   apply: ctx => {
     const routes = new OrderedHooks<readonly RouteRecord[], readonly RouteRecord[]>('routes');
     const runtime = new OrderedHooks<void, readonly RuntimeContribution[]>('runtime');
+    const appConfig = new OrderedHooks<void, readonly AppConfigContribution[]>('app-config');
     const lifetime = new AbortController(), pending = new Set<Promise<PreparedApplication>>(), sessions = new Set<PreparedApplication>();
-    ctx.provide('react', { routes, runtime } satisfies ReactCompilation);
+    ctx.provide('react', { routes, runtime, appConfig } satisfies ReactCompilation);
     ctx.get('diagnostics')?.add('react-hooks', () => [
       ...routes.snapshot().map(({ id, owner }) => ({ kind: 'route-hook', id, declaredOwner: owner })),
       ...runtime.snapshot().map(({ id, owner }) => ({ kind: 'runtime-hook', id, declaredOwner: owner })),
+      ...appConfig.snapshot().map(({ id, owner }) => ({ kind: 'app-config-hook', id, declaredOwner: owner })),
     ]);
     async function create(request: ApplicationRequest): Promise<PreparedApplication> {
       assertActive(ctx);
-      const plan = createBuildPlan(request, ['pages', 'routes', 'runtime', 'mountId', 'strict']);
+      const plan = createBuildPlan(request, ['pages', 'routes', 'runtime', 'runtimeConfig', 'mountId', 'strict']);
       const root = await realpath(request.root), input = request.options;
       const pages = input.pages ?? 'src/pages', mountId = input.mountId ?? 'root', developing = request.command === 'dev';
       const strict = input.strict === undefined ? false : input.strict;
@@ -92,6 +98,7 @@ export const reactPlugin: Plugin.Object<void> = {
         }
       };
       rememberModules(input.routes); rememberModules(input.runtime);
+      if (input.runtimeConfig !== undefined) rememberModules([{ module: input.runtimeConfig }]);
       const baseRepairFiles = [...repairFiles], baseAnchoredFiles = [...anchoredFiles];
       const setState = async (next: Omit<DevelopmentState, 'revision'>) => {
         if (signal.aborted) return;
@@ -142,10 +149,18 @@ export const reactPlugin: Plugin.Object<void> = {
       async function observe() {
         let files: readonly string[] = [], error: unknown;
         try { files = input.routes !== undefined ? [] : await pageFiles(root, pages as string); } catch (cause) { error = cause; }
-        // Metadata observes repair of missing runtime/explicit modules, without executing any page.
-        const key = JSON.stringify([files, await repairSignature(root, [...files, ...repairFiles, ...anchoredFiles], anchoredFiles), routes.revision, runtime.revision,
+        const appRevision = appConfig.revision;
+        let applicationRuntime: AppRuntimePlan = { keys: [] }, appFiles: string[] = [];
+        try {
+          const sources = appConfigContributions([...(input.runtimeConfig === undefined ? [] : [{ id: 'config:runtime', module: input.runtimeConfig }]), ...await appConfig.collect(undefined)]);
+          appFiles = appRuntimeFiles(root, sources);
+          applicationRuntime = await resolveAppRuntime(root, sources);
+        } catch (cause) { error ??= cause; }
+        // Candidate existence is tracked even when app.ts and app.tsx currently conflict.
+        const watched = new Set([...anchoredFiles, ...appFiles.filter(isAbsolute)]);
+        const key = JSON.stringify([files, await repairSignature(root, [...files, ...repairFiles, ...watched, ...appFiles], watched), routes.revision, runtime.revision, appRevision,
           error instanceof Error ? [(error as NodeJS.ErrnoException).code, error.message] : null]);
-        return { files, error, key };
+        return { files, error, key, applicationRuntime, appRevision };
       }
       const compile = async (observed: Awaited<ReturnType<typeof observe>>, initial = false) => {
         const ticket = ++accepted; let phase = 'scan';
@@ -164,7 +179,7 @@ export const reactPlugin: Plugin.Object<void> = {
             rememberModules(next); phase = 'runtime';
             const plugins = runtimeContributions([...runtimeContributions(input.runtime ?? []), ...await runtime.collect(undefined)]);
             rememberModules(plugins); phase = 'generate';
-            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict);
+            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict, observed.applicationRuntime);
             await transform(code, { loader: 'tsx', format: 'esm', jsx: 'automatic', logLevel: 'silent' });
             const types = generateRouteTypes(next);
             const hookInfo = (items: readonly { id: string; owner: string; stage?: number }[]) => items.map(({ id, owner, stage }) => ({ id, owner, stage: stage ?? 0 }));
@@ -172,8 +187,9 @@ export const reactPlugin: Plugin.Object<void> = {
               routes: next.map(route => ({ ...route, ...(route.module ? { module: inspectModule(root, route.module) } : {}),
                 ...(route.errorBoundary ? { errorBoundary: inspectModule(root, route.errorBoundary) } : {}) })),
               runtime: plugins.map(({ id, module }) => ({ id, module: inspectModule(root, module) })),
+              appRuntime: { ...observed.applicationRuntime, ...(observed.applicationRuntime.module ? { module: inspectModule(root, observed.applicationRuntime.module) } : {}) },
               hooks: { routes: hookInfo(routeOrder), runtime: hookInfo(runtimeOrder) } });
-            if (routes.revision !== routeRevision || runtime.revision !== runtimeRevision) throw new CormiError('CONTRIBUTIONS_CHANGED', 'Plugin contributions changed during compilation; this result cannot be published.');
+            if (routes.revision !== routeRevision || runtime.revision !== runtimeRevision || appConfig.revision !== observed.appRevision) throw new CormiError('CONTRIBUTIONS_CHANGED', 'Plugin contributions changed during compilation; this result cannot be published.');
             combined.throwIfAborted(); phase = 'commit'; return { code, types, inspection };
           });
         } catch (error) {

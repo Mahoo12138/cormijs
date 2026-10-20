@@ -40,9 +40,11 @@ prepare 生成入口并返回路由摘要后退出；dev 生成入口并启动�
 
 默认扫描 src/pages 的 .tsx/.jsx；index 是当前目录首页，`[id]` 是参数，`[...rest]` 是终端 catch-all，`_layout` 是所在目录及其后代的布局，组件内部通过 Outlet 渲染后代。点目录、下划线辅助目录和 test/spec 文件忽略。页面树中的符号链接拒绝扫描。所有扫描只读路径，不 import 页面模块。
 
-基础 IR 字段为 id、parentId、path、index、module、source；P4a 增加公开 JSON meta。module 的 specifier/exportName 可附带显式作者 file URL from；source 记录 file/pluginId。路径相对于父路由，顶层 / 规范化为空路径。默认 ID 是 `file:<项目相对文件名>`，不取数组下标。不开放任意运行时路由函数，增量规则见 [功能插件协议](21-react-features.md)。
+基础 IR 字段为 id、parentId、path、index、module、source；P4a 增加公开 JSON meta，F1c 增加可选 redirect/keepQuery。module 的 specifier/exportName 可附带显式作者 file URL from；source 记录 file/pluginId。路径相对于父路由，顶层 / 规范化为空路径。默认 ID 是 `file:<项目相对文件名>`，不取数组下标。不开放任意运行时路由函数，增量规则见 [功能插件协议](21-react-features.md)。
 
 设置 app.routes 后关闭约定扫描；其值必须是平面的 IR 数组。所有来源最终统一校验：重复 ID、缺失 parent、父子环、index 携带 path/children、非终端 splat、重复参数及 URL 结构歧义会失败。`users.tsx` 与 `users/index.tsx`、`[id]` 与 `[slug]`、仅大小写不同的页面不会靠扫描顺序覆盖。静态路由与参数路由可以共存，实际匹配交给 React Router。
+
+F1b 起，`@cormijs/plugin-react` 的 `routeConfigPlugin` 接受嵌套 `ConfigRoute[]`（`path`/`component`/`index`/`errorBoundary`/`redirect`/`keepQuery`/`wrappers`/`meta`/`routes`）。展开由 `@cormijs/routes` 的 `expandRouteConfig` 完成，输出并通过校验的仍是上述扁平 IR；组件和错误边界是项目相对源文件，自动 ID 由路径派生。插件仍是普通 `ctx.react.routes.tap()` 贡献，卸载即撤回。配置声明是追加贡献，不是第二个路由系统；需要 Umi 式显式路由时设置 `app.routes: []` 关闭约定扫描。字段规则、路径语义和 Umi 差异见 [F1b 配置式嵌套路由](61-f1b-config-routes.md) 与 [F1c redirect 与 wrappers](62-f1c-redirects-and-wrappers.md)；`layout:false` 与全局 layout 尚未交付。
 
 app.pages 可选择其他项目内目录。当前不支持可选参数、路由组、并行路由、MDX 或 Umi 全量约定；超过扫描/深度限制明确报错。
 
@@ -71,6 +73,10 @@ RevisionQueue 单消费者执行，仅保留最新等待任务；新 revision �
 ## 6. 浏览器运行时
 
 runtime 插件提供可选 Provider、setup 和 onRouteChange。setup 按声明顺序执行，可返回异步 disposer；后续 setup 失败时撤销已获取的资源。Provider 按数组从外到内组合。每次 mountApplication 独立拥有 React root、Router 和订阅，dispose 幂等，先撤销订阅/路由并卸载 root，再逆序关闭 runtime effects。路由观察者错误不阻塞导航，但会写入控制台。
+
+F1a 起，应用可通过显式启用的 `appRuntimePlugin` 使用 `src/app.tsx` 约定：`defineApp` 可配置 `setup`、`render(next)`、`patchClientRoutes`、`rootContainer` 和完整 `onRouteChange`。应用模块只在生成的浏览器入口中被静态 import，Node 生成阶段不会执行它；未启用约定插件时，显式 `app.runtime` 贡献保持原行为。协议、时序、与 Umi 的差异及验证见 [F1a 应用运行时](60-f1a-app-runtime.md)。
+
+F1c 起，含 `redirect` 的路由在生成入口中使用 runtime 的 `RedirectRoute`：匹配后按参数生成目标，可选保留当前查询串和 hash，并以 replace 导航。它是客户端渲染重定向，不是服务器 3xx 或 loader 重定向；详见 [F1c redirect 与 wrappers](62-f1c-redirects-and-wrappers.md)。
 
 当前默认包含加载、路由错误和 404 页面。页面模块懒加载；生产与开发使用相同路由树。不存在 SSR/hydration/RSC 功能承诺。普通完整页面刷新会销毁浏览器文档；显式多 mount 使用者应调用返回的 dispose。
 

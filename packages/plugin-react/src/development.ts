@@ -4,6 +4,9 @@ import { isAbsolute, relative, resolve, sep } from 'node:path';
 import { lstat } from 'node:fs/promises';
 
 const messages: Readonly<Record<string, string>> = {
+  APP_RUNTIME_CONFLICT: 'More than one application runtime module was found. Keep one app file or disable a conflicting contribution.',
+  APP_RUNTIME_INVALID: 'Application runtime contributions are invalid.',
+  APP_RUNTIME_KEY_CONFLICT: 'Application runtime keys must be unique and cannot replace built-in hooks.',
   ROUTE_CONFLICT: 'Two routes resolve to the same URL. Rename or remove one of the conflicting pages.',
   ROUTE_ID_CONFLICT: 'Route identifiers must be unique and cannot use reserved identifiers.',
   ROUTE_PARENT_MISSING: 'A route refers to a missing parent.',

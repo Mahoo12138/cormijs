@@ -1,6 +1,6 @@
 # cormi 应用开发指南：从创建到独立静态交付
 
-日期：2026-10-19。本文面向使用框架开发应用的人，而不是修改框架内部的开发者。当前应用模式是 React SPA，默认后端由 React–Vite preset 组合提供，Cordis 管理 Node 插件。以下流程使用本地 kit；不是已经发布到公共 npm 的安装指南。实际验收以 P12 结果记录为准。
+日期：2026-10-19，2026-10-20 补充应用运行时与路由配置。本文面向使用框架开发应用的人，而不是修改框架内部的开发者。当前应用模式是 React SPA，默认后端由 React–Vite preset 组合提供，Cordis 管理 Node 插件。以下流程使用本地 kit；不是已经发布到公共 npm 的安装指南。实际验收以 P12 结果记录为准。
 
 ## 1. 创建一个有开发接口的应用
 
@@ -71,7 +71,93 @@ export default function User() {
 
 这份资产声明应保持为没有顶层 import/export 的声明脚本；增加顶层模块标记会改变 ambient module 的含义。关于这一 TypeScript 规则的外部依据见 [官方模块参考](https://www.typescriptlang.org/docs/handbook/modules/reference.html#ambient-modules)。不提供 `declare module '*'` 这样的全量 any 回退。
 
-## 4. 环境和 Mock 使用同一个部署前缀
+## 4. 应用运行时：在 src/app.tsx 中初始化
+
+Umi 风格的 `src/app.tsx` 是浏览器侧运行时配置入口，不是 Node 配置或页面组件。cormi 把协议与发现分开：`@cormijs/runtime` 提供 `defineApp` 和钩子协议，`@cormijs/plugin-react` 的 `appRuntimePlugin` 负责可选的文件约定。默认 preset 不自动接管已有的 `src/app.tsx`，避免把普通 React 组件静默解释为配置；在 `cormi.config.ts` 显式加入一次：
+
+```ts
+import { appRuntimePlugin } from '@cormijs/plugin-react';
+
+export default defineConfig({
+  presets: [reactVite],
+  plugins: [
+    { id: 'app-runtime', plugin: appRuntimePlugin },
+    // 其他应用插件……
+  ],
+});
+```
+
+然后编写 `src/app.tsx`：
+
+```tsx
+import { defineApp } from '@cormijs/runtime';
+
+export default defineApp({
+  async render(next) {
+    const response = await fetch(import.meta.env.BASE_URL + 'startup.json');
+    if (!response.ok) throw new Error('初始化失败');
+    await next(); // 只调用一次；next 返回 Promise，也可直接 return
+  },
+  patchClientRoutes({ routes }) {
+    routes.push({ id: 'help', path: 'help', Component: Help });
+  },
+  rootContainer(container) {
+    return <PreferencesProvider>{container}</PreferencesProvider>;
+  },
+  onRouteChange({ location, action, isFirst, basename }) {
+    document.title = `${action} ${location.pathname}`;
+  },
+});
+```
+
+实际顺序是：runtime 插件 `setup` → `app.setup` → `render`（可异步阻塞首屏）→ `patchClientRoutes` → `rootContainer` → 挂载。`setup` 是 cormi 补充的生命周期，可返回清理函数或异步清理函数；`render` 的 `next` 只能调用一次，未调用前不会创建 Router 或 React root，取消启动会拒绝迟到的调用。`rootContainer` 每次挂载只执行一次，不能直接使用 React Hooks；需要 Context 时用 Provider 组件。`onRouteChange` 的首次事件 `isFirst` 为 true，`location` 是包含 basename 的原始 history location；处理函数抛错只记录，不阻塞导航。
+
+应用模块只被生成的浏览器入口静态 import，Node 配置与生成阶段不会执行 `app.tsx`。同一时刻只允许一个 `src/app.ts` 或 `src/app.tsx`，多个候选、符号链接和混合导出会明确失败。需要更低层入口时可关闭约定插件并配置 `app.runtimeConfig: { specifier, exportName }`，或继续使用已有的 `app.runtime`。模型、请求、权限等原生插件可登记额外运行时 key，登记随插件卸载撤回；应用侧用 module augmentation 扩展 `RuntimeConfig` 获得严格类型。完整 API、与 Umi 的差异和验证见 [F1a 应用运行时结果](60-f1a-app-runtime.md)。
+
+示例：`pnpm cormi dev --root examples/app-runtime`，默认监听 `/runtime/`。
+
+### 4.1 配置式嵌套路由、重定向与 wrappers
+
+需要像 Umi 一样用 `routes` 声明布局、index、动态参数、错误边界、重定向和 wrapper 时，显式加入 `routeConfigPlugin`，并把声明放在独立的带类型源文件中：
+
+```ts
+// src/app-routes.ts
+import type { ConfigRoute } from '@cormijs/plugin-react';
+
+export const routes: readonly ConfigRoute[] = [{
+  id: 'shell', path: '/', component: './src/layouts/Shell.tsx',
+  routes: [
+    { index: true, component: './src/pages/Home.tsx', meta: { title: '首页' } },
+    {
+      path: 'users/:id', component: './src/pages/User.tsx',
+      errorBoundary: './src/pages/UserError.tsx',
+      wrappers: ['./src/wrappers/Trace.tsx', './src/wrappers/Gate.tsx'],
+    },
+    { path: 'legacy/:id', redirect: '/users/:id' },
+    { path: 'search', redirect: '/users/me', keepQuery: true },
+  ],
+}];
+```
+
+```ts
+// cormi.config.ts
+import { routeConfigPlugin } from '@cormijs/plugin-react';
+import { routes } from './src/app-routes';
+
+export default defineConfig({
+  presets: [reactVite],
+  plugins: [{ id: 'application-routes', plugin: routeConfigPlugin, options: { id: 'application:routes', routes } }],
+  app: { routes: [] }, // 显式模式：关闭 src/pages 约定扫描
+});
+```
+
+`component`/`errorBoundary`/`wrappers` 是项目相对、带运行时扩展名的源码文件，默认导出即组件。顶层 `/` 有子级时是根布局，无子级时是 index；空路径叶子在任意层级都按 index 处理。自动 ID 由完整路径派生，显式 `id` 可消除布局歧义。`redirect` 只接受内部绝对路径，目标参数必须来自当前路由的完整路径；重定向路由不能同时声明页面、错误边界、子路由或 wrappers。`keepQuery: true` 会把当前查询串和 hash 带到目标，且目标自身不能再带查询串或 hash。`wrappers` 按外层到内层展开为普通父路由记录，每个 wrapper 必须渲染 `<Outlet />`；第一个 wrapper 拥有 URL 路径，后续 wrapper 和真实页面使用空路径。`layout: false` 尚未实现，当前会被当作未知字段拒绝。
+
+配置贡献仍通过原生 `ctx.react.routes.tap()` 登记，插件卸载会撤回；与 `app.routes` IR、`defineReactFeature` 及约定扫描的最终校验相同。声明修改按 Node 配置重启生效，页面与 wrapper 组件修改仍走 Fast Refresh。完整字段、限制、Umi 差异和验证见 [F1b 配置式嵌套路由](61-f1b-config-routes.md) 与 [F1c redirect 与 wrappers](62-f1c-redirects-and-wrappers.md)。
+
+示例：`pnpm cormi dev --root examples/config-routes`，默认监听 `/routes/`。
+
+## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：
 
@@ -86,7 +172,7 @@ MY_PRIVATE_SERVICE_TOKEN=replace-with-your-private-value
 
 开发接口由可选 Cordis 插件提供，配置中 `enabled: command === 'dev'` 明确关闭非开发目标的实例；页面在生产模式禁用演示请求按钮。Mock 错误、格式不对的响应应表现为错误，不能把 HTML 200 当成 JSON 成功。模板会校验响应 message 类型、支持重新请求，并在页面卸载时取消自己的请求；实际后端的取消语义仍需要它自己实现。
 
-## 5. 把一项应用功能组织为 Cordis 插件
+## 6. 把一项应用功能组织为 Cordis 插件
 
 先明确添加所用 SDK，而不是借用依赖提升。当前本地试用包可执行：
 
@@ -121,7 +207,7 @@ export default function Status() {
 
 多个领域能力可通过原生 `ctx.plugin()` 组合为父插件；需要 API 的子插件声明 `inject: ['devApi']` 并调用 `ctx.devApi.add()`，作用域释放由 Cordis 和领域服务共同承担。不要另建一套 enable/disable 状态机。生态来源和 Node/client 分离见 [生态契约](37-cordis-ecosystem.md)，真正可分发、多实例插件见 [作者指南](41-plugin-authoring.md) 和 [实例协议](45-plugin-instances.md)。
 
-## 6. 类型失败与构建失败要能阻止错误交付
+## 7. 类型失败与构建失败要能阻止错误交付
 
 P16起，TypeScript插件支持根solution和project references。将 `.cormi/**/*` 明确纳入唯一浏览器项目的include，Node工具项目保留自己的环境；需要显式归属时，在TypeScript插件options中设置 `generatedProject`，不要把它写进app。检查按引用关系临时生成内存声明，不落地业务JS/声明或tsbuildinfo；命令的prepare阶段仍会更新受管.cormi。配置示例、原生约束与支持范围见 [TypeScript项目引用](57-typescript-projects.md)。
 
@@ -129,7 +215,7 @@ P16起，TypeScript插件支持根solution和project references。将 `.cormi/**
 
 原 `dist/.cormi-build.json` 是本机输出所有权信息，保留在原输出中供下次受管替换。它不是部署服务器必须消费的文件。不要为了不公开元数据而直接删除原文件，应该只在部署副本中排除它。
 
-## 7. 交付静态文件，不部署开发工具链
+## 8. 交付静态文件，不部署开发工具链
 
 生产站点只需要构建后的 HTML、JS、CSS 和资产。将所选站点文件复制到独立目录，排除点文件元数据；不要把应用根目录、`.env`、`.cormi-local`、`.cormi`、源码和 `node_modules` 当作发布目录。`preview` 只是本地检查工具，不是线上服务器。
 
@@ -160,7 +246,7 @@ server {
 
 SPA 页面 404 是客户端路由结果，不一定等于文档请求 HTTP 404；资源和 API 的缺失不应套用这一规则。实际部署还需独立配置 TLS、缓存、访问控制、真实 API、日志和回滚，不属于这里的静态字节交付验证。
 
-## 8. 可复现的整条验收入口
+## 9. 可复现的整条验收入口
 
 在框架仓库运行：
 
