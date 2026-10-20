@@ -446,6 +446,36 @@ access Provider 依赖初始状态 Provider，并在 runtime stage 中位于其�
 
 示例：`pnpm cormi dev --root examples/access`，默认监听 `/access/`。
 
+### 4.10 路由菜单与面包屑
+
+显式启用 `menuPlugin` 后，可用路由 meta 生成菜单：
+
+```ts
+plugins: [
+  { id: 'app-runtime', plugin: appRuntimePlugin },
+  { id: 'initial-state', plugin: initialStatePlugin, options: { id: 'application:initial-state' } },
+  { id: 'access', plugin: accessPlugin, options: { id: 'application:access' } },
+  { id: 'menu', plugin: menuPlugin, options: { id: 'application:menu' } },
+  { id: 'routes', plugin: routeConfigPlugin, options: { id: 'application:routes', routes } },
+]
+```
+
+```ts
+// 路由 meta
+{ path: 'admin', component: './src/Admin.tsx', meta: { title: '管理', order: 3, access: 'canAdmin' } }
+```
+
+```tsx
+import { useBreadcrumb, useMenu } from '@cormijs/runtime';
+
+const menu = useMenu();       // { key, path, title, order, children, meta }[]
+const crumbs = useBreadcrumb(); // 当前路由匹配的 { title, pathname }[]
+```
+
+菜单支持 `title`/`name`、`order`、`hideInMenu`/`hidden`/`menu:false`、`access`；无标题布局和 wrapper 会被折叠，嵌套路由形成子菜单。启用 access 时，`meta.access` 为 false/缺失的项隐藏；但这不是导航守卫。当前只提供数据 Hook，不提供 ProLayout/Antd adapter、选中/折叠 helper 或路由级 access。完整语义见 [F3c menu](71-f3c-menu.md)。
+
+示例：`pnpm cormi dev --root examples/menu`，默认监听 `/menu/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

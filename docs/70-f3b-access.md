@@ -108,6 +108,6 @@ Access Provider 读取 `initialState` 上下文，因此：
 
 ## 7. 下一步
 
-- F3c：layout/menu/面包屑与可选 UI adapter；
+- F3c：layout/menu/面包屑与可选 UI adapter，菜单/面包屑基础已由 [F3c](71-f3c-menu.md) 交付；
 - access 后续：`src/access.ts` 约定、路由级 access、菜单过滤；
 - U16 后续：消息目录与 UI 库语言联动。

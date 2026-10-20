@@ -22,6 +22,7 @@ export { initialStatePlugin, type InitialStatePluginOptions } from './initial-st
 export { requestPlugin, type RequestPluginOptions } from './request.js';
 export { localePlugin, type LocalePluginOptions } from './locale.js';
 export { accessPlugin, type AccessPluginOptions } from './access.js';
+export { menuPlugin, type MenuPluginOptions } from './menu.js';
 export { clientModule } from './modules.js';
 export { defineReactFeature, type ReactFeature } from './feature.js';
 export { createFeatureNamespace, type FeatureNamespace } from './namespace.js';

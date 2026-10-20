@@ -17,6 +17,7 @@ import { writeInitialStateFixture, verifyInitialStatePage } from './initial-stat
 import { writeRequestFixture, verifyRequestPage } from './request-fixture.js';
 import { writeLocaleFixture, verifyLocalePage } from './locale-fixture.js';
 import { writeAccessFixture, verifyAccessPage } from './access-fixture.js';
+import { writeMenuFixture, verifyMenuPage } from './menu-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -599,6 +600,26 @@ const bad:AccessConfig=()=>({canAdmin:'yes'});
     await command('access-build',accessConsumer,'build');
     await withServer(accessConsumer,'preview',async url=>{await verifyAccessPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'access-preview.png')});});
     report.stages.push({label:'installed-access-from-initial-state-and-static-preview',hooks:'useAccess',previewRegenerated:false});
+
+    const menuConsumer=await create('menu','react');await writeMenuFixture(menuConsumer);
+    const menuManifest=consumerManifest(kit,'react');
+    menuManifest.dependencies['@cormijs/plugin-react']=menuManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    menuManifest.dependencies['@cormijs/routes']=menuManifest.pnpm.overrides['@cormijs/routes']!;
+    await writeFile(join(menuConsumer,'package.json'),JSON.stringify(menuManifest,null,2));
+    await install('menu-install',menuConsumer);await auditLinks(menuConsumer);
+    await command('menu-typecheck',menuConsumer,'typecheck');
+    await writeFile(join(menuConsumer,'types.mts'),`import {menuPlugin,type MenuPluginOptions} from '@cormijs/plugin-react';import {useBreadcrumb,useMenu,type BreadcrumbItem,type MenuItem} from '@cormijs/runtime';
+const options:MenuPluginOptions={id:'consumer:menu'};
+declare const menu:readonly MenuItem[];declare const crumbs:readonly BreadcrumbItem[];
+void [menuPlugin,options,menu,crumbs,useMenu,useBreadcrumb];
+// @ts-expect-error menu titles are strings
+const bad:MenuItem['title']=42;
+`);
+    await execute('menu-public-types',menuConsumer,process.execPath,typeArguments);
+    await withServer(menuConsumer,'dev',async url=>{await verifyMenuPage(page,url);assert.deepEqual(errors,[]);});
+    await command('menu-build',menuConsumer,'build');
+    await withServer(menuConsumer,'preview',async url=>{await verifyMenuPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'menu-preview.png')});});
+    report.stages.push({label:'installed-menu-breadcrumb-access-filter-and-static-preview',hooks:'useMenu',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

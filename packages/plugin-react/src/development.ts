@@ -17,6 +17,7 @@ const messages: Readonly<Record<string, string>> = {
   REQUEST_INVALID: 'The request plugin or request configuration is invalid.',
   LOCALE_INVALID: 'The locale plugin or locale configuration is invalid.',
   ACCESS_INVALID: 'The access plugin or access function is invalid.',
+  MENU_INVALID: 'The menu plugin or route menu metadata is invalid.',
   ROUTE_LAYOUT_INVALID: 'Route layout options only support false.',
   ROUTE_CONFLICT: 'Two routes resolve to the same URL. Rename or remove one of the conflicting pages.',
   ROUTE_ID_CONFLICT: 'Route identifiers must be unique and cannot use reserved identifiers.',

@@ -94,6 +94,8 @@ F3a 起，显式启用的 `localePlugin` 登记 `locale` 配置和 runtime Provi
 
 F3b 起，显式启用的 `accessPlugin` 登记 `access` 函数，Provider 从 `initialState` 计算布尔权限并随状态变化重算；`useAccess`/`Access` 用于页面和按钮级渲染控制。access Provider 通过 runtime stage 位于 initialState Provider 内层；路由级 access 与菜单过滤待后续。详见 [F3b access](70-f3b-access.md)。
 
+F3c 起，显式启用的 `menuPlugin` 从实际挂载的路由树与 `meta` 生成嵌套菜单；`useBreadcrumb` 从当前匹配生成面包屑；启用 access 时按 `meta.access` 过滤。Runtime plugin Provider 契约新增 `routes` 与 `basename`。UI adapter、选中/折叠 helper 与路由级守卫待后续。详见 [F3c menu](71-f3c-menu.md)。
+
 当前默认包含加载、路由错误和 404 页面。页面模块懒加载；生产与开发使用相同路由树。不存在 SSR/hydration/RSC 功能承诺。普通完整页面刷新会销毁浏览器文档；显式多 mount 使用者应调用返回的 dispose。
 
 ## 7. 验证与未完成边界
