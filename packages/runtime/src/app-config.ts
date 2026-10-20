@@ -25,6 +25,8 @@ export interface RuntimeConfig {
   patchClientRoutes?(context: AppRoutesContext): void | Promise<void>;
   rootContainer?(container: ReactNode, context: RootContainerContext): ReactNode;
   onRouteChange?(event: RouteChangeEvent): void;
+  /** Registered by initialStatePlugin; enable that plugin before using the key. */
+  getInitialState?(): unknown | Promise<unknown>;
 }
 export const APP_RUNTIME_KEYS = Object.freeze(['setup', 'render', 'patchClientRoutes', 'rootContainer', 'onRouteChange'] as const);
 type ExactConfig<T> = Record<Exclude<keyof T, keyof RuntimeConfig>, never>;

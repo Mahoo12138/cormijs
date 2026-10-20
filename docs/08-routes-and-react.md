@@ -86,6 +86,8 @@ F1f 起，`app.history` 可选择 browser/hash/memory；hash 与 memory 使用�
 
 F2a 起，显式启用的 `modelPlugin` 通过 `ctx.react.models` 登记 `src/models/**` 等模型来源；生成器静态导入模型，运行时 `ModelProvider` 在每个挂载执行一次模型 Hook，`useModel(namespace, selector?)` 在路由切换间共享状态。模型源码不在 Node 生成阶段执行，模型目录变化进入既有观察。详见 [F2a model 与 useModel](66-f2a-models.md)。
 
+F2b 起，显式启用的 `initialStatePlugin` 登记 `getInitialState` app-config key 和 runtime Provider；`useInitialState` 在挂载后执行一次初始状态，提供 loading/error/data、refresh 与 setInitialState。首次渲染不阻塞，Provider 位于 Router 外、模型 Provider 外，卸载和并发刷新有防护。详见 [F2b getInitialState](67-f2b-initial-state.md)。
+
 当前默认包含加载、路由错误和 404 页面。页面模块懒加载；生产与开发使用相同路由树。不存在 SSR/hydration/RSC 功能承诺。普通完整页面刷新会销毁浏览器文档；显式多 mount 使用者应调用返回的 dispose。
 
 ## 7. 验证与未完成边界

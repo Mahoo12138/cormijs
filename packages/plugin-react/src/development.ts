@@ -13,6 +13,7 @@ const messages: Readonly<Record<string, string>> = {
   LOADING_CONFLICT: 'More than one loading component is active. Keep one loading file or disable a conflicting contribution.',
   MODEL_INVALID: 'A model contribution or model source file is invalid.',
   MODEL_CONFLICT: 'Model namespaces must be unique.',
+  INITIAL_STATE_INVALID: 'The initial state plugin is invalid.',
   ROUTE_LAYOUT_INVALID: 'Route layout options only support false.',
   ROUTE_CONFLICT: 'Two routes resolve to the same URL. Rename or remove one of the conflicting pages.',
   ROUTE_ID_CONFLICT: 'Route identifiers must be unique and cannot use reserved identifiers.',

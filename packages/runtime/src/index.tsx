@@ -6,6 +6,7 @@ import { copyClientRoutes, runAppRender, type HistoryType, type RuntimeConfig, t
 import { ModelProvider, type ModelDescriptor } from './model.js';
 export { useRouteMatches, type CormiRouteMatch } from './route-matches.js';
 export { ModelProvider, useModel, type ModelDescriptor } from './model.js';
+export { InitialStateProvider, initialStateRuntime, useInitialState, type InitialState } from './initial-state.js';
 export { defineApp, resolveAppConfig, type HistoryType, type RuntimeConfig, type AppRuntimeContext, type AppRoutesContext, type RootContainerContext, type RouteChangeEvent } from './app-config.js';
 export { Link, NavLink, Navigate, Outlet, createSearchParams, useHref, useLocation, useMatch, useNavigate, useNavigation, useParams, useSearchParams } from 'react-router';
 

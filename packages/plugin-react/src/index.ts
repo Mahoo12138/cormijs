@@ -18,6 +18,7 @@ export { appRuntimePlugin, appConfigContributions, resolveAppRuntime, type AppRu
 export { layoutPlugin, layoutContributions, resolveGlobalLayout, type LayoutPluginOptions, type LayoutContribution } from './layout.js';
 export { loadingPlugin, loadingContributions, resolveGlobalLoading, type LoadingPluginOptions, type LoadingContribution } from './loading.js';
 export { modelPlugin, modelContributions, resolveModels, type ModelPluginOptions, type ModelContribution, type ModelPlan } from './model.js';
+export { initialStatePlugin, type InitialStatePluginOptions } from './initial-state.js';
 export { clientModule } from './modules.js';
 export { defineReactFeature, type ReactFeature } from './feature.js';
 export { createFeatureNamespace, type FeatureNamespace } from './namespace.js';

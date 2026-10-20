@@ -287,6 +287,45 @@ const selected = useModel('counter', (state: { count: number }) => state.count);
 
 示例：`pnpm cormi dev --root examples/model`，默认监听 `/models/`。
 
+### 4.6 初始状态 getInitialState
+
+需要应用启动状态时，同时启用 app 运行时约定与 `initialStatePlugin`：
+
+```ts
+// cormi.config.ts
+import { appRuntimePlugin, initialStatePlugin } from '@cormijs/plugin-react';
+
+export default defineConfig({
+  presets: [reactVite],
+  plugins: [
+    { id: 'app-runtime', plugin: appRuntimePlugin },
+    { id: 'initial-state', plugin: initialStatePlugin, options: { id: 'application:initial-state' } },
+  ],
+  // ...
+});
+```
+
+```tsx
+// src/app.tsx
+import { defineApp } from '@cormijs/runtime';
+
+export default defineApp({
+  async getInitialState() {
+    return { user: await fetch(import.meta.env.BASE_URL + 'bootstrap.json').then(response => response.json()) };
+  },
+});
+```
+
+```tsx
+import { useInitialState } from '@cormijs/runtime';
+
+const { loading, error, data, refresh, setInitialState } = useInitialState<{ user: { name: string } }>();
+```
+
+Provider 在挂载后执行一次初始状态，首屏不被阻塞；`refresh` 重新请求，`setInitialState` 直接覆盖并取消在途刷新。当前未提供 `useModel('@@initialState')`、首屏阻塞或 SSR/hydration 集成。完整语义与验证见 [F2b getInitialState](67-f2b-initial-state.md)。
+
+示例：`pnpm cormi dev --root examples/initial-state`，默认监听 `/initial-state/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

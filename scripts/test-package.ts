@@ -13,6 +13,7 @@ import { writeConfigRoutesFixture, verifyConfigRoutesPage } from './config-route
 import { writeConventionsFixture, verifyConventionsPage } from './conventions-fixture.js';
 import { writeHistoryFixture, verifyHistoryPage } from './history-fixture.js';
 import { writeModelFixture, verifyModelPage } from './model-fixture.js';
+import { writeInitialStateFixture, verifyInitialStatePage } from './initial-state-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -518,6 +519,25 @@ const bad:ModelDescriptor={namespace:'x',model:1};
     await command('model-build',modelConsumer,'build');
     await withServer(modelConsumer,'preview',async url=>{await verifyModelPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'model-preview.png')});});
     report.stages.push({label:'installed-model-shared-state-selector-and-static-preview',convention:'src/models',previewRegenerated:false});
+
+    const initialStateConsumer=await create('initial-state','react');await writeInitialStateFixture(initialStateConsumer);
+    const initialStateManifest=consumerManifest(kit,'react');
+    initialStateManifest.dependencies['@cormijs/plugin-react']=initialStateManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(initialStateConsumer,'package.json'),JSON.stringify(initialStateManifest,null,2));
+    await install('initial-state-install',initialStateConsumer);await auditLinks(initialStateConsumer);
+    await command('initial-state-typecheck',initialStateConsumer,'typecheck');
+    await writeFile(join(initialStateConsumer,'types.mts'),`import {initialStatePlugin,type InitialStatePluginOptions} from '@cormijs/plugin-react';import {useInitialState,type InitialState} from '@cormijs/runtime';
+const options:InitialStatePluginOptions={id:'consumer:initial'};
+declare const state:InitialState<{user:string}>|null;
+void [initialStatePlugin,options,state,useInitialState];
+// @ts-expect-error initial state id is a string
+const bad:InitialStatePluginOptions={id:42};
+`);
+    await execute('initial-state-public-types',initialStateConsumer,process.execPath,typeArguments);
+    await withServer(initialStateConsumer,'dev',async url=>{await verifyInitialStatePage(page,url);assert.deepEqual(errors,[]);});
+    await command('initial-state-build',initialStateConsumer,'build');
+    await withServer(initialStateConsumer,'preview',async url=>{await verifyInitialStatePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'initial-state-preview.png')});});
+    report.stages.push({label:'installed-initial-state-loading-refresh-and-static-preview',convention:'getInitialState',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

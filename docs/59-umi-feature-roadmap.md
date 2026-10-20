@@ -39,7 +39,7 @@
 | U07 | history browser/hash/memory、查询与导航公共入口 | 基础已有（F1f）：app.history 选择 browser/hash/memory；`@cormijs/runtime` 导出 Link、useNavigate、useSearchParams 等导航/查询入口 | Router 适配插件/客户端 SDK | F1 |
 | U08 | runtime 模块/生成导出/类型提示 | 部分已有（F1a）：应用配置模块随入口生成、仅在浏览器求值并参与类型检查；按启用功能生成应用侧导出仍待 F2 | 应用编译插件，不混合 Node/client barrel | F1 |
 | U09 | model/useModel、命名空间、selector、extraModels | 部分已有（F2a）：modelPlugin 发现 src/models、路径命名空间、Hook 模型共享与 selector；对象模型、reducers/effects、extraModels 和依赖排序待后续 | model 插件 + React Provider | F2 |
-| U10 | getInitialState、@@initialState、refresh/setInitialState | 待实现 | initial-state 插件，依赖 model/应用 runtime | F2 |
+| U10 | getInitialState、@@initialState、refresh/setInitialState | 部分已有（F2b）：initialStatePlugin 登记 getInitialState，提供 useInitialState/loading/error/refresh/set；@@initialState 模型集成、首屏阻塞与 SSR 待后续 | initial-state 插件，依赖 model/应用 runtime | F2 |
 | U11 | request、运行时配置、拦截器、统一错误 | 待实现；dev-api 不是该能力 | request 契约/客户端实现适配 | F2 |
 | U12 | useRequest、手动/自动、分页/加载更多等 | 待实现；按原库/API逐项验收，不只包一层 fetch | 请求 Hooks 插件，可复用成熟库 | F2 |
 | U13 | clientLoader/useClientLoaderData/routeProps | 待实现；页面懒加载不等于数据加载 | 路由数据插件 | F3 |
@@ -111,6 +111,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 这批能力完成后应能写“初始化用户 → 多处读取共享模型 → 请求业务接口 → 更新状态”的应用，而非需要开发者自己搭一套全局上下文。
 
 **F2a 状态（2026-10-20）：** U09 的 Hook 模型基础已交付：显式 `modelPlugin` 发现 `src/models/**`，按路径生成稳定 namespace，每个挂载执行一次模型 Hook；`@cormijs/runtime` 的 `useModel(namespace, selector?)` 共享状态并提供 selector，模型在路由切换间保留、刷新后重建。对象模型、reducers/effects、extraModels、依赖排序、initial-state 与 request 仍待后续 F2 切片。用法、差异与验证见 [F2a model 与 useModel](66-f2a-models.md)。
+
+**F2b 状态（2026-10-20）：** U10 的初始状态基础已交付：`initialStatePlugin` 登记 `getInitialState` 与 runtime Provider，`useInitialState` 提供 loading/error/data、refresh 和 setInitialState；首次渲染不阻塞，卸载与并发刷新有防护。`@@initialState` 模型集成、首屏阻塞与 SSR/hydration 仍待后续。用法、差异与验证见 [F2b getInitialState](67-f2b-initial-state.md)。
 
 ### F3：权限、布局、菜单和国际化
 

@@ -126,6 +126,6 @@ Node 生成阶段只读取路径，不 import 或执行模型源码。模型模�
 
 ## 8. 下一步
 
-- F2b：`getInitialState`/初始状态与刷新语义；
+- F2b：`getInitialState`/初始状态与刷新语义，已由 [F2b](67-f2b-initial-state.md) 交付；
 - F2c：request/useRequest，包含取消、错误和竞态；
 - U09 后续：对象模型、reducers/effects、extraModels 与模型依赖排序。
