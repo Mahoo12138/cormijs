@@ -22,6 +22,7 @@ import { writeHtmlFixture, verifyHtmlPage } from './html-fixture.js';
 import { writeMockFixture, verifyMockPage } from './mock-fixture.js';
 import { writeAliasFixture, verifyAliasPage } from './alias-fixture.js';
 import { writeDefineFixture, verifyDefinePage } from './define-fixture.js';
+import { writeGlobalStyleFixture, verifyGlobalStylePage } from './global-style-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -699,6 +700,25 @@ const bad:DefinePluginOptions={};
     await command('define-build',defineConsumer,'build');
     await withServer(defineConsumer,'preview',async url=>{await verifyDefinePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'define-preview.png')});});
     report.stages.push({label:'installed-define-and-builtin-alias-dev-build-and-static-preview',values:{APP_NAME:'cormi define',APP_FLAGS:{beta:true,retries:2},'process.env.APP_MODE':'fixture-mode'},builtins:true,previewRegenerated:false});
+
+    const styleConsumer=await create('global-style','react');await writeGlobalStyleFixture(styleConsumer);
+    const styleManifest=consumerManifest(kit,'react');
+    styleManifest.dependencies['@cormijs/plugin-react']=styleManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(styleConsumer,'package.json'),JSON.stringify(styleManifest,null,2));
+    await install('global-style-install',styleConsumer);await auditLinks(styleConsumer);
+    await command('global-style-typecheck',styleConsumer,'typecheck');
+    await writeFile(join(styleConsumer,'types.mts'),`import {globalStylePlugin,styleContributions,resolveGlobalStyles,type GlobalStylePluginOptions,type StyleContribution} from '@cormijs/plugin-react';
+const options:GlobalStylePluginOptions={id:'app:styles',files:['src/global.css']};
+const contributions:readonly StyleContribution[]=styleContributions([{id:'app:styles',files:['src/global.css']}]);
+void [globalStylePlugin,options,contributions,resolveGlobalStyles(process.cwd(),contributions)];
+// @ts-expect-error global style files must be a string array
+const bad:GlobalStylePluginOptions={files:1};
+`);
+    await execute('global-style-public-types',styleConsumer,process.execPath,typeArguments);
+    await withServer(styleConsumer,'dev',async url=>{await verifyGlobalStylePage(page,url);assert.deepEqual(errors,[]);});
+    await command('global-style-build',styleConsumer,'build');
+    await withServer(styleConsumer,'preview',async url=>{await verifyGlobalStylePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'global-style-preview.png')});});
+    report.stages.push({label:'installed-global-style-convention-dev-build-and-static-preview',files:['src/global.css'],previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

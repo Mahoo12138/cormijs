@@ -36,6 +36,8 @@ F4d 起，`aliasPlugin` 可用 `builtins: true` 增加 `@`→`src`；`definePlug
 
 F4e 起，`htmlPlugin` 还支持 `headScripts`/`scripts`：条目可为 URL 字符串、内联字符串或对象，位置与 Umi 一致，属性走封闭白名单并转义，内联内容的 `</script` 逃逸被消解。详见 [F4e HTML scripts](78-f4e-html-scripts.md)。
 
+F4f 起，显式启用的 `globalStylePlugin` 发现 `src/global.{css,scss,sass,less}`，由生成入口按 `ctx.react.styles` 的 hook 顺序副作用导入；候选文件变化会触发 dev 重生成。预处理器交给 Vite，cormi 不内置。详见 [F4f 全局样式](79-f4f-global-styles.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

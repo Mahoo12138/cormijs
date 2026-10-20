@@ -81,6 +81,6 @@ export default defineConfig({
 ## 6. 下一步
 
 - U20/U21：路由级 head 与 helmet 类能力；
-- F4 后续：样式与资源约定（U22/U23）、微生成器（U27）、lint/test 工程命令（U28）；
+- F4f 全局样式约定已交付，见 [F4f 全局样式](79-f4f-global-styles.md)；后续为 CSS Modules/资源公开约定、微生成器（U27）与 lint/test 工程命令（U28）；
 - F3 剩余：菜单折叠 helper 与 UI adapter、`src/access.ts` 约定；
 - F5/F6 按路线继续（client loader、预取、SSR、生态集成）。

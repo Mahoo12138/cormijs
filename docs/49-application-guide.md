@@ -608,6 +608,20 @@ declare const APP_FLAGS: { beta: boolean; retries: number };
 
 示例：`pnpm cormi dev --root examples/define`，默认监听 `/define/`。
 
+### 4.17 全局样式约定
+
+入口级全局样式用显式的 `globalStylePlugin` 声明，而不是在某个页面里隐式导入：
+
+```ts
+import { globalStylePlugin } from '@cormijs/plugin-react';
+
+plugins: [{ id: 'styles', plugin: globalStylePlugin, options: { id: 'app:styles' } }]
+```
+
+默认候选为 `src/global.css`、`src/global.scss`、`src/global.sass`、`src/global.less`（每个贡献取第一个存在的文件，可用 `options.files` 覆盖）。生成入口 `.cormi/app.tsx` 会按 styles hook 顺序加入 `import "../src/global.css";`，开发期新建或删除该文件会触发生成更新；页面组件仍各自导入局部样式或 CSS Module。Less/Sass 由 Vite 原生处理，需要应用自行安装 `less`/`sass`；CSS Module 的类型声明由应用提供（create 模板已含 `*.module.css`）。规则与边界见 [F4f 全局样式](79-f4f-global-styles.md)。
+
+示例：`pnpm cormi dev --root examples/global-style`，默认监听 `/global-style/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

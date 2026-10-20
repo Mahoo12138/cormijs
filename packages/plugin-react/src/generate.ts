@@ -1,8 +1,10 @@
 import { CormiError } from '@cormijs/core';
 import { moduleRef, jsonData, validateRoutes, type ModuleRef, type RouteRecord } from '@cormijs/routes';
+import { isAbsolute, join, relative, sep } from 'node:path';
 import { clientSpecifier } from './modules.js';
 import type { AppRuntimePlan } from './app-runtime.js';
 import type { ModelPlan } from './model.js';
+import type { GlobalStylePlan } from './global-style.js';
 export { isServerModule } from './modules.js';
 
 export interface RuntimeContribution { readonly id: string; readonly module: ModuleRef; readonly options?: unknown }
@@ -18,10 +20,20 @@ export function runtimeContributions(input: unknown): readonly RuntimeContributi
     return Object.freeze({ id: item.id, module: moduleRef(item.module), options: jsonData(item.options ?? {}, 'RUNTIME_OPTIONS_INVALID') });
   }));
 }
+/** Stylesheets are side-effect imports resolved relative to `.cormi/`; the specifier stays project-local. */
+function styleSpecifier(root: string, file: string): string {
+  const target = join(root, file), inside = relative(root, target);
+  if (!inside || isAbsolute(inside) || inside === '..' || inside.startsWith('..' + sep)
+    || /(?:^|[\/])(?:node_modules|\.cormi[^\/]*|\.env(?:\.|$))/.test(target)) throw new CormiError('STYLE_INVALID', 'Global style file must stay in project sources.', { file });
+  const local = relative(join(root, '.cormi'), target).split(sep).join('/');
+  if (isAbsolute(local)) throw new CormiError('STYLE_INVALID', 'Cross-volume style files are not supported.', { file });
+  return local;
+}
+
 /** Static imports and JSON string literals only; no user-provided expression interpolation. */
 export async function generateApplication(root: string, routes: readonly RouteRecord[], runtimes: readonly RuntimeContribution[],
   base: string, mountId: string, serverOnlyFiles: readonly string[] = [], strict = false, appRuntime?: AppRuntimePlan, loading?: ModuleRef,
-  history: HistoryType = 'browser', models: readonly ModelPlan[] = []): Promise<string> {
+  history: HistoryType = 'browser', models: readonly ModelPlan[] = [], styles: readonly GlobalStylePlan[] = []): Promise<string> {
   if (typeof strict !== 'boolean') throw new CormiError('CONFIG_INVALID', 'strict must be boolean.');
   routes = validateRoutes(routes); runtimes = runtimeContributions(runtimes);
   const forbidden = new Set(serverOnlyFiles);
@@ -60,7 +72,9 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   const hasAccess = routes.some(route => route.access !== undefined);
   const modelEntries = models.map((model, index) => `{namespace:${JSON.stringify(model.namespace)},model:model${index}[${JSON.stringify(model.module.exportName)}]}`);
   const modelsOption = modelEntries.length ? ',models' : '';
+  const styleImports = styles.map(style => `import ${JSON.stringify(styleSpecifier(root, style.file))};`);
   return [
+    ...styleImports,
     `import { ${hasRedirects ? 'RedirectRoute, ' : ''}${hasAccess ? 'AccessRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule ? ', resolveAppConfig' : ''} } from '@cormijs/runtime';`,
     ...(appModule ? [`import * as applicationConfig from ${JSON.stringify(appModule)};`] : []),
     ...(loadingModule ? [`import * as applicationLoading from ${JSON.stringify(loadingModule)};`] : []),

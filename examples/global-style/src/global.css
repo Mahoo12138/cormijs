@@ -1,0 +1,7 @@
+:root { --cormi-band: rgb(37, 99, 128); --cormi-page: #f2f3f7; }
+body { margin: 0; background: var(--cormi-page); font-family: ui-sans-serif, system-ui, sans-serif; color: #23262f; }
+.shell { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; }
+.eyebrow { letter-spacing: .18em; font-size: 12px; color: #25506b; }
+h1 { margin: 8px 0 20px; font-size: clamp(32px, 6vw, 52px); }
+p { line-height: 1.8; color: #5b6172; }
+[data-global-band] { display: inline-block; background: var(--cormi-band); color: #fff; padding: 6px 12px; border-radius: 8px; }

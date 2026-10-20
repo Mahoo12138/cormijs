@@ -51,7 +51,7 @@
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c/F4d）：aliasPlugin 支持项目内相对别名与可选内置 `@`→src，definePlugin 在 dev 与 build 替换 JSON 常量；`@@`、环境分层自动映射与 define 类型生成待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
 | U20 | HTML title/metas/links/headScripts/scripts/favicon | 部分已有（F4a/F4e）：可选 htmlPlugin 注入 title/lang/meta/link/favicon，并按 Umi 位置约定注入 headScripts/scripts（封闭属性集合、转义与逃逸消解）；每路由 head 与任意 raw head HTML 待后续 | HTML/head 插件 | F4 |
 | U21 | helmet、页面标题/SEO 元数据 | 待实现官方能力；手改 document.title 不算 | head 客户端插件 | F3/F4 |
-| U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有 CSS Modules 与资产；缺完整约定和预处理集成 | 样式/资源插件 + backend adapter | F4 |
+| U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有（F4f）：globalStylePlugin 发现 src/global.{css,scss,sass,less} 并由生成入口按 hook 顺序副作用导入，dev 新建/删除可触发生成；CSS Modules 类型声明、PostCSS/Tailwind/SVGR 与预处理集成仍待后续 | 样式/资源插件 + backend adapter | F4 |
 | U23 | Tailwind、UnoCSS、styled-components | 待实现可选集成 | 各生态 adapter | F4 |
 | U24 | icons | 待实现公共图标方案 | 图标资源/代码生成插件 | F4 |
 | U25 | publicPath/runtimePublicPath、CDN、hash、copy/externals | 部分已有 base/静态资源与原生 Vite 扩展；无统一完整公开配置 | 输出/资源策略插件，差异显式 | F4 |
@@ -135,6 +135,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F4d 状态（2026-10-20）：** U19 的编译期常量与内置别名便利已交付：`definePlugin` 把 JSON 字面量注入 Vite 构建，并在 Vite 不处理 define 的开发阶段由同一插件用 esbuild 完成同名替换，dev/build/preview 结果一致；`aliasPlugin` 的 `builtins` 增加 `@`→`src`，位于显式别名之后且不截获作用域包。define 类型声明、`@@`、环境分层映射、样式与微生成器仍待后续。用法、差异与验证见 [F4d define](77-f4d-define.md)。
 
 **F4e 状态（2026-10-20）：** U20 的 headScripts/scripts 已交付：`htmlPlugin` 接受字符串或对象条目，按 Umi 的位置约定把 head 脚本插在 `<head>` 末尾、body 脚本插在 `</body>` 之前；属性走封闭白名单并转义，内联内容消解 `</script` 逃逸。每路由 head（U21）、CSP/nonce 与函数式贡献仍待后续。用法、差异与验证见 [F4e HTML scripts](78-f4e-html-scripts.md)。
+
+**F4f 状态（2026-10-20）：** U22 的第一步已交付：可选 `globalStylePlugin` 通过新增的 `ctx.react.styles` 贡献全局样式表约定，`generateApplication` 在生成入口顶部插入受校验的相对副作用导入，候选文件的出现/消失参与 dev 观测与重生成，`summary.styles` 报告所有者与文件。预处理器仍由 Vite 原生处理（应用安装 less/sass），CSS Modules 声明、PostCSS/Tailwind/SVGR 与资源约定待后续。用法、差异与验证见 [F4f 全局样式](79-f4f-global-styles.md)。
 
 ### F3：权限、布局、菜单和国际化
 
