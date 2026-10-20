@@ -98,6 +98,8 @@ F3c 起，显式启用的 `menuPlugin` 从实际挂载的路由树与 `meta` 生
 
 F3d 起，`ConfigRoute`/`RouteRecord` 的 `access` 在生成入口中变成 `AccessRoute` 守卫：权限不足渲染内置 403，不解析页面模块；有 wrappers 时守卫位于首个 wrapper 外，菜单读取同一 key 过滤。可定制 403 与 `src/access.ts` 约定待后续。详见 [F3d route access](72-f3d-route-access.md)。
 
+F3e 起，`accessForbidden` app 配置可提供自定义 403 组件；菜单新增 `useActiveMenuKeys`，按当前 location 返回选中项及祖先 key。菜单折叠状态与 ProLayout/Antd adapter 仍未交付。详见 [F3e 自定义 403 与菜单选中](73-f3e-custom-403-active-menu.md)。
+
 当前默认包含加载、路由错误和 404 页面。页面模块懒加载；生产与开发使用相同路由树。不存在 SSR/hydration/RSC 功能承诺。普通完整页面刷新会销毁浏览器文档；显式多 mount 使用者应调用返回的 dispose。
 
 ## 7. 验证与未完成边界

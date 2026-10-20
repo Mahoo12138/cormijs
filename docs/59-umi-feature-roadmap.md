@@ -43,8 +43,8 @@
 | U11 | request、运行时配置、拦截器、统一错误 | 部分已有（F2c）：requestPlugin 注册 app.tsx request 配置和每挂载 fetch 客户端；拦截器、统一错误协议、dataField 待后续 | request 契约/客户端实现适配 | F2 |
 | U12 | useRequest、手动/自动、分页/加载更多等 | 部分已有（F2c）：自动/手动、loading/error、refresh、cancel、竞态保护；重试/轮询/分页/加载更多待后续 | 请求 Hooks 插件，可复用成熟库 | F2 |
 | U13 | clientLoader/useClientLoaderData/routeProps | 待实现；页面懒加载不等于数据加载 | 路由数据插件 | F3 |
-| U14 | access.ts/useAccess/Access、路由访问控制 | 部分已有（F3b/F3d）：accessPlugin 从 initialState 计算权限，useAccess/Access 与路由级 access 守卫（403）可用；src/access.ts 约定与服务端授权边界待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
-| U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c）：布局容器/meta、useMenu/useBreadcrumb 与 access 过滤；无 ProLayout/Antd adapter、选中/折叠 helper 与路由级 access | layout/menu 插件，UI adapter 可选 | F3 |
+| U14 | access.ts/useAccess/Access、路由访问控制 | 部分已有（F3b/F3d/F3e）：accessPlugin 从 initialState 计算权限，useAccess/Access、路由 access 守卫与自定义 accessForbidden 可用；src/access.ts 约定与服务端授权边界待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
+| U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys 与 access 过滤；无 ProLayout/Antd adapter、折叠 helper 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
 | U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a）：localePlugin 提供内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage；消息目录、复数/日期与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
 | U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有 HTTP 规则/取消/固定代理；缺 Umi 式自动发现等易用性 | 复用 DevApiService，新增约定/后端 bridge | F4 |
@@ -123,6 +123,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F3c 状态（2026-10-20）：** U15 的菜单基础已交付：`menuPlugin` 从实际挂载的路由树与 meta 生成嵌套菜单，`useBreadcrumb` 生成面包屑，启用 access 时按 `meta.access` 过滤；Runtime Provider 契约新增 routes/basename。ProLayout/Antd adapter、选中/折叠 helper、路由级 access 与布局插槽仍待后续。用法、差异与验证见 [F3c menu](71-f3c-menu.md)。
 
 **F3d 状态（2026-10-20）：** U14 的路由级 access 已交付：ConfigRoute/RouteRecord 的 `access` 经生成器变为 AccessRoute 守卫，权限不足渲染内置 403 且不加载页面；有 wrappers 时守卫位于 wrapper 链之外，菜单读取同一 key 过滤。可定制 403、src/access.ts 约定与 UI adapter 仍待后续。用法、差异与验证见 [F3d route access](72-f3d-route-access.md)。
+
+**F3e 状态（2026-10-20）：** access 路由守卫可通过 app 配置的 `accessForbidden` 渲染自定义 403；菜单新增 `useActiveMenuKeys`，按当前 location 返回选中项和祖先 key。菜单折叠状态、ProLayout/Antd adapter 与 src/access.ts 自动发现仍待后续。用法与验证见 [F3e 自定义 403 与菜单选中](73-f3e-custom-403-active-menu.md)。F3 剩余为 UI adapter/折叠 helper，之后进入 F4 工程能力。
 
 ### F3：权限、布局、菜单和国际化
 

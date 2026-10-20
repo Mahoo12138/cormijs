@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { Location, NavigationType, RouteObject } from 'react-router';
 
 export type HistoryType = 'browser' | 'hash' | 'memory';
@@ -45,6 +45,8 @@ export interface RuntimeConfig {
   locale?: LocaleConfig;
   /** Registered by accessPlugin; evaluated from the initial-state data. */
   access?: AccessConfig;
+  /** Registered by accessPlugin; rendered by route guards when access is denied. */
+  accessForbidden?: ComponentType;
 }
 export const APP_RUNTIME_KEYS = Object.freeze(['setup', 'render', 'patchClientRoutes', 'rootContainer', 'onRouteChange'] as const);
 type ExactConfig<T> = Record<Exclude<keyof T, keyof RuntimeConfig>, never>;

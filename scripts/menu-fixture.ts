@@ -35,16 +35,18 @@ export async function writeMenuFixture(root: string) {
     'index.html': '<!doctype html><html><head><title>cormi menu</title><link rel="icon" href="data:," /></head><body><div id="root"></div><script type="module" src="/.cormi/app.tsx"></script></body></html>',
     'cormi.config.ts': menuConfiguration,
     'src/app.tsx': `import { defineApp } from '@cormijs/runtime';
+function Forbidden(){return <main role="status"><h1>Custom forbidden</h1><p>Ask an administrator.</p></main>;}
 export default defineApp({
   async getInitialState() { await new Promise(resolve => setTimeout(resolve, 60)); return { role: 'user' }; },
   access(state) { return { canAdmin: (state as { role?: string } | undefined)?.role === 'admin' }; },
+  accessForbidden: Forbidden,
 });`,
-    'src/Shell.tsx': `import { Link, Outlet, useAccess, useBreadcrumb, useInitialState, useMenu } from '@cormijs/runtime';
-function MenuList({items}:{items:readonly import('@cormijs/runtime').MenuItem[]}){return <ul>{items.map(item=><li key={item.key}><Link to={item.path}>{item.title}</Link>{item.children.length?<MenuList items={item.children}/>:null}</li>)}</ul>;}
+    'src/Shell.tsx': `import { Link, Outlet, useAccess, useActiveMenuKeys, useBreadcrumb, useInitialState, useMenu } from '@cormijs/runtime';
+function MenuList({items,active}:{items:readonly import('@cormijs/runtime').MenuItem[];active:readonly string[]}){return <ul>{items.map(item=><li key={item.key}><Link to={item.path} data-active={active.includes(item.key)?'true':undefined}>{item.title}</Link>{item.children.length?<MenuList items={item.children} active={active}/>:null}</li>)}</ul>;}
 export default function Shell(){
   const initial=useInitialState<{role:string}>();useAccess();
-  const crumbs=useBreadcrumb();
-  return <section data-shell><header><h1>Menu demo</h1><nav data-menu><MenuList items={useMenu()} /></nav><p data-crumbs>{crumbs.map(item=>item.title).join(' > ')}</p><button data-promote onClick={()=>initial.setInitialState({role:'admin'})}>Promote</button></header><Outlet/></section>;
+  const crumbs=useBreadcrumb(), active=useActiveMenuKeys();
+  return <section data-shell><header><h1>Menu demo</h1><nav data-menu><MenuList items={useMenu()} active={active}/></nav><p data-crumbs>{crumbs.map(item=>item.title).join(' > ')}</p><button data-promote onClick={()=>initial.setInitialState({role:'admin'})}>Promote</button></header><Outlet/></section>;
 }`,
     'src/Home.tsx': 'export default function Home(){return <main><h2>Home page</h2></main>;}',
     'src/About.tsx': 'export default function About(){return <main><h2>About page</h2></main>;}',
@@ -63,24 +65,28 @@ export async function verifyMenuPage(page: Page, url: string) {
   await page.goto(url); await page.getByRole('heading', { name: 'Home page', exact: true }).waitFor();
   assert.deepEqual(await menuText(), ['About', 'Home', 'Team', 'Overview']);
   assert.equal(await page.locator('[data-crumbs]').innerText(), 'Home');
+  assert.deepEqual(await page.locator('[data-menu] a[data-active="true"]').allInnerTexts(), ['Home']);
   assert.equal(await page.locator('[data-menu]').getByRole('link', { name: 'Admin', exact: true }).count(), 0);
 
   await page.goto(new URL('admin', url).href);
-  await page.getByRole('heading', { name: '403', exact: true }).waitFor();
+  await page.getByRole('heading', { name: 'Custom forbidden', exact: true }).waitFor();
   assert.equal(await page.getByRole('heading', { name: 'Admin page', exact: true }).count(), 0);
   await page.goto(url); await page.getByRole('heading', { name: 'Home page', exact: true }).waitFor();
 
   await page.locator('[data-menu]').getByRole('link', { name: 'Team', exact: true }).click();
   await page.getByRole('heading', { name: 'Team overview', exact: true }).waitFor();
   assert.equal(await page.locator('[data-crumbs]').innerText(), 'Team > Overview');
+  assert.deepEqual(await page.locator('[data-menu] a[data-active="true"]').allInnerTexts(), ['Team', 'Overview']);
   await page.locator('[data-menu]').getByRole('link', { name: 'About', exact: true }).click();
   await page.getByRole('heading', { name: 'About page', exact: true }).waitFor();
   assert.equal(await page.locator('[data-crumbs]').innerText(), 'About');
+  assert.deepEqual(await page.locator('[data-menu] a[data-active="true"]').allInnerTexts(), ['About']);
 
   await page.locator('[data-promote]').click();
   await page.waitForFunction(() => Array.from(document.querySelectorAll('[data-menu] a')).some(link => link.textContent === 'Admin'));
   await page.locator('[data-menu]').getByRole('link', { name: 'Admin', exact: true }).click();
   await page.getByRole('heading', { name: 'Admin page', exact: true }).waitFor();
   assert.equal(await page.locator('[data-crumbs]').innerText(), 'Admin');
+  assert.deepEqual(await page.locator('[data-menu] a[data-active="true"]').allInnerTexts(), ['Admin']);
   assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);
 }

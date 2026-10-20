@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
-import type { RouteObject } from 'react-router';
+import { matchPath, useLocation, type RouteObject } from 'react-router';
 import { useAccessOptional } from './access.js';
 import { useRouteMatches } from './route-matches.js';
 
@@ -65,6 +65,21 @@ export function useBreadcrumb(): readonly BreadcrumbItem[] {
   return useRouteMatches().flatMap(match => typeof match.meta.title === 'string'
     ? [Object.freeze({ id: match.id, pathname: match.pathname, title: match.meta.title, meta: match.meta })]
     : []);
+}
+/** Keys of menu items whose path matches the current location, including active ancestors. */
+export function useActiveMenuKeys(): readonly string[] {
+  const items = useMenu(), { pathname } = useLocation(), active: string[] = [];
+  const visit = (list: readonly MenuItem[]): boolean => {
+    let any = false;
+    for (const item of list) {
+      const child = visit(item.children);
+      const matches = item.path === '/' ? pathname === '/' : matchPath({ path: item.path, end: false }, pathname) !== null;
+      if (child || matches) { active.push(item.key); any = true; }
+    }
+    return any;
+  };
+  visit(items);
+  return active;
 }
 
 /** Runtime plugin object consumed by the generated entry when menuPlugin is mounted. */

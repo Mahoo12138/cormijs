@@ -10,3 +10,4 @@ nav { margin: 16px 0; }
 .crumbs, .hint { font-family: ui-monospace, monospace; font-size: 12px; color: #61707a; }
 main { margin-top: 24px; padding: 24px; background: #fff; border: 1px solid #dbe3e8; border-radius: 12px; }
 button { padding: 8px 14px; border: 1px solid #35617a; border-radius: 8px; background: transparent; color: #35617a; }
+.menu a[data-active="true"] { font-weight: 700; color: #1f292e; }

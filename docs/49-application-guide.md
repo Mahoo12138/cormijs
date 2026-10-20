@@ -486,6 +486,29 @@ const crumbs = useBreadcrumb(); // 当前路由匹配的 { title, pathname }[]
 
 生成器会为该路由创建守卫：`access.canAdmin` 为 true 时加载页面，否则渲染内置 403，不加载页面模块；有 wrappers 时 access 传播到首个 wrapper，守卫覆盖整条链。菜单读取同一个 key 过滤。客户端守卫只保护 UI，不替代后端授权；403 当前不可定制。完整行为见 [F3d route access](72-f3d-route-access.md)。
 
+### 4.12 自定义 403 与菜单选中
+
+在 app 配置中提供 `accessForbidden` 组件，即可替换路由守卫生成的默认 403：
+
+```tsx
+function Forbidden() { return <main role="status"><h1>无权访问</h1></main>; }
+
+export default defineApp({
+  getInitialState() { return { role: 'user' }; },
+  access(state) { return { canAdmin: (state as { role: string }).role === 'admin' }; },
+  accessForbidden: Forbidden,
+});
+```
+
+菜单页面可使用 `useActiveMenuKeys()` 获取当前路径的选中项和祖先 key：
+
+```tsx
+const active = useActiveMenuKeys();
+<Link to={item.path} data-active={active.includes(item.key) ? 'true' : undefined}>{item.title}</Link>
+```
+
+根路径 `/` 使用精确匹配，其他路径使用 `matchPath(..., { end: false })`。当前不提供菜单折叠状态或 ProLayout/Antd adapter。完整语义见 [F3e](73-f3e-custom-403-active-menu.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

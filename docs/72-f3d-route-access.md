@@ -76,6 +76,6 @@ const routes: readonly ConfigRoute[] = [{
 
 ## 6. 下一步
 
-- F3e：菜单选中/折叠 helper、可定制 403 与可选 ProLayout/Antd adapter；
+- F3e：菜单选中/折叠 helper、可定制 403 与可选 ProLayout/Antd adapter，自定义 403 与选中 helper 已由 [F3e](73-f3e-custom-403-active-menu.md) 交付；
 - F4：Mock 约定、配置/别名、HTML/head、样式与资源、微生成器等工程能力；
 - access 后续：`src/access.ts` 自动发现、服务端授权边界文档与 SSR。
