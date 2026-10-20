@@ -11,6 +11,7 @@ import { writeTypecheckGraph, compilerFootprint } from './typescript-fixture.js'
 import { writeAppRuntimeFixture, verifyAppRuntimePage, appRuntimeSource } from './app-runtime-fixture.js';
 import { writeConfigRoutesFixture, verifyConfigRoutesPage } from './config-routes-fixture.js';
 import { writeConventionsFixture, verifyConventionsPage } from './conventions-fixture.js';
+import { writeHistoryFixture, verifyHistoryPage } from './history-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -480,6 +481,23 @@ const bad:LoadingPluginOptions={files:[1]};
     await command('conventions-build',conventionsConsumer,'build');
     await withServer(conventionsConsumer,'preview',async url=>{await verifyConventionsPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'conventions-preview.png')});});
     report.stages.push({label:'installed-conventions-custom-404-loading-and-static-preview',convention:'src/pages/404.tsx + src/loading.tsx',previewRegenerated:false});
+
+    const historyConsumer=await create('history','react');await writeHistoryFixture(historyConsumer,'hash','/history/');
+    const historyManifest=consumerManifest(kit,'react');
+    historyManifest.dependencies['@cormijs/plugin-react']=historyManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(historyConsumer,'package.json'),JSON.stringify(historyManifest,null,2));
+    await install('history-install',historyConsumer);await auditLinks(historyConsumer);
+    await command('history-typecheck',historyConsumer,'typecheck');
+    await writeFile(join(historyConsumer,'types.mts'),`import type {HistoryType} from '@cormijs/plugin-react';import {Link,useNavigate,useSearchParams,type RouteChangeEvent} from '@cormijs/runtime';
+const history:HistoryType='hash';const eventHistory:RouteChangeEvent['history']=history;void [history,eventHistory,Link,useNavigate,useSearchParams];
+// @ts-expect-error history selection is a closed union
+const bad:HistoryType='abstract';
+`);
+    await execute('history-public-types',historyConsumer,process.execPath,typeArguments);
+    await withServer(historyConsumer,'dev',async url=>{await verifyHistoryPage(page,url,'hash','/history/');assert.deepEqual(errors,[]);});
+    await command('history-build',historyConsumer,'build');
+    await withServer(historyConsumer,'preview',async url=>{await verifyHistoryPage(page,url,'hash','/history/');assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'history-preview.png')});});
+    report.stages.push({label:'installed-history-hash-navigation-query-and-static-preview',history:'hash',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

@@ -1,0 +1,11 @@
+:root { color-scheme: light; font-family: ui-sans-serif, system-ui, sans-serif; background: #f7f3ec; color: #29231d; }
+body { margin: 0; }
+.shell { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; }
+.eyebrow { letter-spacing: .18em; font-size: 12px; color: #9a5d2d; }
+h1 { margin: 8px 0 20px; font-size: clamp(32px, 6vw, 52px); }
+nav { display: flex; gap: 18px; flex-wrap: wrap; }
+nav a { color: #9a5d2d; text-decoration: none; border-bottom: 1px solid currentColor; }
+.location, .query { font-family: ui-monospace, monospace; font-size: 12px; color: #6d655b; }
+article { margin-top: 32px; padding: 24px; background: #fffdf8; border: 1px solid #e4dbcd; border-radius: 12px; }
+button { margin: 8px 8px 0 0; padding: 8px 14px; border: 1px solid #9a5d2d; border-radius: 8px; background: transparent; color: #9a5d2d; }
+code { font-family: ui-monospace, monospace; background: #f0e7da; padding: 1px 5px; border-radius: 4px; }

@@ -1,10 +1,11 @@
 import { createElement, StrictMode, type ComponentType, type PropsWithChildren, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { createBrowserRouter, generatePath, Navigate, useLocation, useParams, type RouteObject, type Location } from 'react-router';
+import { createBrowserRouter, createHashRouter, createMemoryRouter, generatePath, Navigate, useLocation, useParams, type RouteObject, type Location } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
-import { copyClientRoutes, runAppRender, type RuntimeConfig, type RouteChangeEvent, type RuntimeCleanup } from './app-config.js';
+import { copyClientRoutes, runAppRender, type HistoryType, type RuntimeConfig, type RouteChangeEvent, type RuntimeCleanup } from './app-config.js';
 export { useRouteMatches, type CormiRouteMatch } from './route-matches.js';
-export { defineApp, resolveAppConfig, type RuntimeConfig, type AppRuntimeContext, type AppRoutesContext, type RootContainerContext, type RouteChangeEvent } from './app-config.js';
+export { defineApp, resolveAppConfig, type HistoryType, type RuntimeConfig, type AppRuntimeContext, type AppRoutesContext, type RootContainerContext, type RouteChangeEvent } from './app-config.js';
+export { Link, NavLink, Navigate, Outlet, createSearchParams, useHref, useLocation, useMatch, useNavigate, useNavigation, useParams, useSearchParams } from 'react-router';
 
 export interface RuntimePlugin {
   Provider?: ComponentType<PropsWithChildren<{ options: unknown; appConfig: Readonly<RuntimeConfig> }>>;
@@ -34,15 +35,18 @@ export async function resolveRouteComponent(load: () => Promise<ComponentType>):
 /** A mount owns its router, root and runtime effects; no module-global application singleton. */
 export async function mountApplication(options: {
   element: HTMLElement; routes: RouteObject[]; base?: string; plugins?: readonly RuntimeEntry[]; strict?: boolean;
-  appConfig?: Readonly<RuntimeConfig>; loading?: ComponentType; signal?: AbortSignal;
+  appConfig?: Readonly<RuntimeConfig>; loading?: ComponentType; history?: HistoryType; signal?: AbortSignal;
 }): Promise<ApplicationHandle> {
   if (options.strict !== undefined && typeof options.strict !== 'boolean') throw new TypeError('strict must be boolean');
+  if (options.history !== undefined && !['browser', 'hash', 'memory'].includes(options.history)) throw new TypeError('history must be browser, hash or memory');
   options.signal?.throwIfAborted();
   if (mountedElements.has(options.element)) throw new Error('cormi mount element is already owned');
   mountedElements.add(options.element);
   const entries = options.plugins ?? [], ids = new Set<string>(), lifetime = new AbortController();
   const appConfig: Readonly<RuntimeConfig> = options.appConfig ?? Object.freeze({});
-  const basename = options.base ?? '/';
+  const history = options.history ?? 'browser';
+  // Hash and memory histories keep route paths independent of the deployment base used for assets.
+  const basename = history === 'browser' ? options.base ?? '/' : '/';
   const context = Object.freeze({ signal: lifetime.signal, basename });
   const cleanups: RuntimeCleanup[] = [];
   let root: Root | undefined, router: ReturnType<typeof createBrowserRouter> | undefined;
@@ -83,14 +87,17 @@ export async function mountApplication(options: {
       const clientRoutes = copyClientRoutes(routes);
       // A pathless layout matches every URL; `path: '/'` would not match `*` at the basename itself.
       const LoadingComponent = options.loading ?? DefaultLoading;
-      router = createBrowserRouter([{ id: 'cormi:root', HydrateFallback: LoadingComponent, ErrorBoundary: RouteFailure,
-        children: [...clientRoutes, { id: 'cormi:404', path: '*', Component: NotFound }] }], { basename });
+      const tree: RouteObject[] = [{ id: 'cormi:root', HydrateFallback: LoadingComponent, ErrorBoundary: RouteFailure,
+        children: [...clientRoutes, { id: 'cormi:404', path: '*', Component: NotFound }] }];
+      router = history === 'hash' ? createHashRouter(tree, { basename })
+        : history === 'memory' ? createMemoryRouter(tree, { basename, initialEntries: ['/'] })
+          : createBrowserRouter(tree, { basename });
       let lastLocation: Location | undefined;
       const notify = (state: ReturnType<typeof createBrowserRouter>['state']) => {
         if (!state.initialized || lifetime.signal.aborted || state.location === lastLocation) return;
         const isFirst = lastLocation === undefined; lastLocation = state.location;
         const location = Object.freeze({ ...state.location });
-        const event: RouteChangeEvent = Object.freeze({ location, action: state.historyAction, basename, isFirst, routes: sourceRoutes, clientRoutes });
+        const event: RouteChangeEvent = Object.freeze({ location, action: state.historyAction, history, basename, isFirst, routes: sourceRoutes, clientRoutes });
         for (const entry of entries) {
           try { void Promise.resolve(entry.plugin.onRouteChange?.(location, event)).catch(error => log(entry.id, error)); }
           catch (error) { log(entry.id, error); }

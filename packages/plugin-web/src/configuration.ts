@@ -21,7 +21,7 @@ export interface ConfigReport {
   readonly hooks: readonly { readonly id: string; readonly owner: string; readonly stage: number }[];
   readonly plugins: NonNullable<CommandRequest['configuration']>['plugins'];
 }
-const allowed = new Set(['/entry','/base','/outDir','/pages','/mountId','/server/host','/server/port']);
+const allowed = new Set(['/entry','/base','/outDir','/pages','/mountId','/history','/history/type','/server/host','/server/port']);
 function disclosure(path: string, value: unknown): { value: unknown; redacted: boolean } {
   // An allowlist, not a secret-name denylist. Never serialize runtime options or arbitrary app values.
   if (allowed.has(path) && (typeof value === 'number' && Number.isFinite(value)

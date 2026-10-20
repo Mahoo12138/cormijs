@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Location, NavigationType, RouteObject } from 'react-router';
 
+export type HistoryType = 'browser' | 'hash' | 'memory';
 export interface AppRuntimeContext { readonly signal: AbortSignal; readonly basename: string }
 export interface AppRoutesContext extends AppRuntimeContext { readonly routes: RouteObject[] }
 export interface RootContainerContext extends AppRuntimeContext { readonly routes: readonly RouteObject[] }
@@ -8,6 +9,7 @@ export interface RouteChangeEvent {
   /** Raw history location: pathname includes basename, as with Umi's history. */
   readonly location: Readonly<Location>;
   readonly action: NavigationType;
+  readonly history: HistoryType;
   readonly basename: string;
   readonly isFirst: boolean;
   /** Routes supplied to mountApplication, before patchClientRoutes. */

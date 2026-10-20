@@ -167,5 +167,5 @@ wrapper 组件和页面一样按需懒加载，不进入 Node 生成阶段执行
 
 - U05 已完成：redirect/keepQuery、wrappers、`layout:false` 均已交付；`layout:false` 见 [F1d](63-f1d-global-layout.md)；
 - U06 已完成：全局布局、`src/pages/404.tsx` 与 `src/loading.*` 已分别由 [F1d](63-f1d-global-layout.md)、[F1e](64-f1e-404-and-loading.md) 交付；
-- U07：browser/hash/memory history 选择与公共导航/查询入口；
+- U07 已完成：history 与公共导航/查询入口由 [F1f](65-f1f-history-and-navigation.md) 交付；
 - F2：在 F1a 运行时入口上登记 model/initial-state/request 的 key 与 Provider。

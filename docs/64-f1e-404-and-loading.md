@@ -116,6 +116,6 @@ export default function Loading() {
 
 ## 6. 下一步
 
-- U07：browser/hash/memory history 选择与公共导航/查询入口；
+- U07 已完成：history 与公共导航/查询入口由 [F1f](65-f1f-history-and-navigation.md) 交付；
 - F2：在 F1a 运行时入口上登记 model/initial-state/request 的 key 与 Provider；
 - U13/F5：结合路由惰性加载补齐导航期间的 Suspense/loading 语义。

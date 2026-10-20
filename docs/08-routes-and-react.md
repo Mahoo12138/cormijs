@@ -82,6 +82,8 @@ F1d 起，显式启用的 `layoutPlugin` 通过 `ctx.react.layouts` 登记一个
 
 F1e 起，约定扫描把根级 `src/pages/404.tsx` 映射为终端 catch-all；显式启用的 `loadingPlugin` 通过 `ctx.react.loading` 提供一个 `src/loading.*` 组件，作为首次路由解析的 `HydrateFallback`。它不改变导航期间保留旧页面的行为；完整 Suspense loading 仍待 U13/F5。详见 [F1e 404 与 loading](64-f1e-404-and-loading.md)。
 
+F1f 起，`app.history` 可选择 browser/hash/memory；hash 与 memory 使用应用相对 Router basename `/`，`app.base` 仍负责资源与挂载前缀。`mountApplication` 仍为每个挂载创建独立 Router，`RouteChangeEvent` 增加 `history`。`@cormijs/runtime` 同时重导出 `Link`、`useNavigate`、`useSearchParams` 等导航/查询应用面。详见 [F1f history 与导航](65-f1f-history-and-navigation.md)。
+
 当前默认包含加载、路由错误和 404 页面。页面模块懒加载；生产与开发使用相同路由树。不存在 SSR/hydration/RSC 功能承诺。普通完整页面刷新会销毁浏览器文档；显式多 mount 使用者应调用返回的 dispose。
 
 ## 7. 验证与未完成边界

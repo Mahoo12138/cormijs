@@ -225,6 +225,31 @@ export default function Loading() {
 
 示例：`pnpm cormi dev --root examples/conventions`，默认监听 `/conventions/`。
 
+### 4.4 history 模式与公共导航入口
+
+`app.history` 选择 `browser`（默认）、`hash` 或 `memory`：
+
+```ts
+export default defineConfig({
+  presets: [reactVite],
+  app: { base: '/history/', history: 'hash' },
+});
+```
+
+- `browser`：`app.base` 作为 Router basename，真实路径包含部署前缀，深链需要服务器 fallback；
+- `hash`：路由位于 `#` 之后（如 `/history/#/about`），刷新保留路由，不需要逐路由 fallback；`app.base` 仍用于资源与挂载；
+- `memory`：Router 从 `/` 开始，地址栏不变，刷新回到首页；适合嵌入或测试，不可分享 URL。
+
+页面导航与查询统一从 `@cormijs/runtime` 导入，不需要直接依赖 `react-router`：
+
+```tsx
+import { Link, Outlet, useLocation, useNavigate, useSearchParams } from '@cormijs/runtime';
+```
+
+`onRouteChange` 事件包含 `history` 字段。完整行为、Umi 差异和验证见 [F1f history 与导航](65-f1f-history-and-navigation.md)。
+
+示例：`pnpm cormi dev --root examples/history`，默认监听 `/history/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

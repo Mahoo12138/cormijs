@@ -6,7 +6,7 @@ import { realpath, readFile } from 'node:fs/promises';
 import { isAbsolute, join, relative } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { transform } from 'esbuild';
-import { generateApplication, runtimeContributions, type RuntimeContribution } from './generate.js';
+import { generateApplication, runtimeContributions, type HistoryType, type RuntimeContribution } from './generate.js';
 import { generateRouteTypes } from './types.js';
 import { developmentDiagnostic, recoverable, repairSignature } from './development.js';
 import { clientModuleFile, inspectModule } from './modules.js';
@@ -21,7 +21,7 @@ export { defineReactFeature, type ReactFeature } from './feature.js';
 export { createFeatureNamespace, type FeatureNamespace } from './namespace.js';
 export { routeConfigPlugin, type RouteConfigOptions } from './route-config.js';
 export type { ConfigRoute, ModuleRef, RouteMeta, RouteRecord } from '@cormijs/routes';
-export { generateApplication, runtimeContributions, type RuntimeContribution } from './generate.js';
+export { generateApplication, runtimeContributions, type HistoryType, type RuntimeContribution } from './generate.js';
 export { generateRouteTypes } from './types.js';
 
 export interface ReactCompilation {
@@ -32,6 +32,14 @@ export interface ReactCompilation {
   readonly loading: OrderedHooks<void, readonly LoadingContribution[]>;
 }
 declare module 'cordis' { interface Context { react: ReactCompilation } }
+
+function historyType(value: unknown): HistoryType {
+  const type = typeof value === 'string' ? value
+    : value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 1 ? (value as { type?: unknown }).type
+      : undefined;
+  if (type !== 'browser' && type !== 'hash' && type !== 'memory') throw new CormiError('CONFIG_INVALID', 'app.history must be browser, hash or memory.');
+  return type;
+}
 
 /** React compilation and recovery are independent of the selected development backend. */
 export const reactPlugin: Plugin.Object<void> = {
@@ -53,11 +61,12 @@ export const reactPlugin: Plugin.Object<void> = {
     ]);
     async function create(request: ApplicationRequest): Promise<PreparedApplication> {
       assertActive(ctx);
-      const plan = createBuildPlan(request, ['pages', 'routes', 'runtime', 'runtimeConfig', 'mountId', 'strict']);
+      const plan = createBuildPlan(request, ['pages', 'routes', 'runtime', 'runtimeConfig', 'mountId', 'strict', 'history']);
       const root = await realpath(request.root), input = request.options;
       const pages = input.pages ?? 'src/pages', mountId = input.mountId ?? 'root', developing = request.command === 'dev';
       const strict = input.strict === undefined ? false : input.strict;
       if (typeof strict !== 'boolean') throw new CormiError('CONFIG_INVALID', 'app.strict must be boolean.');
+      const history = historyType(input.history === undefined ? 'browser' : input.history);
       if (typeof pages !== 'string' || typeof mountId !== 'string' || !mountId || plan.entry !== 'index.html') throw new CormiError('CONFIG_INVALID', 'Invalid React application options.');
       if (!plan.base.startsWith('/') || !plan.base.endsWith('/') || plan.base.startsWith('//') || /[?#%\\]/.test(plan.base) || plan.base.split('/').includes('..')) throw new CormiError('BASE_INVALID', 'base must be a URL path ending with /.');
       const local = new AbortController(), signal = AbortSignal.any([local.signal, request.signal, lifetime.signal]);
@@ -198,11 +207,11 @@ export const reactPlugin: Plugin.Object<void> = {
             rememberModules(next); phase = 'runtime';
             const plugins = runtimeContributions([...runtimeContributions(input.runtime ?? []), ...await runtime.collect(undefined)]);
             rememberModules(plugins); phase = 'generate';
-            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict, observed.applicationRuntime, globalLoading?.module);
+            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict, observed.applicationRuntime, globalLoading?.module, history);
             await transform(code, { loader: 'tsx', format: 'esm', jsx: 'automatic', logLevel: 'silent' });
             const types = generateRouteTypes(next);
             const hookInfo = (items: readonly { id: string; owner: string; stage?: number }[]) => items.map(({ id, owner, stage }) => ({ id, owner, stage: stage ?? 0 }));
-            const inspection = inspectionManifest(code, types, { renderer: 'react', mode: request.mode, base: plan.base, entry: '.cormi/app.tsx', strict,
+            const inspection = inspectionManifest(code, types, { renderer: 'react', mode: request.mode, base: plan.base, entry: '.cormi/app.tsx', strict, history,
               routes: next.map(route => ({ ...route, ...(route.module ? { module: inspectModule(root, route.module) } : {}),
                 ...(route.errorBoundary ? { errorBoundary: inspectModule(root, route.errorBoundary) } : {}) })),
               layout: globalLayout ? { owner: globalLayout.owner, module: inspectModule(root, globalLayout.module) } : null,
