@@ -118,4 +118,4 @@ import {
 
 ## 7. 下一步
 
-F1 的运行时、路由配置、全局布局、404/loading 与 history 已交付。下一阶段进入 F2：model/useModel、初始状态、request/useRequest，继续把应用级能力登记到 F1a 的运行时入口，而不是扩展 Node bootstrap。
+F1 的运行时、路由配置、全局布局、404/loading 与 history 已交付。下一阶段进入 F2：model/useModel、初始状态、request/useRequest，继续把应用级能力登记到 F1a 的运行时入口，而不是扩展 Node bootstrap。F2 的 model 基础已由 [F2a](66-f2a-models.md) 交付。

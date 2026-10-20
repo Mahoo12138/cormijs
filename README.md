@@ -4,7 +4,7 @@
 
 **开发主线已调整（2026-10-20）：优先吸收 Umi 4 / Max 的应用功能，使用 Cordis 插件实现；构建中断恢复等外围深化暂停。** 具体差距、插件归属和顺序见 [Umi 功能吸收路线](docs/59-umi-feature-roadmap.md)。先补运行时约定/路由、数据流/初始状态、请求、权限、布局与国际化，再覆盖其他工程和渲染能力。本次是路线调整，不把计划中的功能写成已实现。
 
-**当前已实现至 P16，并完成 Umi 吸收路线 F1a/F1b/F1c/F1d/F1e/F1f：应用运行时约定、配置式嵌套路由、redirect/wrappers、全局布局、404/loading 与 history/导航入口。** TypeScript领域插件支持solution/project references，用单次内存声明保留项目边界，不写业务编译输出；生成根有明确所属项目。typechecker服务与命令消费者使用原生Cordis组合，core和launcher不增加TS特例。应用可在显式启用的 `src/app.tsx` 中配置首屏初始化、根容器、路由调整和完整路由事件；也可显式启用 `routeConfigPlugin`，用嵌套 `routes` 声明布局、index、动态参数、meta、错误边界、`redirect`/`keepQuery` 与 `wrappers`，由插件展开为既有扁平 IR；`layoutPlugin` 可发现 `src/layouts/index.*` 并用 `layout:false` 支持顶层退出，根 `src/pages/404.tsx` 自动成为 catch-all，`loadingPlugin` 提供首次路由解析回退；`app.history` 支持 browser/hash/memory，导航与查询 Hook 从 `@cormijs/runtime` 统一导出。模型、请求、权限等后续插件将扩展同一运行时入口。API、Umi 差异与当前边界见 [F1a结果](docs/60-f1a-app-runtime.md)、[F1b结果](docs/61-f1b-config-routes.md)、[F1c结果](docs/62-f1c-redirects-and-wrappers.md)、[F1d结果](docs/63-f1d-global-layout.md)、[F1e结果](docs/64-f1e-404-and-loading.md) 与 [F1f结果](docs/65-f1f-history-and-navigation.md)。当前应用入口见 [应用开发指南](docs/49-application-guide.md)，项目引用配置见 [TypeScript协议](docs/57-typescript-projects.md)；高级引导/执行组合仍见 [引导插件](docs/53-bootstrap-plugins.md) 与 [worker执行](docs/55-worker-execution.md)。
+**当前已实现至 P16，并完成 Umi 吸收路线 F1a/F1b/F1c/F1d/F1e/F1f 与 F2a：应用运行时约定、配置式嵌套路由、redirect/wrappers、全局布局、404/loading、history/导航入口与 model/useModel 基础。** TypeScript领域插件支持solution/project references，用单次内存声明保留项目边界，不写业务编译输出；生成根有明确所属项目。typechecker服务与命令消费者使用原生Cordis组合，core和launcher不增加TS特例。应用可在显式启用的 `src/app.tsx` 中配置首屏初始化、根容器、路由调整和完整路由事件；也可显式启用 `routeConfigPlugin`，用嵌套 `routes` 声明布局、index、动态参数、meta、错误边界、`redirect`/`keepQuery` 与 `wrappers`，由插件展开为既有扁平 IR；`layoutPlugin` 可发现 `src/layouts/index.*` 并用 `layout:false` 支持顶层退出，根 `src/pages/404.tsx` 自动成为 catch-all，`loadingPlugin` 提供首次路由解析回退；`app.history` 支持 browser/hash/memory，导航与查询 Hook 从 `@cormijs/runtime` 统一导出；`modelPlugin` 可发现 `src/models/**`，通过 `useModel` 在挂载内共享 Hook 模型状态。模型、初始状态与请求能力将继续扩展同一运行时入口。API、Umi 差异与当前边界见 [F1a结果](docs/60-f1a-app-runtime.md)、[F1b结果](docs/61-f1b-config-routes.md)、[F1c结果](docs/62-f1c-redirects-and-wrappers.md)、[F1d结果](docs/63-f1d-global-layout.md)、[F1e结果](docs/64-f1e-404-and-loading.md)、[F1f结果](docs/65-f1f-history-and-navigation.md) 与 [F2a结果](docs/66-f2a-models.md)。当前应用入口见 [应用开发指南](docs/49-application-guide.md)，项目引用配置见 [TypeScript协议](docs/57-typescript-projects.md)；高级引导/执行组合仍见 [引导插件](docs/53-bootstrap-plugins.md) 与 [worker执行](docs/55-worker-execution.md)。
 
 P16 最终 macOS arm64 **423项Node、19项框架浏览器**通过；13个tgz消费99阶段、默认插件作者54阶段、新应用37阶段和两轮20/100可靠性样本通过。生成归属、旧声明拒收、取消与输入变更的实际范围见 [P16结果](docs/58-p16-results.md)，精确源码/日志/归档身份见 [机器证据](artifacts/p16-validation.json)。不宣称完整1.0、长期无泄漏、任意平台兼容或公开发布；Admin继续仅作框架验证负载。
 
@@ -74,6 +74,8 @@ pnpm cormi dev --root examples/features
 `pnpm cormi dev --root examples/conventions` 演示约定式 404 与 loading（默认 `/conventions/`）：根 `src/pages/404.tsx` 成为 catch-all，`src/layouts/index.tsx` 和 `src/loading.tsx` 分别提供全局布局与首次路由加载回退；`slow`/`missing` 路径可观察页面行为。
 
 `pnpm cormi dev --root examples/history` 演示 hash history（默认 `/history/`）：导航路径位于 `#` 之后，刷新保留路由；`Link`、`useNavigate`、`useSearchParams` 全部从 `@cormijs/runtime` 导入。
+
+`pnpm cormi dev --root examples/model` 演示共享模型（默认 `/models/`）：`src/models/counter.ts` 与 `user.ts` 由 `modelPlugin` 发现，两个组件通过 `useModel` 读取同一状态，selector 读取派生值，路由切换后状态保留。
 
 ## Linux 验证
 

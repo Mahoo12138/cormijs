@@ -3,7 +3,9 @@ import { createRoot, type Root } from 'react-dom/client';
 import { createBrowserRouter, createHashRouter, createMemoryRouter, generatePath, Navigate, useLocation, useParams, type RouteObject, type Location } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { copyClientRoutes, runAppRender, type HistoryType, type RuntimeConfig, type RouteChangeEvent, type RuntimeCleanup } from './app-config.js';
+import { ModelProvider, type ModelDescriptor } from './model.js';
 export { useRouteMatches, type CormiRouteMatch } from './route-matches.js';
+export { ModelProvider, useModel, type ModelDescriptor } from './model.js';
 export { defineApp, resolveAppConfig, type HistoryType, type RuntimeConfig, type AppRuntimeContext, type AppRoutesContext, type RootContainerContext, type RouteChangeEvent } from './app-config.js';
 export { Link, NavLink, Navigate, Outlet, createSearchParams, useHref, useLocation, useMatch, useNavigate, useNavigation, useParams, useSearchParams } from 'react-router';
 
@@ -35,7 +37,7 @@ export async function resolveRouteComponent(load: () => Promise<ComponentType>):
 /** A mount owns its router, root and runtime effects; no module-global application singleton. */
 export async function mountApplication(options: {
   element: HTMLElement; routes: RouteObject[]; base?: string; plugins?: readonly RuntimeEntry[]; strict?: boolean;
-  appConfig?: Readonly<RuntimeConfig>; loading?: ComponentType; history?: HistoryType; signal?: AbortSignal;
+  appConfig?: Readonly<RuntimeConfig>; loading?: ComponentType; history?: HistoryType; models?: readonly ModelDescriptor[]; signal?: AbortSignal;
 }): Promise<ApplicationHandle> {
   if (options.strict !== undefined && typeof options.strict !== 'boolean') throw new TypeError('strict must be boolean');
   if (options.history !== undefined && !['browser', 'hash', 'memory'].includes(options.history)) throw new TypeError('history must be browser, hash or memory');
@@ -106,7 +108,7 @@ export async function mountApplication(options: {
         catch (error) { log('application', error); }
       };
       unsubscribe = router.subscribe(notify);
-      let node: ReactNode = <RouterProvider router={router} />;
+      let node: ReactNode = <ModelProvider models={options.models ?? []}><RouterProvider router={router} /></ModelProvider>;
       for (let i = entries.length - 1; i >= 0; i--) {
         const entry = entries[i]!;
         if (entry.plugin.Provider) node = createElement(entry.plugin.Provider, { options: entry.options ?? {}, appConfig }, node);

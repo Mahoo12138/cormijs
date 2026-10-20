@@ -2,6 +2,7 @@ import { CormiError } from '@cormijs/core';
 import { moduleRef, jsonData, validateRoutes, type ModuleRef, type RouteRecord } from '@cormijs/routes';
 import { clientSpecifier } from './modules.js';
 import type { AppRuntimePlan } from './app-runtime.js';
+import type { ModelPlan } from './model.js';
 export { isServerModule } from './modules.js';
 
 export interface RuntimeContribution { readonly id: string; readonly module: ModuleRef; readonly options?: unknown }
@@ -20,7 +21,7 @@ export function runtimeContributions(input: unknown): readonly RuntimeContributi
 /** Static imports and JSON string literals only; no user-provided expression interpolation. */
 export async function generateApplication(root: string, routes: readonly RouteRecord[], runtimes: readonly RuntimeContribution[],
   base: string, mountId: string, serverOnlyFiles: readonly string[] = [], strict = false, appRuntime?: AppRuntimePlan, loading?: ModuleRef,
-  history: HistoryType = 'browser'): Promise<string> {
+  history: HistoryType = 'browser', models: readonly ModelPlan[] = []): Promise<string> {
   if (typeof strict !== 'boolean') throw new CormiError('CONFIG_INVALID', 'strict must be boolean.');
   routes = validateRoutes(routes); runtimes = runtimeContributions(runtimes);
   const forbidden = new Set(serverOnlyFiles);
@@ -33,6 +34,7 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   const routeModules = new Map<string, string>();
   await Promise.all(routes.map(async route => { if (route.module) routeModules.set(route.id, await clientSpecifier(root, route.module, forbidden)); }));
   const runtimeModules = await Promise.all(runtimes.map(item => clientSpecifier(root, item.module, forbidden)));
+  const modelModules = await Promise.all(models.map(model => clientSpecifier(root, model.module, forbidden)));
   // Boundaries must exist before page lazy resolution. Loading both in one lazy callback cannot catch its own import failure.
   const boundaryPaths = await Promise.all(routes.map(route => route.errorBoundary ? clientSpecifier(root, route.errorBoundary, forbidden) : undefined));
   const boundaryImports = new Map<string, string>();
@@ -51,18 +53,22 @@ export async function generateApplication(root: string, routes: readonly RouteRe
     return '{' + fields.join(',') + '}';
   }).join(',\n') + ']';
   const hasRedirects = routes.some(route => route.redirect !== undefined);
+  const modelEntries = models.map((model, index) => `{namespace:${JSON.stringify(model.namespace)},model:model${index}[${JSON.stringify(model.module.exportName)}]}`);
+  const modelsOption = modelEntries.length ? ',models' : '';
   return [
     `import { ${hasRedirects ? 'RedirectRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule ? ', resolveAppConfig' : ''} } from '@cormijs/runtime';`,
     ...(appModule ? [`import * as applicationConfig from ${JSON.stringify(appModule)};`] : []),
     ...(loadingModule ? [`import * as applicationLoading from ${JSON.stringify(loadingModule)};`] : []),
+    ...modelModules.map((path, i) => `import * as model${i} from ${JSON.stringify(path)};`),
     `import type { RouteObject } from 'react-router';`,
     ...[...boundaryImports].map(([path, alias]) => `import * as ${alias} from ${JSON.stringify(path)};`),
     ...runtimeModules.map((path, i) => `import * as runtime${i} from ${JSON.stringify(path)};`),
     `const routes: RouteObject[] = ${render()};`,
+    ...(modelEntries.length ? [`const models = [${modelEntries.join(',')}];`] : []),
     `const plugins: RuntimeEntry[] = [${runtimes.map((item, i) => `{id:${JSON.stringify(item.id)},plugin:runtime${i}[${JSON.stringify(item.module.exportName)}],options:${JSON.stringify(item.options)}}`).join(',')}];`,
     `const element = document.getElementById(${JSON.stringify(mountId)});`,
     `if (!element) throw new Error('cormi mount element is missing');`,
-    `void Promise.resolve().then(()=>mountApplication({element,routes,plugins,base:${JSON.stringify(base)},strict:${JSON.stringify(strict)}${appOption}${loadingOption}${historyOption}})).catch(error=>{console.error(error);element.textContent='Application startup failed';});`,
+    `void Promise.resolve().then(()=>mountApplication({element,routes${modelsOption},plugins,base:${JSON.stringify(base)},strict:${JSON.stringify(strict)}${appOption}${loadingOption}${historyOption}})).catch(error=>{console.error(error);element.textContent='Application startup failed';});`,
     '',
   ].join('\n');
 }

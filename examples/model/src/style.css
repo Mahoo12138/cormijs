@@ -1,0 +1,13 @@
+:root { color-scheme: light; font-family: ui-sans-serif, system-ui, sans-serif; background: #f5f1e8; color: #27231d; }
+body { margin: 0; }
+.shell { max-width: 800px; margin: 0 auto; padding: 48px 24px 72px; }
+.eyebrow { letter-spacing: .18em; font-size: 12px; color: #8a5a2b; }
+h1 { margin: 8px 0 20px; font-size: clamp(32px, 6vw, 52px); }
+h2 { margin: 0 0 12px; font-size: 18px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
+.card { padding: 20px; background: #fffdf8; border: 1px solid #e3dbcd; border-radius: 12px; }
+.value { margin: 0 0 12px; font-family: ui-monospace, monospace; font-size: 28px; }
+.selected, .hint, .route { color: #6b655c; font-size: 13px; }
+button { padding: 8px 14px; border: 1px solid #8a5a2b; border-radius: 8px; background: transparent; color: #8a5a2b; }
+nav { margin-top: 24px; }
+nav a { color: #8a5a2b; text-decoration: none; border-bottom: 1px solid currentColor; }

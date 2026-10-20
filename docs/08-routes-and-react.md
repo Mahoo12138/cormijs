@@ -84,6 +84,8 @@ F1e 起，约定扫描把根级 `src/pages/404.tsx` 映射为终端 catch-all；
 
 F1f 起，`app.history` 可选择 browser/hash/memory；hash 与 memory 使用应用相对 Router basename `/`，`app.base` 仍负责资源与挂载前缀。`mountApplication` 仍为每个挂载创建独立 Router，`RouteChangeEvent` 增加 `history`。`@cormijs/runtime` 同时重导出 `Link`、`useNavigate`、`useSearchParams` 等导航/查询应用面。详见 [F1f history 与导航](65-f1f-history-and-navigation.md)。
 
+F2a 起，显式启用的 `modelPlugin` 通过 `ctx.react.models` 登记 `src/models/**` 等模型来源；生成器静态导入模型，运行时 `ModelProvider` 在每个挂载执行一次模型 Hook，`useModel(namespace, selector?)` 在路由切换间共享状态。模型源码不在 Node 生成阶段执行，模型目录变化进入既有观察。详见 [F2a model 与 useModel](66-f2a-models.md)。
+
 当前默认包含加载、路由错误和 404 页面。页面模块懒加载；生产与开发使用相同路由树。不存在 SSR/hydration/RSC 功能承诺。普通完整页面刷新会销毁浏览器文档；显式多 mount 使用者应调用返回的 dispose。
 
 ## 7. 验证与未完成边界

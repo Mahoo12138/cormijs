@@ -250,6 +250,43 @@ import { Link, Outlet, useLocation, useNavigate, useSearchParams } from '@cormij
 
 示例：`pnpm cormi dev --root examples/history`，默认监听 `/history/`。
 
+### 4.5 model 与 useModel
+
+需要跨页面共享状态时，显式加入 `modelPlugin`。模型默认导出是一个 React Hook：
+
+```ts
+// cormi.config.ts
+import { modelPlugin } from '@cormijs/plugin-react';
+
+export default defineConfig({
+  presets: [reactVite],
+  plugins: [{ id: 'application-model', plugin: modelPlugin, options: { id: 'application:model' } }],
+  // ...
+});
+```
+
+```ts
+// src/models/counter.ts
+import { useState } from 'react';
+
+export default function counter() {
+  const [count, setCount] = useState(0);
+  return { count, increment: () => setCount(value => value + 1) };
+}
+```
+
+```tsx
+// 页面
+import { useModel } from '@cormijs/runtime';
+
+const { count, increment } = useModel<{ count: number; increment: () => void }>('counter');
+const selected = useModel('counter', (state: { count: number }) => state.count);
+```
+
+默认扫描 `src/models/**`，namespace 由路径派生（`counter`、`admin.user`）；重复 namespace 明确失败。模型在每个 `mountApplication` 中执行一次，路由切换保留状态，完整刷新重建；`useModel` 支持 selector，但当前不做深比较记忆化。对象模型、reducers/effects、`extraModels` 和模型依赖排序尚未交付。规则、限制和验证见 [F2a model 与 useModel](66-f2a-models.md)。
+
+示例：`pnpm cormi dev --root examples/model`，默认监听 `/models/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

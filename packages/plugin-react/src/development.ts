@@ -11,6 +11,8 @@ const messages: Readonly<Record<string, string>> = {
   LAYOUT_CONFLICT: 'More than one global layout module is active. Keep one layout file or disable a conflicting contribution.',
   LOADING_INVALID: 'A loading contribution is invalid.',
   LOADING_CONFLICT: 'More than one loading component is active. Keep one loading file or disable a conflicting contribution.',
+  MODEL_INVALID: 'A model contribution or model source file is invalid.',
+  MODEL_CONFLICT: 'Model namespaces must be unique.',
   ROUTE_LAYOUT_INVALID: 'Route layout options only support false.',
   ROUTE_CONFLICT: 'Two routes resolve to the same URL. Rename or remove one of the conflicting pages.',
   ROUTE_ID_CONFLICT: 'Route identifiers must be unique and cannot use reserved identifiers.',

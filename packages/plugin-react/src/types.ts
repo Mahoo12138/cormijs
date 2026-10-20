@@ -1,7 +1,7 @@
 import type { RouteRecord } from '@cormijs/routes';
 
 /** Project-specific declarations only: importing these types adds no browser JavaScript. */
-export function generateRouteTypes(routes: readonly RouteRecord[]): string {
+export function generateRouteTypes(routes: readonly RouteRecord[], modelNamespaces: readonly string[] = []): string {
   const nodes = new Map(routes.map(route => [route.id, route]));
   const paths = new Map<string, string>();
   const pathOf = (route: RouteRecord): string => {
@@ -14,6 +14,7 @@ export function generateRouteTypes(routes: readonly RouteRecord[]): string {
   return [
     `export type RouteId = ${union(routes.map(route => route.id))};`,
     `export type RoutePath = ${union(routes.map(pathOf))};`,
+    ...(modelNamespaces.length ? [`export type ModelNamespace = ${union(modelNamespaces)};`] : []),
     'export interface RouteParamsById {',
     ...routes.map(route => {
       const parameters = [...new Set(pathOf(route).split('/').filter(part => part.startsWith(':') || part === '*').map(part => part === '*' ? '*' : part.slice(1)))];

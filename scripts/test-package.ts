@@ -12,6 +12,7 @@ import { writeAppRuntimeFixture, verifyAppRuntimePage, appRuntimeSource } from '
 import { writeConfigRoutesFixture, verifyConfigRoutesPage } from './config-routes-fixture.js';
 import { writeConventionsFixture, verifyConventionsPage } from './conventions-fixture.js';
 import { writeHistoryFixture, verifyHistoryPage } from './history-fixture.js';
+import { writeModelFixture, verifyModelPage } from './model-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -498,6 +499,25 @@ const bad:HistoryType='abstract';
     await command('history-build',historyConsumer,'build');
     await withServer(historyConsumer,'preview',async url=>{await verifyHistoryPage(page,url,'hash','/history/');assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'history-preview.png')});});
     report.stages.push({label:'installed-history-hash-navigation-query-and-static-preview',history:'hash',previewRegenerated:false});
+
+    const modelConsumer=await create('model','react');await writeModelFixture(modelConsumer);
+    const modelManifest=consumerManifest(kit,'react');
+    modelManifest.dependencies['@cormijs/plugin-react']=modelManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(modelConsumer,'package.json'),JSON.stringify(modelManifest,null,2));
+    await install('model-install',modelConsumer);await auditLinks(modelConsumer);
+    await command('model-typecheck',modelConsumer,'typecheck');
+    await writeFile(join(modelConsumer,'types.mts'),`import {modelPlugin,type ModelPluginOptions} from '@cormijs/plugin-react';import {useModel,type ModelDescriptor} from '@cormijs/runtime';
+const options:ModelPluginOptions={id:'consumer:model'};
+const descriptor:ModelDescriptor={namespace:'counter',model:()=>({count:0})};
+const value=useModel<{count:number}>('counter');void [modelPlugin,options,descriptor,value];
+// @ts-expect-error model must be a function
+const bad:ModelDescriptor={namespace:'x',model:1};
+`);
+    await execute('model-public-types',modelConsumer,process.execPath,typeArguments);
+    await withServer(modelConsumer,'dev',async url=>{await verifyModelPage(page,url);assert.deepEqual(errors,[]);});
+    await command('model-build',modelConsumer,'build');
+    await withServer(modelConsumer,'preview',async url=>{await verifyModelPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'model-preview.png')});});
+    report.stages.push({label:'installed-model-shared-state-selector-and-static-preview',convention:'src/models',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;
