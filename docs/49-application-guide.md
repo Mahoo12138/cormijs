@@ -655,6 +655,24 @@ plugins: [{ id: 'locale', plugin: localePlugin, options: { id: 'application:loca
 
 示例：`pnpm cormi dev --root examples/locale-catalog`，默认监听 `/locale-catalog/`。
 
+### 4.21 菜单折叠与目录化标题
+
+外壳需要“收起侧栏”或按语言切换菜单文案时，用 `menuPlugin` 的折叠状态与 `meta.locale`：
+
+```ts
+plugins: [
+  { id: 'locale', plugin: localePlugin, options: { id: 'app:locale', directory: 'src/locales' } },
+  { id: 'menu', plugin: menuPlugin, options: { id: 'app:menu', collapse: { storageKey: 'app:menu:collapsed' } } },
+]
+```
+
+```tsx
+import { useMenuCollapse } from '@cormijs/runtime';
+const { collapsed, toggle } = useMenuCollapse();
+```
+
+标题解析顺序是 `meta.locale`（消息目录命中）→ `meta.title` → `meta.name`；未命中的 key 不会被当成标题显示。折叠状态默认 `false`，可选 `defaultCollapsed`，并在 `storageKey` 存在时尽力持久化到 `localStorage`。这里没有 ProLayout/Antd 组件或布局插槽，外壳结构由应用自己实现。规则见 [F4i 菜单折叠与标题](82-f4i-menu-collapse.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

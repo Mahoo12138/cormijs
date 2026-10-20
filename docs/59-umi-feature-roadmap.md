@@ -44,7 +44,7 @@
 | U12 | useRequest、手动/自动、分页/加载更多等 | 部分已有（F2c）：自动/手动、loading/error、refresh、cancel、竞态保护；重试/轮询/分页/加载更多待后续 | 请求 Hooks 插件，可复用成熟库 | F2 |
 | U13 | clientLoader/useClientLoaderData/routeProps | 待实现；页面懒加载不等于数据加载 | 路由数据插件 | F3 |
 | U14 | access.ts/useAccess/Access、路由访问控制 | 基础已有（F3b/F3d/F3e/F4g）：accessPlugin 从 initialState 计算权限，useAccess/Access、路由 access 守卫、自定义 accessForbidden 与 `src/access.ts` 约定（配置优先于约定）可用；服务端授权边界与权限类型生成待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
-| U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys 与 access 过滤；无 ProLayout/Antd adapter、折叠 helper 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
+| U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e/F4i）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys、access 过滤、`meta.locale` 目录化标题与 `useMenuCollapse` 折叠状态；无 ProLayout/Antd adapter 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
 | U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a/F4h）：localePlugin 提供内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage，并可用 `directory` 构建期内联 `src/locales/<locale>.json` 消息目录；复数/日期格式化、按语言懒加载与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
 | U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；req/res 兼容与统一代理配置待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
@@ -141,6 +141,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F4g 状态（2026-10-20）：** U14 的约定入口已交付：`accessPlugin` 通过新增的 `ctx.react.access` hook 发现 `src/access.{ts,tsx}`，生成入口以 `applyAccessConvention(resolveAppConfig(...), accessConvention.default)` 合并权限函数，`app.tsx` 显式 `access` 优先；候选出现/消失参与 dev 观测，`summary.access` 报告归属。权限 key 的类型生成、层级/后端同步与服务端授权边界仍待后续。用法、差异与验证见 [F4g access 约定](80-f4g-access-convention.md)。
 
 **F4h 状态（2026-10-20）：** U16 的消息文件已交付：`localePlugin` 的 `options.directory`（新增 `ctx.react.locale-catalog` hook）在 Node 侧读取 `src/locales/<locale>.json`，校验 locale code、扁平字符串表与容量上限，按 locale 合成为构建期内联 JSON，运行时 `applyLocaleCatalogs` 合并且 `app.tsx` 配置逐 key 优先；目录文件增删改参与 dev 观测，`summary.localeCatalogs` 报告各 locale 的 key 数。复数/日期/数字格式化、locale key 类型生成、按语言懒加载与 UI 库联动仍待后续。用法、差异与验证见 [F4h 消息目录](81-f4h-locale-catalogs.md)。
+
+**F4i 状态（2026-10-20）：** U15 的折叠与目录化标题已交付：`menuPlugin` 的 `collapse` 选项经 RuntimeContribution options 传入 `MenuProvider`，`useMenuCollapse()` 提供 `{collapsed,setCollapsed,toggle}` 并可选 `localStorage` 持久化；菜单与面包屑标题按 `meta.locale` → `meta.title` → `meta.name` 解析，`IntlApi.peek` 保证未命中时不显示原始 key。ProLayout/Antd adapter、图标/徽章与布局插槽仍待后续。用法、差异与验证见 [F4i 菜单折叠与标题](82-f4i-menu-collapse.md)。
 
 ### F3：权限、布局、菜单和国际化
 

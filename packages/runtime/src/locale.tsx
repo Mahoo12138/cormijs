@@ -5,6 +5,8 @@ export interface IntlApi {
   readonly locale: string;
   setLocale(locale: string): void;
   t(key: string, values?: Readonly<Record<string, string | number>>): string;
+  /** Catalog lookup without the key-as-text fallback. */
+  peek(key: string): string | undefined;
 }
 const LocaleContext = createContext<IntlApi | null>(null);
 const DEFAULT_STORAGE_KEY = 'cormi:locale';
@@ -59,8 +61,17 @@ export function LocaleProvider({ appConfig, children }: { readonly appConfig: Re
     if (!values) return text;
     return text.replace(/\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (match, name: string) => Object.hasOwn(values, name) ? String(values[name]) : match);
   }, [config, locale]);
-  const value = useMemo<IntlApi>(() => ({ locale, setLocale, t }), [locale, setLocale, t]);
+  const peek = useCallback((key: string) => {
+    if (typeof key !== 'string' || !key) return undefined;
+    return config.messages[locale]?.[key] ?? (config.fallback ? config.messages[config.fallback]?.[key] : undefined);
+  }, [config, locale]);
+  const value = useMemo<IntlApi>(() => ({ locale, setLocale, t, peek }), [locale, setLocale, t, peek]);
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
+}
+
+/** Reader for features such as menus that localize titles only when a locale provider exists. */
+export function useLocaleOptional(): IntlApi | null {
+  return useContext(LocaleContext);
 }
 
 export function useIntl(): IntlApi {

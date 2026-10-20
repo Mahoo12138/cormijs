@@ -35,3 +35,26 @@ test('invalid menu plugin options fail plugin activation', async t => {
   f.host.mount('bad', menuPlugin, { id: 42 } as never);
   await assert.rejects(f.host.ready(), (error: any) => error?.code === 'PLUGIN_FAILED' && error?.cause?.code === 'MENU_INVALID');
 });
+
+test('menu collapse options are validated, contributed and withdrawn', async t => {
+  const f = await project(t);
+  f.host.mount('menu', menuPlugin, { id: 'app:menu', collapse: { storageKey: 'demo:menu', defaultCollapsed: true } });
+  await f.host.ready();
+  const session = await f.host.ctx.application.prepare(f.request); await session.close();
+  assert.match(await f.code(), /menuRuntime/);
+  assert.match(await f.code(), /options:\{"collapse":\{"storageKey":"demo:menu","defaultCollapsed":true\}\}/);
+  await f.host.unmount('menu');
+  const removed = await f.host.ctx.application.prepare(f.request); await removed.close();
+  assert.doesNotMatch(await f.code(), /"collapse"/);
+});
+
+test('invalid menu collapse options fail plugin activation', async t => {
+  for (const options of [
+    { collapse: 'yes' }, { collapse: { storageKey: '' } }, { collapse: { storageKey: 'a\r\nb' } },
+    { collapse: { defaultCollapsed: 'yes' } }, { collapse: { unknown: 1 } }, { unknown: 1 },
+  ]) {
+    const f = await project(t);
+    f.host.mount('bad', menuPlugin, options as never);
+    await assert.rejects(f.host.ready(), (error: any) => error?.code === 'PLUGIN_FAILED' && error?.cause?.code === 'MENU_INVALID', JSON.stringify(options));
+  }
+});

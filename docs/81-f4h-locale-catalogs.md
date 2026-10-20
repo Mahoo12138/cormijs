@@ -82,6 +82,6 @@ Umi 的 locale 插件位于 `packages/plugins/src/locale.ts`：`localeFolder: 'l
 ## 6. 下一步
 
 - U16 剩余：消息格式化（复数/日期/数字）、locale key 类型、UI 库语言联动；
-- F3 剩余：菜单折叠 helper 与 ProLayout/Antd adapter（U15/U17）；
+- F3 剩余：ProLayout/Antd adapter 与布局插槽（U15/U17）；菜单折叠与目录化标题已由 [F4i](82-f4i-menu-collapse.md) 交付；
 - F4 后续：微生成器（U27）、工程命令（U28）、输出与资源策略（U25）；
 - F5：client loader 与预取（U13/U31）、SSR（U32）、静态导出（U33）。

@@ -42,6 +42,8 @@ F4g 起，`accessPlugin` 可通过 `ctx.react.access` 发现 `src/access.{ts,tsx
 
 F4h 起，`localePlugin` 可用 `options.directory` 构建期内联 `src/locales/<locale>.json` 消息目录（`ctx.react.locale-catalog` hook + 运行时 `applyLocaleCatalogs`），`app.tsx` 的同名 key 优先。详见 [F4h 消息目录](81-f4h-locale-catalogs.md)。
 
+F4i 起，`menuPlugin` 支持 `collapse` 选项与 `useMenuCollapse()`（可选 localStorage 持久化），菜单/面包屑标题按 `meta.locale` → `meta.title` → `meta.name` 解析，未命中的消息 key 不会被当作标题。详见 [F4i 菜单折叠与标题](82-f4i-menu-collapse.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic
