@@ -40,6 +40,8 @@ F4f 起，显式启用的 `globalStylePlugin` 发现 `src/global.{css,scss,sass,
 
 F4g 起，`accessPlugin` 可通过 `ctx.react.access` 发现 `src/access.{ts,tsx}` 约定：生成入口以 `applyAccessConvention(resolveAppConfig(...), accessConvention.default)` 合并权限函数，`src/app.tsx` 显式 `access` 优先，候选文件变化参与 dev 观测。详见 [F4g access 约定](80-f4g-access-convention.md)。
 
+F4h 起，`localePlugin` 可用 `options.directory` 构建期内联 `src/locales/<locale>.json` 消息目录（`ctx.react.locale-catalog` hook + 运行时 `applyLocaleCatalogs`），`app.tsx` 的同名 key 优先。详见 [F4h 消息目录](81-f4h-locale-catalogs.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

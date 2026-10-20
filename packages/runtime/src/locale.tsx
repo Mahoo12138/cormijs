@@ -31,6 +31,16 @@ const store = (key: string, locale: string) => {
   try { if (typeof window !== 'undefined') window.localStorage.setItem(key, locale); } catch { /* persistence is best-effort */ }
 };
 
+/** Catalog files merged at build time fill the message tables; the app configuration module wins per key. */
+export function applyLocaleCatalogs(config: Readonly<RuntimeConfig>, catalogs: readonly { locale: string; messages: Record<string, string> }[]): Readonly<RuntimeConfig> {
+  if (!catalogs.length) return config;
+  const locale = (config.locale ?? {}) as LocaleConfig;
+  const merged: Record<string, Record<string, string>> = {};
+  for (const catalog of catalogs) merged[catalog.locale] = { ...catalog.messages };
+  for (const [code, table] of Object.entries(locale.messages ?? {})) merged[code] = { ...(merged[code] ?? {}), ...(table as Record<string, string>) };
+  return Object.freeze({ ...config, locale: Object.freeze({ ...locale, messages: Object.freeze(merged) }) });
+}
+
 export function LocaleProvider({ appConfig, children }: { readonly appConfig: Readonly<RuntimeConfig>; readonly children?: ReactNode }) {
   const config = useMemo(() => normalize(appConfig.locale), [appConfig.locale]);
   const [locale, setLocaleState] = useState(() => {

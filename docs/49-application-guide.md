@@ -638,6 +638,23 @@ export default function access(state: unknown) {
 
 示例：`pnpm cormi dev --root examples/access-convention`，默认监听 `/access-convention/`。
 
+### 4.19 消息目录
+
+语言文案多起来时，把消息表放进 `src/locales/<locale>.json`，并显式开启目录约定：
+
+```ts
+plugins: [{ id: 'locale', plugin: localePlugin, options: { id: 'application:locale', directory: 'src/locales' } }]
+```
+
+```jsonc
+// src/locales/zh-CN.json
+{ "title": "目录标题", "greeting": "你好 {name}" }
+```
+
+目录在 Node 侧读取并以内联 JSON 写进生成入口（浏览器不再发额外请求）；同一 locale 的重复 key 会直接失败，`src/app.tsx` 里的 `locale.messages` 逐 key 覆盖目录值。文件必须是扁平的 `key → string` 表，locale 由文件名决定。规则与上限见 [F4h 消息目录](81-f4h-locale-catalogs.md)。
+
+示例：`pnpm cormi dev --root examples/locale-catalog`，默认监听 `/locale-catalog/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

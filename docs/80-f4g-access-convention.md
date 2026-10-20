@@ -81,6 +81,6 @@ Umi 的 access 插件位于 `packages/plugins/src/access.ts`，以 `enableBy: En
 
 ## 6. 下一步
 
-- F3 剩余：菜单折叠 helper 与 ProLayout/Antd UI adapter（U15/U17）；
+- F3 剩余：菜单折叠 helper 与 ProLayout/Antd UI adapter（U15/U17）；F4h 已交付消息目录约定，见 [F4h 消息目录](81-f4h-locale-catalogs.md)；
 - F4 后续：微生成器（U27）、工程命令（U28）、输出与资源策略（U25）；
 - F5：client loader 与预取（U13/U31）、SSR（U32）、静态导出（U33）、MPA（U34）、生产 API 路由（U35）。

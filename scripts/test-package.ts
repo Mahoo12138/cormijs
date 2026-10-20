@@ -24,6 +24,7 @@ import { writeAliasFixture, verifyAliasPage } from './alias-fixture.js';
 import { writeDefineFixture, verifyDefinePage } from './define-fixture.js';
 import { writeGlobalStyleFixture, verifyGlobalStylePage } from './global-style-fixture.js';
 import { writeAccessConventionFixture, verifyAccessConventionPage } from './access-convention-fixture.js';
+import { writeLocaleCatalogFixture, verifyLocaleCatalogPage } from './locale-catalog-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -739,6 +740,25 @@ const bad:AccessPluginOptions={files:1};
     await command('access-convention-build',accessConvConsumer,'build');
     await withServer(accessConvConsumer,'preview',async url=>{await verifyAccessConventionPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'access-convention-preview.png')});});
     report.stages.push({label:'installed-access-convention-dev-build-and-static-preview',files:['src/access.ts','src/access.tsx'],previewRegenerated:false});
+
+    const localeCatalogConsumer=await create('locale-catalog','react');await writeLocaleCatalogFixture(localeCatalogConsumer);
+    const localeCatalogManifest=consumerManifest(kit,'react');
+    localeCatalogManifest.dependencies['@cormijs/plugin-react']=localeCatalogManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(localeCatalogConsumer,'package.json'),JSON.stringify(localeCatalogManifest,null,2));
+    await install('locale-catalog-install',localeCatalogConsumer);await auditLinks(localeCatalogConsumer);
+    await command('locale-catalog-typecheck',localeCatalogConsumer,'typecheck');
+    await writeFile(join(localeCatalogConsumer,'types.mts'),`import {localePlugin,localeCatalogSources,readLocaleCatalogs,type LocalePluginOptions,type LocaleCatalogSource} from '@cormijs/plugin-react';
+const options:LocalePluginOptions={id:'app:locale',directory:'src/locales'};
+const sources:readonly LocaleCatalogSource[]=localeCatalogSources([{id:'app:locale',directory:'src/locales'}]);
+void [localePlugin,options,sources,readLocaleCatalogs(process.cwd(),sources)];
+// @ts-expect-error locale directory must be a string
+const bad:LocalePluginOptions={directory:1};
+`);
+    await execute('locale-catalog-public-types',localeCatalogConsumer,process.execPath,typeArguments);
+    await withServer(localeCatalogConsumer,'dev',async url=>{await verifyLocaleCatalogPage(page,url);assert.deepEqual(errors,[]);});
+    await command('locale-catalog-build',localeCatalogConsumer,'build');
+    await withServer(localeCatalogConsumer,'preview',async url=>{await verifyLocaleCatalogPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'locale-catalog-preview.png')});});
+    report.stages.push({label:'installed-locale-catalog-dev-build-and-static-preview',directory:'src/locales',locales:['en','zh-CN'],previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

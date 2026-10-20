@@ -5,6 +5,7 @@ import { clientSpecifier } from './modules.js';
 import type { AppRuntimePlan } from './app-runtime.js';
 import type { ModelPlan } from './model.js';
 import type { GlobalStylePlan } from './global-style.js';
+import type { LocaleCatalog } from './locale.js';
 export { isServerModule } from './modules.js';
 
 export interface RuntimeContribution { readonly id: string; readonly module: ModuleRef; readonly options?: unknown }
@@ -33,7 +34,7 @@ function styleSpecifier(root: string, file: string): string {
 /** Static imports and JSON string literals only; no user-provided expression interpolation. */
 export async function generateApplication(root: string, routes: readonly RouteRecord[], runtimes: readonly RuntimeContribution[],
   base: string, mountId: string, serverOnlyFiles: readonly string[] = [], strict = false, appRuntime?: AppRuntimePlan, loading?: ModuleRef,
-  history: HistoryType = 'browser', models: readonly ModelPlan[] = [], styles: readonly GlobalStylePlan[] = [], access?: ModuleRef): Promise<string> {
+  history: HistoryType = 'browser', models: readonly ModelPlan[] = [], styles: readonly GlobalStylePlan[] = [], access?: ModuleRef, localeCatalogs: readonly LocaleCatalog[] = []): Promise<string> {
   if (typeof strict !== 'boolean') throw new CormiError('CONFIG_INVALID', 'strict must be boolean.');
   routes = validateRoutes(routes); runtimes = runtimeContributions(runtimes);
   const forbidden = new Set(serverOnlyFiles);
@@ -74,13 +75,14 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   const modelsOption = modelEntries.length ? ',models' : '';
   const styleImports = styles.map(style => `import ${JSON.stringify(styleSpecifier(root, style.file))};`);
   const accessModule = access ? await clientSpecifier(root, access, forbidden) : undefined;
-  const configValue = appModule ? `applyAccessConvention(resolveAppConfig(${appValue},${JSON.stringify(appRuntime?.keys ?? [])}),accessConvention.default)` : '';
-  const appOption = accessModule ? (appModule ? `,appConfig:${configValue}`
-    : `,appConfig:applyAccessConvention(resolveAppConfig({},[]),accessConvention.default)`) : appModule ? `,appConfig:resolveAppConfig(${appValue},${JSON.stringify(appRuntime?.keys ?? [])})` : '';
+  let configExpression = appModule ? `resolveAppConfig(${appValue},${JSON.stringify(appRuntime?.keys ?? [])})` : '';
+  if (accessModule) configExpression = `applyAccessConvention(${configExpression || 'resolveAppConfig({},[])'},accessConvention.default)`;
+  if (localeCatalogs.length) configExpression = `applyLocaleCatalogs(${configExpression || 'resolveAppConfig({},[])'},${JSON.stringify(localeCatalogs)})`;
+  const appOption = configExpression ? `,appConfig:${configExpression}` : '';
   return [
     ...styleImports,
     ...(accessModule ? [`import * as accessConvention from ${JSON.stringify(accessModule)};`] : []),
-    `import { ${hasRedirects ? 'RedirectRoute, ' : ''}${hasAccess ? 'AccessRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule || accessModule ? ', resolveAppConfig' : ''}${accessModule ? ', applyAccessConvention' : ''} } from '@cormijs/runtime';`,
+    `import { ${hasRedirects ? 'RedirectRoute, ' : ''}${hasAccess ? 'AccessRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule || accessModule || localeCatalogs.length ? ', resolveAppConfig' : ''}${accessModule ? ', applyAccessConvention' : ''}${localeCatalogs.length ? ', applyLocaleCatalogs' : ''} } from '@cormijs/runtime';`,
     ...(appModule ? [`import * as applicationConfig from ${JSON.stringify(appModule)};`] : []),
     ...(loadingModule ? [`import * as applicationLoading from ${JSON.stringify(loadingModule)};`] : []),
     ...modelModules.map((path, i) => `import * as model${i} from ${JSON.stringify(path)};`),

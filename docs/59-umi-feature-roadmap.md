@@ -45,7 +45,7 @@
 | U13 | clientLoader/useClientLoaderData/routeProps | 待实现；页面懒加载不等于数据加载 | 路由数据插件 | F3 |
 | U14 | access.ts/useAccess/Access、路由访问控制 | 基础已有（F3b/F3d/F3e/F4g）：accessPlugin 从 initialState 计算权限，useAccess/Access、路由 access 守卫、自定义 accessForbidden 与 `src/access.ts` 约定（配置优先于约定）可用；服务端授权边界与权限类型生成待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
 | U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys 与 access 过滤；无 ProLayout/Antd adapter、折叠 helper 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
-| U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a）：localePlugin 提供内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage；消息目录、复数/日期与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
+| U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a/F4h）：localePlugin 提供内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage，并可用 `directory` 构建期内联 `src/locales/<locale>.json` 消息目录；复数/日期格式化、按语言懒加载与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
 | U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；req/res 兼容与统一代理配置待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c/F4d）：aliasPlugin 支持项目内相对别名与可选内置 `@`→src，definePlugin 在 dev 与 build 替换 JSON 常量；`@@`、环境分层自动映射与 define 类型生成待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
@@ -139,6 +139,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F4f 状态（2026-10-20）：** U22 的第一步已交付：可选 `globalStylePlugin` 通过新增的 `ctx.react.styles` 贡献全局样式表约定，`generateApplication` 在生成入口顶部插入受校验的相对副作用导入，候选文件的出现/消失参与 dev 观测与重生成，`summary.styles` 报告所有者与文件。预处理器仍由 Vite 原生处理（应用安装 less/sass），CSS Modules 声明、PostCSS/Tailwind/SVGR 与资源约定待后续。用法、差异与验证见 [F4f 全局样式](79-f4f-global-styles.md)。
 
 **F4g 状态（2026-10-20）：** U14 的约定入口已交付：`accessPlugin` 通过新增的 `ctx.react.access` hook 发现 `src/access.{ts,tsx}`，生成入口以 `applyAccessConvention(resolveAppConfig(...), accessConvention.default)` 合并权限函数，`app.tsx` 显式 `access` 优先；候选出现/消失参与 dev 观测，`summary.access` 报告归属。权限 key 的类型生成、层级/后端同步与服务端授权边界仍待后续。用法、差异与验证见 [F4g access 约定](80-f4g-access-convention.md)。
+
+**F4h 状态（2026-10-20）：** U16 的消息文件已交付：`localePlugin` 的 `options.directory`（新增 `ctx.react.locale-catalog` hook）在 Node 侧读取 `src/locales/<locale>.json`，校验 locale code、扁平字符串表与容量上限，按 locale 合成为构建期内联 JSON，运行时 `applyLocaleCatalogs` 合并且 `app.tsx` 配置逐 key 优先；目录文件增删改参与 dev 观测，`summary.localeCatalogs` 报告各 locale 的 key 数。复数/日期/数字格式化、locale key 类型生成、按语言懒加载与 UI 库联动仍待后续。用法、差异与验证见 [F4h 消息目录](81-f4h-locale-catalogs.md)。
 
 ### F3：权限、布局、菜单和国际化
 
