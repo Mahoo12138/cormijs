@@ -18,6 +18,7 @@ import { writeRequestFixture, verifyRequestPage } from './request-fixture.js';
 import { writeLocaleFixture, verifyLocalePage } from './locale-fixture.js';
 import { writeAccessFixture, verifyAccessPage } from './access-fixture.js';
 import { writeMenuFixture, verifyMenuPage } from './menu-fixture.js';
+import { writeHtmlFixture, verifyHtmlPage } from './html-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -623,6 +624,24 @@ const bad:MenuItem['title']=42;
     await command('menu-build',menuConsumer,'build');
     await withServer(menuConsumer,'preview',async url=>{await verifyMenuPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'menu-preview.png')});});
     report.stages.push({label:'installed-menu-breadcrumb-access-filter-and-static-preview',hooks:'useMenu',previewRegenerated:false});
+
+    const htmlConsumer=await create('html','react');await writeHtmlFixture(htmlConsumer);
+    const htmlManifest=consumerManifest(kit,'react');
+    htmlManifest.dependencies['@cormijs/plugin-react-vite']=htmlManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
+    await writeFile(join(htmlConsumer,'package.json'),JSON.stringify(htmlManifest,null,2));
+    await install('html-install',htmlConsumer);await auditLinks(htmlConsumer);
+    await command('html-typecheck',htmlConsumer,'typecheck');
+    await writeFile(join(htmlConsumer,'types.mts'),`import {applyHtmlHead,htmlPlugin,type HtmlPluginOptions} from '@cormijs/plugin-react-vite';
+const options:HtmlPluginOptions={title:'T',lang:'zh-CN',metas:[{name:'description',content:'D'}]};
+const output:string=applyHtmlHead('<html><head></head></html>',options);void [htmlPlugin,options,output];
+// @ts-expect-error meta content is required
+const bad:HtmlPluginOptions={metas:[{name:'description'}]};
+`);
+    await execute('html-public-types',htmlConsumer,process.execPath,typeArguments);
+    await withServer(htmlConsumer,'dev',async url=>{await verifyHtmlPage(page,url);assert.deepEqual(errors,[]);});
+    await command('html-build',htmlConsumer,'build');
+    await withServer(htmlConsumer,'preview',async url=>{await verifyHtmlPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'html-preview.png')});});
+    report.stages.push({label:'installed-html-head-dev-build-and-static-preview',options:'title/lang/meta/link/favicon',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

@@ -81,6 +81,6 @@ const items = useMenu(), active = useActiveMenuKeys();
 
 ## 6. 下一步
 
-- F4：Mock 约定、配置/别名、HTML/head、样式与资源、微生成器等日常工程能力；
+- F4：Mock 约定、配置/别名、HTML/head、样式与资源、微生成器等日常工程能力，HTML head 已由 [F4a](74-f4a-html-head.md) 交付；
 - menu 后续：折叠/选中 UI helper 与可选 ProLayout/Antd adapter；
 - access 后续：src/access.ts 自动发现与服务端授权边界。

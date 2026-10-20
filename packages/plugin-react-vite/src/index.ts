@@ -3,6 +3,7 @@ import type {} from '@cormijs/plugin-vite';
 import react from '@vitejs/plugin-react';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+export { htmlPlugin, applyHtmlHead, type HtmlPluginOptions, type HtmlMeta, type HtmlLink } from './html.js';
 
 /** All Vite-specific React behavior stays in this optional bridge. */
 export const reactVitePlugin: Plugin.Object<void> = {

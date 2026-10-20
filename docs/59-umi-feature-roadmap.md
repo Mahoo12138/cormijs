@@ -49,7 +49,7 @@
 | U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有 HTTP 规则/取消/固定代理；缺 Umi 式自动发现等易用性 | 复用 DevApiService，新增约定/后端 bridge | F4 |
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有 cormi.config/mode/公开env/派生；缺可组合便捷配置和公共别名 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
-| U20 | HTML title/metas/links/headScripts/scripts/favicon | 可编辑 index.html；缺框架配置注入面 | HTML/head 插件 | F4 |
+| U20 | HTML title/metas/links/headScripts/scripts/favicon | 部分已有（F4a）：可选 htmlPlugin 注入 title/lang/meta/link/favicon；headScripts/scripts 与每路由 head 待后续 | HTML/head 插件 | F4 |
 | U21 | helmet、页面标题/SEO 元数据 | 待实现官方能力；手改 document.title 不算 | head 客户端插件 | F3/F4 |
 | U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有 CSS Modules 与资产；缺完整约定和预处理集成 | 样式/资源插件 + backend adapter | F4 |
 | U23 | Tailwind、UnoCSS、styled-components | 待实现可选集成 | 各生态 adapter | F4 |
@@ -124,7 +124,9 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 
 **F3d 状态（2026-10-20）：** U14 的路由级 access 已交付：ConfigRoute/RouteRecord 的 `access` 经生成器变为 AccessRoute 守卫，权限不足渲染内置 403 且不加载页面；有 wrappers 时守卫位于 wrapper 链之外，菜单读取同一 key 过滤。可定制 403、src/access.ts 约定与 UI adapter 仍待后续。用法、差异与验证见 [F3d route access](72-f3d-route-access.md)。
 
-**F3e 状态（2026-10-20）：** access 路由守卫可通过 app 配置的 `accessForbidden` 渲染自定义 403；菜单新增 `useActiveMenuKeys`，按当前 location 返回选中项和祖先 key。菜单折叠状态、ProLayout/Antd adapter 与 src/access.ts 自动发现仍待后续。用法与验证见 [F3e 自定义 403 与菜单选中](73-f3e-custom-403-active-menu.md)。F3 剩余为 UI adapter/折叠 helper，之后进入 F4 工程能力。
+**F3e 状态（2026-10-20）：** access 路由守卫可通过 app 配置的 `accessForbidden` 渲染自定义 403；菜单新增 `useActiveMenuKeys`，按当前 location 返回选中项和祖先 key。菜单折叠状态、ProLayout/Antd adapter 与 src/access.ts 自动发现仍待后续。用法与验证见 [F3e 自定义 403 与菜单选中](73-f3e-custom-403-active-menu.md)。F3 剩余为 UI adapter/折叠 helper。
+
+**F4a 状态（2026-10-20）：** U20 的配置式 HTML head 已交付：可选 `htmlPlugin` 在 React–Vite 桥中替换/注入 title、lang、favicon、meta 与 link，值经过转义和边界校验，index.html 仍归应用所有。headScripts/scripts、每路由 head 与非 Vite 后端仍待后续。用法、差异与验证见 [F4a HTML head](74-f4a-html-head.md)。
 
 ### F3：权限、布局、菜单和国际化
 

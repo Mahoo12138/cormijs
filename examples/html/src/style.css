@@ -1,0 +1,6 @@
+:root { color-scheme: light; font-family: ui-sans-serif, system-ui, sans-serif; background: #f3f6f8; color: #1f2a30; }
+body { margin: 0; }
+.shell { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; }
+.eyebrow { letter-spacing: .18em; font-size: 12px; color: #35617a; }
+h1 { margin: 8px 0 20px; font-size: clamp(32px, 6vw, 52px); }
+p { max-width: 640px; line-height: 1.8; color: #5d6a70; }

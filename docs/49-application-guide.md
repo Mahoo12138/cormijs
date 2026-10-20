@@ -509,6 +509,29 @@ const active = useActiveMenuKeys();
 
 根路径 `/` 使用精确匹配，其他路径使用 `matchPath(..., { end: false })`。当前不提供菜单折叠状态或 ProLayout/Antd adapter。完整语义见 [F3e](73-f3e-custom-403-active-menu.md)。
 
+### 4.13 配置式 HTML head
+
+使用 React–Vite 时，可显式加入 `htmlPlugin` 配置页面标题、语言、meta、link 与 favicon：
+
+```ts
+import { htmlPlugin } from '@cormijs/plugin-react-vite';
+
+plugins: [{
+  id: 'html', plugin: htmlPlugin,
+  options: {
+    title: 'cormi app',
+    lang: 'zh-CN',
+    favicon: '/favicon.svg',
+    metas: [{ name: 'description', content: '应用描述' }],
+    links: [{ rel: 'canonical', href: '/' }],
+  },
+}]
+```
+
+`index.html` 仍由应用维护，`htmlPlugin` 只做确定性的 head 替换/注入并转义值；开发、构建与 preview 结果一致。当前不提供 headScripts、inline scripts、每路由 head 或非 Vite 后端。完整规则见 [F4a HTML head](74-f4a-html-head.md)。
+
+示例：`pnpm cormi dev --root examples/html`，默认监听 `/html/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：
