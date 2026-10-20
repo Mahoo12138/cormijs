@@ -51,7 +51,7 @@ Umi 的 `clientLoader` 由 `packages/preset-umi/src/features/clientLoader` 生�
 ## 4. 限制
 
 - 只支持浏览器执行，没有服务端 loader、数据注水或流式渲染；loader 结果不进入 `.cormi/routes.d.ts` 类型推导，页面需自带返回类型；
-- **loader 抛错时的呈现未在本切片验证**：验收曾包含“`/broken` 路由的 loader 抛错后由其 `errorBoundary` 渲染失败页”，实测该页面根节点没有挂载；本切片未定位原因，因此回退相关改动、移除该断言，不能把“loader 失败已由路由边界呈现”当作可用能力宣传。React Router 7.18.2 自身会派生该标记（`chunk-62JRHF6Z.mjs:6615`：`hasErrorBoundary: route.hasErrorBoundary || route.ErrorBoundary != null || route.errorElement != null`；`:5452` 只在 `hasErrorBoundary === true` 的匹配里自内向外挑选边界，否则回退 `matches[0]`），且 `lazy` 返回值里的 `hasErrorBoundary` 会被忽略（`:4677`），因此后续排查应从生成入口的静态 `ErrorBoundary` 与 `lazy` 合并顺序入手，而不是再补显式标记；
+- **loader 抛错目前落到根边界，而不是该路由自己的 `errorBoundary`**：验收曾断言“`/broken` 的 loader 抛错后由该路由的 `errorBoundary` 渲染失败页”，实测失败。后续排查已确认两件事：(1) 最早看到的“整棵根节点空白”是验收脚手架自身的问题——边界模块由生成入口**静态导入**，脚手架在其中引用了 `@cormijs/runtime` 并不存在的 `useRouteError` 导出，导入失败会直接让整应用不挂载（这是 cormi 既有的“边界必须先于页面懒解析可用”的取舍，不是 loader 缺陷）；(2) 用 `useClientLoaderError()` 改写脚手架后，为该路由追加静态 `hasErrorBoundary: true` 仍不能让错误停在页面边界，因此该改动已回退，本能力记为未完成。React Router 7.18.2 只在 `hasErrorBoundary === true` 的匹配里自内向外挑选边界，否则回退 `matches[0]`（`node_modules/.pnpm/react-router@7.18.2*/node_modules/react-router/dist/development/chunk-62JRHF6Z.mjs:5452`），且 `lazy` 返回值中的 `hasErrorBoundary` 会被忽略（同文件 `:4677`、`:9279`）。因此真正的修需要研究静态 `ErrorBoundary` 与 `lazy` 的合并顺序，属后续切片；当前 loader 抛错会由 `cormi:root` 的内置失败页呈现，不能宣传“按路由边界呈现失败页”；
 - 没有 `routePrefetch`/`routePreloadOnLoad`（U31），也不提供 loading 期间的 Suspense 骨架；
 - 约定式路由不自动获得 loader 声明（页面模块的 `clientLoader` 导出不会被约定层识别），需要配置式路由显式声明；
 - loader 无并行/依赖编排、无缓存控制 API，重验证行为沿用 React Router。
@@ -74,6 +74,6 @@ Umi 的 `clientLoader` 由 `packages/preset-umi/src/features/clientLoader` 生�
 
 ## 6. 下一步
 
-- U13 剩余：loader 失败的边界呈现契约（含上述未挂载现象的定位）、约定式路由的 loader 识别、数据类型生成；
+- U13 剩余：让 loader/渲染错误停在**该路由**的 `errorBoundary`（现落到 `cormi:root`）、约定式路由的 loader 识别、数据类型生成；
 - U31：路由预取与拆包策略；U32/U33/U34：SSR、静态导出、MPA；U35：生产 API 路由；
 - F4 剩余：U25 输出与资源策略、U27 微生成器（需先扩展 CLI 多参数命令）、U28 工程命令。

@@ -1,13 +1,12 @@
 {
   "format": "cormi:f5a-validation:1",
-  "verifiedAt": "2026-10-20T17:43:20.391Z",
-  "base": "30e556d7e87384fef748a48441e17a4ea41c2a9b",
+  "verifiedAt": "2026-10-20T17:48:17.526Z",
+  "base": "8c55fce2c752bf65ed4abe4efd9e517aaea706bf",
   "branch": "main",
   "worktree": {
     "state": "uncommitted",
     "changedFiles": [
-      "M docs/59-umi-feature-roadmap.md",
-      " M docs/83-f5a-client-loader.md"
+      "M docs/83-f5a-client-loader.md"
     ]
   },
   "environment": {
@@ -610,7 +609,7 @@
     "docs/80-f4g-access-convention.md": "6f135b12e3b3cbb2150691d638cfc679a46bb1779e8b5f1f673b567a186fee60",
     "docs/81-f4h-locale-catalogs.md": "86d13f3c6303b107ac14b2fbf30a20c6f04a2ee1125900f3fe0bd2b50b3d34b6",
     "docs/82-f4i-menu-collapse.md": "798cc91016e7dec45ad046637ac0065a8fe603ed68910292f6bbc48c998c9606",
-    "docs/83-f5a-client-loader.md": "2c2c53f722bf0912dbc6ab880927257b5ae317f0fea9be915bfe6c586bde4c3d"
+    "docs/83-f5a-client-loader.md": "8255d931d7f0d202fa3de4bd021e7788b440c857a6ad2279116b55f377198264"
   },
   "visual": [
     {
