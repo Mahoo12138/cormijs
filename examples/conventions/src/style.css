@@ -1,0 +1,10 @@
+:root { color-scheme: light; font-family: ui-sans-serif, system-ui, sans-serif; background: #f4f7f3; color: #1f2a24; }
+body { margin: 0; }
+.app-shell > aside { padding: 10px 24px; background: #1f2a24; color: #f4f7f3; font-size: 12px; letter-spacing: .12em; }
+main { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; }
+.eyebrow { letter-spacing: .18em; font-size: 12px; color: #3d7a5b; }
+h1 { margin: 8px 0 20px; font-size: clamp(32px, 6vw, 52px); }
+nav { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 24px; }
+nav a { color: #3d7a5b; text-decoration: none; border-bottom: 1px solid currentColor; }
+code { font-family: ui-monospace, monospace; background: #e6efe9; padding: 1px 5px; border-radius: 4px; }
+.loading { max-width: 760px; margin: 48px auto; padding: 24px; border: 1px dashed #9bbcab; border-radius: 12px; color: #3d7a5b; }

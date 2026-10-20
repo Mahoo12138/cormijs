@@ -1,6 +1,6 @@
 # cormi：Umi 4 / Max 功能吸收路线
 
-日期：2026-10-20。当前代码基线：`727b6b978291f2c23491c22b3bed29b0b45aa8ec`（P16）。本文保留路线建立时的优先级、功能差距和实现计划；后续 F1a-F1c 已按此路线交付，见各状态段与独立结果文档。路线建立轮次没有新增产品运行代码，本文不是 P17 功能完成报告。
+日期：2026-10-20。当前代码基线：`727b6b978291f2c23491c22b3bed29b0b45aa8ec`（P16）。本文保留路线建立时的优先级、功能差距和实现计划；后续 F1a-F1e 已按此路线交付，见各状态段与独立结果文档。路线建立轮次没有新增产品运行代码，本文不是 P17 功能完成报告。
 
 ## 1. 目标与优先级纠正
 
@@ -20,7 +20,7 @@
 
 ### 当前 cormi 基础与明显缺口
 
-已重新读取 `packages/runtime/src/index.tsx`、`packages/plugin-react/src/{index,generate,feature,types}.ts`、`packages/routes/src/index.ts`。这是盘点时基线：当时 runtime 只有 Provider、setup 和位置通知式 onRouteChange，路由 IR 只有 path/index/module/errorBoundary/meta，没有 wrappers、redirect、clientLoader/action。**当时也不等于有 Umi 的 src/app.tsx 运行时约定。** F1a-F1c 已补齐 app 运行时、配置式嵌套路由、redirect/keepQuery 与 wrappers；clientLoader/action 仍待 U13。用普通 React 组件手工做得到，不等于框架已吸收对应功能。
+已重新读取 `packages/runtime/src/index.tsx`、`packages/plugin-react/src/{index,generate,feature,types}.ts`、`packages/routes/src/index.ts`。这是盘点时基线：当时 runtime 只有 Provider、setup 和位置通知式 onRouteChange，路由 IR 只有 path/index/module/errorBoundary/meta，没有 wrappers、redirect、clientLoader/action。**当时也不等于有 Umi 的 src/app.tsx 运行时约定。** F1a-F1e 已补齐 app 运行时、配置式嵌套路由、redirect/keepQuery、wrappers、全局布局与 404/loading 约定；clientLoader/action 仍待 U13。用普通 React 组件手工做得到，不等于框架已吸收对应功能。
 
 已有状态示例只是局部 state/Provider，并非自动发现 models 或 useModel；已有开发 Mock/代理并非浏览器 request/useRequest；已有 `_layout` 与路由 meta 并非 Layout/Menu/Access 套件。已有 CSS Modules/SVG 资源可用，也不能直接等同于 Antd/Tailwind/UnoCSS 集成。
 
@@ -35,7 +35,7 @@
 | U03 | render、rootContainer、patchClientRoutes、完整 onRouteChange | 基础已有（F1a）：Promise once-only next 的 render、rootContainer、patchClientRoutes、含 routes/clientRoutes 的完整事件；hash/memory history 未实现 | React 应用 runtime 扩展 | F1 |
 | U04 | 配置式 routes、component、子路由 | 基础已有（F1b/F1c/F1d）：嵌套 `ConfigRoute` 由原生插件展开为扁平 IR，component/errorBoundary/meta/index/动态参数/redirect/wrappers/layout:false 可用；稳定路径 ID | 路由配置插件，输出既有 IR | F1 |
 | U05 | redirect/keepQuery、wrappers、layout:false | 基础已有（F1c/F1d）：redirect/keepQuery、wrappers 与 `layout:false` 均已进入配置和扁平 IR；`layout:false` 由可选全局布局插件消费 | 路由/布局领域插件 | F1 |
-| U06 | 约定路由、全局 layouts/index、404/loading | 部分已有（F1d）：可选 `layoutPlugin` 发现 src/layouts/index.* 并包裹顶层路由；约定 404/loading 仍待实现，默认 404 保留 | 可选择的约定扫描插件 | F1 |
+| U06 | 约定路由、全局 layouts/index、404/loading | 部分已有（F1d/F1e）：可选 layoutPlugin 发现 src/layouts/index.*；根 src/pages/404.tsx 成为 catch-all；loadingPlugin 提供首次路由解析回退。导航期 Suspense loading 待 U13/F5 | 可选择的约定扫描插件 | F1 |
 | U07 | history browser/hash/memory、查询与导航公共入口 | 仅 browser Router；缺配置选择和统一应用导航接口 | Router 适配插件/客户端 SDK | F1 |
 | U08 | runtime 模块/生成导出/类型提示 | 部分已有（F1a）：应用配置模块随入口生成、仅在浏览器求值并参与类型检查；按启用功能生成应用侧导出仍待 F2 | 应用编译插件，不混合 Node/client barrel | F1 |
 | U09 | model/useModel、命名空间、selector、extraModels | 待实现；只有普通 React 局部状态 | model 插件 + React Provider | F2 |
@@ -92,7 +92,9 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 
 **F1c 状态（2026-10-20）：** U05 的 `redirect`/`keepQuery` 与 `wrappers` 已交付；redirect 生成 `RedirectRoute` 做参数替换与 replace 导航，wrappers 展开为普通父路由记录，二者都进入既有扁平 IR。用法、值与路径规则、Umi 差异和验证见 [F1c redirect 与 wrappers](62-f1c-redirects-and-wrappers.md)。
 
-**F1d 状态（2026-10-20）：** U06 的全局布局部分已交付：可选 `layoutPlugin` 发现 `src/layouts/index.*`，在全部路由贡献合并后包裹未退出的顶层路由；`layout:false` 已由配置、低层 IR 和 wrapper 链共同支持。约定 404/loading 仍未实现。用法、差异和验证见 [F1d 全局布局](63-f1d-global-layout.md)。F1 剩余的约定 404/loading、history 选择与公共导航/查询入口尚未开始。
+**F1d 状态（2026-10-20）：** U06 的全局布局部分已交付：可选 `layoutPlugin` 发现 `src/layouts/index.*`，在全部路由贡献合并后包裹未退出的顶层路由；`layout:false` 已由配置、低层 IR 和 wrapper 链共同支持。用法、差异和验证见 [F1d 全局布局](63-f1d-global-layout.md)。
+
+**F1e 状态（2026-10-20）：** U06 的 404/loading 约定已交付：根 `src/pages/404.tsx` 成为终端 catch-all；可选 `loadingPlugin` 发现 `src/loading.*` 并作为首次路由解析回退。导航期间的 Suspense loading 仍待 U13/F5。用法、边界和验证见 [F1e 404 与 loading](64-f1e-404-and-loading.md)。F1 剩余的 history 选择与公共导航/查询入口尚未开始。
 
 验收从真实应用文件出发：app.tsx/tsx 文件冲突、命名/默认导出形式、Hook 次序、异步初始化、路由修改及导航事件、模块停用和源码更新、生产构建、严格类型与独立安装。不是只测试注册表返回了一段字符串。
 

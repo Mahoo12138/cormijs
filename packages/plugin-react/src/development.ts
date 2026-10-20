@@ -9,6 +9,8 @@ const messages: Readonly<Record<string, string>> = {
   APP_RUNTIME_KEY_CONFLICT: 'Application runtime keys must be unique and cannot replace built-in hooks.',
   LAYOUT_INVALID: 'A global layout contribution is invalid.',
   LAYOUT_CONFLICT: 'More than one global layout module is active. Keep one layout file or disable a conflicting contribution.',
+  LOADING_INVALID: 'A loading contribution is invalid.',
+  LOADING_CONFLICT: 'More than one loading component is active. Keep one loading file or disable a conflicting contribution.',
   ROUTE_LAYOUT_INVALID: 'Route layout options only support false.',
   ROUTE_CONFLICT: 'Two routes resolve to the same URL. Rename or remove one of the conflicting pages.',
   ROUTE_ID_CONFLICT: 'Route identifiers must be unique and cannot use reserved identifiers.',

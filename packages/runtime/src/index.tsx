@@ -14,7 +14,7 @@ export interface RuntimePlugin {
 }
 export interface RuntimeEntry { id: string; plugin: RuntimePlugin; options?: unknown }
 export interface ApplicationHandle { dispose(): Promise<void> }
-const Loading = () => <p role="status">Loading…</p>;
+const DefaultLoading = () => <p role="status">Loading…</p>;
 const NotFound = () => <main><h1>404</h1><p>Page not found.</p></main>;
 const RouteFailure = () => <main role="alert">This page could not be loaded.</main>;
 const mountedElements = new WeakSet<HTMLElement>();
@@ -34,7 +34,7 @@ export async function resolveRouteComponent(load: () => Promise<ComponentType>):
 /** A mount owns its router, root and runtime effects; no module-global application singleton. */
 export async function mountApplication(options: {
   element: HTMLElement; routes: RouteObject[]; base?: string; plugins?: readonly RuntimeEntry[]; strict?: boolean;
-  appConfig?: Readonly<RuntimeConfig>; signal?: AbortSignal;
+  appConfig?: Readonly<RuntimeConfig>; loading?: ComponentType; signal?: AbortSignal;
 }): Promise<ApplicationHandle> {
   if (options.strict !== undefined && typeof options.strict !== 'boolean') throw new TypeError('strict must be boolean');
   options.signal?.throwIfAborted();
@@ -82,7 +82,8 @@ export async function mountApplication(options: {
       // Validate the patched tree before constructing a router, preserving its normal lazy boundaries.
       const clientRoutes = copyClientRoutes(routes);
       // A pathless layout matches every URL; `path: '/'` would not match `*` at the basename itself.
-      router = createBrowserRouter([{ id: 'cormi:root', HydrateFallback: Loading, ErrorBoundary: RouteFailure,
+      const LoadingComponent = options.loading ?? DefaultLoading;
+      router = createBrowserRouter([{ id: 'cormi:root', HydrateFallback: LoadingComponent, ErrorBoundary: RouteFailure,
         children: [...clientRoutes, { id: 'cormi:404', path: '*', Component: NotFound }] }], { basename });
       let lastLocation: Location | undefined;
       const notify = (state: ReturnType<typeof createBrowserRouter>['state']) => {

@@ -10,6 +10,7 @@ import { writeEnvironmentFixture, verifyEnvironmentPage, privateMarkers, environ
 import { writeTypecheckGraph, compilerFootprint } from './typescript-fixture.js';
 import { writeAppRuntimeFixture, verifyAppRuntimePage, appRuntimeSource } from './app-runtime-fixture.js';
 import { writeConfigRoutesFixture, verifyConfigRoutesPage } from './config-routes-fixture.js';
+import { writeConventionsFixture, verifyConventionsPage } from './conventions-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -460,6 +461,25 @@ const badLayout:ConfigRoute={path:'x',component:'./src/pages/Home.tsx',layout:tr
     await withServer(routesConsumer,'preview',async url=>{await verifyConfigRoutesPage(page,url,false);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'config-routes-preview.png')});});
     assert.deepEqual(await readFile(join(routesConsumer,'.cormi/app.tsx')),routesEntry);
     report.stages.push({label:'installed-config-routes-nested-index-params-and-static-preview',convention:'explicit app.routes',previewRegenerated:false});
+
+    const conventionsConsumer=await create('conventions','react');await writeConventionsFixture(conventionsConsumer);
+    const conventionsManifest=consumerManifest(kit,'react');
+    conventionsManifest.dependencies['@cormijs/plugin-react']=conventionsManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    conventionsManifest.dependencies['@cormijs/routes']=conventionsManifest.pnpm.overrides['@cormijs/routes']!;
+    await writeFile(join(conventionsConsumer,'package.json'),JSON.stringify(conventionsManifest,null,2));
+    await install('conventions-install',conventionsConsumer);await auditLinks(conventionsConsumer);
+    await command('conventions-typecheck',conventionsConsumer,'typecheck');
+    await writeFile(join(conventionsConsumer,'types.mts'),`import {loadingPlugin,type LoadingPluginOptions} from '@cormijs/plugin-react';
+const loading:LoadingPluginOptions={id:'consumer:loading',files:['src/loading.tsx']};
+void [loadingPlugin,loading];
+// @ts-expect-error loading files are source path strings
+const bad:LoadingPluginOptions={files:[1]};
+`);
+    await execute('conventions-public-types',conventionsConsumer,process.execPath,typeArguments);
+    await withServer(conventionsConsumer,'dev',async url=>{await verifyConventionsPage(page,url);assert.deepEqual(errors,[]);});
+    await command('conventions-build',conventionsConsumer,'build');
+    await withServer(conventionsConsumer,'preview',async url=>{await verifyConventionsPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'conventions-preview.png')});});
+    report.stages.push({label:'installed-conventions-custom-404-loading-and-static-preview',convention:'src/pages/404.tsx + src/loading.tsx',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

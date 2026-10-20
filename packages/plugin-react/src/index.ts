@@ -12,8 +12,10 @@ import { developmentDiagnostic, recoverable, repairSignature } from './developme
 import { clientModuleFile, inspectModule } from './modules.js';
 import { appConfigContributions, appRuntimeFiles, resolveAppRuntime, type AppConfigContribution, type AppRuntimePlan } from './app-runtime.js';
 import { layoutContributions, layoutFilesToWatch, resolveGlobalLayout, type LayoutContribution } from './layout.js';
+import { loadingContributions, loadingFilesToWatch, resolveGlobalLoading, type LoadingContribution } from './loading.js';
 export { appRuntimePlugin, appConfigContributions, resolveAppRuntime, type AppRuntimeOptions, type AppConfigContribution, type AppRuntimePlan } from './app-runtime.js';
 export { layoutPlugin, layoutContributions, resolveGlobalLayout, type LayoutPluginOptions, type LayoutContribution } from './layout.js';
+export { loadingPlugin, loadingContributions, resolveGlobalLoading, type LoadingPluginOptions, type LoadingContribution } from './loading.js';
 export { clientModule } from './modules.js';
 export { defineReactFeature, type ReactFeature } from './feature.js';
 export { createFeatureNamespace, type FeatureNamespace } from './namespace.js';
@@ -27,6 +29,7 @@ export interface ReactCompilation {
   readonly runtime: OrderedHooks<void, readonly RuntimeContribution[]>;
   readonly appConfig: OrderedHooks<void, readonly AppConfigContribution[]>;
   readonly layouts: OrderedHooks<void, readonly LayoutContribution[]>;
+  readonly loading: OrderedHooks<void, readonly LoadingContribution[]>;
 }
 declare module 'cordis' { interface Context { react: ReactCompilation } }
 
@@ -38,13 +41,15 @@ export const reactPlugin: Plugin.Object<void> = {
     const runtime = new OrderedHooks<void, readonly RuntimeContribution[]>('runtime');
     const appConfig = new OrderedHooks<void, readonly AppConfigContribution[]>('app-config');
     const layouts = new OrderedHooks<void, readonly LayoutContribution[]>('layouts');
+    const loading = new OrderedHooks<void, readonly LoadingContribution[]>('loading');
     const lifetime = new AbortController(), pending = new Set<Promise<PreparedApplication>>(), sessions = new Set<PreparedApplication>();
-    ctx.provide('react', { routes, runtime, appConfig, layouts } satisfies ReactCompilation);
+    ctx.provide('react', { routes, runtime, appConfig, layouts, loading } satisfies ReactCompilation);
     ctx.get('diagnostics')?.add('react-hooks', () => [
       ...routes.snapshot().map(({ id, owner }) => ({ kind: 'route-hook', id, declaredOwner: owner })),
       ...runtime.snapshot().map(({ id, owner }) => ({ kind: 'runtime-hook', id, declaredOwner: owner })),
       ...appConfig.snapshot().map(({ id, owner }) => ({ kind: 'app-config-hook', id, declaredOwner: owner })),
       ...layouts.snapshot().map(({ id, owner }) => ({ kind: 'layout-hook', id, declaredOwner: owner })),
+      ...loading.snapshot().map(({ id, owner }) => ({ kind: 'loading-hook', id, declaredOwner: owner })),
     ]);
     async function create(request: ApplicationRequest): Promise<PreparedApplication> {
       assertActive(ctx);
@@ -155,16 +160,17 @@ export const reactPlugin: Plugin.Object<void> = {
         let files: readonly string[] = [], error: unknown;
         try { files = input.routes !== undefined ? [] : await pageFiles(root, pages as string); } catch (cause) { error = cause; }
         const appRevision = appConfig.revision;
-        let applicationRuntime: AppRuntimePlan = { keys: [] }, appFiles: string[] = [], layoutInputFiles: string[] = [];
+        let applicationRuntime: AppRuntimePlan = { keys: [] }, appFiles: string[] = [], layoutInputFiles: string[] = [], loadingInputFiles: string[] = [];
         try {
           const sources = appConfigContributions([...(input.runtimeConfig === undefined ? [] : [{ id: 'config:runtime', module: input.runtimeConfig }]), ...await appConfig.collect(undefined)]);
           appFiles = appRuntimeFiles(root, sources);
           applicationRuntime = await resolveAppRuntime(root, sources);
           layoutInputFiles = layoutFilesToWatch(layoutContributions(await layouts.collect(undefined)));
+          loadingInputFiles = loadingFilesToWatch(loadingContributions(await loading.collect(undefined)));
         } catch (cause) { error ??= cause; }
         // Candidate existence is tracked even when app.ts and app.tsx currently conflict.
         const watched = new Set([...anchoredFiles, ...appFiles.filter(isAbsolute)]);
-        const key = JSON.stringify([files, await repairSignature(root, [...files, ...repairFiles, ...watched, ...appFiles, ...layoutInputFiles], watched), routes.revision, runtime.revision, layouts.revision, appRevision,
+        const key = JSON.stringify([files, await repairSignature(root, [...files, ...repairFiles, ...watched, ...appFiles, ...layoutInputFiles, ...loadingInputFiles], watched), routes.revision, runtime.revision, layouts.revision, loading.revision, appRevision,
           error instanceof Error ? [(error as NodeJS.ErrnoException).code, error.message] : null]);
         return { files, error, key, applicationRuntime, appRevision };
       }
@@ -178,18 +184,21 @@ export const reactPlugin: Plugin.Object<void> = {
             repairFiles.clear(); for (const file of baseRepairFiles) repairFiles.add(file);
             anchoredFiles.clear(); for (const file of baseAnchoredFiles) anchoredFiles.add(file);
             phase = 'routes';
-            const routeRevision = routes.revision, runtimeRevision = runtime.revision, layoutRevision = layouts.revision;
-            const routeOrder = routes.snapshot(), runtimeOrder = runtime.snapshot(), layoutOrder = layouts.snapshot();
+            const routeRevision = routes.revision, runtimeRevision = runtime.revision, layoutRevision = layouts.revision, loadingRevision = loading.revision;
+            const routeOrder = routes.snapshot(), runtimeOrder = runtime.snapshot(), layoutOrder = layouts.snapshot(), loadingOrder = loading.snapshot();
             const initialRoutes = input.routes !== undefined ? validateRoutes(input.routes) : routesFromFiles(observed.files, pages as string);
             const baseRoutes = validateRoutes(await routes.reduce(initialRoutes, (value): value is readonly RouteRecord[] => Array.isArray(value)));
             const layoutSources = layoutContributions(await layouts.collect(undefined));
             const globalLayout = await resolveGlobalLayout(root, layoutSources);
             if (globalLayout) rememberModules([{ module: globalLayout.module }]);
+            const loadingSources = loadingContributions(await loading.collect(undefined));
+            const globalLoading = await resolveGlobalLoading(root, loadingSources);
+            if (globalLoading) rememberModules([{ module: globalLoading.module }]);
             const next = validateRoutes(globalLayout ? applyGlobalLayout(baseRoutes, { module: globalLayout.module, pluginId: globalLayout.owner }) : baseRoutes);
             rememberModules(next); phase = 'runtime';
             const plugins = runtimeContributions([...runtimeContributions(input.runtime ?? []), ...await runtime.collect(undefined)]);
             rememberModules(plugins); phase = 'generate';
-            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict, observed.applicationRuntime);
+            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict, observed.applicationRuntime, globalLoading?.module);
             await transform(code, { loader: 'tsx', format: 'esm', jsx: 'automatic', logLevel: 'silent' });
             const types = generateRouteTypes(next);
             const hookInfo = (items: readonly { id: string; owner: string; stage?: number }[]) => items.map(({ id, owner, stage }) => ({ id, owner, stage: stage ?? 0 }));
@@ -197,10 +206,11 @@ export const reactPlugin: Plugin.Object<void> = {
               routes: next.map(route => ({ ...route, ...(route.module ? { module: inspectModule(root, route.module) } : {}),
                 ...(route.errorBoundary ? { errorBoundary: inspectModule(root, route.errorBoundary) } : {}) })),
               layout: globalLayout ? { owner: globalLayout.owner, module: inspectModule(root, globalLayout.module) } : null,
+              loading: globalLoading ? { owner: globalLoading.owner, module: inspectModule(root, globalLoading.module) } : null,
               runtime: plugins.map(({ id, module }) => ({ id, module: inspectModule(root, module) })),
               appRuntime: { ...observed.applicationRuntime, ...(observed.applicationRuntime.module ? { module: inspectModule(root, observed.applicationRuntime.module) } : {}) },
-              hooks: { routes: hookInfo(routeOrder), runtime: hookInfo(runtimeOrder), layouts: hookInfo(layoutOrder) } });
-            if (routes.revision !== routeRevision || runtime.revision !== runtimeRevision || layouts.revision !== layoutRevision || appConfig.revision !== observed.appRevision) throw new CormiError('CONTRIBUTIONS_CHANGED', 'Plugin contributions changed during compilation; this result cannot be published.');
+              hooks: { routes: hookInfo(routeOrder), runtime: hookInfo(runtimeOrder), layouts: hookInfo(layoutOrder), loading: hookInfo(loadingOrder) } });
+            if (routes.revision !== routeRevision || runtime.revision !== runtimeRevision || layouts.revision !== layoutRevision || loading.revision !== loadingRevision || appConfig.revision !== observed.appRevision) throw new CormiError('CONTRIBUTIONS_CHANGED', 'Plugin contributions changed during compilation; this result cannot be published.');
             combined.throwIfAborted(); phase = 'commit'; return { code, types, inspection };
           });
         } catch (error) {

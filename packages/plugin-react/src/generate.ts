@@ -18,13 +18,15 @@ export function runtimeContributions(input: unknown): readonly RuntimeContributi
 }
 /** Static imports and JSON string literals only; no user-provided expression interpolation. */
 export async function generateApplication(root: string, routes: readonly RouteRecord[], runtimes: readonly RuntimeContribution[],
-  base: string, mountId: string, serverOnlyFiles: readonly string[] = [], strict = false, appRuntime?: AppRuntimePlan): Promise<string> {
+  base: string, mountId: string, serverOnlyFiles: readonly string[] = [], strict = false, appRuntime?: AppRuntimePlan, loading?: ModuleRef): Promise<string> {
   if (typeof strict !== 'boolean') throw new CormiError('CONFIG_INVALID', 'strict must be boolean.');
   routes = validateRoutes(routes); runtimes = runtimeContributions(runtimes);
   const forbidden = new Set(serverOnlyFiles);
   const appModule = appRuntime?.module ? await clientSpecifier(root, appRuntime.module, forbidden) : undefined;
   const appValue = appRuntime?.module?.exportName === '*' ? 'applicationConfig' : `{default:applicationConfig[${JSON.stringify(appRuntime?.module?.exportName)}]}`;
   const appOption = appModule ? `,appConfig:resolveAppConfig(${appValue},${JSON.stringify(appRuntime?.keys ?? [])})` : '';
+  const loadingModule = loading ? await clientSpecifier(root, loading, forbidden) : undefined;
+  const loadingOption = loadingModule ? `,loading:applicationLoading[${JSON.stringify(loading!.exportName)}]` : '';
   const routeModules = new Map<string, string>();
   await Promise.all(routes.map(async route => { if (route.module) routeModules.set(route.id, await clientSpecifier(root, route.module, forbidden)); }));
   const runtimeModules = await Promise.all(runtimes.map(item => clientSpecifier(root, item.module, forbidden)));
@@ -49,6 +51,7 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   return [
     `import { ${hasRedirects ? 'RedirectRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule ? ', resolveAppConfig' : ''} } from '@cormijs/runtime';`,
     ...(appModule ? [`import * as applicationConfig from ${JSON.stringify(appModule)};`] : []),
+    ...(loadingModule ? [`import * as applicationLoading from ${JSON.stringify(loadingModule)};`] : []),
     `import type { RouteObject } from 'react-router';`,
     ...[...boundaryImports].map(([path, alias]) => `import * as ${alias} from ${JSON.stringify(path)};`),
     ...runtimeModules.map((path, i) => `import * as runtime${i} from ${JSON.stringify(path)};`),
@@ -56,7 +59,7 @@ export async function generateApplication(root: string, routes: readonly RouteRe
     `const plugins: RuntimeEntry[] = [${runtimes.map((item, i) => `{id:${JSON.stringify(item.id)},plugin:runtime${i}[${JSON.stringify(item.module.exportName)}],options:${JSON.stringify(item.options)}}`).join(',')}];`,
     `const element = document.getElementById(${JSON.stringify(mountId)});`,
     `if (!element) throw new Error('cormi mount element is missing');`,
-    `void Promise.resolve().then(()=>mountApplication({element,routes,plugins,base:${JSON.stringify(base)},strict:${JSON.stringify(strict)}${appOption}})).catch(error=>{console.error(error);element.textContent='Application startup failed';});`,
+    `void Promise.resolve().then(()=>mountApplication({element,routes,plugins,base:${JSON.stringify(base)},strict:${JSON.stringify(strict)}${appOption}${loadingOption}})).catch(error=>{console.error(error);element.textContent='Application startup failed';});`,
     '',
   ].join('\n');
 }

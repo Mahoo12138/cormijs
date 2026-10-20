@@ -1,6 +1,6 @@
 # cormi 应用开发指南：从创建到独立静态交付
 
-日期：2026-10-19，2026-10-20 补充应用运行时与路由配置。本文面向使用框架开发应用的人，而不是修改框架内部的开发者。当前应用模式是 React SPA，默认后端由 React–Vite preset 组合提供，Cordis 管理 Node 插件。以下流程使用本地 kit；不是已经发布到公共 npm 的安装指南。实际验收以 P12 结果记录为准。
+日期：2026-10-19，2026-10-20 补充应用运行时、路由配置与约定。本文面向使用框架开发应用的人，而不是修改框架内部的开发者。当前应用模式是 React SPA，默认后端由 React–Vite preset 组合提供，Cordis 管理 Node 插件。以下流程使用本地 kit；不是已经发布到公共 npm 的安装指南。实际验收以 P12 结果记录为准。
 
 ## 1. 创建一个有开发接口的应用
 
@@ -193,9 +193,37 @@ export const routes = [{
 }];
 ```
 
-配置路由的 `layout: false` 会传播到 wrapper 链。默认 404 仍在应用路由之外；约定 404/loading 尚未交付。完整规则、与 Umi 的差异和验证见 [F1d 全局布局](63-f1d-global-layout.md)。
+配置路由的 `layout: false` 会传播到 wrapper 链。默认 404 仍在应用路由之外；自定义 `src/pages/404.tsx` 与 loading 约定见 4.3。完整规则、与 Umi 的差异和验证见 [F1d 全局布局](63-f1d-global-layout.md)。
 
 示例：`pnpm cormi dev --root examples/config-routes`，其中 `/routes/bare` 演示退出全局布局。
+
+### 4.3 约定式 404 与 loading
+
+约定扫描会自动把页面根目录的 `src/pages/404.tsx`/`.jsx` 当作终端 catch-all；未知路径渲染该页面，没有该文件时使用框架默认 404。根级 404 会作为普通顶层路由经过全局布局；嵌套目录中的 `404.tsx` 仍是普通页面。显式 `app.routes` 模式不启用此约定，需要时自行声明 `path: "*"`。
+
+需要自定义首次路由加载回退时，显式加入 `loadingPlugin`：
+
+```ts
+// cormi.config.ts
+import { loadingPlugin } from '@cormijs/plugin-react';
+
+export default defineConfig({
+  presets: [reactVite],
+  plugins: [{ id: 'application-loading', plugin: loadingPlugin, options: { id: 'application:loading' } }],
+  // ...
+});
+```
+
+```tsx
+// src/loading.tsx
+export default function Loading() {
+  return <p role="status">正在加载页面…</p>;
+}
+```
+
+默认查找 `src/loading.tsx`、`.jsx`、`.ts`、`.js`，可用 `options.files` 覆盖；多个实际组件以 `LOADING_CONFLICT` 失败，插件卸载后回退默认加载提示。当前回退覆盖首次路由及其懒加载模块解析；客户端导航期间仍保留旧页面，完整的导航期 Suspense loading 留待 U13/F5。规则与验证见 [F1e 404 与 loading](64-f1e-404-and-loading.md)。
+
+示例：`pnpm cormi dev --root examples/conventions`，默认监听 `/conventions/`。
 
 ## 5. 环境和 Mock 使用同一个部署前缀
 

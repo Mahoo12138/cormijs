@@ -331,9 +331,9 @@ export function routesFromFiles(files: readonly string[], directory = 'src/pages
     if (!file.startsWith(prefix) || file.includes('\\')) fail('ROUTE_PATH_INVALID', 'File outside the pages directory.', { file });
     const local = file.slice(prefix.length).replace(/\.(tsx|jsx)$/, '');
     const parts = local.split('/'), name = parts.pop()!;
-    const layout = name === '_layout', index = name === 'index';
+    const layout = name === '_layout', index = name === 'index', notFound = name === '404' && parts.length === 0;
     const dir = parts.join('/');
-    const segments = [...parts, ...(layout || index ? [] : [name])].map(routeSegment);
+    const segments = notFound ? ['*'] : [...parts, ...(layout || index ? [] : [name])].map(routeSegment);
     return { file, dir, layout, index, segments, id: `file:${file}` };
   });
   const layouts = new Map<string, typeof descriptors[number]>();

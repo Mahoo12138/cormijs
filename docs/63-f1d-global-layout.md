@@ -1,6 +1,6 @@
 # cormi F1d：全局布局约定与 layout:false
 
-日期：2026-10-20。本切片交付 U06 的全局布局部分：原生 `layoutPlugin` 发现 `src/layouts/index.*`，把一个无路径全局布局包在所有适用的顶层路由外；配置路由和低层 IR 都可用 `layout: false` 退出该布局。约定 404 与 `src/loading` 仍未交付，U06 保持“部分已有”。
+日期：2026-10-20。本切片交付 U06 的全局布局部分：原生 `layoutPlugin` 发现 `src/layouts/index.*`，把一个无路径全局布局包在所有适用的顶层路由外；配置路由和低层 IR 都可用 `layout: false` 退出该布局。约定 404 与 `src/loading` 已由后续 [F1e](64-f1e-404-and-loading.md) 交付。
 
 ## 1. 使用方式
 
@@ -105,7 +105,7 @@ export default function GlobalLayout() {
 | 多布局 | `addLayouts` 可注册多个带 test 的布局 | 只支持一个实际布局；冲突明确失败 |
 | 布局入口 | `src/layouts/index.*` | 同一默认候选，可用 `files` 覆盖 |
 | `layout:false` | 路由配置字段 | 配置和低层 IR 均支持；wrapper 链传播 |
-| 404 与 loading | 约定自动发现 | 尚未实现（U06 剩余） |
+| 404 与 loading | 约定自动发现 | 已由 [F1e](64-f1e-404-and-loading.md) 交付 |
 | originPath 等布局元数据 | 记录供渲染器使用 | 未记录；当前不需要 |
 
 本切片不承诺 Umi 布局或路由配置的二进制兼容，也不引入 Umi PluginAPI。
@@ -119,7 +119,7 @@ export default function GlobalLayout() {
 - `ROUTE_ID_CONFLICT`：显式布局路由 ID 与已有路由冲突；
 - 布局候选最多 16 个文件（每个贡献），贡献最多 8 个；路由数量、深度和 wrapper 限制沿用既有校验；
 - 配置或布局文件变化按 Node 配置/生成更新策略生效，组件内容仍交给 Vite/Fast Refresh；
-- 默认 404 仍在应用路由之外，不会自动经过全局布局；自定义 404 约定将在后续切片处理。
+- 默认 404 仍在应用路由之外，不会自动经过全局布局；自定义 `src/pages/404.tsx` 由 [F1e](64-f1e-404-and-loading.md) 提供，并作为普通顶层路由经过全局布局。
 
 ## 6. 验证
 
@@ -140,6 +140,6 @@ export default function GlobalLayout() {
 
 ## 7. 下一步
 
-- U06 剩余：`src/pages/404.tsx` 与 `src/loading.*` 约定；
+- U06 已完成：全局布局、`src/pages/404.tsx` 与 `src/loading.*` 已分别由 F1d/F1e 交付；
 - U07：browser/hash/memory history 选择与公共导航/查询入口；
 - F2：在 F1a 运行时入口上登记 model/initial-state/request 的 key 与 Provider。

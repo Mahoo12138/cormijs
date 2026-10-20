@@ -116,6 +116,6 @@ declare module '@cormijs/runtime' {
 
 ## 9. 下一步
 
-- F1 剩余：约定 404/loading、history 选择与公共导航/查询入口。配置式嵌套路由、redirect/wrappers 与全局布局/`layout:false` 已分别在 [F1b](61-f1b-config-routes.md)、[F1c](62-f1c-redirects-and-wrappers.md) 和 [F1d](63-f1d-global-layout.md) 交付。
+- F1 剩余：history 选择与公共导航/查询入口。配置式嵌套路由、redirect/wrappers、全局布局/`layout:false` 与 404/loading 约定已分别在 [F1b](61-f1b-config-routes.md)、[F1c](62-f1c-redirects-and-wrappers.md)、[F1d](63-f1d-global-layout.md) 和 [F1e](64-f1e-404-and-loading.md) 交付。
 - F2：在本入口上登记 model/initial-state/request 的运行时 key 和 Provider，验证初始化用户、共享模型、请求与权限的联动。
 - 不把本切片扩展成浏览器 Cordis 宿主或 bootstrap 重构；应用配置仍只在浏览器求值，Node 插件继续拥有扫描、校验和生成。
