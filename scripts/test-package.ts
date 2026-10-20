@@ -16,6 +16,7 @@ import { writeModelFixture, verifyModelPage } from './model-fixture.js';
 import { writeInitialStateFixture, verifyInitialStatePage } from './initial-state-fixture.js';
 import { writeRequestFixture, verifyRequestPage } from './request-fixture.js';
 import { writeLocaleFixture, verifyLocalePage } from './locale-fixture.js';
+import { writeAccessFixture, verifyAccessPage } from './access-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -579,6 +580,25 @@ const bad:LocaleConfig={messages:{en:{hello:1}}};
     await command('locale-build',localeConsumer,'build');
     await withServer(localeConsumer,'preview',async url=>{await verifyLocalePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'locale-preview.png')});});
     report.stages.push({label:'installed-locale-switch-fallback-persistence-and-static-preview',hooks:'useIntl',previewRegenerated:false});
+
+    const accessConsumer=await create('access','react');await writeAccessFixture(accessConsumer);
+    const accessManifest=consumerManifest(kit,'react');
+    accessManifest.dependencies['@cormijs/plugin-react']=accessManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(accessConsumer,'package.json'),JSON.stringify(accessManifest,null,2));
+    await install('access-install',accessConsumer);await auditLinks(accessConsumer);
+    await command('access-typecheck',accessConsumer,'typecheck');
+    await writeFile(join(accessConsumer,'types.mts'),`import {accessPlugin,type AccessPluginOptions} from '@cormijs/plugin-react';import {Access,useAccess,type AccessConfig,type AccessMap} from '@cormijs/runtime';
+const config:AccessConfig=state=>({canAdmin:Boolean(state)});
+const options:AccessPluginOptions={id:'consumer:access'};
+declare const map:AccessMap;void [accessPlugin,options,config,map,Access,useAccess];
+// @ts-expect-error access values are booleans
+const bad:AccessConfig=()=>({canAdmin:'yes'});
+`);
+    await execute('access-public-types',accessConsumer,process.execPath,typeArguments);
+    await withServer(accessConsumer,'dev',async url=>{await verifyAccessPage(page,url);assert.deepEqual(errors,[]);});
+    await command('access-build',accessConsumer,'build');
+    await withServer(accessConsumer,'preview',async url=>{await verifyAccessPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'access-preview.png')});});
+    report.stages.push({label:'installed-access-from-initial-state-and-static-preview',hooks:'useAccess',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

@@ -407,6 +407,45 @@ setLocale(locale === 'zh' ? 'en' : 'zh');
 
 示例：`pnpm cormi dev --root examples/locale`，默认监听 `/locale/`。
 
+### 4.9 access 与初始状态
+
+权限函数放在 `src/app.tsx`，并同时启用 app 运行时、initial-state 与 access 插件：
+
+```ts
+import { accessPlugin, appRuntimePlugin, initialStatePlugin } from '@cormijs/plugin-react';
+
+export default defineConfig({
+  presets: [reactVite],
+  plugins: [
+    { id: 'app-runtime', plugin: appRuntimePlugin },
+    { id: 'initial-state', plugin: initialStatePlugin, options: { id: 'application:initial-state' } },
+    { id: 'access', plugin: accessPlugin, options: { id: 'application:access' } },
+  ],
+});
+```
+
+```tsx
+// src/app.tsx
+export default defineApp({
+  async getInitialState() { return { role: 'admin' }; },
+  access(state) {
+    const user = state as { role?: string } | undefined;
+    return { canAdmin: user?.role === 'admin' };
+  },
+});
+```
+
+```tsx
+import { Access, useAccess } from '@cormijs/runtime';
+
+const access = useAccess();
+<Access accessible={access.canAdmin} fallback={<p>没有权限</p>}><AdminPanel /></Access>
+```
+
+access Provider 依赖初始状态 Provider，并在 runtime stage 中位于其内层；`setInitialState` 改变数据后权限自动重算。当前没有 `src/access.ts` 自动发现或路由级 access 守卫，客户端权限不能替代后端授权。完整语义见 [F3b access](70-f3b-access.md)。
+
+示例：`pnpm cormi dev --root examples/access`，默认监听 `/access/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

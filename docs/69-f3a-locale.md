@@ -115,6 +115,6 @@ Provider 位于 Router 外、模型 Provider 外；模型与路由组件都能�
 
 ## 6. 下一步
 
-- F3b：access.ts/useAccess/Access 与路由访问控制；
+- F3b：access.ts/useAccess/Access 与路由访问控制，基础 Hook/组件已由 [F3b](70-f3b-access.md) 交付；
 - F3c：layout/menu/面包屑与 UI adapter；
 - locale 后续：消息目录、复数/日期/数字格式、UI 库语言联动与 SSR。

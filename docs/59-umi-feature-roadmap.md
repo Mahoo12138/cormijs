@@ -43,7 +43,7 @@
 | U11 | request、运行时配置、拦截器、统一错误 | 部分已有（F2c）：requestPlugin 注册 app.tsx request 配置和每挂载 fetch 客户端；拦截器、统一错误协议、dataField 待后续 | request 契约/客户端实现适配 | F2 |
 | U12 | useRequest、手动/自动、分页/加载更多等 | 部分已有（F2c）：自动/手动、loading/error、refresh、cancel、竞态保护；重试/轮询/分页/加载更多待后续 | 请求 Hooks 插件，可复用成熟库 | F2 |
 | U13 | clientLoader/useClientLoaderData/routeProps | 待实现；页面懒加载不等于数据加载 | 路由数据插件 | F3 |
-| U14 | access.ts/useAccess/Access、路由访问控制 | 待实现 | access 插件，依赖初始状态与路由扩展 | F3 |
+| U14 | access.ts/useAccess/Access、路由访问控制 | 部分已有（F3b）：accessPlugin 从 initialState 计算权限，提供 useAccess/Access；src/access.ts 约定与路由级守卫待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
 | U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有布局容器/meta，无应用布局套件 | layout/menu 插件，UI adapter 可选 | F3 |
 | U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a）：localePlugin 提供内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage；消息目录、复数/日期与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
 | U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
@@ -116,7 +116,9 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 
 **F2c 状态（2026-10-20）：** U11/U12 的请求基础已交付：`requestPlugin` 注册 request 配置和每挂载 fetch 客户端；`useRequest` 支持自动/手动、loading/error/data、refresh、cancel、HTTP 错误和 generation 竞态保护。拦截器、统一错误协议、重试/轮询/分页仍待后续。用法、差异与验证见 [F2c request 与 useRequest](68-f2c-request.md)。F2 基础链路（初始状态 → 共享模型 → 请求）已具备。
 
-**F3a 状态（2026-10-20）：** U16 的 locale 基础已交付：`localePlugin` 登记 locale 配置与 runtime Provider，`useIntl`/`FormattedMessage` 支持内联消息、default/fallback、切换和 localStorage 持久化。消息目录、复数/日期/数字格式化、UI 库语言联动与 SSR 仍待后续。用法、差异与验证见 [F3a locale](69-f3a-locale.md)。下一阶段继续 access/layout。
+**F3a 状态（2026-10-20）：** U16 的 locale 基础已交付：`localePlugin` 登记 locale 配置与 runtime Provider，`useIntl`/`FormattedMessage` 支持内联消息、default/fallback、切换和 localStorage 持久化。消息目录、复数/日期/数字格式化、UI 库语言联动与 SSR 仍待后续。用法、差异与验证见 [F3a locale](69-f3a-locale.md)。
+
+**F3b 状态（2026-10-20）：** U14 的权限基础已交付：`accessPlugin` 登记 access 函数，从 `initialState` 计算布尔权限并随状态变化重算；`useAccess`/`Access` 可用于页面与按钮级渲染控制。`src/access.ts` 约定、路由级 access 与菜单过滤仍待后续。用法、差异与验证见 [F3b access](70-f3b-access.md)。下一阶段继续 layout/menu。
 
 ### F3：权限、布局、菜单和国际化
 

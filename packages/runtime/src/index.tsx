@@ -9,7 +9,8 @@ export { ModelProvider, useModel, type ModelDescriptor } from './model.js';
 export { InitialStateProvider, initialStateRuntime, useInitialState, type InitialState } from './initial-state.js';
 export { createRequestClient, RequestError, RequestProvider, requestRuntime, useRequest, useRequestClient, type RequestClient, type RequestOptions, type RequestParams, type UseRequestOptions, type UseRequestResult } from './request.js';
 export { FormattedMessage, LocaleProvider, localeRuntime, useIntl, type IntlApi } from './locale.js';
-export { defineApp, resolveAppConfig, type HistoryType, type RequestConfig, type LocaleConfig, type RuntimeConfig, type AppRuntimeContext, type AppRoutesContext, type RootContainerContext, type RouteChangeEvent } from './app-config.js';
+export { Access, AccessProvider, accessRuntime, useAccess, type Access as AccessMap } from './access.js';
+export { defineApp, resolveAppConfig, type HistoryType, type RequestConfig, type LocaleConfig, type AccessConfig, type RuntimeConfig, type AppRuntimeContext, type AppRoutesContext, type RootContainerContext, type RouteChangeEvent } from './app-config.js';
 export { Link, NavLink, Navigate, Outlet, createSearchParams, useHref, useLocation, useMatch, useNavigate, useNavigation, useParams, useSearchParams } from 'react-router';
 
 export interface RuntimePlugin {

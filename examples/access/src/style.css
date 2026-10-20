@@ -1,0 +1,13 @@
+:root { color-scheme: light; font-family: ui-sans-serif, system-ui, sans-serif; background: #f5f2ef; color: #2b2622; }
+body { margin: 0; }
+.shell { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; }
+.eyebrow { letter-spacing: .18em; font-size: 12px; color: #8a5d2e; }
+h1 { margin: 8px 0 20px; font-size: clamp(32px, 6vw, 52px); }
+.hint { color: #6c645d; font-size: 14px; line-height: 1.7; }
+.card { margin-top: 20px; padding: 20px; background: #fff; border: 1px solid #e5ddd5; border-radius: 12px; }
+.card p { margin: 8px 0; }
+code { font-family: ui-monospace, monospace; background: #f1e9e1; padding: 1px 5px; border-radius: 4px; }
+.admin { margin-top: 16px; padding: 16px; background: #e8f2ea; border: 1px solid #b7d6bd; border-radius: 10px; }
+.fallback { margin-top: 16px; padding: 16px; background: #fbefef; border: 1px solid #e6c4c4; border-radius: 10px; }
+.actions { display: flex; gap: 12px; margin-top: 20px; }
+button { padding: 8px 14px; border: 1px solid #8a5d2e; border-radius: 8px; background: transparent; color: #8a5d2e; }

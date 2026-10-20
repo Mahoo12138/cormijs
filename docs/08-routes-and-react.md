@@ -92,6 +92,8 @@ F2c 起，显式启用的 `requestPlugin` 登记 `request` 配置和每挂载 fe
 
 F3a 起，显式启用的 `localePlugin` 登记 `locale` 配置和 runtime Provider；`useIntl`/`FormattedMessage` 提供消息查找、占位符替换、default/fallback、运行时切换和 localStorage 持久化。Provider 位于 Router 外，模型与路由组件都可读取。消息目录、复数/日期格式和 UI 库联动仍待后续。详见 [F3a locale](69-f3a-locale.md)。
 
+F3b 起，显式启用的 `accessPlugin` 登记 `access` 函数，Provider 从 `initialState` 计算布尔权限并随状态变化重算；`useAccess`/`Access` 用于页面和按钮级渲染控制。access Provider 通过 runtime stage 位于 initialState Provider 内层；路由级 access 与菜单过滤待后续。详见 [F3b access](70-f3b-access.md)。
+
 当前默认包含加载、路由错误和 404 页面。页面模块懒加载；生产与开发使用相同路由树。不存在 SSR/hydration/RSC 功能承诺。普通完整页面刷新会销毁浏览器文档；显式多 mount 使用者应调用返回的 dispose。
 
 ## 7. 验证与未完成边界

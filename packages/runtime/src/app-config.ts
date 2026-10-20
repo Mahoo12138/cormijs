@@ -13,6 +13,7 @@ export interface LocaleConfig {
   readonly messages?: Readonly<Record<string, Readonly<Record<string, string>>>>;
   readonly storageKey?: string;
 }
+export type AccessConfig = (initialState: unknown) => Readonly<Record<string, boolean>>;
 export interface AppRuntimeContext { readonly signal: AbortSignal; readonly basename: string }
 export interface AppRoutesContext extends AppRuntimeContext { readonly routes: RouteObject[] }
 export interface RootContainerContext extends AppRuntimeContext { readonly routes: readonly RouteObject[] }
@@ -42,6 +43,8 @@ export interface RuntimeConfig {
   request?: RequestConfig;
   /** Registered by localePlugin; consumed by the locale provider. */
   locale?: LocaleConfig;
+  /** Registered by accessPlugin; evaluated from the initial-state data. */
+  access?: AccessConfig;
 }
 export const APP_RUNTIME_KEYS = Object.freeze(['setup', 'render', 'patchClientRoutes', 'rootContainer', 'onRouteChange'] as const);
 type ExactConfig<T> = Record<Exclude<keyof T, keyof RuntimeConfig>, never>;
