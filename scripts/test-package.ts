@@ -25,6 +25,7 @@ import { writeDefineFixture, verifyDefinePage } from './define-fixture.js';
 import { writeGlobalStyleFixture, verifyGlobalStylePage } from './global-style-fixture.js';
 import { writeAccessConventionFixture, verifyAccessConventionPage } from './access-convention-fixture.js';
 import { writeLocaleCatalogFixture, verifyLocaleCatalogPage } from './locale-catalog-fixture.js';
+import { writeClientLoaderFixture, verifyClientLoaderPage } from './client-loader-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -759,6 +760,24 @@ const bad:LocalePluginOptions={directory:1};
     await command('locale-catalog-build',localeCatalogConsumer,'build');
     await withServer(localeCatalogConsumer,'preview',async url=>{await verifyLocaleCatalogPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'locale-catalog-preview.png')});});
     report.stages.push({label:'installed-locale-catalog-dev-build-and-static-preview',directory:'src/locales',locales:['en','zh-CN'],previewRegenerated:false});
+
+    const loaderConsumer=await create('client-loader','react');await writeClientLoaderFixture(loaderConsumer);
+    const loaderManifest=consumerManifest(kit,'react');
+    loaderManifest.dependencies['@cormijs/plugin-react']=loaderManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(loaderConsumer,'package.json'),JSON.stringify(loaderManifest,null,2));
+    await install('client-loader-install',loaderConsumer);await auditLinks(loaderConsumer);
+    await command('client-loader-typecheck',loaderConsumer,'typecheck');
+    await writeFile(join(loaderConsumer,'types.mts'),`import {useClientLoaderData,clientLoaderOf,type ClientLoaderArgs,type ClientLoaderFunction} from '@cormijs/runtime';
+const loader:ClientLoaderFunction=({params}:ClientLoaderArgs)=>({id:params.id});
+void [loader,useClientLoaderData,clientLoaderOf({clientLoader:loader},"clientLoader","route:id")];
+// @ts-expect-error clientLoader must be a function
+const bad:ClientLoaderFunction=1;
+`);
+    await execute('client-loader-public-types',loaderConsumer,process.execPath,typeArguments);
+    await withServer(loaderConsumer,'dev',async url=>{await verifyClientLoaderPage(page,url);assert.deepEqual(errors,[]);});
+    await command('client-loader-build',loaderConsumer,'build');
+    await withServer(loaderConsumer,'preview',async url=>{await verifyClientLoaderPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'client-loader-preview.png')});});
+    report.stages.push({label:'installed-route-client-loader-dev-build-and-static-preview',routes:['member/:id'],previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

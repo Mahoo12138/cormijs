@@ -73,4 +73,4 @@ Umi 的 layout 插件（`packages/plugins/src/layout.ts`）直接产出一个 `<
 
 - U15/U17：可选 ProLayout/Antd UI adapter（外壳组件、图标、徽章）；
 - F4 后续：微生成器（U27，需先扩展 CLI 的多参数命令解析）、工程命令（U28）、输出与资源策略（U25）；
-- F5：client loader 与预取（U13/U31）、SSR（U32）、静态导出（U33）。
+- F5a 已交付路由 client loader，见 [F5a 路由 client loader](83-f5a-client-loader.md)；后续为预取（U31）、SSR（U32）、静态导出（U33）。

@@ -44,6 +44,8 @@ F4h 起，`localePlugin` 可用 `options.directory` 构建期内联 `src/locales
 
 F4i 起，`menuPlugin` 支持 `collapse` 选项与 `useMenuCollapse()`（可选 localStorage 持久化），菜单/面包屑标题按 `meta.locale` → `meta.title` → `meta.name` 解析，未命中的消息 key 不会被当作标题。详见 [F4i 菜单折叠与标题](82-f4i-menu-collapse.md)。
 
+F5a 起，配置式路由可声明 `clientLoader` 导出名，生成入口把页面模块的同名导出交给 React Router loader，页面用 `useClientLoaderData()` 取数；loader 失败的边界呈现契约尚未交付。详见 [F5a 路由 client loader](83-f5a-client-loader.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

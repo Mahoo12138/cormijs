@@ -5,6 +5,7 @@ import { RouterProvider } from 'react-router/dom';
 import { copyClientRoutes, runAppRender, type HistoryType, type RuntimeConfig, type RouteChangeEvent, type RuntimeCleanup } from './app-config.js';
 import { ModelProvider, type ModelDescriptor } from './model.js';
 export { useRouteMatches, type CormiRouteMatch } from './route-matches.js';
+export { clientLoaderOf, useClientLoaderData, useClientLoaderError, useRouteLoaderDataFor, type ClientLoaderArgs, type ClientLoaderFunction } from './client-loader.js';
 export { ModelProvider, useModel, type ModelDescriptor } from './model.js';
 export { InitialStateProvider, initialStateRuntime, useInitialState, type InitialState } from './initial-state.js';
 export { createRequestClient, RequestError, RequestProvider, requestRuntime, useRequest, useRequestClient, type RequestClient, type RequestOptions, type RequestParams, type UseRequestOptions, type UseRequestResult } from './request.js';

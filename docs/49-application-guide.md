@@ -673,6 +673,29 @@ const { collapsed, toggle } = useMenuCollapse();
 
 标题解析顺序是 `meta.locale`（消息目录命中）→ `meta.title` → `meta.name`；未命中的 key 不会被当成标题显示。折叠状态默认 `false`，可选 `defaultCollapsed`，并在 `storageKey` 存在时尽力持久化到 `localStorage`。这里没有 ProLayout/Antd 组件或布局插槽，外壳结构由应用自己实现。规则见 [F4i 菜单折叠与标题](82-f4i-menu-collapse.md)。
 
+### 4.22 路由 client loader
+
+页面需要的首屏数据可以在配置式路由里声明为浏览器 loader，渲染前完成取数：
+
+```ts
+plugins: [{ id: 'routes', plugin: routeConfigPlugin, options: { id: 'app:routes', routes: [
+  { path: 'member/:id', component: './src/Member.tsx', clientLoader: 'clientLoader' },
+] } }]
+```
+
+```tsx
+import { useClientLoaderData } from '@cormijs/runtime';
+export default function Member() {
+  const data = useClientLoaderData<{ id: string }>();
+  return <p data-id>{data.id}</p>;
+}
+export async function clientLoader({ params }: { params: Record<string, string | undefined> }) {
+  return { id: params.id ?? '-' };
+}
+```
+
+`clientLoader` 是页面模块里的导出名；生成入口把同一模块同时用作组件与 loader 来源，声明交给 React Router 的数据路由执行，因此深链接、刷新和前进后退都会取数。约定式路由暂不识别该声明，loader 失败的边界呈现契约仍未交付，服务端 loader/SSR 注水与预取也不在本能力内。规则与限制见 [F5a 路由 client loader](83-f5a-client-loader.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

@@ -60,7 +60,12 @@ export async function generateApplication(root: string, routes: readonly RouteRe
     pageFields.push(`handle:{cormi:{meta:${JSON.stringify(route.meta ?? {})}}}`);
     if (route.index) pageFields.push('index:true'); else if (route.path !== undefined) pageFields.push(`path:${JSON.stringify(route.access ? '' : route.path)}`);
     if (route.redirect) pageFields.push(`element:<RedirectRoute to=${JSON.stringify(route.redirect)}${route.keepQuery ? ' keepQuery' : ''}/>`);
-    else if (route.module) pageFields.push(`lazy:async()=>({Component:await resolveRouteComponent(async()=>(await import(${JSON.stringify(routeModules.get(route.id))}))[${JSON.stringify(route.module.exportName)}])})`);
+    else if (route.module) {
+      const specifier = JSON.stringify(routeModules.get(route.id));
+      pageFields.push(route.clientLoader === undefined
+        ? `lazy:async()=>({Component:await resolveRouteComponent(async()=>(await import(${specifier}))[${JSON.stringify(route.module.exportName)}])})`
+        : `lazy:async()=>{const page=await import(${specifier});return {Component:await resolveRouteComponent(async()=>page[${JSON.stringify(route.module.exportName)}]),loader:clientLoaderOf(page,${JSON.stringify(route.clientLoader)},${JSON.stringify(route.id)})};}`);
+    }
     if (route.errorBoundary) pageFields.push(`ErrorBoundary:${boundaryAliases.get(route.id)}[${JSON.stringify(route.errorBoundary.exportName)}]`);
     if (children.has(route.id)) pageFields.push(`children:${render(route.id)}`);
     if (!route.access) return '{' + pageFields.join(',') + '}';
@@ -73,6 +78,7 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   const hasAccess = routes.some(route => route.access !== undefined);
   const modelEntries = models.map((model, index) => `{namespace:${JSON.stringify(model.namespace)},model:model${index}[${JSON.stringify(model.module.exportName)}]}`);
   const modelsOption = modelEntries.length ? ',models' : '';
+  const hasClientLoader = routes.some(route => route.clientLoader !== undefined);
   const styleImports = styles.map(style => `import ${JSON.stringify(styleSpecifier(root, style.file))};`);
   const accessModule = access ? await clientSpecifier(root, access, forbidden) : undefined;
   let configExpression = appModule ? `resolveAppConfig(${appValue},${JSON.stringify(appRuntime?.keys ?? [])})` : '';
@@ -82,7 +88,7 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   return [
     ...styleImports,
     ...(accessModule ? [`import * as accessConvention from ${JSON.stringify(accessModule)};`] : []),
-    `import { ${hasRedirects ? 'RedirectRoute, ' : ''}${hasAccess ? 'AccessRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule || accessModule || localeCatalogs.length ? ', resolveAppConfig' : ''}${accessModule ? ', applyAccessConvention' : ''}${localeCatalogs.length ? ', applyLocaleCatalogs' : ''} } from '@cormijs/runtime';`,
+    `import { ${hasRedirects ? 'RedirectRoute, ' : ''}${hasAccess ? 'AccessRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule || accessModule || localeCatalogs.length ? ', resolveAppConfig' : ''}${hasClientLoader ? ', clientLoaderOf' : ''}${accessModule ? ', applyAccessConvention' : ''}${localeCatalogs.length ? ', applyLocaleCatalogs' : ''} } from '@cormijs/runtime';`,
     ...(appModule ? [`import * as applicationConfig from ${JSON.stringify(appModule)};`] : []),
     ...(loadingModule ? [`import * as applicationLoading from ${JSON.stringify(loadingModule)};`] : []),
     ...modelModules.map((path, i) => `import * as model${i} from ${JSON.stringify(path)};`),
