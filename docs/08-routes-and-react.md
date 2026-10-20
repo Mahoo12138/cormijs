@@ -90,6 +90,8 @@ F2b 起，显式启用的 `initialStatePlugin` 登记 `getInitialState` app-conf
 
 F2c 起，显式启用的 `requestPlugin` 登记 `request` 配置和每挂载 fetch 客户端；`useRequest` 提供自动/手动执行、loading/error/data、refresh、cancel、HTTP 错误和 generation 竞态保护。模型 Hook 与路由组件都可使用请求 Hook；拦截器、重试和分页仍待后续。详见 [F2c request 与 useRequest](68-f2c-request.md)。
 
+F3a 起，显式启用的 `localePlugin` 登记 `locale` 配置和 runtime Provider；`useIntl`/`FormattedMessage` 提供消息查找、占位符替换、default/fallback、运行时切换和 localStorage 持久化。Provider 位于 Router 外，模型与路由组件都可读取。消息目录、复数/日期格式和 UI 库联动仍待后续。详见 [F3a locale](69-f3a-locale.md)。
+
 当前默认包含加载、路由错误和 404 页面。页面模块懒加载；生产与开发使用相同路由树。不存在 SSR/hydration/RSC 功能承诺。普通完整页面刷新会销毁浏览器文档；显式多 mount 使用者应调用返回的 dispose。
 
 ## 7. 验证与未完成边界

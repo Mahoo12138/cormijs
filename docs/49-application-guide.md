@@ -363,6 +363,50 @@ const { data, loading, error, run, refresh, cancel } = useRequest(
 
 示例：`pnpm cormi dev --root examples/request`，默认监听 `/request/`。
 
+### 4.8 locale 与消息
+
+需要运行时语言切换时，同时启用 app 运行时与 `localePlugin`：
+
+```ts
+import { appRuntimePlugin, localePlugin } from '@cormijs/plugin-react';
+
+export default defineConfig({
+  presets: [reactVite],
+  plugins: [
+    { id: 'app-runtime', plugin: appRuntimePlugin },
+    { id: 'locale', plugin: localePlugin, options: { id: 'application:locale' } },
+  ],
+});
+```
+
+```tsx
+// src/app.tsx
+export default defineApp({
+  locale: {
+    default: 'zh',
+    fallback: 'en',
+    storageKey: 'demo:locale',
+    messages: {
+      en: { title: 'Locale demo', greeting: 'Hello, {name}' },
+      zh: { title: '语言演示', greeting: '你好，{name}' },
+    },
+  },
+});
+```
+
+```tsx
+import { FormattedMessage, useIntl } from '@cormijs/runtime';
+
+const { locale, setLocale, t } = useIntl();
+setLocale(locale === 'zh' ? 'en' : 'zh');
+<p>{t('greeting', { name: 'Ada' })}</p>
+<FormattedMessage id="greeting" values={{ name: 'Grace' }} />
+```
+
+当前消息只来自内联配置；支持 default/fallback、占位符替换与 localStorage 持久化，不扫描消息目录，也不提供复数/日期格式、UI 库语言联动或 SSR。完整语义见 [F3a locale](69-f3a-locale.md)。
+
+示例：`pnpm cormi dev --root examples/locale`，默认监听 `/locale/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

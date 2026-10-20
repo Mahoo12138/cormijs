@@ -20,6 +20,7 @@ export { loadingPlugin, loadingContributions, resolveGlobalLoading, type Loading
 export { modelPlugin, modelContributions, resolveModels, type ModelPluginOptions, type ModelContribution, type ModelPlan } from './model.js';
 export { initialStatePlugin, type InitialStatePluginOptions } from './initial-state.js';
 export { requestPlugin, type RequestPluginOptions } from './request.js';
+export { localePlugin, type LocalePluginOptions } from './locale.js';
 export { clientModule } from './modules.js';
 export { defineReactFeature, type ReactFeature } from './feature.js';
 export { createFeatureNamespace, type FeatureNamespace } from './namespace.js';

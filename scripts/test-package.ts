@@ -15,6 +15,7 @@ import { writeHistoryFixture, verifyHistoryPage } from './history-fixture.js';
 import { writeModelFixture, verifyModelPage } from './model-fixture.js';
 import { writeInitialStateFixture, verifyInitialStatePage } from './initial-state-fixture.js';
 import { writeRequestFixture, verifyRequestPage } from './request-fixture.js';
+import { writeLocaleFixture, verifyLocalePage } from './locale-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -559,6 +560,25 @@ const bad:RequestConfig={baseURL:42};
     await command('request-build',requestConsumer,'build');
     await withServer(requestConsumer,'preview',async url=>{await verifyRequestPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'request-preview.png')});});
     report.stages.push({label:'installed-request-useRequest-cancel-errors-and-static-preview',hooks:'useRequest',previewRegenerated:false});
+
+    const localeConsumer=await create('locale','react');await writeLocaleFixture(localeConsumer);
+    const localeManifest=consumerManifest(kit,'react');
+    localeManifest.dependencies['@cormijs/plugin-react']=localeManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(localeConsumer,'package.json'),JSON.stringify(localeManifest,null,2));
+    await install('locale-install',localeConsumer);await auditLinks(localeConsumer);
+    await command('locale-typecheck',localeConsumer,'typecheck');
+    await writeFile(join(localeConsumer,'types.mts'),`import {localePlugin,type LocalePluginOptions} from '@cormijs/plugin-react';import {FormattedMessage,useIntl,type IntlApi,type LocaleConfig} from '@cormijs/runtime';
+const config:LocaleConfig={default:'en',messages:{en:{hello:'Hello'}}};
+const options:LocalePluginOptions={id:'consumer:locale'};
+declare const intl:IntlApi;void [localePlugin,options,config,intl,useIntl,FormattedMessage];
+// @ts-expect-error message values are strings
+const bad:LocaleConfig={messages:{en:{hello:1}}};
+`);
+    await execute('locale-public-types',localeConsumer,process.execPath,typeArguments);
+    await withServer(localeConsumer,'dev',async url=>{await verifyLocalePage(page,url);assert.deepEqual(errors,[]);});
+    await command('locale-build',localeConsumer,'build');
+    await withServer(localeConsumer,'preview',async url=>{await verifyLocalePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'locale-preview.png')});});
+    report.stages.push({label:'installed-locale-switch-fallback-persistence-and-static-preview',hooks:'useIntl',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

@@ -7,6 +7,12 @@ export interface RequestConfig {
   readonly headers?: Readonly<Record<string, string>>;
   readonly timeout?: number;
 }
+export interface LocaleConfig {
+  readonly default?: string;
+  readonly fallback?: string;
+  readonly messages?: Readonly<Record<string, Readonly<Record<string, string>>>>;
+  readonly storageKey?: string;
+}
 export interface AppRuntimeContext { readonly signal: AbortSignal; readonly basename: string }
 export interface AppRoutesContext extends AppRuntimeContext { readonly routes: RouteObject[] }
 export interface RootContainerContext extends AppRuntimeContext { readonly routes: readonly RouteObject[] }
@@ -34,6 +40,8 @@ export interface RuntimeConfig {
   getInitialState?(): unknown | Promise<unknown>;
   /** Registered by requestPlugin; consumed by the per-mount request client. */
   request?: RequestConfig;
+  /** Registered by localePlugin; consumed by the locale provider. */
+  locale?: LocaleConfig;
 }
 export const APP_RUNTIME_KEYS = Object.freeze(['setup', 'render', 'patchClientRoutes', 'rootContainer', 'onRouteChange'] as const);
 type ExactConfig<T> = Record<Exclude<keyof T, keyof RuntimeConfig>, never>;

@@ -116,6 +116,6 @@ Provider 位于 Router 外、模型 Provider 外；模型 Hook 与路由组件�
 
 ## 7. 下一步
 
-- F2 基础链路已具备：初始状态 → 共享模型 → 请求；下一步补齐 access（U14）与 layout/menu（U15），进入 F3；
+- F2 基础链路已具备：初始状态 → 共享模型 → 请求；下一步补齐 access（U14）与 layout/menu（U15），进入 F3；locale 基础已由 [F3a](69-f3a-locale.md) 交付；
 - request 后续能力：拦截器、统一错误协议、dataField、重试/轮询/分页；
 - U10 后续：`@@initialState` 模型集成与首屏阻塞策略。

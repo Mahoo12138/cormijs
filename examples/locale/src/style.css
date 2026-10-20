@@ -1,0 +1,10 @@
+:root { color-scheme: light; font-family: ui-sans-serif, system-ui, sans-serif; background: #f4f1f7; color: #29212d; }
+body { margin: 0; }
+.shell { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; }
+.eyebrow { letter-spacing: .18em; font-size: 12px; color: #704080; }
+h1 { margin: 8px 0 20px; font-size: clamp(32px, 6vw, 52px); }
+.hint { color: #6d6370; font-size: 14px; line-height: 1.7; }
+.card { margin-top: 20px; padding: 20px; background: #fff; border: 1px solid #e4d9e8; border-radius: 12px; }
+.card p { margin: 8px 0; }
+code { font-family: ui-monospace, monospace; background: #f1e7f4; padding: 1px 5px; border-radius: 4px; }
+button { margin-top: 12px; padding: 8px 14px; border: 1px solid #704080; border-radius: 8px; background: transparent; color: #704080; }

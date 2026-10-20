@@ -45,7 +45,7 @@
 | U13 | clientLoader/useClientLoaderData/routeProps | 待实现；页面懒加载不等于数据加载 | 路由数据插件 | F3 |
 | U14 | access.ts/useAccess/Access、路由访问控制 | 待实现 | access 插件，依赖初始状态与路由扩展 | F3 |
 | U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有布局容器/meta，无应用布局套件 | layout/menu 插件，UI adapter 可选 | F3 |
-| U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 待实现 | locale 插件 + 客户端 i18n provider | F3 |
+| U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a）：localePlugin 提供内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage；消息目录、复数/日期与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
 | U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有 HTTP 规则/取消/固定代理；缺 Umi 式自动发现等易用性 | 复用 DevApiService，新增约定/后端 bridge | F4 |
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有 cormi.config/mode/公开env/派生；缺可组合便捷配置和公共别名 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
@@ -114,7 +114,9 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 
 **F2b 状态（2026-10-20）：** U10 的初始状态基础已交付：`initialStatePlugin` 登记 `getInitialState` 与 runtime Provider，`useInitialState` 提供 loading/error/data、refresh 和 setInitialState；首次渲染不阻塞，卸载与并发刷新有防护。`@@initialState` 模型集成、首屏阻塞与 SSR/hydration 仍待后续。用法、差异与验证见 [F2b getInitialState](67-f2b-initial-state.md)。
 
-**F2c 状态（2026-10-20）：** U11/U12 的请求基础已交付：`requestPlugin` 注册 request 配置和每挂载 fetch 客户端；`useRequest` 支持自动/手动、loading/error/data、refresh、cancel、HTTP 错误和 generation 竞态保护。拦截器、统一错误协议、重试/轮询/分页仍待后续。用法、差异与验证见 [F2c request 与 useRequest](68-f2c-request.md)。F2 基础链路（初始状态 → 共享模型 → 请求）已具备，下一阶段进入 F3 access/layout。
+**F2c 状态（2026-10-20）：** U11/U12 的请求基础已交付：`requestPlugin` 注册 request 配置和每挂载 fetch 客户端；`useRequest` 支持自动/手动、loading/error/data、refresh、cancel、HTTP 错误和 generation 竞态保护。拦截器、统一错误协议、重试/轮询/分页仍待后续。用法、差异与验证见 [F2c request 与 useRequest](68-f2c-request.md)。F2 基础链路（初始状态 → 共享模型 → 请求）已具备。
+
+**F3a 状态（2026-10-20）：** U16 的 locale 基础已交付：`localePlugin` 登记 locale 配置与 runtime Provider，`useIntl`/`FormattedMessage` 支持内联消息、default/fallback、切换和 localStorage 持久化。消息目录、复数/日期/数字格式化、UI 库语言联动与 SSR 仍待后续。用法、差异与验证见 [F3a locale](69-f3a-locale.md)。下一阶段继续 access/layout。
 
 ### F3：权限、布局、菜单和国际化
 
