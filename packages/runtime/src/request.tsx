@@ -164,6 +164,8 @@ export interface UseRequestOptions<T> {
   readonly refreshDeps?: readonly unknown[];
   /** Coalesce run/refresh calls within this window (0–60000ms); polling bypasses it. */
   readonly debounceWait?: number;
+  /** Drop run/refresh calls within this window after a leading call (0–60000ms); polling bypasses it. */
+  readonly throttleWait?: number;
 }
 export interface UseRequestResult<T> {
   readonly data: T | undefined;
@@ -192,6 +194,8 @@ function validateUseRequest<T>(options: UseRequestOptions<T>): void {
   if (options.pollingWhenHidden !== undefined && typeof options.pollingWhenHidden !== 'boolean') throw new TypeError('REQUEST_INVALID: pollingWhenHidden must be boolean');
   if (options.refreshDeps !== undefined && (!Array.isArray(options.refreshDeps) || options.refreshDeps.length > 16)) throw new TypeError('REQUEST_INVALID: refreshDeps must be an array of at most 16 values');
   if (options.debounceWait !== undefined && (!Number.isInteger(options.debounceWait) || options.debounceWait < 0 || options.debounceWait > 60_000)) throw new TypeError('REQUEST_INVALID: debounceWait must be an integer from 0 to 60000');
+  if (options.throttleWait !== undefined && (!Number.isInteger(options.throttleWait) || options.throttleWait < 0 || options.throttleWait > 60_000)) throw new TypeError('REQUEST_INVALID: throttleWait must be an integer from 0 to 60000');
+  if ((options.debounceWait ?? 0) > 0 && (options.throttleWait ?? 0) > 0) throw new TypeError('REQUEST_INVALID: debounceWait and throttleWait are mutually exclusive');
 }
 
 export function useRequest<T>(service: (client: RequestClient, signal: AbortSignal) => Promise<T>, options: UseRequestOptions<T> = {}): UseRequestResult<T> {
@@ -205,6 +209,7 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
   const mounted = useRef(true), generation = useRef(0), controller = useRef<AbortController | undefined>(undefined);
   const polling = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), poll = useRef<() => void>(() => {});
   const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), debounceResolve = useRef<((value: T | undefined) => void) | undefined>(undefined);
+  const lastThrottle = useRef(0);
   const stopPolling = () => { if (polling.current) { clearTimeout(polling.current); polling.current = undefined; } };
   const stopDebounce = () => {
     if (debounce.current) clearTimeout(debounce.current);
@@ -255,16 +260,24 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
   const executeRef = useRef(execute); executeRef.current = execute;
   const run = useCallback((): Promise<T | undefined> => {
     const wait = optionsRef.current.debounceWait ?? 0;
-    if (!wait) return executeRef.current();
-    stopDebounce();
-    return new Promise<T | undefined>(resolve => {
-      debounceResolve.current = resolve;
-      debounce.current = setTimeout(() => {
-        debounce.current = undefined;
-        debounceResolve.current = undefined;
-        void executeRef.current().then(resolve, () => resolve(undefined));
-      }, wait);
-    });
+    if (wait) {
+      stopDebounce();
+      return new Promise<T | undefined>(resolve => {
+        debounceResolve.current = resolve;
+        debounce.current = setTimeout(() => {
+          debounce.current = undefined;
+          debounceResolve.current = undefined;
+          void executeRef.current().then(resolve, () => resolve(undefined));
+        }, wait);
+      });
+    }
+    const throttle = optionsRef.current.throttleWait ?? 0;
+    if (throttle) {
+      const now = Date.now();
+      if (now - lastThrottle.current < throttle) return Promise.resolve(undefined);
+      lastThrottle.current = now;
+    }
+    return executeRef.current();
   }, []);
   const runRef = useRef(run); runRef.current = run;
   poll.current = () => {
@@ -282,6 +295,7 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
     controller.current?.abort();
     stopPolling();
     stopDebounce();
+    lastThrottle.current = 0;
     setState(value => ({ ...value, loading: false }));
   }, []);
   const manual = options.manual === true;

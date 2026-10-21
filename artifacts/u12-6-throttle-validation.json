@@ -1,0 +1,109 @@
+{
+  "format": "cormi:u12-6-throttle-validation:1",
+  "verifiedAt": "2026-10-21T23:46:45.781Z",
+  "base": "9260f201f876df5ccbd22b31e82bcb6e5a9f7762",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/130-u12-throttle.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-6-throttle/check.log",
+      "sha256": "92dc807e79bf091860af9ba97053a60ac8ef107eb0ac6f5d035163035247aa5b",
+      "seconds": 121.1,
+      "tests": 565,
+      "pass": 565,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-6-throttle/browser.log",
+      "sha256": "2d3db99034d2dfecd70864df786785b8aa58e516e95213b09c1c751ccd996c65",
+      "seconds": 566.2,
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-6-throttle/package.log",
+      "sha256": "a85bfe26b00637abafff31186111844ab474344cf1839c55e89d133c12705bd3",
+      "stages": 336,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-6-throttle/targeted.log",
+      "sha256": "7e0117828931dc3fb4d53779eb8a7d85f179047d050afd71990eecd98dd3d0db",
+      "seconds": 12.9,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "leading throttle drops immediate duplicate, allows call after window, plus debounce/cache/pagination cases"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "5de00f87ff583dfb28bbd52fcbc67b2497acb6d399526a90d298b4fa66e0a300",
+    "docs/130-u12-throttle.md": "688244b39c31a05f452a8c66a0ca402385bf9aa8c2fb32f9bc68cef535b8b690",
+    "docs/49-application-guide.md": "9b76a8f8bcf4a0bf59e2d299d981ef817a72ac4816a8ba83fc499f48c34cca8e",
+    "docs/59-umi-feature-roadmap.md": "f11c6cab04afc755fbc4ba05ef6d099e27c5a9b35f0483e3ebcfeb828d0eb23c",
+    "packages/runtime/src/request.tsx": "43c8cf6e3d0ef4bed866fc7eb6f763c1a21dc7ad047ffa80f76ba1851aeea762",
+    "scripts/request-fixture.ts": "f8c5a48c5144f2876068eb5dff5f42ea12337b818da21713c0874a15dd2913d2",
+    "scripts/test-package.ts": "8652968e1e1d23f90013bf0c7f6f407f08e48ce2ca7ef9c04fcc9d3bdbda9b5e"
+  },
+  "sourceInputCount": 7,
+  "sourceInputsDigest": "b7636e29e25f3b5594c2625f67f30cb72cf947274f399f33decfe44f1175fe0d",
+  "documentationInputs": {
+    "docs/130-u12-throttle.md": "688244b39c31a05f452a8c66a0ca402385bf9aa8c2fb32f9bc68cef535b8b690",
+    "docs/59-umi-feature-roadmap.md": "f11c6cab04afc755fbc4ba05ef6d099e27c5a9b35f0483e3ebcfeb828d0eb23c",
+    "docs/112-roadmap-audit-2026-10-21.md": "5de00f87ff583dfb28bbd52fcbc67b2497acb6d399526a90d298b4fa66e0a300",
+    "docs/49-application-guide.md": "9b76a8f8bcf4a0bf59e2d299d981ef817a72ac4816a8ba83fc499f48c34cca8e"
+  },
+  "evidence": [
+    ".cache/u12-6-throttle/check.log",
+    ".cache/u12-6-throttle/browser.log",
+    ".cache/u12-6-throttle/package.log",
+    ".cache/u12-6-throttle/targeted.log",
+    "artifacts/u12-6-throttle-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "leading-only-no-trailing",
+    "mutually-exclusive-with-debounce",
+    "dropped-calls-resolve-undefined",
+    "polling-bypasses-throttle",
+    "no-per-key-throttling",
+    "no-server-side-dedupe",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}
