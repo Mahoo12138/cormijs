@@ -52,6 +52,8 @@ F5d 起，生成入口带有路由模块注册表，显式启用的 `routePrefet
 
 F4j 起，显式启用的 `outputPlugin`（Vite 桥）可在构建后把项目内文件/目录复制进输出目录，并用 `hash:false` 生成稳定资源名；复制不进入开发服务器，preview 直接提供复制结果。详见 [F4j 构建输出策略](86-f4j-output-policy.md)。
 
+F4k 起，CLI 支持「命令 + 至多 32 个位置参数」，`generatorPlugin` 提供 `cormi generate page|component|model <name>`（`--force`/`--dry-run` 需写在 `--` 之后）；生成器只写文件，不会自动注册路由。详见 [F4k 微生成器](87-f4k-generator.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

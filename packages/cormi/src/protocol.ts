@@ -4,7 +4,7 @@ export interface StartMessage {
   readonly nodeEnv: 'development' | 'production';
   readonly environment: EnvironmentSnapshot;
   readonly version: 1; readonly type: 'start'; readonly root: string; readonly token: string;
-  readonly module: string; readonly command: string; readonly mode: string; readonly timeoutMs: number;
+  readonly module: string; readonly command: string; readonly positionals?: readonly string[]; readonly mode: string; readonly timeoutMs: number;
   readonly serverOnlyFiles: readonly string[];
   readonly configurationCommand?: string;
 }

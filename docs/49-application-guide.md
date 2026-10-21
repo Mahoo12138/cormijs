@@ -747,6 +747,25 @@ plugins: [{ id: 'output', plugin: outputPlugin, options: {
 
 示例：先 `pnpm cormi build --root examples/output`，再 `pnpm cormi preview --root examples/output`。
 
+### 4.26 生成页面、组件与模型
+
+启用 `generatorPlugin` 后可直接生成项目内文件：
+
+```sh
+cormi generate page about-us
+cormi generate component profile-card
+cormi generate model counter
+```
+
+默认拒绝覆盖已有文件；需要覆盖或只看计划时，把 flag 写在 `--` 之后（CLI 的全局选项保持严格）：
+
+```sh
+cormi generate page about-us -- --force
+cormi generate page preview -- --dry-run
+```
+
+生成器只写文件，不会把页面注册进路由，也不会格式化内容；模型模板遵循 `src/models/<kebab>.ts` 的 Hook 模型约定。规则与边界见 [F4k 微生成器](87-f4k-generator.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

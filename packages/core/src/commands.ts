@@ -6,6 +6,8 @@ export interface CommandRequest {
   /** Explicit browser-public bootstrap values; absent in low-level hosts unless supplied. */
   readonly publicEnv?: Readonly<Record<string, string>>;
   readonly root: string;
+  /** Verbatim arguments after the command name; commands interpret their own grammar. */
+  readonly positionals?: readonly string[];
   readonly mode: string;
   readonly options: Readonly<Record<string, unknown>>;
   readonly signal: AbortSignal;

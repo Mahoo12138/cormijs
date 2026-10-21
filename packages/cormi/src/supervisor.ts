@@ -17,7 +17,7 @@ export interface LaunchOptions {
   readonly bootstrap?: Plugin<void>;
   /** Diagnostic command's target environment; never changes which command handler executes. */
   readonly configurationCommand?: string;
-  readonly root: string; readonly command: string; readonly mode?: string; readonly watch?: boolean;
+  readonly root: string; readonly command: string; readonly positionals?: readonly string[]; readonly mode?: string; readonly watch?: boolean;
   readonly signal?: AbortSignal; readonly startupTimeoutMs?: number; readonly shutdownTimeoutMs?: number;
   readonly pollIntervalMs?: number; readonly onEvent?: (event: LauncherEvent) => void;
   readonly onLog?: (stream: 'stdout' | 'stderr', text: string) => void;
@@ -94,6 +94,11 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
   const interval = options.pollIntervalMs ?? 200;
   for (const value of [startup, shutdown, interval]) if (!Number.isFinite(value) || value < 20 || value > 120000) throw new RangeError('Invalid launcher timeout/interval');
   if (!/^[a-z][a-z0-9-]*$/.test(options.command)) throw new CormiError('COMMAND_INVALID', 'Invalid command name.');
+  const positionals = options.positionals ?? [];
+  if (!Array.isArray(positionals) || positionals.length > 32 || positionals.some(value =>
+    typeof value !== 'string' || value.length > 512 || /[\0\r\n]/.test(value))) {
+    throw new CormiError('COMMAND_INVALID', 'Command arguments must be at most 32 bounded, single-line strings.');
+  }
   if (options.mode !== undefined) validateMode(options.mode);
   const callerSignal = options.signal ?? new AbortController().signal;
   if (callerSignal.aborted) return 0;
@@ -183,7 +188,7 @@ export async function runCormi(options: LaunchOptions): Promise<number> {
         await writeFile(module, compiled.code, { flag: 'wx', mode: 0o600 });
         extra = []; extraStamp = await fingerprint(extra); generation++;
         active = startWorker({ version: 1, type: 'start', root, token: lease.token, module,
-          command: options.command, configurationCommand, mode, nodeEnv, environment: compiled.environment, timeoutMs: shutdown, serverOnlyFiles: compiled.files }, options,
+          command: options.command, positionals, configurationCommand, mode, nodeEnv, environment: compiled.environment, timeoutMs: shutdown, serverOnlyFiles: compiled.files }, options,
           (values, stamp) => { extra = values.map(file => projectFile(root, file)); extraStamp = stamp; });
         emit({ type: 'starting', generation, pid: active.pid });
         try {

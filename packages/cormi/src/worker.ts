@@ -78,7 +78,7 @@ async function run(message: StartMessage): Promise<void> {
   host = new ProjectRuntime(timeout, message.root);
   // Native execution composition owns application activation and observation policy.
   execution = executionSession(host, config, message.command, {
-    root: message.root, mode: message.mode, options: config.app, signal: lifetime.signal,
+    root: message.root, positionals: Object.freeze([...(message.positionals ?? [])]), mode: message.mode, options: config.app, signal: lifetime.signal,
     publicEnv: resolvedEnv.publicEnv,
     configuration: Object.freeze({ command: environment.command, layers: config.layers, plugins: config.pluginSources, environment: resolvedEnv.summary }),
     serverOnlyFiles: [...message.serverOnlyFiles, ...config.watch],

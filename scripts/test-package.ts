@@ -29,6 +29,7 @@ import { writeClientLoaderFixture, verifyClientLoaderPage } from './client-loade
 import { writeHeadFixture, verifyHeadPage } from './head-fixture.js';
 import { writePrefetchFixture, verifyPrefetchPage } from './prefetch-fixture.js';
 import { writeOutputFixture, verifyOutputBuild, verifyOutputPage } from './output-fixture.js';
+import { writeGeneratorFixture } from './generator-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -841,6 +842,28 @@ const bad:OutputPluginOptions={hash:1};
     await verifyOutputBuild(outputConsumer);
     await withServer(outputConsumer,'preview',async url=>{await verifyOutputPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'output-preview.png')});});
     report.stages.push({label:'installed-output-copy-and-stable-names-dev-build-and-static-preview',hash:false,previewRegenerated:false});
+
+    const generatorConsumer=await create('generator','react');await writeGeneratorFixture(generatorConsumer);
+    const generatorManifest=consumerManifest(kit,'react');
+    generatorManifest.dependencies['@cormijs/plugin-react']=generatorManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(generatorConsumer,'package.json'),JSON.stringify(generatorManifest,null,2));
+    await install('generator-install',generatorConsumer);await auditLinks(generatorConsumer);
+    await command('generator-typecheck-before',generatorConsumer,'typecheck');
+    await writeFile(join(generatorConsumer,'types.mts'),`import {generatorPlugin,planGeneration,type GeneratePlan,type PlannedFile} from '@cormijs/plugin-react';
+const plan:GeneratePlan=planGeneration(['page','typed']);
+const files:readonly PlannedFile[]=plan.files;void [generatorPlugin,plan,files];
+// @ts-expect-error positionals must be an array of strings
+const bad:GeneratePlan=planGeneration(1);
+`);
+    await execute('generator-public-types',generatorConsumer,process.execPath,typeArguments);
+    const cormiBin=join(generatorConsumer,'node_modules/.bin/cormi');
+    await execute('generator-page',generatorConsumer,cormiBin,['generate','page','generated','--json']);
+    const generated=await readFile(join(generatorConsumer,'src/pages/generated.tsx'),'utf8');
+    assert.match(generated,/export default function GeneratedPage\(\)/);
+    await command('generator-typecheck-after',generatorConsumer,'typecheck');
+    await execute('generator-exists',generatorConsumer,cormiBin,['generate','page','generated'],1,/GENERATE_EXISTS/);
+    await execute('generator-page-force',generatorConsumer,cormiBin,['generate','page','generated','--json','--','--force']);
+    report.stages.push({label:'installed-generator-cli-page-force-and-typecheck',kinds:['page'],previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

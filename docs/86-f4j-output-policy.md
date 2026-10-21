@@ -66,4 +66,4 @@ Umi 的 `hash` 由 Vite 后端转换器处理：`hash !== true` 时把输出名�
 
 - U25 剩余：externals、runtimePublicPath、CDN/按 chunk 命名策略；
 - U32/U33/U34/U35：SSR、静态导出（`exportStatic`）、MPA、生产 API 路由；
-- F4 剩余：U27 微生成器（需 CLI 多参数协议）、U28 工程命令；U23：Tailwind/UnoCSS 等样式生态。
+- F4k 已交付微生成器与命令位置参数协议，见 [F4k 微生成器](87-f4k-generator.md)；后续为 U28 工程命令与 U23 样式生态。

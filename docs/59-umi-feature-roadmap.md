@@ -56,7 +56,7 @@
 | U24 | icons | 待实现公共图标方案 | 图标资源/代码生成插件 | F4 |
 | U25 | publicPath/runtimePublicPath、CDN、hash、copy/externals | 部分已有（F4j）：base 表达部署前缀，可选 outputPlugin 在构建后复制文件并支持 `hash:false` 稳定文件名；externals、runtimePublicPath 与 CDN 运行时切换待后续 | 输出/资源策略插件，差异显式 | F4 |
 | U26 | targets、polyfill、legacy、ReactCompiler/SWC/transform | 可用既有 Vite 原生插件口；未交付对应官方配置面 | 可选转换 provider/bridge | F4/F6 |
-| U27 | page/component/mock/API 等微生成器 | 仅新建 app/插件模板；缺项目内增量生成器 | generators 插件与模板贡献 | F4 |
+| U27 | page/component/mock/API 等微生成器 | 部分已有（F4k）：通用「命令+位置参数」协议 + 内置 `generate page/component/model`（含 --force/--dry-run）；mock/API 生成器、模板贡献与交互式提问待后续 | generators 插件与模板贡献 | F4 |
 | U28 | lint/format/test/precommit/deadcode 等工程命令 | 框架自身有测试；不是面向用户的完整工具集成 | 可选命令插件 | F4 |
 | U29 | request/接口代码生成与类型工作流 | 待实现；API generator 入口已登记，具体协议/规范需读实现 | API generator 插件 | F4 |
 | U30 | TypeScript、prepare、导出类型、monorepo | 基础已有至 P16；仍需配合新功能生成类型与别名 | 既有 TS/prepare + monorepo adapter | 随功能 |
@@ -153,6 +153,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5d 状态（2026-10-20）：** U31 的模块预取已交付：生成入口为每个带模块的路由生成惰性注册表并传给 `mountApplication`，`routePrefetchPlugin` 提供 `usePrefetch()`（`ids`/`prefetch`/`prefetchAll`，在途复用、失败返回 false）与 `mode: "idle"` 的空闲全量预热（`requestIdleCallback`，2 秒超时，卸载取消）。链接 intent/视口预取、client loader 数据预取与 SSR 侧预取仍待后续。用法、差异与验证见 [F5d 路由预取](85-f5d-route-prefetch.md)。
 
 **F4j 状态（2026-10-20）：** U25 的构建输出能力已交付：可选 `outputPlugin` 在 `closeBundle` 把项目内文件/目录复制进输出目录（路径与符号链接校验、默认目标为 basename），并用 `hash:false` 生成稳定资源名（保留 `assets/` 目录，与自定义命名冲突时失败）；复制只在构建发生，preview 直接提供复制后的文件。externals、runtimePublicPath、CDN 与按 chunk 命名策略仍待后续。用法、差异与验证见 [F4j 构建输出策略](86-f4j-output-policy.md)。
+
+**F4k 状态（2026-10-20）：** U27 的首批生成器已交付，同时把 CLI 的入参协议扩展为「命令 + 至多 32 个位置参数」（`CommandRequest.positionals` 经 CLI → supervisor → worker 传递，全局选项仍严格）。`generatorPlugin` 注册 `generate` 命令，内置 page/component/model 模板，默认拒绝覆盖、`--force` 覆盖、`--dry-run` 只返回计划，名称与路径校验齐全。mock/API 生成器、模板贡献面与交互式提问仍待后续。用法、差异与验证见 [F4k 微生成器](87-f4k-generator.md)。
 
 ### F3：权限、布局、菜单和国际化
 
