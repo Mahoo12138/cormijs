@@ -32,6 +32,9 @@ test('renderStaticPage applies title template, metas and links without escaping 
   assert.match(rendered, /<link rel="canonical" href="\/guide" \/>/);
   assert.match(rendered, /<meta name="author" content="me">/);
   assert.equal(renderStaticPage(html, { path: '/', head: {} }), html);
+  const withJsonLd = renderStaticPage(html, { path: '/', head: { jsonLd: { name: '</script><script>alert(1)</script>' } } });
+  assert.match(withJsonLd, /<script type="application\/ld\+json">\{"name":"\\u003c\/script>/);
+  assert.doesNotMatch(withJsonLd, /<script>alert\(1\)<\/script>/);
 });
 
 test('writeStaticPages emits one shell per page and rewrites the root shell', async t => {

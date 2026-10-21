@@ -9,7 +9,7 @@ import { headPlugin, routeConfigPlugin } from '@cormijs/plugin-react';
 const routes = [{
   id: 'shell', path: '/', component: './src/Shell.tsx', meta: { head: { metas: [{ name: 'description', content: 'shell description' }] } }, routes: [
     { index: true, component: './src/Home.tsx', meta: { head: { title: 'Home' } } },
-    { path: 'guide/:id', component: './src/Guide.tsx', meta: { head: { title: 'Guide', metas: [{ property: 'og:title', content: 'Guide og' }], links: [{ rel: 'canonical', href: '/guide' }] } } },
+    { path: 'guide/:id', component: './src/Guide.tsx', meta: { head: { title: 'Guide', metas: [{ property: 'og:title', content: 'Guide og' }], links: [{ rel: 'canonical', href: '/guide' }], jsonLd: { '@context': 'https://schema.org', '@type': 'Article', headline: 'Guide', name: 'A </script> test' } } } },
   ],
 }];
 export default defineConfig({
@@ -55,6 +55,9 @@ export async function verifyHeadPage(page: Page, url: string) {
   assert.equal(new URL(await page.locator('link[rel="canonical"]').getAttribute('href') ?? '', url).pathname, '/guide');
   assert.equal(await managed(page, 'meta'), 2, 'inherited description plus the guide og:title, replaced not appended');
   assert.equal(await managed(page, 'link'), 1, 'managed links are replaced, not appended');
+  const jsonLd = page.locator('script[type="application/ld+json"][data-cormi-head]');
+  assert.equal(await jsonLd.count(), 1);
+  assert.deepEqual(JSON.parse(await jsonLd.textContent() ?? ''), { '@context': 'https://schema.org', '@type': 'Article', headline: 'Guide', name: 'A </script> test' });
   assert.equal(await page.locator('meta[name="author"]').getAttribute('content'), 'static author');
 
   await page.getByRole('link', { name: 'Home', exact: true }).click();
@@ -63,6 +66,7 @@ export async function verifyHeadPage(page: Page, url: string) {
   assert.equal(await managed(page, 'meta'), 1, 'returning to a route does not duplicate tags');
   assert.equal(await managed(page, 'link'), 0);
   assert.equal(await page.locator('meta[property="og:title"]').count(), 0);
+  assert.equal(await page.locator('script[type="application/ld+json"]').count(), 0);
 
   await page.goto(new URL('guide/9', url).href);
   await page.getByRole('heading', { name: 'Guide page', exact: true }).waitFor();

@@ -14,7 +14,21 @@ export interface StaticExportOptions {
 export interface StaticPage {
   /** Absolute application path, always starting with `/`. */
   readonly path: string;
-  readonly head: { readonly title?: string; readonly metas?: readonly HtmlMeta[]; readonly links?: readonly HtmlLink[] };
+  readonly head: { readonly title?: string; readonly metas?: readonly HtmlMeta[]; readonly links?: readonly HtmlLink[]; readonly jsonLd?: unknown };
+}
+
+function jsonLdOf(value: unknown): unknown {
+  if (!value || typeof value !== 'object') return undefined;
+  if (Array.isArray(value) && (!value.length || value.length > 32 || value.some(entry => !entry || typeof entry !== 'object' || Array.isArray(entry)))) return undefined;
+  try {
+    const text = JSON.stringify(value, (_key, item) => {
+      if (item === undefined || typeof item === 'function' || typeof item === 'symbol' || typeof item === 'bigint'
+        || (typeof item === 'number' && !Number.isFinite(item))) throw new TypeError();
+      return item;
+    });
+    if (text.length > 65536) return undefined;
+    return JSON.parse(text);
+  } catch { return undefined; }
 }
 
 const headOf = (route: RouteRecord): StaticPage['head'] => {
@@ -30,13 +44,14 @@ const headOf = (route: RouteRecord): StaticPage['head'] => {
     if (!selector || typeof label !== 'string' || !label || typeof row.content !== 'string' || !row.content) return [];
     return [{ [selector]: label, content: row.content } as HtmlMeta];
   }) : undefined;
+  const jsonLd = jsonLdOf(value.jsonLd);
   const links = Array.isArray(value.links) ? value.links.flatMap(entry => {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return [];
     const row = entry as Record<string, unknown>;
     if (typeof row.rel !== 'string' || !row.rel || typeof row.href !== 'string' || !row.href) return [];
     return [{ rel: row.rel, href: row.href } as HtmlLink];
   }) : undefined;
-  return Object.freeze({ ...(title !== undefined ? { title } : {}), ...(metas?.length ? { metas: Object.freeze(metas) } : {}), ...(links?.length ? { links: Object.freeze(links) } : {}) });
+  return Object.freeze({ ...(title !== undefined ? { title } : {}), ...(metas?.length ? { metas: Object.freeze(metas) } : {}), ...(links?.length ? { links: Object.freeze(links) } : {}), ...(jsonLd !== undefined ? { jsonLd } : {}) });
 };
 
 /**
@@ -66,15 +81,16 @@ export function staticPages(routes: readonly RouteRecord[]): readonly StaticPage
   };
   // Ancestor heads merge like the runtime: deeper titles win, metas replace by name/property, links dedupe.
   const merged = (route: RouteRecord): StaticPage['head'] => {
-    let title: string | undefined;
+    let title: string | undefined, jsonLd: unknown;
     const metas = new Map<string, HtmlMeta>(), links = new Map<string, HtmlLink>();
     for (const entry of chain(route)) {
       const head = headOf(entry);
       if (head.title !== undefined) title = head.title;
+      if (head.jsonLd !== undefined) jsonLd = head.jsonLd;
       for (const meta of head.metas ?? []) metas.set(meta.name !== undefined ? `name:${meta.name}` : `property:${meta.property}`, meta);
       for (const link of head.links ?? []) links.set(`${link.rel} ${link.href}`, link);
     }
-    return Object.freeze({ ...(title !== undefined ? { title } : {}), ...(metas.size ? { metas: Object.freeze([...metas.values()]) } : {}), ...(links.size ? { links: Object.freeze([...links.values()]) } : {}) });
+    return Object.freeze({ ...(title !== undefined ? { title } : {}), ...(metas.size ? { metas: Object.freeze([...metas.values()]) } : {}), ...(links.size ? { links: Object.freeze([...links.values()]) } : {}), ...(jsonLd !== undefined ? { jsonLd } : {}) });
   };
   const pages = new Map<string, StaticPage>();
   for (const route of routes) {
@@ -90,12 +106,15 @@ export function staticPages(routes: readonly RouteRecord[]): readonly StaticPage
 /** Apply a page head to the shared shell without touching author tags. */
 export function renderStaticPage(html: string, page: StaticPage, titleTemplate = ''): string {
   const head = page.head;
-  if (head.title === undefined && !head.metas && !head.links) return html;
-  return applyHtmlHead(html, {
+  if (head.title === undefined && !head.metas && !head.links && head.jsonLd === undefined) return html;
+  const rendered = applyHtmlHead(html, {
     ...(head.title !== undefined ? { title: `${head.title}${titleTemplate}` } : {}),
     ...(head.metas ? { metas: head.metas } : {}),
     ...(head.links ? { links: head.links } : {}),
   });
+  if (head.jsonLd === undefined) return rendered;
+  const script = `<script type="application/ld+json">${JSON.stringify(head.jsonLd).replace(/</g, '\\u003c')}</script>`;
+  return /<\/head>/i.test(rendered) ? rendered.replace(/<\/head>/i, `${script}</head>`) : rendered;
 }
 
 /** Writes one `index.html` per page; the application root keeps the built shell (with its head applied). */

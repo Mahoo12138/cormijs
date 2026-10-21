@@ -10,7 +10,7 @@ import { apiRoutePlugin, staticExportPlugin } from '@cormijs/plugin-react-vite';
 const routes = [{
   id: 'shell', path: '/', component: './src/Shell.tsx', meta: { head: { title: 'Site', metas: [{ name: 'description', content: 'shell description' }] } }, routes: [
     { index: true, component: './src/Home.tsx' },
-    { path: 'guide', component: './src/Guide.tsx', meta: { head: { title: 'Guide', links: [{ rel: 'canonical', href: '/static/guide' }] } } },
+    { path: 'guide', component: './src/Guide.tsx', meta: { head: { title: 'Guide', links: [{ rel: 'canonical', href: '/static/guide' }], jsonLd: { '@context': 'https://schema.org', '@type': 'Article', headline: 'Guide' } } } },
     { path: 'detail/:id', component: './src/Detail.tsx' },
   ],
 }];
@@ -54,6 +54,9 @@ export async function verifyStaticExport(root: string) {
   assert.match(guide, /<title>Guide · demo<\/title>/);
   assert.match(guide, /<link rel="canonical" href="\/static\/guide" \/>/);
   assert.match(guide, /<meta name="description" content="shell description" \/>/);
+  const jsonLd = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(guide)?.[1];
+  assert.deepEqual(JSON.parse(jsonLd ?? ''), { '@context': 'https://schema.org', '@type': 'Article', headline: 'Guide' });
+  assert.doesNotMatch(await readFile(join(root, 'dist/index.html'), 'utf8'), /application\/ld\+json/);
   await assert.rejects(readFile(join(root, 'dist/detail/index.html')), /ENOENT/, 'dynamic routes are not exported');
 }
 

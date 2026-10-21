@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import type { RouteObject } from 'react-router';
-import { collectHead, normalizeHead } from '@cormijs/runtime';
+import { collectHead, normalizeHead, serializeJsonLd } from '@cormijs/runtime';
 
 const route = (id: string, path: string | undefined, head?: unknown, children?: RouteObject[]): RouteObject => ({
   id, ...(path === undefined ? {} : { path }), handle: { cormi: { meta: head === undefined ? {} : { head } } }, ...(children ? { children } : {}),
@@ -33,6 +33,18 @@ test('normalizeHead validates the documented shape', () => {
     { links: [{ href: '/x' }] }, { links: [{ rel: 'a', href: '' }] },
     { metas: Array.from({ length: 33 }, () => ({ name: 'n', content: 'c' })) },
   ]) assert.throws(() => normalizeHead(bad), /HEAD_INVALID/, JSON.stringify(bad));
+});
+
+test('jsonLd validates JSON data, replaces on deeper routes and escapes script closes', () => {
+  const head = { jsonLd: { '@context': 'https://schema.org', '@type': 'Article', name: 'A' } };
+  assert.deepEqual(normalizeHead(head), head);
+  assert.equal(serializeJsonLd({ name: '</script>' }), '{"name":"\\u003c/script>"}');
+  const nested = [route('root', '', { jsonLd: { '@type': 'WebSite' } }, [route('child', 'child', { jsonLd: { '@type': 'Article' } }), route('plain', 'plain')])];
+  assert.deepEqual(collectHead(nested, '/child', '/').jsonLd, { '@type': 'Article' });
+  assert.deepEqual(collectHead(nested, '/plain', '/').jsonLd, { '@type': 'WebSite' });
+  for (const bad of [{ jsonLd: null }, { jsonLd: [] }, { jsonLd: 'x' }, { jsonLd: [{ name: 'ok' }, 'x'] }, { jsonLd: { run: () => 1 } }, { jsonLd: { value: Number.POSITIVE_INFINITY } }]) {
+    assert.throws(() => normalizeHead(bad), /HEAD_INVALID/, JSON.stringify(bad));
+  }
 });
 
 test('basename accepts both stripped and full pathnames', () => {

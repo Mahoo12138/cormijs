@@ -966,6 +966,16 @@ plugins: [{ id: 'proxy', plugin: proxyPlugin, options: { proxy: { '/api': { targ
 
 1–32 个前缀；目标必须是 http(s) URL 且不能内嵌凭据；支持 `changeOrigin`/`secure`/`ws`。开发与预览都生效，构建产物不含代理，生产部署需网关。不支持 rewrite 函数与自定义 headers。规则见 [F5s 代理](101-f5s-proxy.md)。
 
+### 4.41 路由 JSON-LD
+
+在路由 `meta.head.jsonLd` 声明结构化数据，导航后自动同步到 `<head>`：
+
+```ts
+meta: { head: { title: 'Article', jsonLd: { '@context': 'https://schema.org', '@type': 'Article', headline: 'cormi' } } }
+```
+
+对象或 ≤32 个对象、≤64 KiB 的 JSON 数据；最深路由整体替换祖先块，切换/卸载移除受管脚本。`staticExportPlugin` 会把同一数据写入静态页面；`<` 被转义为 `\u003c`。规则见 [F5t JSON-LD](102-f5t-json-ld.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

@@ -8,7 +8,7 @@ export { useRouteMatches, type CormiRouteMatch } from './route-matches.js';
 export { clientLoaderOf, useClientLoaderData, useClientLoaderError, useRouteLoaderDataFor, type ClientLoaderArgs, type ClientLoaderFunction } from './client-loader.js';
 export { analyticsRuntime, type AnalyticsOptions, type PageViewEvent } from './analytics.js';
 export { PrefetchProvider, prefetchRuntime, usePrefetch, usePrefetchOnIntent, usePrefetchOnVisible, type PrefetchApi, type PrefetchLoader, type PrefetchIntentHandlers, type PrefetchIntentOptions, type PrefetchVisibleOptions } from './prefetch.js';
-export { collectHead, normalizeHead, routeHeadRuntime, HEAD_ATTRIBUTE, type HeadMeta, type HeadLink, type RouteHead, type HeadOptions, type RouteHeadRuntimeOptions } from './head.js';
+export { collectHead, normalizeHead, routeHeadRuntime, serializeJsonLd, HEAD_ATTRIBUTE, type JsonLd, type HeadMeta, type HeadLink, type RouteHead, type HeadOptions, type RouteHeadRuntimeOptions } from './head.js';
 export { ModelProvider, useModel, type ModelDescriptor } from './model.js';
 export { InitialStateProvider, initialStateRuntime, useInitialState, type InitialState } from './initial-state.js';
 export { createRequestClient, RequestError, RequestProvider, requestRuntime, useRequest, useRequestClient, type RequestClient, type RequestOptions, type RequestParams, type UseRequestOptions, type UseRequestResult } from './request.js';

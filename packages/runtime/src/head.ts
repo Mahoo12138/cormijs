@@ -10,10 +10,13 @@ export interface HeadLink {
   readonly rel: string;
   readonly href: string;
 }
+export type JsonLd = Readonly<Record<string, unknown>> | readonly Readonly<Record<string, unknown>>[];
 export interface RouteHead {
   readonly title?: string;
   readonly metas?: readonly HeadMeta[];
   readonly links?: readonly HeadLink[];
+  /** schema.org JSON-LD object or array of objects; the deepest declared block wins. */
+  readonly jsonLd?: JsonLd;
 }
 export interface HeadOptions {
   /** Applied as `${title}${titleTemplate ?? ''}`; the deeper route's title wins. */
@@ -31,7 +34,7 @@ export function normalizeHead(input: unknown): RouteHead {
   if (input === undefined) return Object.freeze({});
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new TypeError('HEAD_INVALID: meta.head must be an object');
   const value = input as Record<string, unknown>;
-  if (Object.keys(value).some(key => !['title', 'metas', 'links'].includes(key))) throw new TypeError('HEAD_INVALID: unknown meta.head field');
+  if (Object.keys(value).some(key => !['title', 'metas', 'links', 'jsonLd'].includes(key))) throw new TypeError('HEAD_INVALID: unknown meta.head field');
   if (value.title !== undefined && !text(value.title, 512)) throw new TypeError('HEAD_INVALID: title must be bounded text');
   const normalizeList = <T>(entries: unknown, limit: number, map: (row: Record<string, unknown>, index: number) => T, fields: readonly string[]): readonly T[] => {
     if (!Array.isArray(entries) || entries.length > limit) throw new TypeError('HEAD_INVALID: expected a bounded array');
@@ -51,27 +54,53 @@ export function normalizeHead(input: unknown): RouteHead {
     if (!text(row.rel, 128) || !text(row.href, 2048)) throw new TypeError('HEAD_INVALID: link entries need rel and href');
     return Object.freeze({ rel: row.rel as string, href: row.href as string });
   }, ['rel', 'href']);
+  const jsonLd = value.jsonLd === undefined ? undefined : normalizeJsonLd(value.jsonLd);
   return Object.freeze({
     ...(value.title !== undefined ? { title: value.title as string } : {}),
     ...(metas !== undefined ? { metas } : {}),
     ...(links !== undefined ? { links } : {}),
+    ...(jsonLd !== undefined ? { jsonLd } : {}),
   });
+}
+
+function normalizeJsonLd(input: unknown): JsonLd {
+  if (!input || typeof input !== 'object') throw new TypeError('HEAD_INVALID: jsonLd must be an object or array');
+  if (Array.isArray(input) && (!input.length || input.length > 32 || input.some(entry => !entry || typeof entry !== 'object' || Array.isArray(entry)))) {
+    throw new TypeError('HEAD_INVALID: jsonLd arrays must contain 1 to 32 objects');
+  }
+  let serialized: string;
+  try {
+    serialized = JSON.stringify(input, (_key, value) => {
+      if (value === undefined || typeof value === 'function' || typeof value === 'symbol' || typeof value === 'bigint'
+        || (typeof value === 'number' && !Number.isFinite(value))) throw new TypeError();
+      return value;
+    });
+  } catch { throw new TypeError('HEAD_INVALID: jsonLd must be JSON-serializable'); }
+  if (serialized.length > 65536) throw new TypeError('HEAD_INVALID: jsonLd exceeds 64 KiB');
+  return JSON.parse(serialized) as JsonLd;
+}
+
+/** JSON for a `<script type="application/ld+json">`; `<` is escaped so a value cannot close the tag. */
+export function serializeJsonLd(value: JsonLd): string {
+  return JSON.stringify(value).replace(/</g, '\\u003c');
 }
 
 /**
  * Merge `meta.head` from the root match down: the deepest title wins, metas merge with a deeper entry of the same
- * name/property replacing the ancestor one, and links merge by rel+href. Sibling routes never influence each other.
+ * name/property replacing the ancestor one, links merge by rel+href, and jsonLd is replaced by the deepest block.
+ * Sibling routes never influence each other.
  */
 export function collectHead(routes: readonly RouteObject[], pathname: string, basename = '/'): RouteHead {
   // Router state carries the basename-stripped pathname; accept a full pathname too without guessing twice.
   const matches = matchRoutes(routes as RouteObject[], pathname, basename) ?? matchRoutes(routes as RouteObject[], pathname, '/');
   if (!matches) return Object.freeze({});
-  let title: string | undefined;
+  let title: string | undefined, jsonLd: JsonLd | undefined;
   const metas = new Map<string, HeadMeta>(), links = new Map<string, HeadLink>();
   for (const match of matches) {
     const handle = match.route.handle as { cormi?: { meta?: Record<string, unknown> } } | undefined;
     const head = normalizeHead(handle?.cormi?.meta?.head);
     if (head.title !== undefined) title = head.title;
+    if (head.jsonLd !== undefined) jsonLd = head.jsonLd;
     for (const meta of head.metas ?? []) metas.set(meta.name !== undefined ? `name:${meta.name}` : `property:${meta.property}`, meta);
     for (const link of head.links ?? []) links.set(`${link.rel} ${link.href}`, link);
   }
@@ -79,6 +108,7 @@ export function collectHead(routes: readonly RouteObject[], pathname: string, ba
     ...(title !== undefined ? { title } : {}),
     ...(metas.size ? { metas: Object.freeze([...metas.values()]) } : {}),
     ...(links.size ? { links: Object.freeze([...links.values()]) } : {}),
+    ...(jsonLd !== undefined ? { jsonLd } : {}),
   });
 }
 
@@ -111,6 +141,13 @@ function apply(routes: readonly RouteObject[], pathname: string, basename: strin
     node.setAttribute(HEAD_ATTRIBUTE, '');
     node.setAttribute('rel', link.rel);
     node.setAttribute('href', link.href);
+    document.head.appendChild(node);
+  }
+  if (head.jsonLd !== undefined) {
+    const node = document.createElement('script');
+    node.setAttribute(HEAD_ATTRIBUTE, '');
+    node.setAttribute('type', 'application/ld+json');
+    node.textContent = serializeJsonLd(head.jsonLd);
     document.head.appendChild(node);
   }
 }

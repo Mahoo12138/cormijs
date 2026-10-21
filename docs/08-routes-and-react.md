@@ -82,6 +82,8 @@ F5r 起，`cormi generate api <name>` 与 `generate mock <name>` 分别生成 `s
 
 F5s 起，显式启用的 `proxyPlugin` 把路径前缀代理到 http(s) 上游，合并进 Vite 的 dev 与 preview 代理；只接受可序列化子集，生产部署仍需网关。详见 [F5s 代理](101-f5s-proxy.md)。
 
+F5t 起，`meta.head.jsonLd` 由 `headPlugin` 同步为受管的 JSON-LD 脚本并在切换/卸载时移除，`staticExportPlugin` 把同一数据写入静态外壳；数据限 JSON、≤64 KiB，最深路由替换。详见 [F5t JSON-LD](102-f5t-json-ld.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic
