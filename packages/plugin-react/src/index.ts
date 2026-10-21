@@ -9,7 +9,7 @@ import { transform } from 'esbuild';
 import { generateApplication, runtimeContributions, type HistoryType, type RuntimeContribution } from './generate.js';
 import { generateRouteTypes } from './types.js';
 import { developmentDiagnostic, recoverable, repairSignature } from './development.js';
-import { clientModuleFile, inspectModule } from './modules.js';
+import { clientModuleFile, clientSpecifier, inspectModule } from './modules.js';
 import { appConfigContributions, appRuntimeFiles, resolveAppRuntime, type AppConfigContribution, type AppRuntimePlan } from './app-runtime.js';
 import { layoutContributions, layoutFilesToWatch, resolveGlobalLayout, type LayoutContribution } from './layout.js';
 import { loadingContributions, loadingFilesToWatch, resolveGlobalLoading, type LoadingContribution } from './loading.js';
@@ -17,6 +17,7 @@ import { resolveGlobalStyles, styleContributions, styleFilesToWatch, type StyleC
 import { accessContributions, accessFilesToWatch, resolveAccessPlan, type AccessContribution } from './access.js';
 import { pageLoaders } from './page-loaders.js';
 import { generateLocaleTypes, localeCatalogSources, mergeLocaleCatalogs, readLocaleCatalogs, type LocaleCatalog, type LocaleCatalogSource } from './locale.js';
+import { generateLoaderTypes, type LoaderTypeEntry } from './loaders.js';
 import { modelContributions, modelFiles, modelWatchPaths, resolveModels, type ModelContribution, type ModelPlan } from './model.js';
 export { appRuntimePlugin, appConfigContributions, resolveAppRuntime, type AppRuntimeOptions, type AppConfigContribution, type AppRuntimePlan } from './app-runtime.js';
 export { layoutPlugin, layoutContributions, resolveGlobalLayout, type LayoutPluginOptions, type LayoutContribution } from './layout.js';
@@ -27,6 +28,7 @@ export { routePrefetchPlugin, type RoutePrefetchOptions } from './prefetch.js';
 export { analyticsPlugin, type AnalyticsPluginOptions } from './analytics.js';
 export { toolPlugin, runTool, type ToolPluginOptions, type ToolSpec } from './tools.js';
 export { detectClientLoader, pageLoaders, CLIENT_LOADER_EXPORT } from './page-loaders.js';
+export { generateLoaderTypes, type LoaderTypeEntry } from './loaders.js';
 export { generatorPlugin, planGeneration, applyGeneration, type GeneratorPluginOptions, type GeneratePlan, type PlannedFile } from './generate-command.js';
 export { modelPlugin, modelContributions, resolveModels, type ModelPluginOptions, type ModelContribution, type ModelPlan } from './model.js';
 export { initialStatePlugin, type InitialStatePluginOptions } from './initial-state.js';
@@ -104,7 +106,7 @@ export const reactPlugin: Plugin.Object<void> = {
       if (request.command === 'preview') return { plan, snapshot: null, async close() {} };
       const html = await readFile(join(root, 'index.html'), 'utf8');
       if (!html.includes('/.cormi/app.tsx')) throw new CormiError('GENERATED_ENTRY_MISSING', 'index.html must import /.cormi/app.tsx.');
-      const entry = await AtomicEntry.open(root), typeFile = await AtomicEntry.open(root, 'routes.d.ts'), localeTypesFile = await AtomicEntry.open(root, 'locale.d.ts'), manifestFile = await AtomicEntry.open(root, 'inspect.jsonc');
+      const entry = await AtomicEntry.open(root), typeFile = await AtomicEntry.open(root, 'routes.d.ts'), localeTypesFile = await AtomicEntry.open(root, 'locale.d.ts'), loaderTypesFile = await AtomicEntry.open(root, 'loaders.d.ts'), manifestFile = await AtomicEntry.open(root, 'inspect.jsonc');
       signal.throwIfAborted();
       let latestSnapshot: GeneratedInspection | undefined, lastSignature = '', lastError = '', accepted = 0;
       let polling: Promise<void> | undefined, closing: Promise<void> | undefined;
@@ -154,12 +156,13 @@ export const reactPlugin: Plugin.Object<void> = {
         const published = state = Object.freeze({ ...next, revision: state.revision + 1 });
         await deliver(statusListeners, published, () => state === published);
       };
-      const queue = new RevisionQueue<{ code: string; types: string; localeTypes: string; inspection: GeneratedInspection }>(async (value, current) => {
+      const queue = new RevisionQueue<{ code: string; types: string; localeTypes: string; loaderTypes: string; inspection: GeneratedInspection }>(async (value, current) => {
         const valid = () => current() && !signal.aborted, first = !state.hasOutput;
         let changed: boolean;
         try {
           await typeFile.publish(value.types, valid);
           await localeTypesFile.publish(value.localeTypes, valid);
+          await loaderTypesFile.publish(value.loaderTypes, valid);
           changed = await entry.publish(value.code, valid);
           await manifestFile.publish(JSON.stringify(value.inspection, null, 2) + '\n', valid);
           if (!valid()) throw new CormiError('STALE_GENERATION', 'Inputs changed before publishing diagnostics.');
@@ -174,7 +177,7 @@ export const reactPlugin: Plugin.Object<void> = {
       });
       const session: PreparedApplication = {
         plan, get snapshot() { return latestSnapshot; },
-        typecheck: { files: ['.cormi/app.tsx', '.cormi/routes.d.ts', '.cormi/locale.d.ts'] },
+        typecheck: { files: ['.cormi/app.tsx', '.cormi/routes.d.ts', '.cormi/locale.d.ts', '.cormi/loaders.d.ts'] },
         ...(developing ? { development: { entry: '.cormi/app.tsx', current: () => state,
           subscribe(listener: (value: DevelopmentState) => Promise<void>) {
             signal.throwIfAborted();
@@ -262,6 +265,10 @@ export const reactPlugin: Plugin.Object<void> = {
             await transform(code, { loader: 'tsx', format: 'esm', jsx: 'automatic', logLevel: 'silent' });
             const types = generateRouteTypes(next, modelPlans.map(model => model.namespace));
             const localeTypes = generateLocaleTypes(catalogs);
+            const loaderEntries: LoaderTypeEntry[] = await Promise.all(next.filter(route => route.module && route.clientLoader !== undefined).map(async route => ({
+              id: route.id, specifier: await clientSpecifier(root, route.module!, new Set(request.serverOnlyFiles)), exportName: route.clientLoader!,
+            })));
+            const loaderTypes = generateLoaderTypes(loaderEntries);
             const hookInfo = (items: readonly { id: string; owner: string; stage?: number }[]) => items.map(({ id, owner, stage }) => ({ id, owner, stage: stage ?? 0 }));
             const inspection = inspectionManifest(code, types, { renderer: 'react', mode: request.mode, base: plan.base, entry: '.cormi/app.tsx', strict, history,
               routes: next.map(route => ({ ...route, ...(route.module ? { module: inspectModule(root, route.module) } : {}),
@@ -276,7 +283,7 @@ export const reactPlugin: Plugin.Object<void> = {
               appRuntime: { ...observed.applicationRuntime, ...(observed.applicationRuntime.module ? { module: inspectModule(root, observed.applicationRuntime.module) } : {}) },
               hooks: { routes: hookInfo(routeOrder), runtime: hookInfo(runtimeOrder), layouts: hookInfo(layoutOrder), loading: hookInfo(loadingOrder), styles: hookInfo(styleOrder), access: hookInfo(accessOrder), locale: hookInfo(localeOrder), models: hookInfo(modelOrder) } });
             if (routes.revision !== routeRevision || runtime.revision !== runtimeRevision || layouts.revision !== layoutRevision || loading.revision !== loadingRevision || styles.revision !== styleRevision || access.revision !== accessRevision || locale.revision !== localeRevision || models.revision !== modelRevision || appConfig.revision !== observed.appRevision) throw new CormiError('CONTRIBUTIONS_CHANGED', 'Plugin contributions changed during compilation; this result cannot be published.');
-            combined.throwIfAborted(); phase = 'commit'; return { code, types, localeTypes, inspection };
+            combined.throwIfAborted(); phase = 'commit'; return { code, types, localeTypes, loaderTypes, inspection };
           });
         } catch (error) {
           if (!developing || initial && !recoverable(error)) throw error;

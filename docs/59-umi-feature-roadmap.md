@@ -42,7 +42,7 @@
 | U10 | getInitialState、@@initialState、refresh/setInitialState | 部分已有（F2b）：initialStatePlugin 登记 getInitialState，提供 useInitialState/loading/error/refresh/set；@@initialState 模型集成、首屏阻塞与 SSR 待后续 | initial-state 插件，依赖 model/应用 runtime | F2 |
 | U11 | request、运行时配置、拦截器、统一错误 | 部分已有（F2c）：requestPlugin 注册 app.tsx request 配置和每挂载 fetch 客户端；拦截器、统一错误协议、dataField 待后续 | request 契约/客户端实现适配 | F2 |
 | U12 | useRequest、手动/自动、分页/加载更多等 | 部分已有（F2c）：自动/手动、loading/error、refresh、cancel、竞态保护；重试/轮询/分页/加载更多待后续 | 请求 Hooks 插件，可复用成熟库 | F2 |
-| U13 | clientLoader/useClientLoaderData/routeProps | 部分已有（F5a/F5b/F5j）：配置式与约定式页面都可用 `clientLoader`（编译期词法扫描），映射到静态 route loader，loader 抛错由本路由 `errorBoundary` 呈现；数据类型生成、重导出与预取待后续 | 路由数据插件 | F3 |
+| U13 | clientLoader/useClientLoaderData/routeProps | 部分已有（F5a/F5b/F5j/F5u）：配置式与约定式页面都可用 `clientLoader`（编译期词法扫描），映射到静态 route loader，loader 抛错由本路由 `errorBoundary` 呈现；生成 `.cormi/loaders.d.ts` 提供按路由 id 的 `CormiLoaderData.Data` 返回类型；重导出、数据预取与 SSR loader 待后续 | 路由数据插件 | F3 |
 | U14 | access.ts/useAccess/Access、路由访问控制 | 基础已有（F3b/F3d/F3e/F4g）：accessPlugin 从 initialState 计算权限，useAccess/Access、路由 access 守卫、自定义 accessForbidden 与 `src/access.ts` 约定（配置优先于约定）可用；服务端授权边界与权限类型生成待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
 | U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e/F4i）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys、access 过滤、`meta.locale` 目录化标题与 `useMenuCollapse` 折叠状态；无 ProLayout/Antd adapter 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
 | U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a/F4h/F5f/F5l/F5m）：内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage、`src/locales` 目录，`formatNumber`/`formatDate`/`tp`，生成的 `CormiLocale.Code`/`MessageKey` 类型，ICU 子集（plural/selectordinal/select、offset、`#`、number/date/time、嵌套与引号转义）、`formatRelativeTime` 相对时间与 ICU 富文本标签；Antd/dayjs UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
@@ -111,7 +111,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5s | a200b8c | 开发与预览代理 | docs/101 |
 | F5t | 06f9623 | 路由 JSON-LD | docs/102 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 539/539、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5t-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
+最新冻结验证（2026-10-21）：`pnpm check` 541/541、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5u-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -224,6 +224,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5s 状态（2026-10-21）：** U18 的代理已交付：`proxyPlugin`（`cormi:proxy`，`inject: ['vite']`）接受 1–32 个路径前缀到 http(s) 上游的映射，校验前缀/目标/布尔选项，合并进 Vite 的 `server.proxy` 与 `preview.proxy`；开发与预览一致，构建产物不含代理，生产仍需网关。rewrite 函数、headers 与凭据被拒绝/未提供。用法、差异与验证见 [F5s 代理](101-f5s-proxy.md)。
 
 **F5t 状态（2026-10-21）：** U21 的 JSON-LD 已交付：路由 `meta.head.jsonLd`（对象或 ≤32 个对象）经 `headPlugin` 同步为受管 `<script type="application/ld+json" data-cormi-head>`，最深路由整体替换祖先块，切换/卸载移除；`staticExportPlugin` 把同一数据写入静态 HTML 外壳。只接受 ≤64 KiB 的 JSON 数据，`<` 序列化为 `\u003c` 防闭合脚本；`<Helmet>` 组件与 SSR 头部收集仍待后续。用法、差异与验证见 [F5t JSON-LD](102-f5t-json-ld.md)。
+
+**F5u 状态（2026-10-21）：** U13 的类型部分已交付：编译生成 `.cormi/loaders.d.ts`，按路由 id 暴露 `Awaited<ReturnType<clientLoader>>` 为 `CormiLoaderData.Data<'id'>`，加入 typecheck 生成输入白名单；没有 loader 时为空接口/`never`，删除 loader 导出会在 typecheck 中暴露。运行时 `useClientLoaderData<T>()` 不变；重导出识别、数据预取与 SSR loader 仍待后续。用法、差异与验证见 [F5u loader 类型](103-f5u-loader-types.md)。
 
 ### F3：权限、布局、菜单和国际化
 

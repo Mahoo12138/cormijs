@@ -976,6 +976,17 @@ meta: { head: { title: 'Article', jsonLd: { '@context': 'https://schema.org', '@
 
 对象或 ≤32 个对象、≤64 KiB 的 JSON 数据；最深路由整体替换祖先块，切换/卸载移除受管脚本。`staticExportPlugin` 会把同一数据写入静态页面；`<` 被转义为 `\u003c`。规则见 [F5t JSON-LD](102-f5t-json-ld.md)。
 
+### 4.42 loader 返回类型
+
+启用 client loader 后，编译生成 `.cormi/loaders.d.ts`（无需 import，tsconfig 已包含 `.cormi/**/*`）：
+
+```ts
+type MemberData = CormiLoaderData.Data<'config:member/:id'>;
+const data = useClientLoaderData<MemberData>();
+```
+
+按路由 id 索引，类型来自 `Awaited<ReturnType<typeof import(module)[exportName]>>`；没有 loader 时为空接口。删除/改名 loader 导出会导致 typecheck 失败。规则见 [F5u loader 类型](103-f5u-loader-types.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

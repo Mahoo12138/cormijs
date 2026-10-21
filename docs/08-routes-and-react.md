@@ -84,6 +84,8 @@ F5s 起，显式启用的 `proxyPlugin` 把路径前缀代理到 http(s) 上游�
 
 F5t 起，`meta.head.jsonLd` 由 `headPlugin` 同步为受管的 JSON-LD 脚本并在切换/卸载时移除，`staticExportPlugin` 把同一数据写入静态外壳；数据限 JSON、≤64 KiB，最深路由替换。详见 [F5t JSON-LD](102-f5t-json-ld.md)。
 
+F5u 起，带 client loader 的路由生成 `.cormi/loaders.d.ts`，提供 `CormiLoaderData.Data<'<route-id>'>` 返回类型；运行时读取仍用 `useClientLoaderData<T>()`。详见 [F5u loader 类型](103-f5u-loader-types.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

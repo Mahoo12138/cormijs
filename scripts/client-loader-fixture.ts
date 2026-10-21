@@ -42,6 +42,12 @@ export async function clientLoader({ params }: { params: Record<string, string |
   await new Promise(resolve => setTimeout(resolve, 40));
   return { id: params.id ?? '-', hits: 7 };
 }`,
+    'src/loader-contract.ts': `type MemberData = CormiLoaderData.Data<'config:member/:id'>;
+const member: MemberData = { id: '42', hits: 7 };
+// @ts-expect-error loader data keeps the declared result type
+const bad: MemberData = { id: '42', hits: '7' };
+void member; void bad;
+`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
       strict: true, noEmit: true, skipLibCheck: false, allowImportingTsExtensions: true, lib: ['ES2023', 'DOM', 'DOM.Iterable'], types: ['react', 'react-dom', 'node'] },
       include: ['cormi.config.ts', 'src', '.cormi/**/*'] }, null, 2),
