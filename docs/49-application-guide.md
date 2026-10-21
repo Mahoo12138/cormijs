@@ -1017,6 +1017,20 @@ import { Helmet } from '@cormijs/runtime';
 
 需要启用 `headPlugin`。合并顺序为路由 `meta.head` → Helmet 挂载顺序：标题/JSON-LD 后者胜，meta 按 name/property、link 按 rel+href 替换；卸载/导航移除条目。使用对象 props，不支持 children 标签或 SSR 收集。规则见 [F5x Helmet](106-f5x-helmet.md)。
 
+### 4.46 SSR（首个切片）
+
+需要生产预览的服务端首屏时，同时设置应用选项并启用插件：
+
+```ts
+export default defineConfig({
+  presets: [preset],
+  plugins: [{ id: 'ssr', plugin: ssrPlugin, options: { id: 'application:ssr', mountId: 'root' } }],
+  app: { ssr: true, server: { port: 0 } },
+});
+```
+
+`cormi build` 产出 `dist/.cormi/ssr/ssr.mjs`；`cormi preview` 的 HTML 导航由 static handler 渲染（clientLoader 在服务端执行）并注入 hydration 数据，客户端 hydrateRoot 接管。`app.ssr: true` 会改为 eager 页面组件（牺牲路由拆包）。dev 仍为 CSR；目前仅支持 base `/`，无 serverLoader/流式/独立 server 命令。规则见 [F5y SSR](107-f5y-ssr.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

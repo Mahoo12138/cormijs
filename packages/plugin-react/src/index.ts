@@ -93,13 +93,14 @@ export const reactPlugin: Plugin.Object<void> = {
     ]);
     async function create(request: ApplicationRequest): Promise<PreparedApplication> {
       assertActive(ctx);
-      const plan = createBuildPlan(request, ['pages', 'routes', 'runtime', 'runtimeConfig', 'mountId', 'strict', 'history']);
+      const plan = createBuildPlan(request, ['pages', 'routes', 'runtime', 'runtimeConfig', 'mountId', 'strict', 'history', 'ssr']);
       const root = await realpath(request.root), input = request.options;
       const pages = input.pages ?? 'src/pages', mountId = input.mountId ?? 'root', developing = request.command === 'dev';
       const strict = input.strict === undefined ? false : input.strict;
       if (typeof strict !== 'boolean') throw new CormiError('CONFIG_INVALID', 'app.strict must be boolean.');
       const history = historyType(input.history === undefined ? 'browser' : input.history);
       if (typeof pages !== 'string' || typeof mountId !== 'string' || !mountId || plan.entry !== 'index.html') throw new CormiError('CONFIG_INVALID', 'Invalid React application options.');
+      if (input.ssr !== undefined && typeof input.ssr !== 'boolean') throw new CormiError('CONFIG_INVALID', 'app.ssr must be boolean.');
       if (!plan.base.startsWith('/') || !plan.base.endsWith('/') || plan.base.startsWith('//') || /[?#%\\]/.test(plan.base) || plan.base.split('/').includes('..')) throw new CormiError('BASE_INVALID', 'base must be a URL path ending with /.');
       const local = new AbortController(), signal = AbortSignal.any([local.signal, request.signal, lifetime.signal]);
       signal.throwIfAborted();
@@ -261,7 +262,7 @@ export const reactPlugin: Plugin.Object<void> = {
             rememberModules(next); phase = 'runtime';
             const plugins = runtimeContributions([...runtimeContributions(input.runtime ?? []), ...await runtime.collect(undefined)]);
             rememberModules(plugins); phase = 'generate';
-            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict, observed.applicationRuntime, globalLoading?.module, history, modelPlans, globalStyles, accessPlan?.module, catalogs);
+            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict, observed.applicationRuntime, globalLoading?.module, history, modelPlans, globalStyles, accessPlan?.module, catalogs, input.ssr === true);
             await transform(code, { loader: 'tsx', format: 'esm', jsx: 'automatic', logLevel: 'silent' });
             const types = generateRouteTypes(next, modelPlans.map(model => model.namespace));
             const localeTypes = generateLocaleTypes(catalogs);

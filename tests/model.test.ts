@@ -47,7 +47,7 @@ test('model plugin generates imports, type surface and inspection, then withdraw
   const code = await f.code();
   assert.match(code, /import \* as model0 from "\.\.\/src\/models\/counter\.ts"/);
   assert.match(code, /const models = \[\{namespace:"counter",model:model0\["default"\]\}\];/);
-  assert.match(code, /models,plugins/);
+  assert.match(code, /plugins,models/);
   assert.match(await readFile(join(f.root, '.cormi/routes.d.ts'), 'utf8'), /export type ModelNamespace = "counter";/);
   const inspection = readInspection(f.root).summary as { models: Array<{ namespace: string, module: { specifier: string } }> };
   assert.deepEqual(inspection.models.map(model => [model.namespace, model.module.specifier]), [['counter', './src/models/counter.ts']]);

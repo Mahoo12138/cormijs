@@ -61,7 +61,7 @@
 | U29 | request/接口代码生成与类型工作流 | 待实现；API generator 入口已登记，具体协议/规范需读实现 | API generator 插件 | F4 |
 | U30 | TypeScript、prepare、导出类型、monorepo | 基础已有至 P16；仍需配合新功能生成类型与别名 | 既有 TS/prepare + monorepo adapter | 随功能 |
 | U31 | code splitting、routePrefetch、routePreloadOnLoad | 部分已有（F5d/F5g/F5p）：页面按路由懒加载，注册表支持手动、`mode:"idle"` 空闲全量、`usePrefetchOnIntent()` 悬停/聚焦与 `usePrefetchOnVisible()` 视口触发预取；数据预取与 SSR 侧预取待后续 | 路由加载插件 + backend bridge | F5 |
-| U32 | SSR、服务端 loader/渲染入口 | 待实现 | 独立 SSR renderer/profile，复用可共享契约 | F5 |
+| U32 | SSR、服务端 loader/渲染入口 | 部分已有（F5y）：`app.ssr: true` + `ssrPlugin` 在 build 产出服务端 bundle，preview 执行 static handler/clientLoader、注入 hydration 并由客户端 hydrateRoot 接管；dev SSR、serverLoader、流式渲染、独立 server 命令与 base≠/ 待后续 | 独立 SSR renderer/profile，复用可共享契约 | F5 |
 | U33 | exportStatic/预渲染/静态导出 | 部分已有（F5e）：可选 staticExportPlugin 为每个字面路径路由生成带 `meta.head` 的 HTML 外壳；prerender、404.html、sitemap 与 SSR 组合待后续（外壳不等于预渲染） | 静态导出插件 | F5 |
 | U34 | MPA | 部分已有（F5q）：mpaPlugin 按 `src/pages` 顶层目录生成独立 HTML 与 React 入口，dev/build/preview 可用，与 SPA 共存；自定义模板、布局/App 包装、页面级 Provider 与热更新待后续 | 独立 MPA profile | F5 |
 | U35 | apiRoute | 部分已有（F5n）：apiRoutePlugin 将 `src/api/**` 的 Fetch 处理器注册为路由，dev 由 Vite 中间件运行、build 用 esbuild 编译、preview 提供编译产物；独立生产服务、中间件链与流式响应待后续 | 独立服务端路由插件 | F5 |
@@ -115,7 +115,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5w | bb1a8c5 | 自定义生成模板 | docs/105 |
 | F5x | f97adb0 | `<Helmet>` 组件级 head | docs/106 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 542/542、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5x-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
+最新冻结验证（2026-10-21）：`pnpm check` 544/544、`pnpm test:browser` 52/52、`pnpm test:package` 327 阶段通过；证据见 `artifacts/f4a…f5y-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -236,6 +236,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5w 状态（2026-10-21）：** U27 的模板贡献面已交付：`generatorPlugin` 的 `templates` 接受最多 16 个 `{ path, content }` 静态模板，支持 `{{name}}`/`{{kebab}}`/`{{pascal}}` 占位符，禁止覆盖内置类型与写入 `node_modules/.git/.cormi/.env*/cormi.config.ts` 等受保护路径；覆盖、试运行与项目内校验沿用原生成器。交互式提问、模板函数与目录树模板仍待后续。用法、差异与验证见 [F5w 自定义生成模板](105-f5w-generator-templates.md)。
 
 **F5x 状态（2026-10-21）：** U21 的组件 API 已交付：`@cormijs/runtime` 导出 `<Helmet>`、`HeadProvider` 与 `headRuntime`，headPlugin 的 runtime 贡献改为带 Provider；页面组件可声明 title/metas/links/jsonLd，按路由 head→组件挂载顺序合并（标题/JSON-LD 后者胜、meta/link 按选择器替换），卸载/导航移除受管节点，首帧用当前地址 seed 路由 head。对象 props API，SSR 头部收集仍待后续。用法、差异与验证见 [F5x Helmet](106-f5x-helmet.md)。
+
+**F5y 状态（2026-10-21）：** U32 的首个 SSR 切片已交付：应用设置 `app.ssr: true` 并启用 `ssrPlugin` 后，build 用 Vite SSR 产出 `dist/.cormi/ssr/ssr.mjs`，preview 对 HTML 导航用 `createStaticHandler` 执行 client loader、`StaticRouterProvider` 渲染并注入 hydration 数据，客户端以 `hydrateRoot` 接管；`app.ssr` 下路由组件 eager 导入以保证首屏一致。dev 仍为 CSR，仅支持 base `/`，无 serverLoader、流式或独立 server 命令。用法、差异与验证见 [F5y SSR](107-f5y-ssr.md)。
 
 ### F3：权限、布局、菜单和国际化
 

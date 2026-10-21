@@ -30,7 +30,7 @@ test('the generated entry exposes a lazy prefetch registry per page route', asyn
   const code = await f.code();
   assert.match(code, /const prefetch = \{[^}]*"home":\(\)=>import\("\.\.\/src\/pages\/index\.tsx"\)/);
   assert.match(code, /const prefetch = \{[^}]*"guide":\(\)=>import\("\.\.\/src\/pages\/guide\.tsx"\)/);
-  assert.match(code, /mountApplication\(\{element,routes,plugins,prefetch,base:/);
+  assert.match(code, /export const cormiApplication = \{routes,plugins,prefetch,base:/);
   assert.doesNotMatch(code, /prefetchRuntime/);
 });
 

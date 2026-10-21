@@ -11,6 +11,7 @@ export { staticExportPlugin, staticPages, renderStaticPage, writeStaticPages, ty
 export { apiRoutePlugin, resolveApiRoutes, matchApiRoute, runApiHandler, type ApiRoutePluginOptions, type ApiRoute, type ApiHandler, type ApiHandlerContext } from './api.js';
 export { mpaPlugin, resolveMpaEntries, mpaEntrySource, mpaHtml, type MpaPluginOptions, type MpaCandidate, type MpaEntry } from './mpa.js';
 export { proxyPlugin, normalizeProxy, type ProxyPluginOptions, type ProxyTarget, type ProxyTargetOptions, type NormalizedProxyTarget } from './proxy.js';
+export { ssrPlugin, type SsrPluginOptions } from './ssr.js';
 
 /** All Vite-specific React behavior stays in this optional bridge. */
 export const reactVitePlugin: Plugin.Object<void> = {

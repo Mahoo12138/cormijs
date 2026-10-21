@@ -27,6 +27,7 @@ import { writeAccessConventionFixture, verifyAccessConventionPage } from './acce
 import { writeLocaleCatalogFixture, verifyLocaleCatalogPage } from './locale-catalog-fixture.js';
 import { writeClientLoaderFixture, verifyClientLoaderPage } from './client-loader-fixture.js';
 import { writeHeadFixture, verifyHeadPage } from './head-fixture.js';
+import { writeSsrFixture, verifySsrPage } from './ssr-fixture.js';
 import { writePrefetchFixture, verifyPrefetchPage } from './prefetch-fixture.js';
 import { writeOutputFixture, verifyOutputBuild, verifyOutputPage } from './output-fixture.js';
 import { writeGeneratorFixture } from './generator-fixture.js';
@@ -863,6 +864,29 @@ const bad:HeadPluginOptions={titleTemplate:1};
     await command('route-head-build',headConsumer,'build');
     await withServer(headConsumer,'preview',async url=>{await verifyHeadPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'route-head-preview.png')});});
     report.stages.push({label:'installed-route-head-dev-build-and-static-preview',meta:'meta.head',titleTemplate:' · demo',previewRegenerated:false});
+
+    }
+    if (selected('ssr')) {
+    const ssrConsumer=await create('ssr','react');await writeSsrFixture(ssrConsumer);
+    const ssrManifest=consumerManifest(kit,'react');
+    ssrManifest.dependencies['@cormijs/plugin-react-vite']=ssrManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
+    await writeFile(join(ssrConsumer,'package.json'),JSON.stringify(ssrManifest,null,2));
+    await install('ssr-install',ssrConsumer);await auditLinks(ssrConsumer);
+    await command('ssr-typecheck',ssrConsumer,'typecheck');
+    await writeFile(join(ssrConsumer,'types.mts'),`import {ssrPlugin,type SsrPluginOptions} from '@cormijs/plugin-react-vite';
+import {renderServerApplication,type ServerApplication,type ServerRenderResult} from '@cormijs/runtime/server';
+const options:SsrPluginOptions={id:'app:ssr',mountId:'root'};
+declare const app:ServerApplication;
+const render:(request:Request)=>Promise<ServerRenderResult|Response>=request=>renderServerApplication(app,request);
+void [ssrPlugin,options,render];
+// @ts-expect-error mountId is a string
+const bad:SsrPluginOptions={mountId:1};
+`);
+    await execute('ssr-public-types',ssrConsumer,process.execPath,typeArguments);
+    await command('ssr-build',ssrConsumer,'build');
+    assert.ok(existsSync(join(ssrConsumer,'dist/.cormi/ssr/ssr.mjs')));
+    await withServer(ssrConsumer,'preview',async url=>{await verifySsrPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'ssr-preview.png')});});
+    report.stages.push({label:'installed-ssr-build-and-hydrated-preview',serverLoader:true,previewRegenerated:false});
 
     }
     if (selected('prefetch')) {

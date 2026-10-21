@@ -1,5 +1,5 @@
 import { createElement, StrictMode, type ComponentType, type PropsWithChildren, type ReactNode } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
+import { createRoot, hydrateRoot, type Root } from 'react-dom/client';
 import { createBrowserRouter, createHashRouter, createMemoryRouter, generatePath, Navigate, useLocation, useParams, type RouteObject, type Location } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { copyClientRoutes, runAppRender, type HistoryType, type RuntimeConfig, type RouteChangeEvent, type RuntimeCleanup } from './app-config.js';
@@ -49,9 +49,10 @@ export async function resolveRouteComponent(load: () => Promise<ComponentType>):
 export async function mountApplication(options: {
   element: HTMLElement; routes: RouteObject[]; base?: string; plugins?: readonly RuntimeEntry[]; strict?: boolean;
   appConfig?: Readonly<RuntimeConfig>; loading?: ComponentType; history?: HistoryType; models?: readonly ModelDescriptor[];
-  prefetch?: Readonly<Record<string, () => Promise<unknown>>>; signal?: AbortSignal;
+  prefetch?: Readonly<Record<string, () => Promise<unknown>>>; signal?: AbortSignal; hydrate?: boolean;
 }): Promise<ApplicationHandle> {
   if (options.strict !== undefined && typeof options.strict !== 'boolean') throw new TypeError('strict must be boolean');
+  if (options.hydrate !== undefined && typeof options.hydrate !== 'boolean') throw new TypeError('hydrate must be boolean');
   if (options.history !== undefined && !['browser', 'hash', 'memory'].includes(options.history)) throw new TypeError('history must be browser, hash or memory');
   options.signal?.throwIfAborted();
   if (mountedElements.has(options.element)) throw new Error('cormi mount element is already owned');
@@ -128,7 +129,9 @@ export async function mountApplication(options: {
       if (appConfig.rootContainer) node = appConfig.rootContainer(node, { ...context, routes: clientRoutes });
       lifetime.signal.throwIfAborted();
       if (options.strict) node = <StrictMode>{node}</StrictMode>;
-      root = createRoot(options.element); root.render(node); notify(router.state);
+      if (options.hydrate) root = hydrateRoot(options.element, node);
+      else { root = createRoot(options.element); root.render(node); }
+      notify(router.state);
     });
     lifetime.signal.throwIfAborted(); started = true;
     return Object.freeze({ dispose });
