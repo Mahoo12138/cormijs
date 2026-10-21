@@ -109,6 +109,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5q | 74d0b3a | 目录约定 MPA | docs/99 |
 | F5r | 61cf848 | API/Mock 生成器 | docs/100 |
 | F5s | a200b8c | 开发与预览代理 | docs/101 |
+| F5t | 06f9623 | 路由 JSON-LD | docs/102 |
 
 最新冻结验证（2026-10-21）：`pnpm check` 539/539、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5t-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
 
