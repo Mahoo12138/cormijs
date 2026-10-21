@@ -33,6 +33,7 @@ import { writeOutputFixture, verifyOutputBuild, verifyOutputPage } from './outpu
 import { writeGeneratorFixture } from './generator-fixture.js';
 import { writeStaticExportFixture, verifyStaticExport, verifyStaticExportPages } from './static-export-fixture.js';
 import { writeMpaFixture, verifyMpaPages, verifyMpaOutput } from './mpa-fixture.js';
+import { writeAntdFixture, verifyAntdPage } from './antd-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
 import { writeConventionalLoaderFixture, verifyConventionalLoaderPage } from './conventional-loader-fixture.js';
@@ -568,6 +569,27 @@ const bad:ModelDescriptor={namespace:'x',model:1};
     await command('model-build',modelConsumer,'build');
     await withServer(modelConsumer,'preview',async url=>{await verifyModelPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'model-preview.png')});});
     report.stages.push({label:'installed-model-shared-state-selector-and-static-preview',convention:'src/models',previewRegenerated:false});
+
+    }
+    if (selected('antd')) {
+    const antdConsumer=await create('antd','react');await writeAntdFixture(antdConsumer);
+    const antdManifest=consumerManifest(kit,'react');
+    antdManifest.dependencies['@cormijs/plugin-antd']=antdManifest.pnpm.overrides['@cormijs/plugin-antd']!;
+    antdManifest.dependencies['@cormijs/plugin-react']=antdManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    antdManifest.dependencies.antd='6.6.7';
+    await writeFile(join(antdConsumer,'package.json'),JSON.stringify(antdManifest,null,2));
+    await install('antd-install',antdConsumer);await auditLinks(antdConsumer);
+    await command('antd-typecheck',antdConsumer,'typecheck');
+    await writeFile(join(antdConsumer,'types.mts'),`import {antdPlugin,type AntdPluginOptions} from '@cormijs/plugin-antd';
+const options:AntdPluginOptions={id:'consumer:antd',theme:{token:{colorPrimary:'#1677ff'},dark:false}};void [antdPlugin,options];
+// @ts-expect-error theme.dark is boolean
+const bad:AntdPluginOptions={theme:{dark:'yes'}};
+`);
+    await execute('antd-public-types',antdConsumer,process.execPath,typeArguments);
+    await withServer(antdConsumer,'dev',async url=>{await verifyAntdPage(page,url);assert.deepEqual(errors,[]);});
+    await command('antd-build',antdConsumer,'build');
+    await withServer(antdConsumer,'preview',async url=>{await verifyAntdPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'antd-preview.png')});});
+    report.stages.push({label:'installed-antd-provider-locale-theme-dev-build-preview',adapter:'@cormijs/plugin-antd',previewRegenerated:false});
 
     }
     if (selected('initial-state')) {

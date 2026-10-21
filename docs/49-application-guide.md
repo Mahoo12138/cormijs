@@ -1051,7 +1051,7 @@ const items = toAntdMenuItems(useMenu());
 // 或 const route = { path: '/', routes: toLayoutRoutes(useMenu()) };
 ```
 
-适配器不引入 antd/ProLayout；`key` 为 path、label 已本地化、routeId 保留路由 id。主题/图标/图表与 Antd/dayjs locale 联动仍需应用自行处理。规则见 [U17 菜单适配器](109-ui-menu-adapters.md)。
+适配器不引入 antd/ProLayout；`key` 为 path、label 已本地化、routeId 保留路由 id。需要 Antd Provider 时安装 `antd` 并加入 `@cormijs/plugin-antd`（见 4.51），主题/图标/图表仍需应用自行组合。规则见 [U17 菜单适配器](109-ui-menu-adapters.md)。
 
 ### 4.49 CSS Modules 与资源类型
 
@@ -1065,6 +1065,17 @@ useEffect(() => intl.subscribe(locale => dayjs.locale(locale)), [intl]);
 ```
 
 只在 `setLocale` 成功后通知，初始挂载不回调；框架不自动修改 dayjs/Antd 语言包。规则见 [U16 locale 订阅](111-u16-locale-subscription.md)。规则见 [F5y SSR](107-f5y-ssr.md)。
+
+### 4.51 Antd Provider 集成
+
+```ts
+plugins: [
+  { id: 'locale', plugin: localePlugin, options: { id: 'application:locale' } },
+  { id: 'antd', plugin: antdPlugin, options: { id: 'application:antd', theme: { token: { colorPrimary: '#1677ff' }, dark: false } } },
+],
+```
+
+安装 `antd` 后，`@cormijs/plugin-antd` 通过 runtime 贡献包裹 `ConfigProvider`：locale 由 cormi 的 UI locale 回退链选择包内 11 个官方 locale（含 `en`/`zh` 语言别名），direction 来自 `localeDirection`，主题 token 与 dark 算法由插件校验后传 JSON。localePlugin 必须先挂载。不提供 ProLayout、图标/图表、自定义 locale 对象或 Antd SSR 样式抽取；Antd 6 的上游声明可能需要 `skipLibCheck`。规则见 [U17-1 Antd](126-u17-antd.md)。
 
 ## 5. 环境和 Mock 使用同一个部署前缀
 

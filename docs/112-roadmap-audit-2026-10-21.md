@@ -1,6 +1,6 @@
 # cormi Umi 吸收路线完成度审计（2026-10-21）
 
-本文件按 [Umi 功能路线](59-umi-feature-roadmap.md) 与当前工作区、测试产物逐项核对，回答“路线目标是否已经完成”。结论是**未完成**：U32 已补齐 serverLoader 与流式 SSR、U33 已补齐字面路由与显式动态路径的预渲染和 sitemap；仍有 SSR 生产化（压缩/TLS/背压）、U33 自动路径发现/增量，以及 U17 官方 UI 集成、U16 dayjs/Antd 映射、F6 等明确缺口。
+本文件按 [Umi 功能路线](59-umi-feature-roadmap.md) 与当前工作区、测试产物逐项核对，回答“路线目标是否已经完成”。结论是**未完成**：U32/U33 的 SSR、预渲染、serverLoader 与流式核心已交付，U09/U12/U16 的模型、请求与 locale 能力大幅补齐，U17 已交付可选 Antd Provider；仍有 ProLayout/图表、F6 微前端与状态库适配、U12 防抖/游标、U33 并发/增量、SSR 生产化等明确缺口。
 
 ## 1. 目标重述
 
@@ -35,7 +35,7 @@
 | U33 | 字面路由与 `prerenderPaths`（数组/异步函数）预渲染、sitemap、单页容错已交付；每页关闭、并发/增量、robots 未实现 | 部分完成 |
 | U09 | Hook 与对象模型、reducers/effects/subscriptions、跨模型 put、extraModels、依赖排序已交付；选择器等值优化与热替换保留未实现 | 部分完成 |
 | U12 | useRequest 重试、轮询、refreshDeps、usePagination、GET 缓存/去重/LRU/标签失效已交付；防抖节流、游标分页、持久化未实现 | 部分完成 |
-| U17 | 官方 Antd/ProLayout 集成包、主题/图标/图表与 locale 联动 | 仅结构适配器 |
+| U17 | 可选 `@cormijs/plugin-antd`（locale/direction/theme）已交付；ProLayout、图标/图表、主题编辑器、自定义 locale 未实现 | 部分完成 |
 | U16 | UI locale 归一化/回退链/资源解析与 RTL direction 已交付；按请求 locale、RTL 样式/组件封装未实现 | 部分完成 |
 | F6 | qiankun/Module Federation、dva/valtio/react-query 适配、多 builder、MFSU 等 | 未实现 |
 | U25 | externals；runtimePublicPath 已确认 Vite chunk 导入无法等价实现 | 未交付 |

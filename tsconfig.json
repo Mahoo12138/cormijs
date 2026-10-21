@@ -11,6 +11,7 @@
     {"path": "packages/routes"},
     {"path": "packages/runtime"},
     {"path": "packages/plugin-react"},
+    {"path": "packages/plugin-antd"},
     {"path": "packages/plugin-react-vite"},
     {"path": "packages/plugin-typescript"},
     {"path": "packages/preset-react-vite"}

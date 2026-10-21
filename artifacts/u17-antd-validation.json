@@ -1,0 +1,134 @@
+{
+  "format": "cormi:u17-antd-validation:1",
+  "verifiedAt": "2026-10-21T22:32:34.176Z",
+  "base": "84d1dd5918bf73762fbf2bf66f6b1d74a7f2b586",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "docs/126-u17-antd.md",
+      "package.json",
+      "pnpm-lock.yaml",
+      "tsconfig.json",
+      "packages/plugin-react-vite/src/index.ts",
+      "packages/plugin-react/src/index.ts",
+      "packages/plugin-react/src/modules.ts",
+      "packages/plugin-antd/package.json",
+      "packages/plugin-antd/tsconfig.json",
+      "packages/plugin-antd/src/index.ts",
+      "packages/plugin-antd/src/runtime.tsx",
+      "scripts/antd-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/browser/antd.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62",
+    "antd": "6.6.7",
+    "dayjs": "1.11.23"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u17-antd/check.log",
+      "sha256": "fd11dba8bb4f18cfd16c021fa8f55ff4ec7344cf2ee4ef42a93023b21c5be4f2",
+      "seconds": 119.7,
+      "tests": 565,
+      "pass": 565,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u17-antd/browser.log",
+      "sha256": "ee69583126faae0c2c742c8fa39dee4dde4ebdc7f777a78ca449ab9e7c99908a",
+      "seconds": 563.5,
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes the Antd Provider fixture"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u17-antd/package.log",
+      "sha256": "19b89bb5bef59ee72275154a25d4055a8853ddacca2b26e213eaf720a0e70881",
+      "stages": 336,
+      "passed": true,
+      "note": "includes the installed antd consumer (offline install, typecheck, public types, dev/build/preview)"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/antd.test.ts",
+      "log": ".cache/u17-antd/targeted.log",
+      "sha256": "4663d1dd417fee7ae793637d119458a9512b5651e69d260f5e678d91babb1e68",
+      "seconds": 12,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "en/zh Antd Empty locale, reload persistence, colorPrimary theme token, dev/build/preview"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "d6dbfa93b280079c85b29f5d940ee1b716be620fbaa609851e1b1e9c043c37f0",
+    "docs/49-application-guide.md": "476c904639a69bfc8efc577ca7f5ad79d89589d0acfcefe48c59bc668eca1f25",
+    "docs/59-umi-feature-roadmap.md": "6fc863b5f9d78837ea83cce3390cd2357f062d2082cc9fbc27e51287eb845d61",
+    "docs/126-u17-antd.md": "169a8323de1c430f7b5ae007ea5132a508240ec6220ab3ae9d6c8482e215c6cd",
+    "package.json": "d204cc41453ed4eb996a09f50936af51dec41568e1017c95b46d33c58fe53b15",
+    "pnpm-lock.yaml": "a20d0306c0f4e0fef023545a779e1eb55cf3cb09f6f8d2e8d395adabc4a5328e",
+    "tsconfig.json": "54567b9a5f636fda7e0d0762d52ed88fdcfb13055bab93f169e4f48635055978",
+    "packages/plugin-react-vite/src/index.ts": "5986626a4d7e54f2c6ab10287ad88087299b9f0cbe5a714b6ecd2b1faffc21c5",
+    "packages/plugin-react/src/index.ts": "e98343b8fb27c168c312a58ffbf01ff6e57a055cefa1870c2dac553018ce2c10",
+    "packages/plugin-react/src/modules.ts": "5201d730d55ed0ebbfe12a47a25e8f6803c40ab641b2fea6c3d784d668de3dc7",
+    "packages/plugin-antd/package.json": "f0aa532067ab2dd6fac21545590efb6997284f1e51ff6f0a6e23d0fb06abe38f",
+    "packages/plugin-antd/tsconfig.json": "0d07c4de02099bbf7b4a1428e77ce6e20f971c64e34d95039cb4f2e804a0933c",
+    "packages/plugin-antd/src/index.ts": "e6256973bb0079f20c45aace956e92aa17d9bd65ec92bd1d7e53352f11fb6b53",
+    "packages/plugin-antd/src/runtime.tsx": "aeb85f0c6bfcdff4fcff2a58078526a0b03eeb60b94e1e01dc96994896d8a55b",
+    "scripts/antd-fixture.ts": "77c27435abe090407f1ec842450cf3dfa696828d0b556b183e5ad131bd305609",
+    "scripts/test-package.ts": "45501ef3e2b89eadda2536471cf0eac7ab359877eeeaace3a70a51d1433adb30",
+    "tests/browser/antd.test.ts": "abc61d970ea25f8713d40181d69a3c4be400e3488d38c410865eba3bbcc4e63d"
+  },
+  "sourceInputCount": 17,
+  "sourceInputsDigest": "93c4b185b025d3c91a88a3e4f43da29379835fd169ee5d1e195901a48d2ad521",
+  "documentationInputs": {
+    "docs/126-u17-antd.md": "169a8323de1c430f7b5ae007ea5132a508240ec6220ab3ae9d6c8482e215c6cd",
+    "docs/59-umi-feature-roadmap.md": "6fc863b5f9d78837ea83cce3390cd2357f062d2082cc9fbc27e51287eb845d61",
+    "docs/112-roadmap-audit-2026-10-21.md": "d6dbfa93b280079c85b29f5d940ee1b716be620fbaa609851e1b1e9c043c37f0",
+    "docs/49-application-guide.md": "476c904639a69bfc8efc577ca7f5ad79d89589d0acfcefe48c59bc668eca1f25"
+  },
+  "evidence": [
+    ".cache/u17-antd/check.log",
+    ".cache/u17-antd/browser.log",
+    ".cache/u17-antd/package.log",
+    ".cache/u17-antd/targeted.log",
+    "artifacts/u17-antd-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "antd-6.6.7-only",
+    "11-bundled-locales",
+    "no-custom-locale-objects",
+    "no-prolayout-icons-or-charts",
+    "no-theme-editor",
+    "no-antd-ssr-style-extraction",
+    "skipLibCheck-required-by-upstream-rc-component-types",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

@@ -1,5 +1,6 @@
 import type { Plugin } from '@cormijs/core';
 import type {} from '@cormijs/plugin-vite';
+import { isServerModule } from '@cormijs/plugin-react';
 import react from '@vitejs/plugin-react';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,11 +30,7 @@ export const reactVitePlugin: Plugin.Object<void> = {
             server: { fs: { allow: [...(config.server?.fs?.allow ?? []), runtime] } } };
         },
         resolveId(id) {
-          if (id === 'cormijs' || id.startsWith('cormijs/') || id.startsWith('node:')
-            || id === 'cordis' || id.startsWith('cordis/') || id.startsWith('@cordisjs/')
-            || /^@cormijs\/(?:core|builder|routes|plugin-[^/]+|preset-[^/]+)(?:\/|$)/.test(id)) {
-            throw new Error(`CLIENT_SERVER_IMPORT: ${id} belongs to the Node toolchain, not the browser`);
-          }
+          if (isServerModule(id)) throw new Error(`CLIENT_SERVER_IMPORT: ${id} belongs to the Node toolchain, not the browser`);
         },
       },
     ]));

@@ -39,6 +39,7 @@ export { localePlugin, localeCatalogSources, readLocaleCatalogs, mergeLocaleCata
 export { accessPlugin, accessContributions, resolveAccessPlan, DEFAULT_ACCESS_FILES, type AccessPluginOptions, type AccessContribution, type AccessPlan } from './access.js';
 export { menuPlugin, type MenuPluginOptions } from './menu.js';
 export { clientModule } from './modules.js';
+export { isServerModule } from './modules.js';
 export { defineReactFeature, type ReactFeature } from './feature.js';
 export { createFeatureNamespace, type FeatureNamespace } from './namespace.js';
 export { routeConfigPlugin, type RouteConfigOptions } from './route-config.js';
