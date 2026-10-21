@@ -38,7 +38,7 @@
 | U06 | 约定路由、全局 layouts/index、404/loading | 部分已有（F1d/F1e）：可选 layoutPlugin 发现 src/layouts/index.*；根 src/pages/404.tsx 成为 catch-all；loadingPlugin 提供首次路由解析回退。导航期 Suspense loading 待 U13/F5 | 可选择的约定扫描插件 | F1 |
 | U07 | history browser/hash/memory、查询与导航公共入口 | 基础已有（F1f）：app.history 选择 browser/hash/memory；`@cormijs/runtime` 导出 Link、useNavigate、useSearchParams 等导航/查询入口 | Router 适配插件/客户端 SDK | F1 |
 | U08 | runtime 模块/生成导出/类型提示 | 部分已有（F1a）：应用配置模块随入口生成、仅在浏览器求值并参与类型检查；按启用功能生成应用侧导出仍待 F2 | 应用编译插件，不混合 Node/client barrel | F1 |
-| U09 | model/useModel、命名空间、selector、extraModels | 部分已有（F2a/U09-1）：modelPlugin 发现 src/models、路径命名空间、Hook 模型共享与 selector；对象模型 `state/reducers/effects`、`useModelDispatch`/全局派发、跨模型 put 已交付；subscriptions、extraModels、依赖排序与选择器等值优化待后续 | model 插件 + React Provider | F2 |
+| U09 | model/useModel、命名空间、selector、extraModels | 部分已有（F2a/U09-1/U09-2）：modelPlugin 发现 src/models、路径命名空间、Hook 模型共享与 selector；对象模型 `state/reducers/effects/subscriptions`、`useModelDispatch`/全局派发、跨模型 put、`extraModels` 追加文件已交付；模型依赖排序与选择器等值优化待后续 | model 插件 + React Provider | F2 |
 | U10 | getInitialState、@@initialState、refresh/setInitialState | 部分已有（F2b）：initialStatePlugin 登记 getInitialState，提供 useInitialState/loading/error/refresh/set；@@initialState 模型集成、首屏阻塞与 SSR 待后续 | initial-state 插件，依赖 model/应用 runtime | F2 |
 | U11 | request、运行时配置、拦截器、统一错误 | 部分已有（F2c）：requestPlugin 注册 app.tsx request 配置和每挂载 fetch 客户端；拦截器、统一错误协议、dataField 待后续 | request 契约/客户端实现适配 | F2 |
 | U12 | useRequest、手动/自动、分页/加载更多等 | 部分已有（F2c/U12-1）：自动/手动、loading/error、refresh、cancel、竞态保护；失败重试与 retryDelay、成功后轮询（可含隐藏页）、refreshDeps 已交付；分页/加载更多、缓存/去重、防抖节流待后续 | 请求 Hooks 插件，可复用成熟库 | F2 |
@@ -120,7 +120,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F4m | abbe5aa | CSS Modules/资源类型声明 | docs/110 |
 | U16-1 | ba6ea1f | locale 变更订阅 | docs/111 |
 
-最新冻结验证（2026-10-22）：`pnpm check` 559/559、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/u12-request-retry-validation.json`、`artifacts/u09-object-models-validation.json`、`artifacts/u32-streaming-validation.json`、`artifacts/u33-2-prerender-paths-validation.json`、`artifacts/u33-prerender-validation.json`、`artifacts/u32-server-loader-validation.json` 及此前的 f4a…f5z、u16、u17、f4m、f5e 产物。仍未覆盖的大项见 U17、F6、U09 subscriptions/extraModels、U12 分页/缓存、SSR 生产化与 U33 自动路径发现/增量；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交 2a62832（useRequest 重试/轮询/依赖刷新）。
+最新冻结验证（2026-10-22）：`pnpm check` 559/559、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/u09-2-subscriptions-validation.json`、`artifacts/u12-request-retry-validation.json`、`artifacts/u09-object-models-validation.json`、`artifacts/u32-streaming-validation.json`、`artifacts/u33-2-prerender-paths-validation.json`、`artifacts/u33-prerender-validation.json`、`artifacts/u32-server-loader-validation.json` 及此前的 f4a…f5z、u16、u17、f4m、f5e 产物。仍未覆盖的大项见 U17、F6、U09 依赖排序、U12 分页/缓存、SSR 生产化与 U33 自动路径发现/增量；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交：U09-2 subscriptions/extraModels（见提交记录）。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -158,6 +158,7 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 
 **F2a 状态（2026-10-20）：** U09 的 Hook 模型基础已交付：显式 `modelPlugin` 发现 `src/models/**`，按路径生成稳定 namespace，每个挂载执行一次模型 Hook；`@cormijs/runtime` 的 `useModel(namespace, selector?)` 共享状态并提供 selector，模型在路由切换间保留、刷新后重建。对象模型、reducers/effects、extraModels、依赖排序、initial-state 与 request 仍待后续 F2 切片。用法、差异与验证见 [F2a model 与 useModel](66-f2a-models.md)。
 **U09-1 状态（2026-10-22）：** 对象模型已交付：默认导出 `{ state, reducers, effects }`（可用 `defineModel` 推断类型），store 按挂载创建，`useModel` 通过 `useSyncExternalStore` 订阅；reducer 必须返回新 state，effect 获得 `put/call/state`，`put` 可派发其他对象模型；`useModelDispatch(namespace)` 绑定派发，`useGlobalModelDispatch()` 使用 `namespace/action`。Hook 模型与对象模型共存；仍无 subscriptions、extraModels、依赖排序、effect 取消与状态持久化。用法与边界见 [U09-1 对象模型](116-u09-object-models.md)。
+**U09-2 状态（2026-10-22）：** 对象模型 `subscriptions` 已交付：挂载后执行，可返回清理函数，收到 dispatch/state；SSR 不执行，错误记录不阻断应用。`modelPlugin.extraModels` 可追加目录外模型文件，参与生成、类型检查、观察与 inspect，namespace 仍按路径派生。仍无跨模型依赖排序与选择器等值优化。用法与边界见 [U09-2 subscriptions/extraModels](118-u09-subscriptions-extra-models.md)。
 
 **F2b 状态（2026-10-20）：** U10 的初始状态基础已交付：`initialStatePlugin` 登记 `getInitialState` 与 runtime Provider，`useInitialState` 提供 loading/error/data、refresh 和 setInitialState；首次渲染不阻塞，卸载与并发刷新有防护。`@@initialState` 模型集成、首屏阻塞与 SSR/hydration 仍待后续。用法、差异与验证见 [F2b getInitialState](67-f2b-initial-state.md)。
 

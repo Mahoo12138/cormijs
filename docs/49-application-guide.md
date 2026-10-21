@@ -283,7 +283,7 @@ const { count, increment } = useModel<{ count: number; increment: () => void }>(
 const selected = useModel('counter', (state: { count: number }) => state.count);
 ```
 
-默认扫描 `src/models/**`，namespace 由路径派生（`counter`、`admin.user`）；重复 namespace 明确失败。函数默认导出是 Hook 模型：每个 `mountApplication` 执行一次，路由切换保留状态，完整刷新重建。含 `state` 的对象默认导出是对象模型：`state + reducers + effects`，用 `defineModel` 获得 state 推断，`useModel` 订阅状态，`useModelDispatch(namespace)` 派发 reducer/effect，effect 的 `put` 可用 `namespace/action` 跨对象模型；reducer 必须返回新 state。`useModel` 支持 selector，但不做深比较记忆化。仍无 subscriptions、`extraModels`、模型依赖排序与 effect 取消。Hook 模型规则见 [F2a](66-f2a-models.md)，对象模型见 [U09-1](116-u09-object-models.md)。
+默认扫描 `src/models/**`，namespace 由路径派生（`counter`、`admin.user`）；重复 namespace 明确失败。函数默认导出是 Hook 模型：每个 `mountApplication` 执行一次，路由切换保留状态，完整刷新重建。含 `state` 的对象默认导出是对象模型：`state + reducers + effects + subscriptions`，用 `defineModel` 获得 state 推断；`useModel` 订阅状态，`useModelDispatch(namespace)` 派发 reducer/effect，effect 的 `put` 可用 `namespace/action` 跨对象模型；reducer 必须返回新 state；subscriptions 在挂载后执行并可返回清理函数（SSR 不执行）。`modelPlugin` 的 `extraModels` 可追加目录外文件，namespace 仍由路径派生。`useModel` 支持 selector，但不做深比较记忆化。仍无 subscriptions 的 history、`extraModels` 内联对象、模型依赖排序与 effect 取消。Hook 模型规则见 [F2a](66-f2a-models.md)，对象模型见 [U09-1](116-u09-object-models.md) 与 [U09-2](118-u09-subscriptions-extra-models.md)。
 
 示例：`pnpm cormi dev --root examples/model`，默认监听 `/models/`。
 

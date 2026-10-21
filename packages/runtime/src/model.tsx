@@ -1,17 +1,24 @@
-import { createContext, useContext, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 export type ModelAction = string | { readonly type: string; readonly payload?: unknown };
+export type ModelDispatch = (action: ModelAction) => Promise<unknown>;
 export interface ModelEffectHelpers {
   put(action: ModelAction): Promise<unknown>;
   call<T>(fn: (...args: any[]) => T | Promise<T>, ...args: any[]): Promise<Awaited<T>>;
   state(): unknown;
 }
+export interface ModelSubscriptionHelpers {
+  dispatch: ModelDispatch;
+  state(): unknown;
+}
+export type ModelSubscription = (helpers: ModelSubscriptionHelpers) => void | (() => void);
 export type ModelReducer<S = unknown> = (state: S, action: { readonly type: string; readonly payload?: unknown }) => S;
 export type ModelEffect<S = unknown> = (action: { readonly type: string; readonly payload?: unknown }, helpers: ModelEffectHelpers) => unknown;
 export interface ObjectModel<S = unknown> {
   readonly state: S;
   readonly reducers?: Readonly<Record<string, ModelReducer<S>>>;
   readonly effects?: Readonly<Record<string, ModelEffect<S>>>;
+  readonly subscriptions?: Readonly<Record<string, ModelSubscription>>;
 }
 export interface ModelDescriptor {
   readonly namespace: string;
@@ -19,12 +26,13 @@ export interface ModelDescriptor {
 }
 /** Identity helper that types reducers/effects from the declared state without a schema library. */
 export function defineModel<S>(model: ObjectModel<S>): ObjectModel<S> { return model; }
-type Dispatch = (action: ModelAction) => Promise<unknown>;
+type Dispatch = ModelDispatch;
 interface Store {
   readonly namespace: string;
   readonly dispatch: Dispatch;
   readonly getState: () => unknown;
   readonly subscribe: (listener: () => void) => () => void;
+  readonly start: () => () => void;
 }
 interface ModelScope {
   readonly hooks: Readonly<Record<string, unknown>>;
@@ -51,8 +59,8 @@ function dispatchGlobal(stores: ReadonlyMap<string, Store>, action: ModelAction)
 }
 
 function createStore(namespace: string, model: ObjectModel<any>, global: (action: ModelAction) => Promise<unknown>): Store {
-  const reducers = model.reducers ?? {}, effects = model.effects ?? {};
-  for (const [kind, entries] of [['reducers', reducers], ['effects', effects]] as const) {
+  const reducers = model.reducers ?? {}, effects = model.effects ?? {}, subscriptions = model.subscriptions ?? {};
+  for (const [kind, entries] of [['reducers', reducers], ['effects', effects], ['subscriptions', subscriptions]] as const) {
     if (!entries || typeof entries !== 'object' || Array.isArray(entries) || Object.values(entries).some(entry => typeof entry !== 'function')) {
       throw new TypeError(`MODEL_INVALID: ${namespace} ${kind} must be a function map`);
     }
@@ -90,6 +98,21 @@ function createStore(namespace: string, model: ObjectModel<any>, global: (action
     dispatch,
     getState: () => state,
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    start() {
+      const cleanups: Array<() => void> = [];
+      for (const [name, subscribe] of Object.entries(subscriptions)) {
+        try {
+          const cleanup = subscribe({ dispatch, state: () => state });
+          if (typeof cleanup === 'function') cleanups.push(cleanup);
+        } catch (error) { console.error(`[cormi:model-subscription] ${namespace}/${name}`, error); }
+      }
+      return () => {
+        for (const cleanup of cleanups.reverse()) {
+          try { cleanup(); }
+          catch (error) { console.error(`[cormi:model-subscription] ${namespace} cleanup`, error); }
+        }
+      };
+    },
   });
 }
 
@@ -113,6 +136,10 @@ export function ModelProvider({ models, children }: { readonly models: readonly 
     const model = item.model;
     if (typeof model === 'function') hooks[item.namespace] = model();
   }
+  useEffect(() => {
+    const cleanups = [...stores.values()].map(store => store.start());
+    return () => { for (const cleanup of cleanups.reverse()) cleanup(); };
+  }, [stores]);
   const scope: ModelScope = Object.freeze({ hooks: Object.freeze(hooks), stores });
   return <ModelContext.Provider value={scope}>{children}</ModelContext.Provider>;
 }

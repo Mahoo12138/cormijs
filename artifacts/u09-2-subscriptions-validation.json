@@ -1,0 +1,113 @@
+{
+  "format": "cormi:u09-2-subscriptions-validation:1",
+  "verifiedAt": "2026-10-21T19:57:10.758Z",
+  "base": "932c3e5f5ab5333a8a32601dd73459cb9af03cd3",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/plugin-react/src/model.ts",
+      "packages/runtime/src/index.tsx",
+      "packages/runtime/src/model.tsx",
+      "scripts/model-fixture.ts",
+      "scripts/test-package.ts",
+      "docs/118-u09-subscriptions-extra-models.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u09-2-subscriptions/check.log",
+      "sha256": "ee4787cd27b7fb491defef3afbdf37dc7acba781664d056c3c238bfaaa99aa71",
+      "seconds": 120.8,
+      "tests": 559,
+      "pass": 559,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u09-2-subscriptions/browser.log",
+      "sha256": "842347e342d5a7103402bd9498e8a77be2a10d94e889a65cf9a53a708f8d23fc",
+      "seconds": 555.6,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u09-2-subscriptions/package.log",
+      "sha256": "351ea12c5fe8bffc25f6bdbd5fc87c5e1549e8b302fa8098d00ef793457f95d8",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/model.test.ts",
+      "log": ".cache/u09-2-subscriptions/targeted.log",
+      "sha256": "7318c11d8fac32c5fc214ac1aab939ab68453ca89428643b68a981d15f34f9c5",
+      "seconds": 11.3,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "extraModels generated/typechecked, subscription dispatch after mount, navigation persistence, reload resubscribe, existing model cases"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "e284a9c1e84c914b582a31613e6fcf9ab2e6bca8185526a4d7c00bcd1cea18b5",
+    "docs/49-application-guide.md": "134668501b7d66cbba552241fb6f2fcb409c78fb72b4023af425c15236ca8b9c",
+    "docs/59-umi-feature-roadmap.md": "ffca5aeb09ee4ac58e0026355935fe0fd711360e3672183920e53d7d5f88ca39",
+    "packages/plugin-react/src/model.ts": "e724e61d224235b8cf38012df9cb91d541446d74658735506c4d3c8bcfce300e",
+    "packages/runtime/src/index.tsx": "e306cc07f369ab430641b6af8009db27af37cfa49e518ec5cd454656792135c0",
+    "packages/runtime/src/model.tsx": "8182e03953dbdbd7f733de2b08e6ab3f60ce27991c98aeaeff1747e39facac57",
+    "scripts/model-fixture.ts": "b57605a816b5fdf23528edd7b515d21f79e33ff36f9df1c6e64aff5ba6517ae0",
+    "scripts/test-package.ts": "c3735a27d8676f7a2b071943b3834de59be7b4a342a4fd4a63bfd2110bb4c637",
+    "docs/118-u09-subscriptions-extra-models.md": "dd2e8792f909ea644f6ea9106decfe9dfef5edf7369ca9d04daf02d3ccd78476"
+  },
+  "sourceInputCount": 9,
+  "sourceInputsDigest": "b885962452d12911605bec65aea5bfdb32dcee964b4c5bbf8e58def7e97efb37",
+  "documentationInputs": {
+    "docs/118-u09-subscriptions-extra-models.md": "dd2e8792f909ea644f6ea9106decfe9dfef5edf7369ca9d04daf02d3ccd78476",
+    "docs/59-umi-feature-roadmap.md": "ffca5aeb09ee4ac58e0026355935fe0fd711360e3672183920e53d7d5f88ca39",
+    "docs/112-roadmap-audit-2026-10-21.md": "e284a9c1e84c914b582a31613e6fcf9ab2e6bca8185526a4d7c00bcd1cea18b5",
+    "docs/49-application-guide.md": "134668501b7d66cbba552241fb6f2fcb409c78fb72b4023af425c15236ca8b9c"
+  },
+  "evidence": [
+    ".cache/u09-2-subscriptions/check.log",
+    ".cache/u09-2-subscriptions/browser.log",
+    ".cache/u09-2-subscriptions/package.log",
+    ".cache/u09-2-subscriptions/targeted.log",
+    "artifacts/u09-2-subscriptions-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "subscriptions-have-no-history-argument",
+    "no-model-dependency-order-or-hot-store-preservation",
+    "subscriptions-run-after-first-commit",
+    "subscription-errors-are-logged-not-fatal",
+    "extra-model-namespace-follows-file-path",
+    "no-inline-extra-models",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

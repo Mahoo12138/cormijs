@@ -8,7 +8,7 @@ import preset from '@cormijs/preset-react-vite';
 import { modelPlugin } from '@cormijs/plugin-react';
 export default defineConfig({
   presets: [preset],
-  plugins: [{ id: 'application-model', plugin: modelPlugin, options: { id: 'application:model' } }],
+  plugins: [{ id: 'application-model', plugin: modelPlugin, options: { id: 'application:model', extraModels: ['src/extra/boost.ts'] } }],
   app: { base: '/models/', server: { port: 0 } },
 });
 `;
@@ -16,6 +16,7 @@ export default defineConfig({
 export async function writeModelFixture(root: string) {
   await mkdir(join(root, 'src/pages'), { recursive: true });
   await mkdir(join(root, 'src/models'), { recursive: true });
+  await mkdir(join(root, 'src/extra'), { recursive: true });
   const files: Record<string, string> = {
     'index.html': '<!doctype html><html><head><title>cormi models</title><link rel="icon" href="data:," /></head><body><div id="root"></div><script type="module" src="/.cormi/app.tsx"></script></body></html>',
     'cormi.config.ts': modelConfiguration,
@@ -43,12 +44,19 @@ export default defineModel({
 export default defineModel({
   state: { touched: '' },
   reducers: { touch(state, action) { return { touched: String(action.payload) }; } },
+});`,
+    'src/extra/boost.ts': `import { defineModel } from '@cormijs/runtime';
+export default defineModel({
+  state: { booted: false },
+  reducers: { mark() { return { booted: true }; } },
+  subscriptions: { boot({ dispatch }) { void dispatch({ type: 'mark' }); } },
 });`,    'src/pages/index.tsx': `import { useModel, useModelDispatch } from '@cormijs/runtime';
 import { Link } from '@cormijs/runtime';
 import { useState } from 'react';
 function CounterView(){const {count,increment}=useModel<{count:number;increment:()=>void}>('counter');return <section data-counter>{count}<button onClick={increment}>Increment</button></section>;}
 function CounterSelector(){const count=useModel('counter',(state:{count:number})=>state.count);return <output data-count>{count}</output>;}
 function UserView(){const {name,rename}=useModel<{name:string;rename:(value:string)=>void}>('user');return <section data-user>{name}<button onClick={()=>rename('Grace')}>Rename</button></section>;}
+function BoostView(){const {booted}=useModel<{booted:boolean}>('extra.boost');return <p data-boost>{String(booted)}</p>;}
 function CartView(){
   const cart=useModel<{items:string[];total:number}>('cart');
   const prefs=useModel<{touched:string}>('prefs');
@@ -61,7 +69,7 @@ function CartView(){
     <output data-cart-error>{error}</output>
   </section>;
 }
-export default function Home(){return <main><h1>Model home</h1><CounterView /><CounterSelector /><UserView /><CartView /><Link to="/other">Other page</Link></main>;}`,
+export default function Home(){return <main><h1>Model home</h1><CounterView /><CounterSelector /><UserView /><BoostView /><CartView /><Link to="/other">Other page</Link></main>;}`,
     'src/pages/other.tsx': `import { Link, useModel } from '@cormijs/runtime';
 export default function Other(){const count=useModel('counter',(state:{count:number})=>state.count);const cart=useModel<{total:number}>('cart');return <main><h1>Model other</h1><output data-other-count>{count}</output><output data-other-cart>{cart.total}</output><Link to="/">Model home</Link></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -77,6 +85,7 @@ export async function verifyModelPage(page: Page, url: string) {
   assert.equal(await page.locator('[data-count]').innerText(), '0');
   assert.equal(await page.locator('[data-user]').innerText(), 'AdaRename');
   assert.ok((await page.locator('[data-cart]').innerText()).startsWith('0:'));
+  await page.waitForFunction(() => document.querySelector('[data-boost]')?.textContent === 'true');
   await page.getByRole('button', { name: 'Add later', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('[data-cart]')?.textContent?.startsWith('1:'));
   await page.getByRole('button', { name: 'Cross add', exact: true }).click();
@@ -101,5 +110,6 @@ export async function verifyModelPage(page: Page, url: string) {
   assert.equal(await page.locator('[data-user]').innerText(), 'AdaRename');
   assert.ok((await page.locator('[data-cart]').innerText()).startsWith('0:'));
   assert.equal(await page.locator('[data-cart-error]').innerText(), '');
+  await page.waitForFunction(() => document.querySelector('[data-boost]')?.textContent === 'true');
   assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);
 }

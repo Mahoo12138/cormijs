@@ -107,17 +107,21 @@ export interface ModelPluginOptions {
   readonly id?: string;
   readonly dir?: string;
   readonly files?: readonly string[];
+  /** Additional model source files appended to the directory scan. */
+  readonly extraModels?: readonly string[];
 }
-/** Opt-in convention: model hook modules under src/models, shared per application mount. */
+/** Opt-in convention: model modules under src/models, shared per application mount. */
 export const modelPlugin: Plugin.Object<ModelPluginOptions> = {
   name: 'cormi:model', inject: ['react'],
   apply(ctx, options = {}) {
-    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'dir', 'files'].includes(key))) {
+    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'dir', 'files', 'extraModels'].includes(key))) {
       throw new CormiError('MODEL_INVALID', 'Invalid model plugin options.');
     }
     const id = options.id ?? 'cormi:model';
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('MODEL_INVALID', 'Invalid model id.');
     const contribution = modelContributions([{ id, ...(options.dir === undefined ? {} : { dir: options.dir }), ...(options.files === undefined ? {} : { files: options.files }) }])[0]!;
-    ctx.effect(() => ctx.react.models.tap({ id: id + ':models', owner: id, ownerOrder: 0, run: () => [contribution] }));
+    const contributions = options.extraModels === undefined ? [contribution]
+      : [contribution, modelContributions([{ id: id + ':extra', files: options.extraModels }])[0]!];
+    ctx.effect(() => ctx.react.models.tap({ id: id + ':models', owner: id, ownerOrder: 0, run: () => contributions }));
   },
 };
