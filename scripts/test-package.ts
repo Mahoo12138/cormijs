@@ -549,11 +549,16 @@ const bad:HistoryType='abstract';
     await writeFile(join(modelConsumer,'package.json'),JSON.stringify(modelManifest,null,2));
     await install('model-install',modelConsumer);await auditLinks(modelConsumer);
     await command('model-typecheck',modelConsumer,'typecheck');
-    await writeFile(join(modelConsumer,'types.mts'),`import {modelPlugin,type ModelPluginOptions} from '@cormijs/plugin-react';import {useModel,type ModelDescriptor} from '@cormijs/runtime';
+    await writeFile(join(modelConsumer,'types.mts'),`import {modelPlugin,type ModelPluginOptions} from '@cormijs/plugin-react';import {defineModel,useGlobalModelDispatch,useModel,useModelDispatch,type ModelDescriptor,type ObjectModel} from '@cormijs/runtime';
 const options:ModelPluginOptions={id:'consumer:model'};
 const descriptor:ModelDescriptor={namespace:'counter',model:()=>({count:0})};
-const value=useModel<{count:number}>('counter');void [modelPlugin,options,descriptor,value];
-// @ts-expect-error model must be a function
+const object:ObjectModel<{count:number}>=defineModel({state:{count:0},reducers:{increment(state){return {count:state.count+1};}}});
+const objectDescriptor:ModelDescriptor={namespace:'object',model:object};
+const value=useModel<{count:number}>('counter');
+const dispatch=useModelDispatch('object');
+const globalDispatch=useGlobalModelDispatch();
+void [modelPlugin,options,descriptor,objectDescriptor,value,dispatch,globalDispatch];
+// @ts-expect-error model must be a function or object model
 const bad:ModelDescriptor={namespace:'x',model:1};
 `);
     await execute('model-public-types',modelConsumer,process.execPath,typeArguments);

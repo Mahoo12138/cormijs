@@ -1,0 +1,112 @@
+{
+  "format": "cormi:u09-object-models-validation:1",
+  "verifiedAt": "2026-10-21T19:16:04.153Z",
+  "base": "1f7d4cbcebe444c913851b2a54aa2e82e2b11215",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/index.tsx",
+      "packages/runtime/src/model.tsx",
+      "scripts/model-fixture.ts",
+      "scripts/test-package.ts",
+      "docs/116-u09-object-models.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u09-object-models/check.log",
+      "sha256": "25f1ee3d48e5949e61ee73940e97924fecf197f89ab2ca2c35239857123e7dc6",
+      "seconds": 121.3,
+      "tests": 559,
+      "pass": 559,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u09-object-models/browser.log",
+      "sha256": "1430a7593d59ba852250ebd17c9f0a76cac8de6eb7b7538dec27fca29bb5675d",
+      "seconds": 553.9,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u09-object-models/package.log",
+      "sha256": "f91c22a7e66f2e8a9268cd653514e4fedab534fc97dd0afdd151826868bfc19b",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/model.test.ts",
+      "log": ".cache/u09-object-models/targeted.log",
+      "sha256": "1525f02a607e7b26c99da0252915f7a9905ea47c181a7efc51f44282e079758d",
+      "seconds": 11.3,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "hook and object models coexist, reducer, async effect, cross-model put, unknown action, navigation persistence, reload reset"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "06cbb558c85fc8c7997538ed30cc3d96c0cbe5d87a75858285b941920574b5fb",
+    "docs/49-application-guide.md": "b99403a7517b6b6564031ce0d9d592fa2e62b41d8347412f74da24eb3a27749c",
+    "docs/59-umi-feature-roadmap.md": "3e6cc4952fdc7cb060a55977454529ba229936e362430870d9a1f1ddb555fd65",
+    "packages/runtime/src/index.tsx": "0ecab03bcf3b0ed7f80dc0c5f2e632f625c47c21f7861832c4a26e39c13561e6",
+    "packages/runtime/src/model.tsx": "168411af8a81a08eb28f0a74437b6cd8c39f74f90a7ba347da761c85fd68ce2e",
+    "scripts/model-fixture.ts": "3e4f27d795bed91714706ea90ffc4f0237d81865a052f292fe14fa1b62e33f8c",
+    "scripts/test-package.ts": "a39b7c64cc5b1494e77d78ab15ba2a540e335f15865e33e30e0d9a0b033473be",
+    "docs/116-u09-object-models.md": "0bcb53b7db73ae05f3d3d30095321852cd031e0fcbcb2b6c4b3498dfc8305446"
+  },
+  "sourceInputCount": 8,
+  "sourceInputsDigest": "5ad07f6ae68ffa871470954b3e44f791388529d88982f1ca043fbaa2fcd07fc9",
+  "documentationInputs": {
+    "docs/116-u09-object-models.md": "0bcb53b7db73ae05f3d3d30095321852cd031e0fcbcb2b6c4b3498dfc8305446",
+    "docs/59-umi-feature-roadmap.md": "3e6cc4952fdc7cb060a55977454529ba229936e362430870d9a1f1ddb555fd65",
+    "docs/112-roadmap-audit-2026-10-21.md": "06cbb558c85fc8c7997538ed30cc3d96c0cbe5d87a75858285b941920574b5fb",
+    "docs/49-application-guide.md": "b99403a7517b6b6564031ce0d9d592fa2e62b41d8347412f74da24eb3a27749c"
+  },
+  "evidence": [
+    ".cache/u09-object-models/check.log",
+    ".cache/u09-object-models/browser.log",
+    ".cache/u09-object-models/package.log",
+    ".cache/u09-object-models/targeted.log",
+    "artifacts/u09-object-models-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "native-object-model-not-dva-compatible",
+    "no-subscriptions-extra-models-or-dependency-order",
+    "reducers-must-return-state",
+    "no-effect-cancellation-or-timeouts",
+    "no-selector-equality",
+    "no-state-persistence",
+    "hook-models-cannot-dispatch",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

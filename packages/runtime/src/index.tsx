@@ -11,7 +11,7 @@ export { analyticsRuntime, type AnalyticsOptions, type PageViewEvent } from './a
 export { PrefetchProvider, prefetchRuntime, usePrefetch, usePrefetchOnIntent, usePrefetchOnVisible, type PrefetchApi, type PrefetchLoader, type PrefetchIntentHandlers, type PrefetchIntentOptions, type PrefetchVisibleOptions } from './prefetch.js';
 export { collectHead, mergeHeads, normalizeHead, routeHeadRuntime, serializeJsonLd, HEAD_ATTRIBUTE, type JsonLd, type HeadMeta, type HeadLink, type RouteHead, type HeadOptions, type RouteHeadRuntimeOptions } from './head.js';
 export { HeadProvider, Helmet, headRuntime } from './helmet.js';
-export { ModelProvider, useModel, type ModelDescriptor } from './model.js';
+export { ModelProvider, useModel, useModelDispatch, useGlobalModelDispatch, defineModel, type ModelDescriptor, type ObjectModel, type ModelAction, type ModelEffect, type ModelEffectHelpers, type ModelReducer } from './model.js';
 export { InitialStateProvider, initialStateRuntime, useInitialState, type InitialState } from './initial-state.js';
 export { createRequestClient, RequestError, RequestProvider, requestRuntime, useRequest, useRequestClient, type RequestClient, type RequestOptions, type RequestParams, type UseRequestOptions, type UseRequestResult } from './request.js';
 export { applyLocaleCatalogs, FormattedMessage, LocaleProvider, localeRuntime, formatDateFor, formatNumberFor, formatRelativeTimeFor, richNodes, selectPluralKey, useIntl, useLocaleOptional, type IntlApi, type RichTag, type RichTags } from './locale.js';
