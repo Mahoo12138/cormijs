@@ -120,7 +120,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F4m | abbe5aa | CSS Modules/资源类型声明 | docs/110 |
 | U16-1 | ba6ea1f | locale 变更订阅 | docs/111 |
 
-最新冻结验证（2026-10-22）：`pnpm check` 562/562、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/u12-3-cache-validation.json`、`artifacts/u16-ui-locale-validation.json`、`artifacts/u12-2-pagination-validation.json`、`artifacts/u09-2-subscriptions-validation.json`、`artifacts/u12-request-retry-validation.json`、`artifacts/u09-object-models-validation.json`、`artifacts/u32-streaming-validation.json`、`artifacts/u33-2-prerender-paths-validation.json`、`artifacts/u33-prerender-validation.json`、`artifacts/u32-server-loader-validation.json` 及此前的 f4a…f5z、u16、u17、f4m、f5e 产物。仍未覆盖的大项见 U17、F6、U09 依赖排序、U12 容量/失效、U16 RTL/请求 locale、SSR 生产化与 U33 自动路径发现/增量；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交：U12-3 请求缓存（见提交记录）。
+最新冻结验证（2026-10-22）：`pnpm check` 562/562、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/u12-3-cache-validation.json`、`artifacts/u16-ui-locale-validation.json`、`artifacts/u12-2-pagination-validation.json`、`artifacts/u09-2-subscriptions-validation.json`、`artifacts/u12-request-retry-validation.json`、`artifacts/u09-object-models-validation.json`、`artifacts/u32-streaming-validation.json`、`artifacts/u33-2-prerender-paths-validation.json`、`artifacts/u33-prerender-validation.json`、`artifacts/u32-server-loader-validation.json` 及此前的 f4a…f5z、u16、u17、f4m、f5e 产物。仍未覆盖的大项见 U17、F6、U09 依赖排序、U12 容量/失效、U16 RTL/请求 locale、SSR 生产化与 U33 自动路径发现/增量；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交 1c72095（GET 缓存与并发去重）。
 
 ## 4. 实施顺序与可审阅交付
 
