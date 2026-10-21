@@ -46,7 +46,7 @@
 | U14 | access.ts/useAccess/Access、路由访问控制 | 基础已有（F3b/F3d/F3e/F4g）：accessPlugin 从 initialState 计算权限，useAccess/Access、路由 access 守卫、自定义 accessForbidden 与 `src/access.ts` 约定（配置优先于约定）可用；服务端授权边界与权限类型生成待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
 | U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e/F4i）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys、access 过滤、`meta.locale` 目录化标题与 `useMenuCollapse` 折叠状态；无 ProLayout/Antd adapter 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
 | U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a/F4h/F5f/F5l/F5m）：内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage、`src/locales` 目录，`formatNumber`/`formatDate`/`tp`，生成的 `CormiLocale.Code`/`MessageKey` 类型，ICU 子集（plural/selectordinal/select、offset、`#`、number/date/time、嵌套与引号转义）、`formatRelativeTime` 相对时间与 ICU 富文本标签；Antd/dayjs UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
-| U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
+| U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 部分已有（U17 增量）：`toAntdMenuItems`/`toLayoutRoutes` 提供无 UI 依赖的菜单适配；Antd/ProLayout 集成包、主题/图标/图表与 locale 联动待后续 | 可选 UI adapter/集成指南，不绑定 core | F3 |
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b/F5s）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；proxyPlugin 把路径前缀代理到 http(s) 上游，dev 与 preview 一致；req/res 兼容与统一配置入口待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c/F4d）：aliasPlugin 支持项目内相对别名与可选内置 `@`→src，definePlugin 在 dev 与 build 替换 JSON 常量；`@@`、环境分层自动映射与 define 类型生成待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
 | U20 | HTML title/metas/links/headScripts/scripts/favicon | 部分已有（F4a/F4e）：可选 htmlPlugin 注入 title/lang/meta/link/favicon，并按 Umi 位置约定注入 headScripts/scripts（封闭属性集合、转义与逃逸消解）；每路由 head 与任意 raw head HTML 待后续 | HTML/head 插件 | F4 |
@@ -117,7 +117,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5y | 5cc6c4f | SSR（dev/preview + hydration） | docs/107 |
 | F5z | d27c980 | 独立 serve 命令 | docs/108 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 544/544、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/f4a…f5z-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态。
+最新冻结验证（2026-10-21）：`pnpm check` 546/546、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/f4a…f5z-validation.json` 与 `artifacts/u17-menu-adapters-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -244,6 +244,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5x 状态（2026-10-21）：** U21 的组件 API 已交付：`@cormijs/runtime` 导出 `<Helmet>`、`HeadProvider` 与 `headRuntime`，headPlugin 的 runtime 贡献改为带 Provider；页面组件可声明 title/metas/links/jsonLd，按路由 head→组件挂载顺序合并（标题/JSON-LD 后者胜、meta/link 按选择器替换），卸载/导航移除受管节点，首帧用当前地址 seed 路由 head。对象 props API，SSR 头部收集仍待后续。用法、差异与验证见 [F5x Helmet](106-f5x-helmet.md)。
 
 **F5y head 增量（2026-10-21）：** SSR 渲染后收集路由 `meta.head` 与页面 `<Helmet>` 条目，合并 titleTemplate，并把 title/meta/link/JSON-LD 以受管标签写入 shell（dev/preview/serve 共用），客户端 hydration 后接管；SEO 首屏与服务端渲染一致。
+
+**U17 增量状态（2026-10-21）：** 新增无 UI 库依赖的菜单适配器：`toAntdMenuItems`（key=path、label=本地化标题、routeId、children）与 `toLayoutRoutes`（path/name/routes），供应用传给 Antd Menu/ProLayout；不引入 antd/ProLayout，主题、图标、图表与 dayjs/Antd locale 联动仍待后续。用法、差异与验证见 [U17 菜单适配器](109-ui-menu-adapters.md)。
 
 **F5z 状态（2026-10-21）：** U32 的独立服务已交付：`servePlugin`（`cormi:serve`）注册 `cormi serve`，从已完成构建的 `dist` 读取 SSR bundle 与静态资产，原生 Node HTTP 服务对 HTML 导航执行 SSR/hydration、对静态请求做输出目录白名单式提供，支持 app.base 前缀；不启动 Vite，不执行 API/Mock/proxy，无流式、压缩或 TLS。用法、差异与验证见 [F5z cormi serve](108-f5z-serve.md)。
 

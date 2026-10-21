@@ -665,10 +665,12 @@ const bad:AccessConfig=()=>({canAdmin:'yes'});
     await writeFile(join(menuConsumer,'package.json'),JSON.stringify(menuManifest,null,2));
     await install('menu-install',menuConsumer);await auditLinks(menuConsumer);
     await command('menu-typecheck',menuConsumer,'typecheck');
-    await writeFile(join(menuConsumer,'types.mts'),`import {menuPlugin,type MenuPluginOptions} from '@cormijs/plugin-react';import {useBreadcrumb,useMenu,type BreadcrumbItem,type MenuItem} from '@cormijs/runtime';
+    await writeFile(join(menuConsumer,'types.mts'),`import {menuPlugin,type MenuPluginOptions} from '@cormijs/plugin-react';import {toAntdMenuItems,toLayoutRoutes,useBreadcrumb,useMenu,type AntdMenuItem,type BreadcrumbItem,type LayoutRoute,type MenuItem} from '@cormijs/runtime';
 const options:MenuPluginOptions={id:'consumer:menu'};
 declare const menu:readonly MenuItem[];declare const crumbs:readonly BreadcrumbItem[];
-void [menuPlugin,options,menu,crumbs,useMenu,useBreadcrumb];
+const antdItems:readonly AntdMenuItem[]=toAntdMenuItems(menu);
+const layoutRoutes:readonly LayoutRoute[]=toLayoutRoutes(menu);
+void [menuPlugin,options,menu,crumbs,useMenu,useBreadcrumb,antdItems,layoutRoutes];
 // @ts-expect-error menu titles are strings
 const bad:MenuItem['title']=42;
 `);

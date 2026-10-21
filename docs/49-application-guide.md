@@ -1039,7 +1039,17 @@ export default defineConfig({
 plugins: [{ id: 'serve', plugin: servePlugin, options: { id: 'application:serve', port: 4173, base: '/' } }]
 ```
 
-服务读取 `dist/index.html` 与 `dist/.cormi/ssr/ssr.mjs`：HTML 导航执行 SSR/hydration，其余请求按 dist 白名单提供静态文件；需先 `cormi build`。支持 `host`/`port`/`outDir`/`base`/`mountId` 选项；不执行 API 路由、Mock、代理，无压缩/流式/TLS。规则见 [F5z cormi serve](108-f5z-serve.md)。规则见 [F5y SSR](107-f5y-ssr.md)。
+服务读取 `dist/index.html` 与 `dist/.cormi/ssr/ssr.mjs`：HTML 导航执行 SSR/hydration，其余请求按 dist 白名单提供静态文件；需先 `cormi build`。支持 `host`/`port`/`outDir`/`base`/`mountId` 选项；不执行 API 路由、Mock、代理，无压缩/流式/TLS。规则见 [F5z cormi serve](108-f5z-serve.md)。
+
+### 4.48 菜单适配 Antd/ProLayout
+
+```tsx
+const items = toAntdMenuItems(useMenu());
+<Menu items={items} onClick={({ key }) => navigate(key)} />
+// 或 const route = { path: '/', routes: toLayoutRoutes(useMenu()) };
+```
+
+适配器不引入 antd/ProLayout；`key` 为 path、label 已本地化、routeId 保留路由 id。主题/图标/图表与 Antd/dayjs locale 联动仍需应用自行处理。规则见 [U17 菜单适配器](109-ui-menu-adapters.md)。规则见 [F5y SSR](107-f5y-ssr.md)。
 
 ## 5. 环境和 Mock 使用同一个部署前缀
 
