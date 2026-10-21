@@ -62,11 +62,14 @@ export async function generateApplication(root: string, routes: readonly RouteRe
     if (route.redirect) pageFields.push(`element:<RedirectRoute to=${JSON.stringify(route.redirect)}${route.keepQuery ? ' keepQuery' : ''}/>`);
     else if (route.module) {
       const specifier = JSON.stringify(routeModules.get(route.id));
-      pageFields.push(route.clientLoader === undefined
-        ? `lazy:async()=>({Component:await resolveRouteComponent(async()=>(await import(${specifier}))[${JSON.stringify(route.module.exportName)}])})`
-        : `lazy:async()=>{const page=await import(${specifier});return {Component:await resolveRouteComponent(async()=>page[${JSON.stringify(route.module.exportName)}]),loader:clientLoaderOf(page,${JSON.stringify(route.clientLoader)},${JSON.stringify(route.id)})};}`);
+      // A loader returned from `lazy` is never merged when it throws, so the loader stays a static property that
+      // imports the page itself; only the component is lazy. This keeps the route's own boundary reachable.
+      if (route.clientLoader !== undefined) {
+        pageFields.push(`loader:async(args)=>{const page=await import(${specifier});return clientLoaderOf(page,${JSON.stringify(route.clientLoader)},${JSON.stringify(route.id)})(args)}`);
+      }
+      pageFields.push(`lazy:async()=>({Component:await resolveRouteComponent(async()=>(await import(${specifier}))[${JSON.stringify(route.module.exportName)}])})`);
     }
-    if (route.errorBoundary) pageFields.push(`ErrorBoundary:${boundaryAliases.get(route.id)}[${JSON.stringify(route.errorBoundary.exportName)}]`);
+    if (route.errorBoundary) pageFields.push('hasErrorBoundary:true', `ErrorBoundary:${boundaryAliases.get(route.id)}[${JSON.stringify(route.errorBoundary.exportName)}]`);
     if (children.has(route.id)) pageFields.push(`children:${render(route.id)}`);
     if (!route.access) return '{' + pageFields.join(',') + '}';
     const guard = [`id:${JSON.stringify(route.id + ':access')}`, `handle:{cormi:{meta:{},access:${JSON.stringify(route.access)}}}`];

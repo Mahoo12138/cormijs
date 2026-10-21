@@ -42,7 +42,7 @@
 | U10 | getInitialState、@@initialState、refresh/setInitialState | 部分已有（F2b）：initialStatePlugin 登记 getInitialState，提供 useInitialState/loading/error/refresh/set；@@initialState 模型集成、首屏阻塞与 SSR 待后续 | initial-state 插件，依赖 model/应用 runtime | F2 |
 | U11 | request、运行时配置、拦截器、统一错误 | 部分已有（F2c）：requestPlugin 注册 app.tsx request 配置和每挂载 fetch 客户端；拦截器、统一错误协议、dataField 待后续 | request 契约/客户端实现适配 | F2 |
 | U12 | useRequest、手动/自动、分页/加载更多等 | 部分已有（F2c）：自动/手动、loading/error、refresh、cancel、竞态保护；重试/轮询/分页/加载更多待后续 | 请求 Hooks 插件，可复用成熟库 | F2 |
-| U13 | clientLoader/useClientLoaderData/routeProps | 部分已有（F5a）：配置式路由的 `clientLoader` 导出名映射到 React Router loader，页面用 `useClientLoaderData`/`useRouteLoaderDataFor`/`useClientLoaderError` 读取；约定式路由识别、loader 失败的边界呈现契约与数据类型生成待后续 | 路由数据插件 | F3 |
+| U13 | clientLoader/useClientLoaderData/routeProps | 部分已有（F5a/F5b）：配置式路由的 `clientLoader` 导出名映射到 React Router 静态 loader，页面用 `useClientLoaderData`/`useRouteLoaderDataFor`/`useClientLoaderError` 读取，loader 抛错由该路由的 `errorBoundary` 呈现；约定式路由识别、类型生成与预取待后续 | 路由数据插件 | F3 |
 | U14 | access.ts/useAccess/Access、路由访问控制 | 基础已有（F3b/F3d/F3e/F4g）：accessPlugin 从 initialState 计算权限，useAccess/Access、路由 access 守卫、自定义 accessForbidden 与 `src/access.ts` 约定（配置优先于约定）可用；服务端授权边界与权限类型生成待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
 | U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e/F4i）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys、access 过滤、`meta.locale` 目录化标题与 `useMenuCollapse` 折叠状态；无 ProLayout/Antd adapter 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
 | U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a/F4h）：localePlugin 提供内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage，并可用 `directory` 构建期内联 `src/locales/<locale>.json` 消息目录；复数/日期格式化、按语言懒加载与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
@@ -145,6 +145,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F4i 状态（2026-10-20）：** U15 的折叠与目录化标题已交付：`menuPlugin` 的 `collapse` 选项经 RuntimeContribution options 传入 `MenuProvider`，`useMenuCollapse()` 提供 `{collapsed,setCollapsed,toggle}` 并可选 `localStorage` 持久化；菜单与面包屑标题按 `meta.locale` → `meta.title` → `meta.name` 解析，`IntlApi.peek` 保证未命中时不显示原始 key。ProLayout/Antd adapter、图标/徽章与布局插槽仍待后续。用法、差异与验证见 [F4i 菜单折叠与标题](82-f4i-menu-collapse.md)。
 
 **F5a 状态（2026-10-20）：** U13 的核心已交付：`ConfigRoute.clientLoader` 与扁平 IR 校验导出名，`generateApplication` 让该路由一次性解析页面模块并用 `clientLoaderOf` 把同名导出交给 React Router loader，深链接/重载/前进后退都会取数；`@cormijs/runtime` 新增 `useClientLoaderData`、`useRouteLoaderDataFor`、`useClientLoaderError`。约定式路由识别、loader 失败的边界呈现契约（该呈现实测未挂载，原因尚未定位，故回退相关改动）、SSR 数据注水与预取（U31）仍待后续。用法、差异与验证见 [F5a 路由 client loader](83-f5a-client-loader.md)。
+
+**F5b 状态（2026-10-20）：** U13 的错误呈现缺口已闭环：loader 从 `lazy()` 返回值改为路由的静态属性，修复了“loader 抛错后 lazy 未合并、匹配被截断到根路由而整页空白”的行为；错误现在落到该路由自己的 `errorBoundary`（导航与深链接一致），`useClientLoaderError` 可读取原始错误对象。代价是页面模块被 loader 与 lazy 各导入一次（浏览器模块缓存复用），约定式路由识别、类型生成与预取仍待后续。见 [F5a 路由 client loader](83-f5a-client-loader.md)。
 
 ### F3：权限、布局、菜单和国际化
 

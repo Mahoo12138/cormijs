@@ -10,6 +10,7 @@ const routes = [{
   id: 'shell', path: '/', component: './src/Shell.tsx', routes: [
     { index: true, component: './src/Home.tsx' },
     { path: 'member/:id', component: './src/Member.tsx', clientLoader: 'clientLoader' },
+    { path: 'broken', component: './src/Broken.tsx', clientLoader: 'clientLoader', errorBoundary: './src/Failed.tsx' },
   ],
 }];
 export default defineConfig({
@@ -25,8 +26,12 @@ export async function writeClientLoaderFixture(root: string) {
     'index.html': '<!doctype html><html><head><title>cormi client loader</title><link rel="icon" href="data:," /></head><body><div id="root"></div><script type="module" src="/.cormi/app.tsx"></script></body></html>',
     'cormi.config.ts': clientLoaderConfiguration,
     'src/Shell.tsx': `import { Link, Outlet } from '@cormijs/runtime';
-export default function Shell(){return <section data-shell><header><h1>Client loader demo</h1><nav><Link to="/">Home</Link><Link to="/member/42">Ada</Link></nav></header><Outlet/></section>;}`,
+export default function Shell(){return <section data-shell><header><h1>Client loader demo</h1><nav><Link to="/">Home</Link><Link to="/member/42">Ada</Link><Link to="/broken">Broken</Link></nav></header><Outlet/></section>;}`,
     'src/Home.tsx': 'export default function Home(){return <main><h2>Loader home</h2></main>;}',
+    'src/Broken.tsx': `export default function Broken(){return <main><h2>Should not render</h2></main>;}
+export async function clientLoader(){ throw new Error('CLIENT_LOADER_FAILED'); }`,
+    'src/Failed.tsx': `import { useClientLoaderError } from '@cormijs/runtime';
+export default function Failed(){const error=useClientLoaderError();return <main role="status"><h2>Loader failed</h2><p data-reason>{error instanceof Error ? error.message : String(error)}</p></main>;}`,
     'src/Member.tsx': `import { useClientLoaderData } from '@cormijs/runtime';
 interface Data { id: string; hits: number }
 export default function Member(){
@@ -37,7 +42,6 @@ export async function clientLoader({ params }: { params: Record<string, string |
   await new Promise(resolve => setTimeout(resolve, 40));
   return { id: params.id ?? '-', hits: 7 };
 }`,
-    'src/Broken.tsx': `export default function Broken(){return <main><h2>Should not render</h2></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
       strict: true, noEmit: true, skipLibCheck: false, allowImportingTsExtensions: true, lib: ['ES2023', 'DOM', 'DOM.Iterable'], types: ['react', 'react-dom', 'node'] },
       include: ['cormi.config.ts', 'src', '.cormi/**/*'] }, null, 2),
@@ -60,7 +64,14 @@ export async function verifyClientLoaderPage(page: Page, url: string) {
   await page.getByRole('heading', { name: 'Member page', exact: true }).waitFor();
   assert.equal(await page.locator('[data-hits]').innerText(), '7');
 
-  // Navigating back re-runs the loader for the target route only.
+  // A throwing loader is contained by the route's own error boundary, on navigation and on a deep link.
+  await page.getByRole('link', { name: 'Broken', exact: true }).click();
+  await page.getByRole('heading', { name: 'Loader failed', exact: true }).waitFor();
+  assert.equal(await page.locator('[data-reason]').innerText(), 'CLIENT_LOADER_FAILED');
+  assert.equal(await page.getByRole('heading', { name: 'Should not render', exact: true }).count(), 0);
+  await page.goto(new URL('broken', url).href);
+  await page.getByRole('heading', { name: 'Loader failed', exact: true }).waitFor();
+
   await page.getByRole('link', { name: 'Home', exact: true }).click();
   await page.getByRole('heading', { name: 'Loader home', exact: true }).waitFor();
 

@@ -45,8 +45,11 @@ test('the generated entry binds the page clientLoader as the route loader', asyn
   await session.close();
   const code = await f.code();
   assert.match(code, /import \{ mountApplication, resolveRouteComponent, type RuntimeEntry, clientLoaderOf \} from '@cormijs\/runtime';/);
-  assert.match(code, /loader:clientLoaderOf\(page,"clientLoader","member"\)/);
-  assert.equal((code.match(/await import\("\.\.\/src\/pages\/member\/\[id\]\.tsx"\)/g) ?? []).length, 1, 'the page module is resolved once per route');
+  // The loader stays a static route property: a loader returned from `lazy` is never merged when it throws.
+  assert.match(code, /loader:async\(args\)=>\{const page=await import\("\.\.\/src\/pages\/member\/\[id\]\.tsx"\);return clientLoaderOf\(page,"clientLoader","member"\)\(args\)\}/);
+  assert.doesNotMatch(code, /loader:clientLoaderOf/);
+  // The loader and the lazy component both import the page; the browser resolves the same module instance.
+  assert.equal((code.match(/await import\("\.\.\/src\/pages\/member\/\[id\]\.tsx"\)/g) ?? []).length, 2);
 
   const plain = await f.host.ctx.application.prepare(f.request({ routes: [
     { id: 'home', index: true, module: { specifier: './src/pages/index.tsx', exportName: 'default' }, source: {} },
