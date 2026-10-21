@@ -1,5 +1,5 @@
 import { CormiError, type Plugin } from '@cormijs/core';
-import { lstat, mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, readFile, readdir, realpath, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import type {} from '@cormijs/plugin-vite';
 
@@ -9,6 +9,8 @@ export interface MpaPluginOptions {
   readonly directory?: string;
   /** Fallback element id for generated entries; default `root`. */
   readonly mountElementId?: string;
+  /** Project-relative React layout wrapping every page unless overridden per page. */
+  readonly layout?: string;
 }
 export interface MpaCandidate {
   readonly name: string;
@@ -16,8 +18,10 @@ export interface MpaCandidate {
   readonly file: string;
   readonly title?: string;
   readonly mountElementId?: string;
+  readonly layout?: string;
 }
 export interface MpaEntry extends Required<Pick<MpaCandidate, 'name' | 'file' | 'title' | 'mountElementId'>> {
+  readonly layout?: string;
   /** Generated HTML, project-relative. */
   readonly html: string;
   /** Generated React entry, project-relative. */
@@ -30,8 +34,18 @@ const extensionPattern = /\.(?:tsx|jsx|ts|js)$/;
 const escape = (value: string) => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const posix = (value: string) => value.split(sep).join('/');
 
+const layoutPattern = /\.(?:tsx|jsx|ts|js)$/;
+function normalizeLayout(value: unknown, field = 'layout'): string | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string' || !value || value.length > 256 || !layoutPattern.test(value) || isAbsolute(value)
+    || value.split('/').some(part => !part || part === '..' || part === '.' || part === 'node_modules' || part === '.cormi' || part === '.git') || /[\0\r\n\\]/.test(value)) {
+    throw new CormiError('MPA_INVALID', 'MPA layout must be a project-relative source file.', { [field]: value });
+  }
+  return value;
+}
+
 function normalizeOptions(options: MpaPluginOptions = {}) {
-  if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'directory', 'mountElementId'].includes(key))) {
+  if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'directory', 'mountElementId', 'layout'].includes(key))) {
     throw new CormiError('MPA_INVALID', 'Invalid MPA plugin options.');
   }
   const id = options.id ?? 'cormi:mpa';
@@ -42,11 +56,11 @@ function normalizeOptions(options: MpaPluginOptions = {}) {
   }
   const mountElementId = options.mountElementId ?? 'root';
   if (typeof mountElementId !== 'string' || !mountPattern.test(mountElementId)) throw new CormiError('MPA_INVALID', 'Invalid mount element id.', { mountElementId });
-  return { id, directory, mountElementId };
+  return { id, directory, mountElementId, layout: normalizeLayout(options.layout) };
 }
 
 /** Validate/canonicalize discovered page directories; index is reserved for the SPA shell. */
-export function resolveMpaEntries(candidates: readonly MpaCandidate[], options: Pick<Required<MpaPluginOptions>, 'directory' | 'mountElementId'>): readonly MpaEntry[] {
+export function resolveMpaEntries(candidates: readonly MpaCandidate[], options: Pick<Required<MpaPluginOptions>, 'directory' | 'mountElementId'> & { readonly layout?: string }): readonly MpaEntry[] {
   if (!Array.isArray(candidates) || candidates.length > 32) throw new CormiError('MPA_INVALID', 'MPA supports 1 to 32 page directories.');
   const base = options.directory.replace(/\/+$/, '');
   const names = new Set<string>(), entries: MpaEntry[] = [];
@@ -63,9 +77,10 @@ export function resolveMpaEntries(candidates: readonly MpaCandidate[], options: 
     if (typeof title !== 'string' || !title || title.length > 512 || /[\0\r\n]/.test(title)) throw new CormiError('MPA_INVALID', 'MPA title must be bounded text.', { name });
     const mountElementId = candidate.mountElementId ?? options.mountElementId;
     if (typeof mountElementId !== 'string' || !mountPattern.test(mountElementId)) throw new CormiError('MPA_INVALID', 'Invalid mount element id.', { name });
+    const layout = normalizeLayout(candidate.layout ?? options.layout);
     names.add(name);
     const root = `.cormi/mpa/${name}`;
-    entries.push(Object.freeze({ name, file, title, mountElementId, html: `${root}.html`, entry: `${root}.tsx` }));
+    entries.push(Object.freeze({ name, file, title, mountElementId, ...(layout !== undefined ? { layout } : {}), html: `${root}.html`, entry: `${root}.tsx` }));
   }
   return Object.freeze(entries.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)));
 }
@@ -74,9 +89,9 @@ export function resolveMpaEntries(candidates: readonly MpaCandidate[], options: 
 export function mpaEntrySource(entry: MpaEntry): string {
   return `import { createRoot } from 'react-dom/client';
 import Page from '/${entry.file}';
-const container = document.getElementById(${JSON.stringify(entry.mountElementId)});
+${entry.layout ? `import Layout from '/${entry.layout}';\n` : ''}const container = document.getElementById(${JSON.stringify(entry.mountElementId)});
 if (!container) throw new Error(${JSON.stringify(`MPA_MOUNT_MISSING: #${entry.mountElementId}`)});
-createRoot(container).render(<Page />);
+createRoot(container).render(${entry.layout ? '<Layout><Page /></Layout>' : '<Page />'});
 `;
 }
 
@@ -97,7 +112,7 @@ export function mpaHtml(entry: MpaEntry): string {
 `;
 }
 
-async function discover(root: string, directory: string, mount: string): Promise<readonly MpaEntry[]> {
+async function discover(root: string, directory: string, mount: string, layout: string | undefined): Promise<readonly MpaEntry[]> {
   const pages = join(root, directory);
   const items = await readdir(pages, { withFileTypes: true }).catch((error: NodeJS.ErrnoException) => {
     if (error.code === 'ENOENT') return [];
@@ -127,21 +142,22 @@ async function discover(root: string, directory: string, mount: string): Promise
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     }
-    const title = config.title, mountElementId = config.mountElementId;
+    const title = config.title, mountElementId = config.mountElementId, pageLayout = config.layout;
     candidates.push({
       name: item.name, file: posix(relative(root, file)),
       ...(title !== undefined ? { title: title as string } : {}),
       ...(mountElementId !== undefined ? { mountElementId: mountElementId as string } : {}),
+      ...(pageLayout !== undefined ? { layout: pageLayout as string } : {}),
     });
   }
-  return resolveMpaEntries(candidates, { directory, mountElementId: mount });
+  return resolveMpaEntries(candidates, { directory, mountElementId: mount, ...(layout !== undefined ? { layout } : {}) });
 }
 
 /** Opt-in MPA: top-level page directories become standalone `<name>.html` entries. */
 export const mpaPlugin: Plugin.Object<MpaPluginOptions> = {
   name: 'cormi:mpa', inject: ['vite', 'projectRoot'],
   apply(ctx, options) {
-    const { id, directory, mountElementId } = normalizeOptions(options);
+    const { id, directory, mountElementId, layout } = normalizeOptions(options);
     const root = ctx.projectRoot.root;
     const generated = join(root, '.cormi/mpa');
     let entries: readonly MpaEntry[] = [];
@@ -152,10 +168,14 @@ export const mpaPlugin: Plugin.Object<MpaPluginOptions> = {
       return {
         name: id,
         async config(_config, env) {
-          entries = await discover(root, directory, mountElementId);
+          entries = await discover(root, directory, mountElementId, layout);
           await rm(generated, { recursive: true, force: true });
           await mkdir(generated, { recursive: true });
           for (const entry of entries) {
+            if (entry.layout) {
+              const target = join(root, entry.layout);
+              if (!(await stat(target)).isFile() || (await realpath(target)) !== target) throw new CormiError('MPA_INVALID', 'MPA layout must be a real project file.', { layout: entry.layout });
+            }
             const file = join(root, entry.entry);
             if (!(await stat(join(root, entry.file))).isFile()) throw new CormiError('MPA_INVALID', 'MPA entry is unreadable.', { file: entry.file });
             await writeFile(file, mpaEntrySource(entry));
