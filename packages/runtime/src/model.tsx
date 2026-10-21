@@ -8,6 +8,7 @@ export interface ModelEffectHelpers {
   state(): unknown;
 }
 export interface ModelSubscriptionHelpers {
+  /** Bare actions target this model; `namespace/action` actions dispatch globally. */
   dispatch: ModelDispatch;
   state(): unknown;
 }
@@ -19,6 +20,8 @@ export interface ObjectModel<S = unknown> {
   readonly reducers?: Readonly<Record<string, ModelReducer<S>>>;
   readonly effects?: Readonly<Record<string, ModelEffect<S>>>;
   readonly subscriptions?: Readonly<Record<string, ModelSubscription>>;
+  /** Namespaces initialized before this model; subscriptions of dependencies start first. */
+  readonly dependencies?: readonly string[];
 }
 export interface ModelDescriptor {
   readonly namespace: string;
@@ -42,6 +45,41 @@ const ModelContext = createContext<ModelScope | null>(null);
 
 const isObjectModel = (value: unknown): value is ObjectModel<any> =>
   !!value && typeof value === 'object' && !Array.isArray(value) && Object.hasOwn(value, 'state');
+
+/** Validate descriptors and return dependency-first namespace order; cycles and missing deps fail. */
+export function modelInitializationOrder(models: readonly ModelDescriptor[]): readonly string[] {
+  if (!Array.isArray(models)) throw new TypeError('MODEL_INVALID: models must be an array');
+  const byName = new Map<string, ModelDescriptor>();
+  for (const item of models) {
+    if (!item || typeof item.namespace !== 'string' || !/^[A-Za-z_$][A-Za-z0-9_$.-]*$/.test(item.namespace) || byName.has(item.namespace)) {
+      throw new TypeError(`MODEL_INVALID: ${String(item?.namespace)}`);
+    }
+    if (typeof item.model !== 'function' && !isObjectModel(item.model)) throw new TypeError(`MODEL_INVALID: ${item.namespace}`);
+    byName.set(item.namespace, item);
+  }
+  const dependencies = new Map<string, readonly string[]>();
+  for (const item of models) {
+    if (!isObjectModel(item.model) || item.model.dependencies === undefined) continue;
+    const list = item.model.dependencies;
+    if (!Array.isArray(list) || list.length > 64 || list.some(name => typeof name !== 'string' || !name)) {
+      throw new TypeError(`MODEL_DEPENDENCY_INVALID: ${item.namespace}`);
+    }
+    for (const name of list) {
+      if (!byName.has(name)) throw new TypeError(`MODEL_DEPENDENCY_MISSING: ${item.namespace} -> ${name}`);
+      if (name === item.namespace) throw new TypeError(`MODEL_DEPENDENCY_CYCLE: ${item.namespace}`);
+    }
+    dependencies.set(item.namespace, Object.freeze([...new Set(list)]));
+  }
+  const order: string[] = [];
+  const visit = (namespace: string, stack: readonly string[]): void => {
+    if (order.includes(namespace)) return;
+    if (stack.includes(namespace)) throw new TypeError(`MODEL_DEPENDENCY_CYCLE: ${[...stack, namespace].join(' -> ')}`);
+    for (const dependency of dependencies.get(namespace) ?? []) visit(dependency, [...stack, namespace]);
+    order.push(namespace);
+  };
+  for (const item of models) visit(item.namespace, []);
+  return Object.freeze(order);
+}
 
 function actionOf(action: ModelAction): { type: string; payload?: unknown } {
   if (typeof action === 'string') return { type: action };
@@ -102,7 +140,10 @@ function createStore(namespace: string, model: ObjectModel<any>, global: (action
       const cleanups: Array<() => void> = [];
       for (const [name, subscribe] of Object.entries(subscriptions)) {
         try {
-          const cleanup = subscribe({ dispatch, state: () => state });
+          const cleanup = subscribe({
+            dispatch: action => actionOf(action).type.includes('/') ? global(action) : dispatch(action),
+            state: () => state,
+          });
           if (typeof cleanup === 'function') cleanups.push(cleanup);
         } catch (error) { console.error(`[cormi:model-subscription] ${namespace}/${name}`, error); }
       }
@@ -118,18 +159,12 @@ function createStore(namespace: string, model: ObjectModel<any>, global: (action
 
 /** Execute hook models per render and instantiate object model stores once per mount. */
 export function ModelProvider({ models, children }: { readonly models: readonly ModelDescriptor[]; readonly children: ReactNode }) {
-  const [stores] = useState(() => {
-    const created = new Map<string, Store>(), namespaces = new Set<string>();
+  const [{ stores, order }] = useState(() => {
+    const order = modelInitializationOrder(models);
+    const created = new Map<string, Store>();
     const global = (action: ModelAction) => dispatchGlobal(created, action);
-    for (const item of models) {
-      if (!item || typeof item.namespace !== 'string' || !/^[A-Za-z_$][A-Za-z0-9_$.-]*$/.test(item.namespace) || namespaces.has(item.namespace)) {
-        throw new TypeError(`MODEL_INVALID: ${String(item?.namespace)}`);
-      }
-      namespaces.add(item.namespace);
-      if (!isObjectModel(item.model) && typeof item.model !== 'function') throw new TypeError(`MODEL_INVALID: ${item.namespace}`);
-      if (isObjectModel(item.model)) created.set(item.namespace, createStore(item.namespace, item.model, global));
-    }
-    return created;
+    for (const item of models) if (isObjectModel(item.model)) created.set(item.namespace, createStore(item.namespace, item.model, global));
+    return { stores: created, order };
   });
   const hooks: Record<string, unknown> = {};
   for (const item of models) {
@@ -137,9 +172,9 @@ export function ModelProvider({ models, children }: { readonly models: readonly 
     if (typeof model === 'function') hooks[item.namespace] = model();
   }
   useEffect(() => {
-    const cleanups = [...stores.values()].map(store => store.start());
+    const cleanups = order.filter(namespace => stores.has(namespace)).map(namespace => stores.get(namespace)!.start());
     return () => { for (const cleanup of cleanups.reverse()) cleanup(); };
-  }, [stores]);
+  }, [stores, order]);
   const scope: ModelScope = Object.freeze({ hooks: Object.freeze(hooks), stores });
   return <ModelContext.Provider value={scope}>{children}</ModelContext.Provider>;
 }

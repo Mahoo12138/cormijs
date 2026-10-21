@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { ProjectRuntime } from '@cormijs/core';
 import { modelContributions, modelPlugin, reactPlugin, resolveModels } from '@cormijs/plugin-react';
 import { readInspection, type ApplicationRequest } from '@cormijs/plugin-web';
+import { defineModel, modelInitializationOrder } from '@cormijs/runtime';
 import { hasCode } from './helpers.js';
 
 async function project(t: TestContext) {
@@ -58,4 +59,24 @@ test('model plugin generates imports, type surface and inspection, then withdraw
   await f.host.unmount('models');
   const off = await f.host.ctx.application.prepare(f.request); await off.close();
   assert.doesNotMatch(await f.code(), /model0/);
+});
+
+test('modelInitializationOrder sorts dependencies first and rejects missing or cyclic graphs', () => {
+  const model = (dependencies?: string[]) => defineModel({ state: {}, ...(dependencies ? { dependencies } : {}) });
+  assert.deepEqual(modelInitializationOrder([
+    { namespace: 'cart', model: model(['prefs']) },
+    { namespace: 'hook', model: () => ({}) },
+    { namespace: 'prefs', model: model() },
+  ]), ['prefs', 'cart', 'hook']);
+  assert.throws(() => modelInitializationOrder([
+    { namespace: 'a', model: model(['b']) },
+    { namespace: 'b', model: model(['a']) },
+  ]), /MODEL_DEPENDENCY_CYCLE/);
+  assert.throws(() => modelInitializationOrder([{ namespace: 'a', model: model(['a']) }]), /MODEL_DEPENDENCY_CYCLE/);
+  assert.throws(() => modelInitializationOrder([{ namespace: 'a', model: model(['missing']) }]), /MODEL_DEPENDENCY_MISSING/);
+  assert.throws(() => modelInitializationOrder([
+    { namespace: 'a', model: model() },
+    { namespace: 'a', model: model() },
+  ]), /MODEL_INVALID/);
+  assert.throws(() => modelInitializationOrder([{ namespace: 'a', model: defineModel({ state: {}, dependencies: [''] }) }]), /MODEL_DEPENDENCY_INVALID/);
 });

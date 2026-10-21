@@ -30,7 +30,7 @@ export default defineModel({
 
 ## 2. 契约与语义
 
-- **subscriptions**：对象模型的 `subscriptions` 是函数表，每个函数在 Provider 挂载后执行一次，收到 `{ dispatch, state }`；dispatch 与 `useModelDispatch` 等价，`state()` 读取当前最新 state。返回函数作为清理函数，Provider 卸载时逆序执行。
+- **subscriptions**：对象模型的 `subscriptions` 是函数表，每个函数在 Provider 挂载后按 `dependencies` 拓扑顺序执行一次，收到 `{ dispatch, state }`；裸 dispatch 作用于本模型，`namespace/action` 走全局派发，`state()` 读取当前最新 state。返回函数作为清理函数，Provider 卸载时逆序执行。
 - **SSR**：subscriptions 在 effect 中执行，服务端渲染不运行；hydration 后在浏览器挂载时执行。StrictMode 开发模式下按 React effect 语义执行/清理/再执行。
 - **错误**：订阅函数抛错或清理抛错记录到 `[cormi:model-subscription]`，不阻止其他订阅或应用渲染；订阅内的异步错误由订阅自行处理。
 - **extraModels**：`modelPlugin` 选项接受项目相对源文件数组（≤256）；与 `dir`/`files` 的结果合并、去重，并参与观察、生成、类型检查与 inspect。namespace 仍由文件路径派生：`src/extra/boost.ts` 是 `extra.boost`，不是 `boost`。

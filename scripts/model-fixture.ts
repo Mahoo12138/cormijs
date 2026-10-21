@@ -27,6 +27,7 @@ export default function user(){const [name,setName]=useState('Ada');return {name
     'src/models/cart.ts': `import { defineModel } from '@cormijs/runtime';
 export default defineModel({
   state: { items: [] as string[], total: 0 },
+  dependencies: ['prefs'],
   reducers: {
     add(state, action) { return { items: [...state.items, String(action.payload)], total: state.total + 1 }; },
   },
@@ -39,11 +40,18 @@ export default defineModel({
       await put({ type: 'prefs/touch', payload: action.payload });
     },
   },
+  subscriptions: { boot({ dispatch }) { void dispatch({ type: 'audit/record', payload: 'cart' }); } },
 });`,
     'src/models/prefs.ts': `import { defineModel } from '@cormijs/runtime';
 export default defineModel({
   state: { touched: '' },
   reducers: { touch(state, action) { return { touched: String(action.payload) }; } },
+  subscriptions: { boot({ dispatch }) { void dispatch({ type: 'audit/record', payload: 'prefs' }); } },
+});`,
+    'src/models/audit.ts': `import { defineModel } from '@cormijs/runtime';
+export default defineModel({
+  state: { order: '' },
+  reducers: { record(state, action) { return { order: state.order ? state.order + ',' + String(action.payload) : String(action.payload) }; } },
 });`,
     'src/extra/boost.ts': `import { defineModel } from '@cormijs/runtime';
 export default defineModel({
@@ -57,6 +65,7 @@ function CounterView(){const {count,increment}=useModel<{count:number;increment:
 function CounterSelector(){const count=useModel('counter',(state:{count:number})=>state.count);return <output data-count>{count}</output>;}
 function UserView(){const {name,rename}=useModel<{name:string;rename:(value:string)=>void}>('user');return <section data-user>{name}<button onClick={()=>rename('Grace')}>Rename</button></section>;}
 function BoostView(){const {booted}=useModel<{booted:boolean}>('extra.boost');return <p data-boost>{String(booted)}</p>;}
+function AuditView(){const {order}=useModel<{order:string}>('audit');return <p data-order>{order}</p>;}
 function CartView(){
   const cart=useModel<{items:string[];total:number}>('cart');
   const prefs=useModel<{touched:string}>('prefs');
@@ -69,7 +78,7 @@ function CartView(){
     <output data-cart-error>{error}</output>
   </section>;
 }
-export default function Home(){return <main><h1>Model home</h1><CounterView /><CounterSelector /><UserView /><BoostView /><CartView /><Link to="/other">Other page</Link></main>;}`,
+export default function Home(){return <main><h1>Model home</h1><CounterView /><CounterSelector /><UserView /><BoostView /><AuditView /><CartView /><Link to="/other">Other page</Link></main>;}`,
     'src/pages/other.tsx': `import { Link, useModel } from '@cormijs/runtime';
 export default function Other(){const count=useModel('counter',(state:{count:number})=>state.count);const cart=useModel<{total:number}>('cart');return <main><h1>Model other</h1><output data-other-count>{count}</output><output data-other-cart>{cart.total}</output><Link to="/">Model home</Link></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -86,6 +95,7 @@ export async function verifyModelPage(page: Page, url: string) {
   assert.equal(await page.locator('[data-user]').innerText(), 'AdaRename');
   assert.ok((await page.locator('[data-cart]').innerText()).startsWith('0:'));
   await page.waitForFunction(() => document.querySelector('[data-boost]')?.textContent === 'true');
+  await page.waitForFunction(() => document.querySelector('[data-order]')?.textContent === 'prefs,cart');
   await page.getByRole('button', { name: 'Add later', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('[data-cart]')?.textContent?.startsWith('1:'));
   await page.getByRole('button', { name: 'Cross add', exact: true }).click();
@@ -111,5 +121,6 @@ export async function verifyModelPage(page: Page, url: string) {
   assert.ok((await page.locator('[data-cart]').innerText()).startsWith('0:'));
   assert.equal(await page.locator('[data-cart-error]').innerText(), '');
   await page.waitForFunction(() => document.querySelector('[data-boost]')?.textContent === 'true');
+  await page.waitForFunction(() => document.querySelector('[data-order]')?.textContent === 'prefs,cart');
   assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);
 }
