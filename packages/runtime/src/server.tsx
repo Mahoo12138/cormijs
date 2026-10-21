@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { createStaticHandler, createStaticRouter, StaticRouterProvider, type RouteObject } from 'react-router';
 import { copyClientRoutes, type HistoryType, type RuntimeConfig } from './app-config.js';
 import { ModelProvider, type ModelDescriptor } from './model.js';
+import { collectHead, mergeHeads, type RouteHead } from './head.js';
 
 export interface ServerRuntimeEntry {
   readonly id: string;
@@ -24,6 +25,7 @@ export interface ServerRenderResult {
   readonly html: string;
   readonly status: number;
   readonly headers: Headers;
+  readonly head: RouteHead;
 }
 
 const DefaultLoading = () => createElement('p', { role: 'status' }, 'Loading…');
@@ -58,16 +60,26 @@ export async function renderServerApplication(application: ServerApplication, re
   if (context instanceof Response) return context;
   const staticContext = basename === '/' ? context : Object.freeze({ ...context, basename });
   const router = createStaticRouter(handler.dataRoutes, staticContext);
+  const pathname = url.pathname;
+  const routeHead = collectHead(clientRoutes, pathname, basename);
+  const collected: RouteHead[] = [];
+  let titleTemplate: string | undefined;
   let node: ReactNode = <ModelProvider models={application.models ?? []}><StaticRouterProvider router={router} context={context} /></ModelProvider>;
   const entries = application.plugins ?? [];
   for (let index = entries.length - 1; index >= 0; index--) {
     const entry = entries[index]!;
     if (entry.plugin.Provider) {
+      const head = (entry.plugin as { readonly cormiHeadRuntime?: unknown }).cormiHeadRuntime === true;
+      if (head && typeof (entry.options as { titleTemplate?: unknown } | undefined)?.titleTemplate === 'string') titleTemplate = (entry.options as { titleTemplate: string }).titleTemplate;
       node = createElement(entry.plugin.Provider, { options: entry.options ?? {}, appConfig: application.appConfig ?? {}, routes: clientRoutes,
-        basename, prefetch: application.prefetch ?? {}, signal: lifetime.signal }, node);
+        basename, prefetch: application.prefetch ?? {}, signal: lifetime.signal, ...(head ? { serverCollector: collected } : {}) }, node);
     }
   }
   if (application.appConfig?.rootContainer) node = application.appConfig.rootContainer(node, { signal: lifetime.signal, basename, routes: clientRoutes });
   if (application.strict) node = createElement(StrictMode, null, node);
-  return Object.freeze({ html: renderToString(node), status: context.statusCode, headers: new Headers() });
+  const html = renderToString(node);
+  const merged = mergeHeads(routeHead, collected);
+  const head: RouteHead = merged.title !== undefined && titleTemplate !== undefined
+    ? Object.freeze({ ...merged, title: `${merged.title}${titleTemplate}` }) : merged;
+  return Object.freeze({ html, status: context.statusCode, headers: new Headers(), head });
 }

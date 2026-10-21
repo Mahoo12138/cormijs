@@ -869,6 +869,7 @@ const bad:HeadPluginOptions={titleTemplate:1};
     if (selected('ssr')) {
     const ssrConsumer=await create('ssr','react');await writeSsrFixture(ssrConsumer);
     const ssrManifest=consumerManifest(kit,'react');
+    ssrManifest.dependencies['@cormijs/plugin-react']=ssrManifest.pnpm.overrides['@cormijs/plugin-react']!;
     ssrManifest.dependencies['@cormijs/plugin-react-vite']=ssrManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
     await writeFile(join(ssrConsumer,'package.json'),JSON.stringify(ssrManifest,null,2));
     await install('ssr-install',ssrConsumer);await auditLinks(ssrConsumer);

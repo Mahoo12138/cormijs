@@ -14,7 +14,7 @@ const hasCode = (code: string) => (error: any) => (error?.code ?? error?.cause?.
 
 test('renderServerApplication renders routes and loader data, and returns redirects as responses', async () => {
   const app: ServerApplication = { routes: [
-    { id: 'home', path: '/', Component: () => createElement('main', null, createElement('h1', null, 'SSR unit')), loader: async () => ({ answer: 42 }) },
+    { id: 'home', path: '/', Component: () => createElement('main', null, createElement('h1', null, 'SSR unit')), loader: async () => ({ answer: 42 }), handle: { cormi: { meta: { head: { title: 'Unit head', metas: [{ name: 'unit', content: 'yes' }] } } } } },
     { id: 'old', path: '/old', loader: () => { throw redirect('/'); } },
   ] };
   const rendered = await renderServerApplication(app, new Request('http://localhost/'));
@@ -22,6 +22,8 @@ test('renderServerApplication renders routes and loader data, and returns redire
   assert.match(rendered.html, /<h1>SSR unit<\/h1>/);
   assert.match(rendered.html, /__staticRouterHydrationData/);
   assert.equal(rendered.status, 200);
+  assert.equal(rendered.head.title, 'Unit head');
+  assert.deepEqual(rendered.head.metas, [{ name: 'unit', content: 'yes' }]);
   const moved = await renderServerApplication(app, new Request('http://localhost/old'));
   assert.ok(moved instanceof Response);
   assert.equal(moved.status, 302);

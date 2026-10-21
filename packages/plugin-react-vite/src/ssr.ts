@@ -39,7 +39,27 @@ export function toRequest(request: import('node:http').IncomingMessage): Request
   return new Request(url, { method: request.method, headers });
 }
 
-export function injectShell(shell: string, rendered: { html?: unknown; status?: unknown; headers?: unknown }, mountId: string): Response {
+export interface ServerHead { readonly title?: string; readonly metas?: readonly { readonly name?: string; readonly property?: string; readonly content: string }[];
+  readonly links?: readonly { readonly rel: string; readonly href: string }[]; readonly jsonLd?: unknown }
+const attr = (value: string) => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/** Mirrors the head plugin's output as managed tags so the client can replace them after hydration. */
+export function injectHead(shell: string, head: unknown): string {
+  if (!head || typeof head !== 'object' || Array.isArray(head)) return shell;
+  const value = head as ServerHead;
+  let output = shell;
+  if (typeof value.title === 'string') {
+    const title = `<title>${attr(value.title)}</title>`;
+    output = /<title[^>]*>[\s\S]*?<\/title>/i.test(output) ? output.replace(/<title[^>]*>[\s\S]*?<\/title>/i, title) : output.replace(/<\/head>/i, `${title}</head>`);
+  }
+  const tags: string[] = [];
+  for (const meta of value.metas ?? []) tags.push(`<meta ${meta.name !== undefined ? `name="${attr(meta.name)}"` : `property="${attr(meta.property ?? '')}"`} content="${attr(meta.content)}" data-cormi-head="" />`);
+  for (const link of value.links ?? []) tags.push(`<link rel="${attr(link.rel)}" href="${attr(link.href)}" data-cormi-head="" />`);
+  if (value.jsonLd !== undefined) tags.push(`<script type="application/ld+json" data-cormi-head="">${JSON.stringify(value.jsonLd).replace(/</g, '\\u003c')}</script>`);
+  return tags.length ? output.replace(/<\/head>/i, `${tags.join('')}</head>`) : output;
+}
+
+export function injectShell(shell: string, rendered: { html?: unknown; status?: unknown; headers?: unknown; head?: unknown }, mountId: string): Response {
   if (typeof rendered.html !== 'string') throw new CormiError('SSR_RENDER_INVALID', 'SSR result has no html.');
   const marker = `<div id="${mountId}"></div>`;
   if (!shell.includes(marker)) throw new CormiError('SSR_SHELL_INVALID', 'index.html has no empty mount element.', { mountId });
@@ -47,6 +67,7 @@ export function injectShell(shell: string, rendered: { html?: unknown; status?: 
   const markup = hydration ? rendered.html.replace(hydration, '') : rendered.html;
   const headers = rendered.headers instanceof Headers ? rendered.headers : new Headers();
   headers.set('content-type', 'text/html; charset=utf-8');
+  shell = injectHead(shell, rendered.head);
   // Hydration data must execute before the client module, but must not become a child of the hydration root.
   return new Response(shell.replace(marker, `<div id="${mountId}">${markup}</div>${hydration}`), {
     status: typeof rendered.status === 'number' ? rendered.status : 200, headers,
