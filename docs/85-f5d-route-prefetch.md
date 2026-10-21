@@ -75,4 +75,4 @@ Umi 的 `routePrefetch` 是链接驱动策略：配置 `defaultPrefetch: 'none' 
 
 - U31 剩余：链接 intent/视口预取、按数据依赖预取、SSR 侧预取；
 - U32/U33/U34/U35：SSR、静态导出、MPA、生产 API 路由；
-- F4 剩余：U25 输出与资源策略、U27 微生成器（需 CLI 多参数协议）、U28 工程命令。
+- F4 剩余：U27 微生成器（需 CLI 多参数协议）、U28 工程命令；U25 输出与资源策略已由 [F4j](86-f4j-output-policy.md) 交付一部分；

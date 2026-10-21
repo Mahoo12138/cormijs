@@ -732,6 +732,21 @@ void prefetch('config:guide');
 
 示例：`pnpm cormi dev --root examples/prefetch`，默认监听 `/prefetch/`。
 
+### 4.25 构建输出与静态文件
+
+需要把 `public/` 之外的项目文件带进构建产物，或关闭文件名哈希时，显式启用 `outputPlugin`：
+
+```ts
+plugins: [{ id: 'output', plugin: outputPlugin, options: {
+  hash: false,
+  copy: [{ from: 'static', to: 'extras' }, { from: 'static/robots.txt' }],
+} }]
+```
+
+复制发生在构建结束（`closeBundle`），目标缺省为源路径的文件名，`from` 必须在项目内且不能是 `node_modules`、`.cormi*`、`.env*` 或符号链接；`hash:false` 生成 `assets/[name].js` 这类稳定名称，若同时存在自定义命名策略会直接失败。开发服务器不执行复制（开发期需要的静态文件请放 `public/`），preview 会提供复制后的文件。规则与边界见 [F4j 构建输出策略](86-f4j-output-policy.md)。
+
+示例：先 `pnpm cormi build --root examples/output`，再 `pnpm cormi preview --root examples/output`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

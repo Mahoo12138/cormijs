@@ -28,6 +28,7 @@ import { writeLocaleCatalogFixture, verifyLocaleCatalogPage } from './locale-cat
 import { writeClientLoaderFixture, verifyClientLoaderPage } from './client-loader-fixture.js';
 import { writeHeadFixture, verifyHeadPage } from './head-fixture.js';
 import { writePrefetchFixture, verifyPrefetchPage } from './prefetch-fixture.js';
+import { writeOutputFixture, verifyOutputBuild, verifyOutputPage } from './output-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -820,6 +821,26 @@ const bad:RoutePrefetchOptions={mode:'later'};
     await command('prefetch-build',prefetchConsumer,'build');
     await withServer(prefetchConsumer,'preview',async url=>{await verifyPrefetchPage(page,url,true);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'prefetch-preview.png')});});
     report.stages.push({label:'installed-route-prefetch-dev-build-and-static-preview',mode:'manual',previewRegenerated:false});
+
+    const outputConsumer=await create('output','react');await writeOutputFixture(outputConsumer);
+    const outputManifest=consumerManifest(kit,'react');
+    outputManifest.dependencies['@cormijs/plugin-react-vite']=outputManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
+    await writeFile(join(outputConsumer,'package.json'),JSON.stringify(outputManifest,null,2));
+    await install('output-install',outputConsumer);await auditLinks(outputConsumer);
+    await command('output-typecheck',outputConsumer,'typecheck');
+    await writeFile(join(outputConsumer,'types.mts'),`import {outputPlugin,resolveOutputCopy,stableOutputNames,type OutputPluginOptions,type OutputCopy} from '@cormijs/plugin-react-vite';
+const options:OutputPluginOptions={hash:false,copy:[{from:'static',to:'extras'}]};
+const copies:readonly OutputCopy[]=resolveOutputCopy(process.cwd(),[{from:'static'}]);
+void [outputPlugin,options,copies,stableOutputNames()];
+// @ts-expect-error hash must be a boolean
+const bad:OutputPluginOptions={hash:1};
+`);
+    await execute('output-public-types',outputConsumer,process.execPath,typeArguments);
+    await withServer(outputConsumer,'dev',async url=>{await page.goto(url);await page.getByRole('heading',{name:'Output home',exact:true}).waitFor();assert.deepEqual(errors,[]);});
+    await command('output-build',outputConsumer,'build');
+    await verifyOutputBuild(outputConsumer);
+    await withServer(outputConsumer,'preview',async url=>{await verifyOutputPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'output-preview.png')});});
+    report.stages.push({label:'installed-output-copy-and-stable-names-dev-build-and-static-preview',hash:false,previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

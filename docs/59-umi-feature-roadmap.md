@@ -54,7 +54,7 @@
 | U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有（F4f）：globalStylePlugin 发现 src/global.{css,scss,sass,less} 并由生成入口按 hook 顺序副作用导入，dev 新建/删除可触发生成；CSS Modules 类型声明、PostCSS/Tailwind/SVGR 与预处理集成仍待后续 | 样式/资源插件 + backend adapter | F4 |
 | U23 | Tailwind、UnoCSS、styled-components | 待实现可选集成 | 各生态 adapter | F4 |
 | U24 | icons | 待实现公共图标方案 | 图标资源/代码生成插件 | F4 |
-| U25 | publicPath/runtimePublicPath、CDN、hash、copy/externals | 部分已有 base/静态资源与原生 Vite 扩展；无统一完整公开配置 | 输出/资源策略插件，差异显式 | F4 |
+| U25 | publicPath/runtimePublicPath、CDN、hash、copy/externals | 部分已有（F4j）：base 表达部署前缀，可选 outputPlugin 在构建后复制文件并支持 `hash:false` 稳定文件名；externals、runtimePublicPath 与 CDN 运行时切换待后续 | 输出/资源策略插件，差异显式 | F4 |
 | U26 | targets、polyfill、legacy、ReactCompiler/SWC/transform | 可用既有 Vite 原生插件口；未交付对应官方配置面 | 可选转换 provider/bridge | F4/F6 |
 | U27 | page/component/mock/API 等微生成器 | 仅新建 app/插件模板；缺项目内增量生成器 | generators 插件与模板贡献 | F4 |
 | U28 | lint/format/test/precommit/deadcode 等工程命令 | 框架自身有测试；不是面向用户的完整工具集成 | 可选命令插件 | F4 |
@@ -151,6 +151,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5c 状态（2026-10-20）：** U21 的配置侧能力已交付：`headPlugin` 注册 `routeHeadRuntime`，每次导航合并根→深的 `meta.head`（标题取最深、meta 按 name/property 覆盖、link 按 rel+href 去重），写入带 `data-cormi-head` 标记的受管节点，卸载时移除并恢复挂载时标题；运行时 `onRouteChange` 新增可选 `{options, signal}` 第三参数（向后兼容）。`<Helmet>` 式组件、JSON-LD、多语言标题与 SSR 头部收集仍待后续。用法、差异与验证见 [F5c 路由级页面头部](84-f5c-route-head.md)。
 
 **F5d 状态（2026-10-20）：** U31 的模块预取已交付：生成入口为每个带模块的路由生成惰性注册表并传给 `mountApplication`，`routePrefetchPlugin` 提供 `usePrefetch()`（`ids`/`prefetch`/`prefetchAll`，在途复用、失败返回 false）与 `mode: "idle"` 的空闲全量预热（`requestIdleCallback`，2 秒超时，卸载取消）。链接 intent/视口预取、client loader 数据预取与 SSR 侧预取仍待后续。用法、差异与验证见 [F5d 路由预取](85-f5d-route-prefetch.md)。
+
+**F4j 状态（2026-10-20）：** U25 的构建输出能力已交付：可选 `outputPlugin` 在 `closeBundle` 把项目内文件/目录复制进输出目录（路径与符号链接校验、默认目标为 basename），并用 `hash:false` 生成稳定资源名（保留 `assets/` 目录，与自定义命名冲突时失败）；复制只在构建发生，preview 直接提供复制后的文件。externals、runtimePublicPath、CDN 与按 chunk 命名策略仍待后续。用法、差异与验证见 [F4j 构建输出策略](86-f4j-output-policy.md)。
 
 ### F3：权限、布局、菜单和国际化
 

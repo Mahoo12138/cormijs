@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 export { htmlPlugin, applyHtmlHead, normalizeScript, type HtmlPluginOptions, type HtmlMeta, type HtmlLink, type HtmlScript, type NormalizedHtmlOptions } from './html.js';
 export { aliasPlugin, resolveAliases, aliasEntries, type AliasPluginOptions, type ViteAlias } from './alias.js';
 export { definePlugin, resolveDefines, applyDefines, mergeDefines, type DefinePluginOptions, type DefineEntry } from './define.js';
+export { outputPlugin, resolveOutputCopy, stableOutputNames, type OutputPluginOptions, type OutputCopy } from './output.js';
 
 /** All Vite-specific React behavior stays in this optional bridge. */
 export const reactVitePlugin: Plugin.Object<void> = {

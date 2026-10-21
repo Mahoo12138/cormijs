@@ -50,6 +50,8 @@ F5c 起，显式启用的 `headPlugin` 在每次导航后把 `meta.head` 同步�
 
 F5d 起，生成入口带有路由模块注册表，显式启用的 `routePrefetchPlugin` 提供 `usePrefetch()` 手动预热，或 `mode: "idle"` 在首屏空闲时预热全部路由；只预取代码，不预取 loader 数据。详见 [F5d 路由预取](85-f5d-route-prefetch.md)。
 
+F4j 起，显式启用的 `outputPlugin`（Vite 桥）可在构建后把项目内文件/目录复制进输出目录，并用 `hash:false` 生成稳定资源名；复制不进入开发服务器，preview 直接提供复制结果。详见 [F4j 构建输出策略](86-f4j-output-policy.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic
