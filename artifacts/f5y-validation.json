@@ -1,7 +1,7 @@
 {
   "format": "cormi:f5y-validation:1",
-  "verifiedAt": "2026-10-21T11:55:35.087Z",
-  "base": "81b5e255680640fd8c85d59e8f687307176e0db1",
+  "verifiedAt": "2026-10-21T12:16:06.158Z",
+  "base": "a1e225f57ec0408a6be899d062c1473fc3c18ee0",
   "branch": "main",
   "worktree": {
     "state": "uncommitted",
@@ -12,7 +12,8 @@
       " M docs/49-application-guide.md",
       " M docs/59-umi-feature-roadmap.md",
       " M packages/plugin-react-vite/src/ssr.ts",
-      " M tests/browser/ssr.test.ts"
+      " M packages/runtime/src/server.tsx",
+      " M scripts/ssr-fixture.ts"
     ]
   },
   "environment": {
@@ -27,8 +28,8 @@
     "node": {
       "command": "pnpm check",
       "log": ".cache/f5y-final/check.log",
-      "sha256": "9e7b3ca1830c43b35881620ae239ff5c29d1914416cbd777d2fa0891d098031a",
-      "seconds": 119.1,
+      "sha256": "178ab6d8af60db0627ccd219469a168de33d3698baf1a74448c25af0a999ca83",
+      "seconds": 116.7,
       "tests": 544,
       "pass": 544,
       "fail": 0,
@@ -40,8 +41,8 @@
     "targetedRepeat": {
       "command": "node --import tsx --test --test-concurrency=1 tests/ssr.test.ts",
       "log": ".cache/f5y-final/targeted.log",
-      "sha256": "d40baaec8b979059b7bcee6694c0ef2f4d114eba6c20b8b8641bc98db9fa39f0",
-      "seconds": 0.5,
+      "sha256": "d78a9281998138499d870e80c065548a83c8a4cc11b1658481a15e801ada2126",
+      "seconds": 0.4,
       "tests": 2,
       "pass": 2,
       "fail": 0,
@@ -53,8 +54,8 @@
     "browser": {
       "command": "pnpm test:browser",
       "log": ".cache/f5y-final/browser.log",
-      "sha256": "6c1d46ddc15321d4e95cae862325cf195c63383c06d2f743a41d4e34b32e5226",
-      "seconds": 556.3,
+      "sha256": "8e8a0b1ec54b3c805b2ee4efea3c24643f9cc51ba2f2d5f8f6f6a959af10d36f",
+      "seconds": 555,
       "tests": 52,
       "pass": 52,
       "fail": 0,
@@ -63,15 +64,15 @@
       "todo": 0,
       "newSinceF5x": 1,
       "engine": "155.0.4283.62",
-      "note": "SSR case covers dev and preview server markup, loader data and hydrated pages without errors"
+      "note": "SSR case covers dev and preview server markup under /ssr/, loader data and hydrated pages without errors"
     },
     "package": {
       "command": "pnpm test:package",
-      "result": ".cache/package-test-1792583294274/result.json",
-      "sha256": "6c2d8964acdcd0240d7555f872f1ac2d427093e5bfe06a2398c3619fa4f98c75",
+      "result": ".cache/package-test-1792584532163/result.json",
+      "sha256": "705d5ca38bdeda162aff897a748bdead16cdbe1e2d9cb32f0d68a9627d624ff6",
       "bytes": 83071,
       "log": ".cache/f5y-final/package.log",
-      "logSha256": "70f1d6e413302f153cb1a7a2fe70270bd6cb604b7b4be89b53776a120f5a896e",
+      "logSha256": "f3433dd2b80fc5e159e3067e378b930da8cda8a540bb00ad4c0d03ff2203478e",
       "passed": true,
       "stages": 327,
       "ssrStages": [
@@ -88,20 +89,20 @@
         "detection": "ast",
         "previewRegenerated": false
       },
-      "startedAt": "2026-10-21T11:48:14.275Z",
+      "startedAt": "2026-10-21T12:08:52.164Z",
       "ssrConsumerAdded": true
     }
   },
   "evidence": {
     "plugin": {
       "path": "packages/plugin-react-vite/src/ssr.ts",
-      "sha256": "3992edebd7e3b420802adb5690c8c340685edfaaa9c83b28d06643dd67cb3eab",
-      "bytes": 8740
+      "sha256": "e119694c3f78deafe3efbfdef10a7d54b3e299ff96e80815bd2f35e164936930",
+      "bytes": 8683
     },
     "renderer": {
       "path": "packages/runtime/src/server.tsx",
-      "sha256": "91a154141edf582086f0ee3c8554f82b081ab404109feda6ed99e6d41b24e254",
-      "bytes": 3971
+      "sha256": "338d3d5a95dc3916690ef293797c650d7b48a4239a58942e0bddf0d95bc02e8b",
+      "bytes": 4358
     },
     "generator": {
       "path": "packages/plugin-react/src/generate.ts",
@@ -110,8 +111,8 @@
     },
     "fixture": {
       "path": "scripts/ssr-fixture.ts",
-      "sha256": "eb1d7eaf259ea13a245ab86745ec749ae2613398c853d9108b03ad4b5559d46f",
-      "bytes": 3183
+      "sha256": "5ad537919fc24460b6b6b4838a409d3258d316576eb32f46792cc4080fc8f18e",
+      "bytes": 3198
     },
     "unit": {
       "path": "tests/ssr.test.ts",
@@ -129,7 +130,7 @@
     ".npmrc": "d089b05fc08a36af3a3eb500ffd9d2087c0c2517ee6a820980377dc95bede2f9",
     ".nvmrc": "c989649ac5c541692f22f2e41f5fbc34927c02bf1644e5dcca46bb4c88281f87",
     "AGENTS.md": "9add5d4d2e3b64331824e854c8e956d344149cff9070c07d202fcaa727b06c60",
-    "README.md": "39f144729d7fc301e1dbc48e03fbaf569261c97325705825d01c89f4bd18cc31",
+    "README.md": "128367d51be548f65cd24cf64c52e86dd3d1bc55e1741729ed97b445cfe58799",
     "examples/access-convention/cormi.config.ts": "a31340caaa9b2eb846582ae1de3f7c196427f735a078bff22c81ce64a1e06484",
     "examples/access-convention/index.html": "98657be99bf833dd197c2b4b5bb56126a7259bb5e1da4fca3192ed3171c320b7",
     "examples/access-convention/src/access.ts": "73a161367f777d30f45f4341f8910073aa0f437b821b09d1da802f5474243446",
@@ -371,7 +372,7 @@
     "packages/plugin-react-vite/src/mpa.ts": "2c10a8d9f5566aeed51de4bae58c23a39b99060ba27c31df7064372653b073e2",
     "packages/plugin-react-vite/src/output.ts": "b82f3134a1b1fa3fd56a59dc030275575eeb901094b06a0a592d80cbc24d9d29",
     "packages/plugin-react-vite/src/proxy.ts": "d9f89e7877e724b58dc398f13fe474ccac8ecdde2ec3f0b83c0cc27011756b47",
-    "packages/plugin-react-vite/src/ssr.ts": "3992edebd7e3b420802adb5690c8c340685edfaaa9c83b28d06643dd67cb3eab",
+    "packages/plugin-react-vite/src/ssr.ts": "e119694c3f78deafe3efbfdef10a7d54b3e299ff96e80815bd2f35e164936930",
     "packages/plugin-react-vite/src/static-export.ts": "54417f9e26f65f808fd33b17fb9e8dde160f0db525e364ed3ef43432caf71b4f",
     "packages/plugin-react-vite/tsconfig.json": "6dff251ba0e8067dc31ef48390d0615fd7a4f8e17aa7190b9d0be4fe602459a5",
     "packages/plugin-react/package.json": "435c75b26a172e365c15fa369746407985f9e26240dc6780498b14ebcb3388a2",
@@ -447,7 +448,7 @@
     "packages/runtime/src/prefetch.tsx": "f78252aea26f86529a0f6de4ae6aae04729ca8b777d2e22dec265baf641d6d03",
     "packages/runtime/src/request.tsx": "93b0f7bd0cc7ac3aeddcd16f4f52319c663224924dac8863402b314f23ec305a",
     "packages/runtime/src/route-matches.ts": "cd208e8753ede98a5a56503f4f248d5fe1dd90e3e3a252bda07195d58b6f982d",
-    "packages/runtime/src/server.tsx": "91a154141edf582086f0ee3c8554f82b081ab404109feda6ed99e6d41b24e254",
+    "packages/runtime/src/server.tsx": "338d3d5a95dc3916690ef293797c650d7b48a4239a58942e0bddf0d95bc02e8b",
     "packages/runtime/tsconfig.json": "e409e3b42ce86c6d10b739e22d0c8fc049d9a1b4ab816fbb83a739de9eba0dc7",
     "patches/README.md": "0c3484f890bcf1f5c4d2c13aa8eaf2253c2d41467be653de20b8d65dde04b3ed",
     "scripts/access-convention-fixture.ts": "5a85cef38e680c426a86284e9fa612c4eb8bb7e79ce99d34ea529930ced7ddc0",
@@ -505,7 +506,7 @@
     "scripts/reliability/resources.ts": "d9fc205a4678482bf8eddb37919aa015cd7961237e19704eebdf2eb4a560f084",
     "scripts/reliability/worker-plugin.ts": "798f2dab2a4ba6dc67319a33de636b3670a1e6ab1e97604a06c257dc546ed0d9",
     "scripts/request-fixture.ts": "97938f1339c21be8a3bd682a96aec6f200874e2a8a3834a9cdce09f6832ecc2b",
-    "scripts/ssr-fixture.ts": "eb1d7eaf259ea13a245ab86745ec749ae2613398c853d9108b03ad4b5559d46f",
+    "scripts/ssr-fixture.ts": "5ad537919fc24460b6b6b4838a409d3258d316576eb32f46792cc4080fc8f18e",
     "scripts/static-export-fixture.ts": "3a2421d335c5f8b9062536ab4dd52e0b1ed2c810b25067f185265391f4bfc821",
     "scripts/test-application.ts": "4202871d40c3faaf5d4de5c85bcb3c333a9b607a9f96aeadf7b74c0fbd0270a8",
     "scripts/test-linux.ts": "bdf97d0aabb05ee3c92634a7ba3a6577cddf403ee53c54fdfc80adc4286a380d",
@@ -685,9 +686,9 @@
     "tsconfig.json": "3dc2b20d3fe968c8474c4cbabb8cded5fcf85f7c0b73e02c79020548e7c83e4f"
   },
   "sourceInputCount": 557,
-  "sourceInputsDigest": "047cc935a378decbcc0b82201225415e2fa3a92001fecbc5d7c4f0bf690c44c9",
+  "sourceInputsDigest": "25a4ebc55e5180bfbb50402e4afbcc6da09a7c1e3d7e71ea042e5c93db343865",
   "documentationInputs": {
-    "README.md": "39f144729d7fc301e1dbc48e03fbaf569261c97325705825d01c89f4bd18cc31",
+    "README.md": "128367d51be548f65cd24cf64c52e86dd3d1bc55e1741729ed97b445cfe58799",
     "docs/01-source-study.md": "384ae2c0b9c5d22529b9aa4fa9ceb4505092489a41b990f11dc647694b4207d4",
     "docs/02-architecture.md": "5c4e324b8e846953a33dd5445420d8a70eaaabc69edd03b3a37a6d61a2bb2a71",
     "docs/03-mvp-plan.md": "1bab997354a947788ff5ecffa3ccb78f070cc82205b3c9c620688a59197c207a",
@@ -695,7 +696,7 @@
     "docs/05-p0-results.md": "51d1f0ca71b66a0f93264e8edfef8c94d4ca02e598fd0b1beef3c8f82a9cede6",
     "docs/06-naming-and-launcher.md": "9f3462b42b6e8caa223c2b8a80b5d40247e89f413255f00304504253460de0b4",
     "docs/07-p1a-results.md": "35ecddd1a10cd722bf5b07a4a13f1b6f3eac89076878b3bdc95409a65792cf30",
-    "docs/08-routes-and-react.md": "62411be4d922c2a8e9f63f1b12ac60157ebb60fdc056910d849b3d07698025f7",
+    "docs/08-routes-and-react.md": "3fb09e0391076dc6da6a95052a3236bd154a2631dbe6ea4c3e62a529b0fd2f34",
     "docs/09-p1b-results.md": "ba7dfc69d4b5be0ff6371dc11f362656e9f10ceb350d21a1dda6a7288778da6a",
     "docs/10-publication-and-tools.md": "96a416ed41cec32072b2992b77467cebe49b4ec3b6dc53862af4b751a28a4fff",
     "docs/100-f5r-generators.md": "a0e6929dbb478c0823acad29395390ee0f7d29606e0f452265a9df99b45622ce",
@@ -705,7 +706,7 @@
     "docs/104-f5v-reexport-loaders.md": "012734f93710d9c6e73983f0c1cf6704de50ad00e7cfdda4cf33dcd8b292d89b",
     "docs/105-f5w-generator-templates.md": "06904330e9b82bde9b4627cfea1e5b0c300227eebf0db47aebe587b5c6c4fab8",
     "docs/106-f5x-helmet.md": "329281591085a680ff9eb2b5f624e14a61bef3d9142aac43f7504c50e7173f8e",
-    "docs/107-f5y-ssr.md": "ecc4d053dacbdaeb49ee595160352177c41bdb5d271a039dcd9b15c9447e2126",
+    "docs/107-f5y-ssr.md": "b85f1b2c89456af4f358452c8a83c6cfafd038de3f1d03a35838595cb14edf81",
     "docs/11-p1c-results.md": "ee4ccf2c18ab922ffeaeb2f2642cc2bc27b8c7d9416b60f63dd4d88e4594cb87",
     "docs/12-development-recovery.md": "d30ee61bf724844e8a1954bd85f24007d59050ae100dfddea1239b130e130d8c",
     "docs/13-p2a-results.md": "3ffc368d4d40b6c02bf0c7fc276a4f862b695d305fe089d4f6bd749b9a90d3f3",
@@ -744,7 +745,7 @@
     "docs/46-p10-results.md": "eaea054b22d5838996c4a54722b77379c3b9303e19e52cf90987281f2107eb86",
     "docs/47-environment-configuration.md": "17d499494e7b6e60094f21c8fc5bd8ca6c2c2cf25cade1f16b58dbe11ff6dc5f",
     "docs/48-p11-results.md": "fe270f4249b32408969bd086b72d5c3eddf8485c364398fc380469831f397764",
-    "docs/49-application-guide.md": "6a174b4eb0a399880affd5bc4aac3f5c9661a2868e5108cf7f5cfd274cd36f1e",
+    "docs/49-application-guide.md": "c26b7b0c5bdefbdf35d38b89a0557ad561dc5d984029d8170919e9c2033aa40d",
     "docs/50-p12-results.md": "de4229ef84966abfe8e49836f7b6cf7576e5ee89fc806770da5618c2b962e20b",
     "docs/51-plugin-first-reliability.md": "653a50c44f8809e7632693c1a246382eec6b4611ed643c25cf367fc8231e7203",
     "docs/52-p13-results.md": "cafd44d030c30e1ef672fe86b27ca8e63f655f7a54071c00ac1ca7b26257ad47",
@@ -754,7 +755,7 @@
     "docs/56-p15-results.md": "2f40c0acb9ad686a16bdb484bea5e5190bf2691f166778ad395555b1fcaa471a",
     "docs/57-typescript-projects.md": "ce90b44568c971739dd31b1f674c8bd53f3373f44d7de53e25a9cb82fe5a5bb5",
     "docs/58-p16-results.md": "06d20747852e0cfdf7c2ac083854d009992061664d2c866d2fec339f71d3c772",
-    "docs/59-umi-feature-roadmap.md": "20295654c453a2465695d646a89c78432d9763056605760a3bf6d7d4560d453b",
+    "docs/59-umi-feature-roadmap.md": "9c85da9ab1045ebc14f48ad1c1e97708264b375e5faa644ad8b04b988771b799",
     "docs/60-f1a-app-runtime.md": "8c8ef18afce74c96d21c0cfeb57acb41aa843ca78514d81bc37e41f8138cb1d3",
     "docs/61-f1b-config-routes.md": "674c8679c7ff7c25b0f7748dfcb3674dd71df1a7d3fc46ddeafda5d2b3e092f8",
     "docs/62-f1c-redirects-and-wrappers.md": "6465adb6d14aa8e3c9d9c9898d9279d83499028be9660bf33c3161755098815a",
@@ -815,7 +816,6 @@
   "limits": [
     "macOS-arm64-only",
     "uncommitted-worktree",
-    "root-base-only",
     "eager-route-components-under-app-ssr",
     "no-server-loader",
     "no-streaming",

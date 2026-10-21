@@ -49,9 +49,15 @@ export async function renderServerApplication(application: ServerApplication, re
   const tree: RouteObject[] = [{ id: 'cormi:root', HydrateFallback: LoadingComponent, ErrorBoundary: RouteFailure,
     children: [...clientRoutes, { id: 'cormi:404', path: '*', Component: NotFound }] }];
   const handler = createStaticHandler(tree);
-  const context = await handler.query(request);
+  const url = new URL(request.url);
+  if (basename !== '/' && (url.pathname === basename || url.pathname.startsWith(basename))) {
+    url.pathname = url.pathname.slice(basename.length - 1) || '/';
+  }
+  const query = new Request(url, { method: request.method, headers: request.headers });
+  const context = await handler.query(query);
   if (context instanceof Response) return context;
-  const router = createStaticRouter(handler.dataRoutes, context);
+  const staticContext = basename === '/' ? context : Object.freeze({ ...context, basename });
+  const router = createStaticRouter(handler.dataRoutes, staticContext);
   let node: ReactNode = <ModelProvider models={application.models ?? []}><StaticRouterProvider router={router} context={context} /></ModelProvider>;
   const entries = application.plugins ?? [];
   for (let index = entries.length - 1; index >= 0; index--) {

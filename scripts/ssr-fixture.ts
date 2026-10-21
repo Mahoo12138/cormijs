@@ -9,7 +9,7 @@ import { ssrPlugin } from '@cormijs/plugin-react-vite';
 export default defineConfig({
   presets: [preset],
   plugins: [{ id: 'ssr', plugin: ssrPlugin, options: { id: 'application:ssr' } }],
-  app: { ssr: true, server: { port: 0 } },
+  app: { ssr: true, base: '/ssr/', server: { port: 0 } },
 });
 `;
 

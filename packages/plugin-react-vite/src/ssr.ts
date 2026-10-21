@@ -53,6 +53,13 @@ function injectShell(shell: string, rendered: { html?: unknown; status?: unknown
   });
 }
 
+function withinBase(request: import('node:http').IncomingMessage, base: string): boolean {
+  if (base === '/') return true;
+  const pathname = new URL(request.url ?? '/', 'http://localhost').pathname;
+  const prefix = base.endsWith('/') ? base.slice(0, -1) : base;
+  return pathname === prefix || pathname.startsWith(prefix + '/');
+}
+
 function navigation(request: import('node:http').IncomingMessage): boolean {
   const accept = request.headers.accept ?? '';
   return (request.method === 'GET' || request.method === 'HEAD') && accept.includes('text/html')
@@ -77,7 +84,6 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
       const entryFile = () => resolved ? join(resolved.root, '.cormi', 'ssr.tsx') : '';
 
       const devRender = async (server: ViteDevServer, request: import('node:http').IncomingMessage): Promise<Response> => {
-        if (server.config.base !== '/') throw new CormiError('SSR_BASE_UNSUPPORTED', 'SSR currently requires app.base to be /.', { base: server.config.base });
         const entry = entryFile();
         await mkdir(join(server.config.root, '.cormi'), { recursive: true });
         await writeFile(entry, entrySource);
@@ -95,7 +101,6 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
         async closeBundle() {
           if (!building) { if (resolved) await rm(entryFile(), { force: true }); return; }
           if (!resolved) return;
-          if (resolved.base !== '/') throw new CormiError('SSR_BASE_UNSUPPORTED', 'SSR currently requires app.base to be /.', { base: resolved.base });
           await mkdir(join(resolved.root, '.cormi'), { recursive: true });
           await writeFile(entryFile(), entrySource);
           try {
@@ -115,7 +120,7 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
         },
         configureServer(server) {
           server.middlewares.use((request, response, next) => {
-            if (!navigation(request)) return next();
+            if (!navigation(request) || !withinBase(request, server.config.base)) return next();
             void (async () => {
               try { return sendResult(await devRender(server, request), response, request.method === 'HEAD'); }
               catch (error) { console.error('[cormi:ssr]', error); next(); }
@@ -126,10 +131,9 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
           const shellFile = join(server.config.build.outDir, 'index.html'), moduleFile = join(serverOut(), 'ssr.mjs');
           let handler: Promise<Render> | undefined;
           server.middlewares.use((request, response, next) => {
-            if (!navigation(request)) return next();
+            if (!navigation(request) || !withinBase(request, server.config.base)) return next();
             void (async () => {
               try {
-                if (server.config.base !== '/') throw new CormiError('SSR_BASE_UNSUPPORTED', 'SSR currently requires app.base to be /.', { base: server.config.base });
                 handler ??= import(pathToFileURL(moduleFile).href).then((module: { render?: unknown }) => {
                   if (typeof module.render !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR bundle has no render export.');
                   return module.render as Render;

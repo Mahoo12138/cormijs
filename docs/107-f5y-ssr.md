@@ -35,7 +35,7 @@ cormi preview
 - 构建：`ssrPlugin` 在客户端构建后写临时 `.cormi/ssr.tsx`，用同一 `define`/`resolve.alias` 与 React 插件做 Vite SSR 构建，输出到 `dist/.cormi/ssr`，随后删除临时入口；
 - 预览：中间件只接管 `Accept: text/html` 的 GET/HEAD 导航；把服务端标记注入空挂载点，把 hydration script 放在挂载点之外；资产、API 与 `/.cormi/*` 不接管；SSR 失败时记录错误并回退 CSR 外壳；
 - 客户端：`mountApplication` 新增 `hydrate` 选项；生成入口在挂载点已有子节点时使用 `hydrateRoot`，React Router 自动读取 `__staticRouterHydrationData`；
-- 限制：当前仅支持 `app.base === '/'`；`ssrPlugin` 非法选项以 `SSR_INVALID` 失败，基座不符以 `SSR_BASE_UNSUPPORTED` 失败，服务端 bundle 失败以 `SSR_BUILD_FAILED` 失败。
+- 限制：`ssrPlugin` 非法选项以 `SSR_INVALID` 失败，服务端 bundle 失败以 `SSR_BUILD_FAILED` 失败；`app.base` 前缀在服务端匹配前剥离，并由 static context 的 `basename` 与客户端 router 对齐。
 
 ## 3. 与 Umi 4 的差异
 
@@ -48,11 +48,11 @@ Umi SSR 在 dev 与生产服务中执行服务端渲染，支持 serverLoader/�
 | loader | serverLoader/clientLoader | clientLoader 在服务端执行 |
 | 代码分割 | 保留 | `app.ssr` 下 eager |
 | 流式/独立服务 | 支持 | 未提供 |
-| base | 支持 | 仅 `/` |
+| base | 支持 | 支持（测试 `/ssr/`） |
 
 ## 4. 限制
 
-- 只验证了 macOS/Node 22 与 root base；
+- 只验证了 macOS/Node 22 与 `/`、`/ssr/` base；
 - dev 与 preview 中间件只处理 HTML 导航；SSR 错误回退 CSR，不承诺错误页语义；
 - 页面/Provider 若依赖 `window`、localStorage 或浏览器插件，服务端渲染可能失败或 hydration 不一致；
 - 服务端 bundle 使用 Vite SSR 构建，CSS 资源不进入服务端产物；
