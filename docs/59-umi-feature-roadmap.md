@@ -60,7 +60,7 @@
 | U28 | lint/format/test/precommit/deadcode 等工程命令 | 框架自身有测试；不是面向用户的完整工具集成 | 可选命令插件 | F4 |
 | U29 | request/接口代码生成与类型工作流 | 待实现；API generator 入口已登记，具体协议/规范需读实现 | API generator 插件 | F4 |
 | U30 | TypeScript、prepare、导出类型、monorepo | 基础已有至 P16；仍需配合新功能生成类型与别名 | 既有 TS/prepare + monorepo adapter | 随功能 |
-| U31 | code splitting、routePrefetch、routePreloadOnLoad | 部分已有（F5d）：页面按路由懒加载，生成入口提供路由模块注册表，`usePrefetch()` 手动预热或 `mode:"idle"` 空闲全量；链接 intent/视口触发、数据预取与 SSR 侧预取待后续 | 路由加载插件 + backend bridge | F5 |
+| U31 | code splitting、routePrefetch、routePreloadOnLoad | 部分已有（F5d/F5g）：页面按路由懒加载，注册表支持手动、`mode:"idle"` 空闲全量与 `usePrefetchOnIntent()` 悬停/聚焦预取；视口触发、数据预取与 SSR 侧预取待后续 | 路由加载插件 + backend bridge | F5 |
 | U32 | SSR、服务端 loader/渲染入口 | 待实现 | 独立 SSR renderer/profile，复用可共享契约 | F5 |
 | U33 | exportStatic/预渲染/静态导出 | 部分已有（F5e）：可选 staticExportPlugin 为每个字面路径路由生成带 `meta.head` 的 HTML 外壳；prerender、404.html、sitemap 与 SSR 组合待后续（外壳不等于预渲染） | 静态导出插件 | F5 |
 | U34 | MPA | 待实现多入口应用编排 | 独立 MPA profile | F5 |
@@ -159,6 +159,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5e 状态（2026-10-20）：** U33 的第一步已交付：`staticExportPlugin` 在构建后读取路由 IR，为字面路径的模块路由生成 `dist/<path>/index.html`，按运行时相同规则合并祖先 `meta.head` 并追加 `titleTemplate`；`/` 的 head 写回 `dist/index.html`，动态段/catch-all/redirect 跳过。外壳不是预渲染：没有 SSR 内容与数据，静态页面仍依赖 JS 挂载。prerender、404.html 与 SSR 组合仍待后续。用法、差异与验证见 [F5e 静态导出](88-f5e-static-export.md)。
 
 **F5f 状态（2026-10-20）：** U16 的格式化部分已交付：`useIntl()` 新增 `formatNumber`、`formatDate` 与复数感知的 `tp`；复数类别由 `Intl.PluralRules` 决定，消息按 `${key}_${category}` → `${key}_other` → `${key}`（含 fallback 语言）解析，插值与既有 `t` 一致；纯函数 `formatNumberFor`/`formatDateFor`/`selectPluralKey` 从 `@cormijs/runtime` 导出。ICU 复数语法、相对时间、富文本与 locale key 类型仍待后续。用法、差异与验证见 [F5f 格式化与复数](89-f5f-locale-formatting.md)。
+
+**F5g 状态（2026-10-20）：** U31 的意图预取已交付：`usePrefetchOnIntent(id, { delayMs })` 提供 `onMouseEnter`/`onFocus` 延迟加载与 `onMouseLeave`/`onBlur` 取消（默认 50ms，0–5000 校验），复用既有注册表与在途 Promise；浏览器用例验证悬停即取模块且随后导航正常。视口触发、数据预取与 SSR 侧预取仍待后续。见 [F5d 路由预取](85-f5d-route-prefetch.md)。
 
 ### F3：权限、布局、菜单和国际化
 

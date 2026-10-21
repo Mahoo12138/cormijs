@@ -55,5 +55,31 @@ export function usePrefetch(): PrefetchApi {
   return api;
 }
 
+export interface PrefetchIntentOptions {
+  /** Milliseconds the pointer or focus must stay before the module loads; 0–5000, default 50. */
+  readonly delayMs?: number;
+}
+export interface PrefetchIntentHandlers {
+  onMouseEnter(): void;
+  onMouseLeave(): void;
+  onFocus(): void;
+  onBlur(): void;
+}
+/** Intent prefetching for links: spread these handlers on any clickable element. */
+export function usePrefetchOnIntent(id: string, options: PrefetchIntentOptions = {}): PrefetchIntentHandlers {
+  const api = usePrefetch(), delay = options.delayMs ?? 50, timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  if (typeof delay !== 'number' || !Number.isFinite(delay) || delay < 0 || delay > 5000) throw new TypeError('PREFETCH_INVALID: delayMs must be between 0 and 5000');
+  const cancel = () => { if (timer.current !== null) { clearTimeout(timer.current); timer.current = null; } };
+  useEffect(cancel, []);
+  const handlers = useMemo<PrefetchIntentHandlers>(() => {
+    const schedule = () => {
+      cancel();
+      timer.current = setTimeout(() => { timer.current = null; void api.prefetch(id); }, delay);
+    };
+    return Object.freeze({ onMouseEnter: schedule, onMouseLeave: cancel, onFocus: schedule, onBlur: cancel });
+  }, [api, id, delay]);
+  return handlers;
+}
+
 /** Runtime plugin object consumed by the generated entry when prefetchPlugin is mounted. */
 export const prefetchRuntime = { Provider: PrefetchProvider };
