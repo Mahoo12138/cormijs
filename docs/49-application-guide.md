@@ -1049,7 +1049,11 @@ const items = toAntdMenuItems(useMenu());
 // 或 const route = { path: '/', routes: toLayoutRoutes(useMenu()) };
 ```
 
-适配器不引入 antd/ProLayout；`key` 为 path、label 已本地化、routeId 保留路由 id。主题/图标/图表与 Antd/dayjs locale 联动仍需应用自行处理。规则见 [U17 菜单适配器](109-ui-menu-adapters.md)。规则见 [F5y SSR](107-f5y-ssr.md)。
+适配器不引入 antd/ProLayout；`key` 为 path、label 已本地化、routeId 保留路由 id。主题/图标/图表与 Antd/dayjs locale 联动仍需应用自行处理。规则见 [U17 菜单适配器](109-ui-menu-adapters.md)。
+
+### 4.49 CSS Modules 与资源类型
+
+启用 `styleTypesPlugin` 后生成 `.cormi/styles.d.ts`，声明 `*.module.{css,scss,sass,less}`、纯 CSS 副作用导入与常见图片/字体资源；默认关闭以免与应用自有 `*.d.ts` 冲突。类名为字符串索引，不解析具体选择器，也不支持 `?url` 等后缀。规则见 [F4m 样式类型](110-f4m-style-types.md)。规则见 [F5y SSR](107-f5y-ssr.md)。
 
 ## 5. 环境和 Mock 使用同一个部署前缀
 

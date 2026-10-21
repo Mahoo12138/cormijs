@@ -51,7 +51,7 @@
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c/F4d）：aliasPlugin 支持项目内相对别名与可选内置 `@`→src，definePlugin 在 dev 与 build 替换 JSON 常量；`@@`、环境分层自动映射与 define 类型生成待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
 | U20 | HTML title/metas/links/headScripts/scripts/favicon | 部分已有（F4a/F4e）：可选 htmlPlugin 注入 title/lang/meta/link/favicon，并按 Umi 位置约定注入 headScripts/scripts（封闭属性集合、转义与逃逸消解）；每路由 head 与任意 raw head HTML 待后续 | HTML/head 插件 | F4 |
 | U21 | helmet、页面标题/SEO 元数据 | 部分已有（F5c/F5t/F5x）：可选 headPlugin 按 `meta.head` 在导航后同步标题/meta/link/JSON-LD，并提供 `<Helmet>` 组件级贡献（路由→组件合并、受管节点可替换、卸载恢复）；SSR 头部收集待后续 | head 客户端插件 | F3/F4 |
-| U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有（F4f）：globalStylePlugin 发现 src/global.{css,scss,sass,less} 并由生成入口按 hook 顺序副作用导入，dev 新建/删除可触发生成；CSS Modules 类型声明、PostCSS/Tailwind/SVGR 与预处理集成仍待后续 | 样式/资源插件 + backend adapter | F4 |
+| U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有（F4f/F4m）：globalStylePlugin 发现 src/global.{css,scss,sass,less} 并由生成入口按 hook 顺序副作用导入；可选 styleTypesPlugin 生成 CSS Modules/静态资源的环境类型声明；精确类名类型、PostCSS/Tailwind/SVGR 仍待后续 | 样式/资源插件 + backend adapter | F4 |
 | U23 | Tailwind、UnoCSS、styled-components | 待实现可选集成 | 各生态 adapter | F4 |
 | U24 | icons | 待实现公共图标方案 | 图标资源/代码生成插件 | F4 |
 | U25 | publicPath/runtimePublicPath、CDN、hash、copy/externals | 部分已有（F4j）：base 表达部署前缀，可选 outputPlugin 在构建后复制文件并支持 `hash:false` 稳定文件名；externals、runtimePublicPath 与 CDN 运行时切换待后续；Vite 7 的 `renderBuiltUrl` runtime 只覆盖 JS 内资源引用，不覆盖代码分割 chunk 导入，未交付等价 runtimePublicPath | 输出/资源策略插件，差异显式 | F4 |
@@ -118,7 +118,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5z | d27c980 | 独立 serve 命令 | docs/108 |
 | U17-1 | edf6d6e | Antd/ProLayout 菜单适配器 | docs/109 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 546/546、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/f4a…f5z-validation.json` 与 `artifacts/u17-menu-adapters-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态。
+最新冻结验证（2026-10-21）：`pnpm check` 548/548、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/f4a…f5z-validation.json` 与 `artifacts/u17-menu-adapters-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态。
 
 ## 4. 实施顺序与可审阅交付
 

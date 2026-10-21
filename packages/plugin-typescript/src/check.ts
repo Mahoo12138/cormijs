@@ -12,7 +12,7 @@ export async function checkTypes(root: string, generated: readonly string[], sig
   const options = typecheckOptions(input), ts = await import('typescript'); signal.throwIfAborted();
   const required = generated.map(file => {
     const absolute = resolve(root, file), local = relative(root, absolute);
-    if (isAbsolute(file) || !['.cormi/app.tsx', '.cormi/routes.d.ts', '.cormi/locale.d.ts', '.cormi/loaders.d.ts'].includes(local.split(sep).join('/'))
+    if (isAbsolute(file) || !['.cormi/app.tsx', '.cormi/routes.d.ts', '.cormi/locale.d.ts', '.cormi/loaders.d.ts', '.cormi/styles.d.ts'].includes(local.split(sep).join('/'))
       || realpathSync(absolute) !== absolute || !lstatSync(absolute).isFile()) throw new CormiError('TYPECHECK_PATH_INVALID', 'Unexpected generated typecheck input.');
     return absolute;
   });
