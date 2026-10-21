@@ -945,7 +945,7 @@ const visible = usePrefetchOnVisible('config:guide', { rootMargin: '200px' });
 plugins: [{ id: 'mpa', plugin: mpaPlugin }]
 ```
 
-`src/pages/home/index.tsx` 生成 `/home.html`，可在同目录 `config.json` 配 `{ "title": "Home page", "mountElementId": "app", "layout": "src/HomeLayout.tsx" }`；`layout` 也可由插件选项全局指定，页面配置优先。`src/pages` 顶层目录即页面，`index` 保留给 SPA。每个页面是独立 React 根，layout 只包裹 children、不注入 SPA Provider；dev/build/preview 均可用，构建产物为 `dist/<name>.html`。新增/删除页面需重启开发服务。规则见 [F5q MPA](99-f5q-mpa.md)。
+`src/pages/home/index.tsx` 生成 `/home.html`，可在同目录 `config.json` 配 `{ "title": "Home page", "mountElementId": "app", "layout": "src/HomeLayout.tsx" }`；`layout` 也可由插件选项全局指定，页面配置优先；插件 `template` 可指定项目内 HTML 模板，需包含 `{{mountElementId}}` 与 `{{entry}}`。`src/pages` 顶层目录即页面，`index` 保留给 SPA。每个页面是独立 React 根，layout 只包裹 children、不注入 SPA Provider；dev/build/preview 均可用，构建产物为 `dist/<name>.html`。新增/删除页面需重启开发服务。规则见 [F5q MPA](99-f5q-mpa.md)。
 
 ### 4.39 生成 API 与 Mock 文件
 

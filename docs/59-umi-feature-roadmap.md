@@ -63,7 +63,7 @@
 | U31 | code splitting、routePrefetch、routePreloadOnLoad | 部分已有（F5d/F5g/F5p）：页面按路由懒加载，注册表支持手动、`mode:"idle"` 空闲全量、`usePrefetchOnIntent()` 悬停/聚焦与 `usePrefetchOnVisible()` 视口触发预取；数据预取与 SSR 侧预取待后续 | 路由加载插件 + backend bridge | F5 |
 | U32 | SSR、服务端 loader/渲染入口 | 部分已有（F5y）：`app.ssr: true` + `ssrPlugin` 在 dev（Vite ssrLoadModule）与 preview（构建 bundle）执行 static handler/clientLoader、注入 hydration 并由客户端 hydrateRoot 接管；servePlugin 提供 `cormi serve`（静态 dist + SSR bundle、base 前缀），SSR 输出路由/Helmet head；serverLoader 与流式渲染待后续 | 独立 SSR renderer/profile，复用可共享契约 | F5 |
 | U33 | exportStatic/预渲染/静态导出 | 部分已有（F5e）：可选 staticExportPlugin 为每个字面路径路由生成带 `meta.head` 的 HTML 外壳；prerender、404.html、sitemap 与 SSR 组合待后续（外壳不等于预渲染） | 静态导出插件 | F5 |
-| U34 | MPA | 部分已有（F5q）：mpaPlugin 按 `src/pages` 顶层目录生成独立 HTML 与 React 入口，dev/build/preview 可用，与 SPA 共存；自定义模板、App/Provider 包装与热更新待后续（全局/页面级 layout 已交付） | 独立 MPA profile | F5 |
+| U34 | MPA | 部分已有（F5q）：mpaPlugin 按 `src/pages` 顶层目录生成独立 HTML 与 React 入口，dev/build/preview 可用，与 SPA 共存；App/Provider 包装与热更新待后续（全局/页面级 layout 与自定义 HTML 模板已交付） | 独立 MPA profile | F5 |
 | U35 | apiRoute | 部分已有（F5n）：apiRoutePlugin 将 `src/api/**` 的 Fetch 处理器注册为路由，dev 由 Vite 中间件运行、build 用 esbuild 编译、preview 提供编译产物；独立生产服务、中间件链与流式响应待后续 | 独立服务端路由插件 | F5 |
 | U36 | qiankun、Module Federation | 待实现 | 可选主/子应用与 federation adapter | F6 |
 | U37 | dva、valtio、react-query | 待实现可选集成，不全塞入默认数据流 | 各状态库/服务端状态 adapter | F6 |
@@ -223,9 +223,11 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 
 **F5p 状态（2026-10-21）：** U31 的视口触发已交付：`usePrefetchOnVisible(id, { rootMargin, threshold, delayMs })` 返回 ref 回调，元素首次进入视口后经注册表预取路由模块并断开观察；ref 变化/卸载释放观察器与定时器，无 `IntersectionObserver` 时为空操作，参数越界抛 `PREFETCH_INVALID`。只预取模块，不预取 loader 数据。用法、差异与验证见 [F5p 视口预取](98-f5p-viewport-prefetch.md)。
 
+**F5q 模板增量（2026-10-21）：** MPA 支持插件级自定义 HTML 模板（项目内真实文件、≤1 MiB），要求 `{{mountElementId}}` 与 `{{entry}}` 占位符，`{{title}}` 转义；与 layout 组合生成多页入口。
+
 **F5q layout 增量（2026-10-21）：** MPA 支持插件级与 `config.json.layout` 页面级 React 布局包装（项目内源码、真实文件校验，页面覆盖全局），入口生成 `<Layout><Page /></Layout>`；App/Provider 包装与热更新仍待后续。
 
-**F5q 状态（2026-10-21）：** U34 的目录约定 MPA 已交付：`mpaPlugin` 把 `src/pages` 顶层目录（含可选 `config.json` 的 title/mountElementId）生成为独立 `<name>.html` 与 React 入口；dev 通过内部重写提供，build 以 Vite 多 HTML 输入构建并把页面移到 `dist/<name>.html`，preview 直接静态提供；`index` 保留给 SPA，页面不继承 SPA 路由/Provider，自定义模板、App/Provider 包装与热更新待后续（全局/页面级 layout 已交付）。用法、差异与验证见 [F5q MPA](99-f5q-mpa.md)。
+**F5q 状态（2026-10-21）：** U34 的目录约定 MPA 已交付：`mpaPlugin` 把 `src/pages` 顶层目录（含可选 `config.json` 的 title/mountElementId）生成为独立 `<name>.html` 与 React 入口；dev 通过内部重写提供，build 以 Vite 多 HTML 输入构建并把页面移到 `dist/<name>.html`，preview 直接静态提供；`index` 保留给 SPA，页面不继承 SPA 路由/Provider，App/Provider 包装与热更新待后续（全局/页面级 layout 与自定义 HTML 模板已交付）。用法、差异与验证见 [F5q MPA](99-f5q-mpa.md)。
 
 **F5r 状态（2026-10-21）：** U27 的 API/Mock 模板已交付：沿用 `generatorPlugin` 与「命令+位置参数」协议，`generate api <name>` 写 `src/api/<name>.ts`（Fetch 骨架），`generate mock <name>` 写 `mock/<name>.ts`（`GET /api/<name>` 示例）；覆盖/试运行/路径限制沿用既有规则，生成器不注册路由或 Mock，文件由 `apiRoutePlugin`/`mockPlugin` 按约定发现。模板贡献与交互式提问仍待后续。用法、差异与验证见 [F5r API/Mock 生成器](100-f5r-generators.md)。
 

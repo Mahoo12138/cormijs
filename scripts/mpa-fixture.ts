@@ -8,7 +8,7 @@ import preset from '@cormijs/preset-react-vite';
 import { mpaPlugin } from '@cormijs/plugin-react-vite';
 export default defineConfig({
   presets: [preset],
-  plugins: [{ id: 'mpa', plugin: mpaPlugin, options: { id: 'application:mpa', layout: 'src/GlobalMpaLayout.tsx' } }],
+  plugins: [{ id: 'mpa', plugin: mpaPlugin, options: { id: 'application:mpa', layout: 'src/GlobalMpaLayout.tsx', template: 'src/mpa-template.html' } }],
   app: { routes: [], server: { port: 0 } },
 });
 `;
@@ -22,6 +22,7 @@ export async function writeMpaFixture(root: string) {
     'src/pages/index.tsx': 'export default () => <main>SPA home</main>;',
     'src/pages/home/index.tsx': 'export default function Home(){return <main><h1>MPA home</h1></main>;}',
     'src/pages/home/config.json': JSON.stringify({ title: 'Home page', mountElementId: 'app', layout: 'src/HomeLayout.tsx' }),
+    'src/mpa-template.html': '<!doctype html><html><head><meta charset="utf-8"><title>{{title}}</title><meta name="mpa-template" content="custom"><link rel="icon" href="data:,"></head><body><div id="{{mountElementId}}"></div><script type="module" src="/{{entry}}"></script></body></html>',
     'src/GlobalMpaLayout.tsx': `import type { ReactNode } from 'react';
 export default function GlobalMpaLayout({ children }: { children: ReactNode }){return <section data-global-layout><header>Global MPA layout</header>{children}</section>;}`,
     'src/HomeLayout.tsx': `import type { ReactNode } from 'react';
@@ -52,8 +53,10 @@ export async function verifyMpaPages(page: Page, url: string, errors: string[]) 
 export async function verifyMpaOutput(root: string) {
   const home = await readFile(join(root, 'dist/home.html'), 'utf8');
   assert.match(home, /<title>Home page<\/title>/);
+  assert.match(home, /<meta name="mpa-template" content="custom">/);
   assert.match(home, /<script type="module" crossorigin src="\/assets\/[^"]+\.js"><\/script>/);
   const admin = await readFile(join(root, 'dist/admin.html'), 'utf8');
   assert.match(admin, /<title>Admin page<\/title>/);
+  assert.match(admin, /<meta name="mpa-template" content="custom">/);
   await assert.rejects(readFile(join(root, 'dist/.cormi/mpa/home.html')), /ENOENT/);
 }

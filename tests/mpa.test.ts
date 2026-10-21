@@ -22,6 +22,10 @@ test('resolveMpaEntries maps page directories to standalone entries', () => {
   assert.match(mpaEntrySource(entries[1]!), /document\.getElementById\("root"\)/);
   assert.match(mpaEntrySource(entries[1]!), /import Page from '\/src\/pages\/home\/index\.tsx'/);
   assert.match(mpaHtml({ ...entries[1]!, title: 'A "quoted" <title>' }), /<title>A &quot;quoted&quot; &lt;title&gt;<\/title>/);
+  const templated = resolveMpaEntries([{ name: 'home', file: 'src/pages/home/index.tsx' }], { ...options, template: '<html><head><title>{{title}}</title></head><body><div id="{{mountElementId}}"></div><script src="/{{entry}}"></script></body></html>' });
+  assert.match(mpaHtml({ ...templated[0]!, title: 'T' }), /<title>T<\/title>/);
+  assert.match(mpaHtml({ ...templated[0]!, title: 'T' }), /src="\/\.cormi\/mpa\/home\.tsx"/);
+  assert.throws(() => mpaHtml({ ...templated[0]!, template: '<html></html>' }), hasCode('MPA_INVALID'));
   const wrapped = resolveMpaEntries([{ name: 'home', file: 'src/pages/home/index.tsx', layout: 'src/Layout.tsx' }], options);
   assert.equal(wrapped[0]!.layout, 'src/Layout.tsx');
   assert.match(mpaEntrySource(wrapped[0]!), /import Layout from '\/src\/Layout\.tsx'/);
