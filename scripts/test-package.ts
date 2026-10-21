@@ -596,11 +596,14 @@ const bad:InitialStatePluginOptions={id:42};
     await writeFile(join(requestConsumer,'package.json'),JSON.stringify(requestManifest,null,2));
     await install('request-install',requestConsumer);await auditLinks(requestConsumer);
     await command('request-typecheck',requestConsumer,'typecheck');
-    await writeFile(join(requestConsumer,'types.mts'),`import {requestPlugin,type RequestPluginOptions} from '@cormijs/plugin-react';import {RequestError,useRequest,type RequestClient,type RequestConfig,type UseRequestResult} from '@cormijs/runtime';
+    await writeFile(join(requestConsumer,'types.mts'),`import {requestPlugin,type RequestPluginOptions} from '@cormijs/plugin-react';import {RequestError,useRequest,type RequestClient,type RequestConfig,type UseRequestOptions,type UseRequestResult} from '@cormijs/runtime';
 const config:RequestConfig={baseURL:'/api',headers:{'x-app':'cormi'},timeout:1000};
 const options:RequestPluginOptions={id:'consumer:request'};
+const hookOptions:UseRequestOptions<string>={retry:2,retryDelay:attempt=>attempt*10,pollingInterval:1000,pollingWhenHidden:false,refreshDeps:['q']};
 declare const client:RequestClient;declare const result:UseRequestResult<string>;
-void [requestPlugin,options,config,client,result,useRequest,RequestError];
+void [requestPlugin,options,hookOptions,config,client,result,useRequest,RequestError];
+// @ts-expect-error retry is a number
+const badHook:UseRequestOptions<string>={retry:'2'};
 // @ts-expect-error baseURL must be a string
 const bad:RequestConfig={baseURL:42};
 `);

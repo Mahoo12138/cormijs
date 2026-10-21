@@ -1,0 +1,109 @@
+{
+  "format": "cormi:u12-request-retry-validation:1",
+  "verifiedAt": "2026-10-21T19:34:37.083Z",
+  "base": "fb23a5b51a2b687e127e8b8af63c3d00b569e902",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts",
+      "docs/117-u12-request-retry-polling.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-request-retry/check.log",
+      "sha256": "15e652067b0479131dc155ef1988bbe2ad378e536fba0709d0f34899581b5638",
+      "seconds": 120.4,
+      "tests": 559,
+      "pass": 559,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-request-retry/browser.log",
+      "sha256": "7fead39970586372103fa06a2d1ffcc8c08a6e349295ee4e0ac1c0ca82dc070e",
+      "seconds": 555.3,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-request-retry/package.log",
+      "sha256": "9eb104ef59fc3975216fbc8a6440682295e00cce53dfd87a8dad10ec384eaab4",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-request-retry/targeted.log",
+      "sha256": "2a55eeb6292ea0e9050d27930411f1666c2825cb5c2912f32b269b532066ae67",
+      "seconds": 11.3,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "retry until success, polling ticks, polling stops on unmount, refreshDeps rerun, plus existing cancel/race/error cases"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "d7b6045033fa3c70ecb6545fd5944e9d25973f38e1a01e46bd27cddcfd30aba2",
+    "docs/49-application-guide.md": "21d6a7d0574952b587704f7af242821d1a6a31defdcca7bad32d11d94b3a152d",
+    "docs/59-umi-feature-roadmap.md": "a7259c9d03ab8e893b3287cddde59d9543f6d3beb5b1f165dc369ec750b88f25",
+    "packages/runtime/src/request.tsx": "aa6ef89520dc3578385e1102e1fae75e768ec083569c621f12267a8f896a1a94",
+    "scripts/request-fixture.ts": "4afd75ff52d10b745be4ffad30cb5a3a149722bf900d5bbc0b57a67c603558af",
+    "scripts/test-package.ts": "7b94dc1139612eb7f71858a9e55605644c2e9e59d7e39e4cd4b0cb436e30d9f3",
+    "docs/117-u12-request-retry-polling.md": "2d9ad42d33d3fc3bcf8afae82c467339b01a5ab684ed877866f74e7b20af8500"
+  },
+  "sourceInputCount": 7,
+  "sourceInputsDigest": "4872b8cb9c1177e6fb9e96904ba6ab93d9d4e4990b1ee2df15b5bf5020e3c9c2",
+  "documentationInputs": {
+    "docs/117-u12-request-retry-polling.md": "2d9ad42d33d3fc3bcf8afae82c467339b01a5ab684ed877866f74e7b20af8500",
+    "docs/59-umi-feature-roadmap.md": "a7259c9d03ab8e893b3287cddde59d9543f6d3beb5b1f165dc369ec750b88f25",
+    "docs/112-roadmap-audit-2026-10-21.md": "d7b6045033fa3c70ecb6545fd5944e9d25973f38e1a01e46bd27cddcfd30aba2",
+    "docs/49-application-guide.md": "21d6a7d0574952b587704f7af242821d1a6a31defdcca7bad32d11d94b3a152d"
+  },
+  "evidence": [
+    ".cache/u12-request-retry/check.log",
+    ".cache/u12-request-retry/browser.log",
+    ".cache/u12-request-retry/package.log",
+    ".cache/u12-request-retry/targeted.log",
+    "artifacts/u12-request-retry-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "no-pagination-or-load-more",
+    "no-cache-or-request-dedupe",
+    "refresh-deps-are-json-compared",
+    "polling-is-timeout-serial-not-strict-period",
+    "manual-requests-do-not-poll",
+    "retry-delay-bounded-0-60000ms",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

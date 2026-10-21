@@ -359,7 +359,7 @@ const { data, loading, error, run, refresh, cancel } = useRequest(
 );
 ```
 
-首次请求自动执行；`manual: true` 时只由 `run`/`refresh` 触发。重复执行会中止旧请求，generation 保证最后一次结果生效；取消不写入错误。当前只提供 fetch 客户端，拦截器、统一错误协议、重试、轮询与分页尚未交付。完整语义与验证见 [F2c request 与 useRequest](68-f2c-request.md)。
+首次请求自动执行；`manual: true` 时只由 `run`/`refresh` 触发。重复执行会中止旧请求，generation 保证最后一次结果生效；取消不写入错误。`retry`/`retryDelay` 在最终失败前重试，`pollingInterval` 在成功后轮询（`pollingWhenHidden` 控制隐藏页），`refreshDeps` 值变化时重新执行；取消和卸载会清理重试等待与轮询计时。分页/加载更多、缓存/去重与防抖节流尚未交付。完整语义与验证见 [F2c](68-f2c-request.md) 与 [U12-1](117-u12-request-retry-polling.md)。
 
 示例：`pnpm cormi dev --root examples/request`，默认监听 `/request/`。
 

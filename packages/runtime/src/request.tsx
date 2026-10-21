@@ -96,6 +96,16 @@ export interface UseRequestOptions<T> {
   readonly manual?: boolean;
   readonly onSuccess?: (data: T) => void;
   readonly onError?: (error: unknown) => void;
+  /** Additional attempts after the first failure, 0–10. */
+  readonly retry?: number;
+  /** Delay between attempts; a function receives the retry number starting at 1. */
+  readonly retryDelay?: number | ((attempt: number, error: unknown) => number);
+  /** Re-run after each success, in milliseconds; manual requests do not poll. */
+  readonly pollingInterval?: number;
+  /** Keep polling while the document is hidden; default false. */
+  readonly pollingWhenHidden?: boolean;
+  /** Re-run when these JSON-serializable values change; ignored for manual requests. */
+  readonly refreshDeps?: readonly unknown[];
 }
 export interface UseRequestResult<T> {
   readonly data: T | undefined;
@@ -106,7 +116,27 @@ export interface UseRequestResult<T> {
   cancel(): void;
 }
 
+const delayOf = (value: UseRequestOptions<unknown>['retryDelay'], attempt: number, error: unknown): number => {
+  const ms = typeof value === 'function' ? value(attempt, error) : value ?? 1000;
+  if (!Number.isFinite(ms) || ms < 0 || ms > 60_000) throw new TypeError('REQUEST_INVALID: retryDelay must resolve to 0–60000ms');
+  return ms;
+};
+const sleep = (ms: number, signal: AbortSignal) => new Promise<void>(resolve => {
+  if (signal.aborted) { resolve(); return; }
+  const timer = setTimeout(resolve, ms);
+  signal.addEventListener('abort', () => { clearTimeout(timer); resolve(); }, { once: true });
+});
+
+function validateUseRequest<T>(options: UseRequestOptions<T>): void {
+  if (options.retry !== undefined && (!Number.isInteger(options.retry) || options.retry < 0 || options.retry > 10)) throw new TypeError('REQUEST_INVALID: retry must be an integer from 0 to 10');
+  if (options.retryDelay !== undefined && typeof options.retryDelay !== 'number' && typeof options.retryDelay !== 'function') throw new TypeError('REQUEST_INVALID: retryDelay must be a number or function');
+  if (options.pollingInterval !== undefined && (!Number.isInteger(options.pollingInterval) || options.pollingInterval < 100 || options.pollingInterval > 3_600_000)) throw new TypeError('REQUEST_INVALID: pollingInterval must be an integer from 100 to 3600000');
+  if (options.pollingWhenHidden !== undefined && typeof options.pollingWhenHidden !== 'boolean') throw new TypeError('REQUEST_INVALID: pollingWhenHidden must be boolean');
+  if (options.refreshDeps !== undefined && (!Array.isArray(options.refreshDeps) || options.refreshDeps.length > 16)) throw new TypeError('REQUEST_INVALID: refreshDeps must be an array of at most 16 values');
+}
+
 export function useRequest<T>(service: (client: RequestClient, signal: AbortSignal) => Promise<T>, options: UseRequestOptions<T> = {}): UseRequestResult<T> {
+  validateUseRequest(options);
   const client = useRequestClient();
   const [state, setState] = useState<{ data: T | undefined; error: unknown; loading: boolean }>({
     data: undefined, error: undefined, loading: !options.manual,
@@ -114,38 +144,76 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
   const serviceRef = useRef(service), optionsRef = useRef(options);
   serviceRef.current = service; optionsRef.current = options;
   const mounted = useRef(true), generation = useRef(0), controller = useRef<AbortController | undefined>(undefined);
+  const polling = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), poll = useRef<() => void>(() => {});
+  const stopPolling = () => { if (polling.current) { clearTimeout(polling.current); polling.current = undefined; } };
   const run = useCallback(async (): Promise<T | undefined> => {
     const token = ++generation.current;
     controller.current?.abort();
+    stopPolling();
     const current = controller.current = new AbortController();
     setState(value => ({ ...value, loading: true, error: undefined }));
-    try {
-      const data = await serviceRef.current(client, current.signal);
-      if (mounted.current && token === generation.current) {
-        setState({ data, error: undefined, loading: false });
-        optionsRef.current.onSuccess?.(data);
+    const retry = optionsRef.current.retry ?? 0;
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const data = await serviceRef.current(client, current.signal);
+        if (mounted.current && token === generation.current) {
+          setState({ data, error: undefined, loading: false });
+          optionsRef.current.onSuccess?.(data);
+          poll.current();
+        }
+        return data;
+      } catch (error) {
+        const aborted = current.signal.aborted || (error instanceof DOMException && error.name === 'AbortError');
+        if (!mounted.current || token !== generation.current || aborted) {
+          if (mounted.current && token === generation.current) setState(value => ({ ...value, loading: false }));
+          return undefined;
+        }
+        if (attempt < retry) {
+          let delay: number;
+          try { delay = delayOf(optionsRef.current.retryDelay, attempt + 1, error); }
+          catch (invalid) {
+            setState({ data: undefined, error: invalid, loading: false });
+            optionsRef.current.onError?.(invalid);
+            return undefined;
+          }
+          await sleep(delay, current.signal);
+          if (current.signal.aborted || !mounted.current || token !== generation.current) return undefined;
+          continue;
+        }
+        setState({ data: undefined, error, loading: false });
+        optionsRef.current.onError?.(error);
+        return undefined;
       }
-      return data;
-    } catch (error) {
-      const aborted = current.signal.aborted || (error instanceof DOMException && error.name === 'AbortError');
-      if (mounted.current && token === generation.current) {
-        setState(value => ({ ...value, loading: false, ...(aborted ? {} : { error }) }));
-        if (!aborted) optionsRef.current.onError?.(error);
-      }
-      return undefined;
     }
   }, [client]);
+  const runRef = useRef(run); runRef.current = run;
+  poll.current = () => {
+    stopPolling();
+    const interval = optionsRef.current.pollingInterval;
+    if (!interval || optionsRef.current.manual === true || !mounted.current) return;
+    polling.current = setTimeout(async () => {
+      if (!mounted.current) return;
+      if (optionsRef.current.pollingWhenHidden !== true && typeof document !== 'undefined' && document.hidden) { poll.current(); return; }
+      await runRef.current();
+    }, interval);
+  };
   const cancel = useCallback(() => {
-    controller.current?.abort();
     generation.current++;
+    controller.current?.abort();
+    stopPolling();
     setState(value => ({ ...value, loading: false }));
   }, []);
   const manual = options.manual === true;
+  const deps = options.refreshDeps === undefined ? '' : JSON.stringify(options.refreshDeps);
   useEffect(() => {
     mounted.current = true;
-    if (!manual) void run();
-    return () => { mounted.current = false; controller.current?.abort(); };
-  }, [manual, run]);
+    if (!manual) void runRef.current();
+    return () => {
+      mounted.current = false;
+      controller.current?.abort();
+      stopPolling();
+    };
+  }, [manual, run, deps]);
   return { ...state, run, refresh: run, cancel };
 }
 

@@ -23,8 +23,8 @@ export async function writeRequestFixture(root: string) {
     'cormi.config.ts': requestConfiguration,
     'src/app.tsx': `import { defineApp } from '@cormijs/runtime';
 export default defineApp({ request: { baseURL: '/api', headers: { 'x-app': 'cormi' }, timeout: 2000 } });`,
-    'src/pages/index.tsx': `import { useRef } from 'react';
-import { useRequest } from '@cormijs/runtime';
+    'src/pages/index.tsx': `import { useRef, useState } from 'react';
+import { Link, useRequest } from '@cormijs/runtime';
 function Auto(){
   const {data,loading,error,refresh}=useRequest<{message:string}>((client,signal)=>client.get('/hello',{signal,params:{q:'one'}}));
   return <section data-auto-section><p data-auto>{data?.message ?? ''}</p><p data-loading>{String(loading)}</p><p data-error>{error ? 'error' : ''}</p><button onClick={()=>void refresh()}>Refresh</button></section>;
@@ -42,7 +42,22 @@ function Race(){
   const {data,run}=useRequest<{message:string}>((client,signal)=>client.get('/slow?id='+target.current,{signal}),{manual:true});
   return <section><p data-race>{data?.message ?? ''}</p><button onClick={()=>{target.current='first';void run();}}>Run first</button><button onClick={()=>{target.current='second';void run();}}>Run second</button></section>;
 }
-export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /></main>;}`,
+function Retry(){
+  const {data,error}=useRequest<{message:string}>((client,signal)=>client.get('/flaky',{signal}),{retry:2,retryDelay:10});
+  return <section><p data-retry>{data?.message ?? ''}</p><p data-retry-error>{error ? 'error' : ''}</p></section>;
+}
+function Polling(){
+  const {data}=useRequest<{message:string}>((client,signal)=>client.get('/poll',{signal}),{pollingInterval:150});
+  return <p data-poll>{data?.message ?? ''}</p>;
+}
+function Deps(){
+  const [q,setQ]=useState('one');
+  const {data}=useRequest<{message:string}>((client,signal)=>client.get('/deps',{signal,params:{q}}),{refreshDeps:[q]});
+  return <section><p data-deps>{data?.message ?? ''}</p><button onClick={()=>setQ('two')}>Change dep</button></section>;
+}
+export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Deps /><Link to="/other">Other</Link></main>;}`,
+    'src/pages/other.tsx': `import { Link } from '@cormijs/runtime';
+export default function Other(){return <main><h1>Request other</h1><Link to="/">Request home</Link></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
       strict: true, noEmit: true, skipLibCheck: false, allowImportingTsExtensions: true, lib: ['ES2023', 'DOM', 'DOM.Iterable'], types: ['react', 'react-dom', 'node'] },
       include: ['cormi.config.ts', 'src', '.cormi/**/*'] }, null, 2),
@@ -51,7 +66,7 @@ export default function Home(){return <main><h1>Request home</h1><Auto /><Manual
 }
 
 export async function verifyRequestPage(page: Page, url: string) {
-  let helloCount = 0, seenHeader = '', slowCount = 0;
+  let helloCount = 0, seenHeader = '', slowCount = 0, flakyCount = 0, pollCount = 0, depsCount = 0;
   await page.route('**/api/**', async route => {
     const request = route.request(), target = new URL(request.url());
     seenHeader = request.headers()['x-app'] ?? '';
@@ -66,6 +81,16 @@ export async function verifyRequestPage(page: Page, url: string) {
       catch { /* the useRequest generation may have aborted this request */ }
     } else if (target.pathname === '/api/error') {
       await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'failed' }) });
+    } else if (target.pathname === '/api/flaky') {
+      flakyCount++;
+      if (flakyCount < 3) await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'flaky' }) });
+      else await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'ok' }) });
+    } else if (target.pathname === '/api/poll') {
+      pollCount++;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'poll:' + pollCount }) });
+    } else if (target.pathname === '/api/deps') {
+      depsCount++;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'deps:' + (target.searchParams.get('q') ?? '') }) });
     } else {
       await route.fulfill({ status: 404, body: 'missing' });
     }
@@ -97,6 +122,21 @@ export async function verifyRequestPage(page: Page, url: string) {
   await page.getByRole('button', { name: 'Run second', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('[data-race]')?.textContent === 'second');
   assert.ok(slowCount >= 2);
+  await page.waitForFunction(() => document.querySelector('[data-retry]')?.textContent === 'ok');
+  assert.equal(flakyCount, 3);
+  assert.equal(await page.locator('[data-retry-error]').innerText(), '');
+  await page.waitForTimeout(500);
+  assert.ok(pollCount >= 2, `polled ${pollCount} times`);
+  await page.waitForFunction(() => document.querySelector('[data-deps]')?.textContent === 'deps:one');
+  await page.getByRole('button', { name: 'Change dep', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-deps]')?.textContent === 'deps:two');
+  assert.ok(depsCount >= 2);
+  await page.getByRole('link', { name: 'Other', exact: true }).click();
+  await page.getByRole('heading', { name: 'Request other', exact: true }).waitFor();
+  await page.waitForTimeout(200);
+  const stoppedAt = pollCount;
+  await page.waitForTimeout(400);
+  assert.equal(pollCount, stoppedAt, 'polling stops after unmount');
   assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);
   await page.unroute('**/api/**');
 }
