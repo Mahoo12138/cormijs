@@ -76,6 +76,8 @@ F5o 起，`useIntl().rich()` 与 `FormattedMessage` 的 `tags` 把 ICU 消息中
 
 F5p 起，`usePrefetchOnVisible(id, { rootMargin, threshold, delayMs })` 返回 ref 回调，元素首次进入视口时预取对应路由模块并断开观察；与手动/意图预取共用注册表与在途 Promise。详见 [F5p 视口预取](98-f5p-viewport-prefetch.md)。
 
+F5q 起，显式启用的 `mpaPlugin` 把 `src/pages` 顶层目录生成为独立 HTML 页面（可配 title/mountElementId），dev/build/preview 与 SPA 共存；页面不继承 SPA 路由与 Provider，自定义模板与布局待后续。详见 [F5q MPA](99-f5q-mpa.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

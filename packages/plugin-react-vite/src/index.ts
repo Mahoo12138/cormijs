@@ -9,6 +9,7 @@ export { definePlugin, resolveDefines, applyDefines, mergeDefines, type DefinePl
 export { outputPlugin, resolveOutputCopy, stableOutputNames, type OutputPluginOptions, type OutputCopy } from './output.js';
 export { staticExportPlugin, staticPages, renderStaticPage, writeStaticPages, type StaticExportOptions, type StaticPage } from './static-export.js';
 export { apiRoutePlugin, resolveApiRoutes, matchApiRoute, runApiHandler, type ApiRoutePluginOptions, type ApiRoute, type ApiHandler, type ApiHandlerContext } from './api.js';
+export { mpaPlugin, resolveMpaEntries, mpaEntrySource, mpaHtml, type MpaPluginOptions, type MpaCandidate, type MpaEntry } from './mpa.js';
 
 /** All Vite-specific React behavior stays in this optional bridge. */
 export const reactVitePlugin: Plugin.Object<void> = {

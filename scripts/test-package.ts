@@ -31,6 +31,7 @@ import { writePrefetchFixture, verifyPrefetchPage } from './prefetch-fixture.js'
 import { writeOutputFixture, verifyOutputBuild, verifyOutputPage } from './output-fixture.js';
 import { writeGeneratorFixture } from './generator-fixture.js';
 import { writeStaticExportFixture, verifyStaticExport, verifyStaticExportPages } from './static-export-fixture.js';
+import { writeMpaFixture, verifyMpaPages, verifyMpaOutput } from './mpa-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
 import { writeConventionalLoaderFixture, verifyConventionalLoaderPage } from './conventional-loader-fixture.js';
@@ -960,6 +961,28 @@ const badApi:ApiRoutePluginOptions={prefix:1};
     await verifyStaticExport(exportConsumer);
     await withServer(exportConsumer,'preview',async url=>{await verifyStaticExportPages(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'static-export-preview.png')});});
     report.stages.push({label:'installed-static-export-dev-build-and-static-preview',routes:['/','/guide'],apiRoutes:['/api/ping'],previewRegenerated:false});
+
+    }
+    if (selected('mpa')) {
+    const mpaConsumer=await create('mpa','react');await writeMpaFixture(mpaConsumer);
+    const mpaManifest=consumerManifest(kit,'react');
+    mpaManifest.dependencies['@cormijs/plugin-react-vite']=mpaManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
+    await writeFile(join(mpaConsumer,'package.json'),JSON.stringify(mpaManifest,null,2));
+    await install('mpa-install',mpaConsumer);await auditLinks(mpaConsumer);
+    await command('mpa-typecheck',mpaConsumer,'typecheck');
+    await writeFile(join(mpaConsumer,'types.mts'),`import {mpaPlugin,resolveMpaEntries,mpaEntrySource,mpaHtml,type MpaPluginOptions,type MpaEntry} from '@cormijs/plugin-react-vite';
+const options:MpaPluginOptions={id:'app:mpa',directory:'src/pages',mountElementId:'root'};
+const entries:readonly MpaEntry[]=resolveMpaEntries([{name:'home',file:'src/pages/home/index.tsx'}],{directory:'src/pages',mountElementId:'root'});
+void [mpaPlugin,options,entries,mpaEntrySource,mpaHtml];
+// @ts-expect-error mountElementId is a string
+const bad:MpaPluginOptions={mountElementId:1};
+`);
+    await execute('mpa-public-types',mpaConsumer,process.execPath,typeArguments);
+    await withServer(mpaConsumer,'dev',async url=>{await verifyMpaPages(page,url,errors);assert.deepEqual(errors,[]);});
+    await command('mpa-build',mpaConsumer,'build');
+    await verifyMpaOutput(mpaConsumer);
+    await withServer(mpaConsumer,'preview',async url=>{await verifyMpaPages(page,url,errors);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'mpa-preview.png')});});
+    report.stages.push({label:'installed-mpa-dev-build-and-static-preview',pages:['home','admin'],previewRegenerated:false});
 
     }
     if (selected('analytics')) {

@@ -63,7 +63,7 @@
 | U31 | code splitting、routePrefetch、routePreloadOnLoad | 部分已有（F5d/F5g/F5p）：页面按路由懒加载，注册表支持手动、`mode:"idle"` 空闲全量、`usePrefetchOnIntent()` 悬停/聚焦与 `usePrefetchOnVisible()` 视口触发预取；数据预取与 SSR 侧预取待后续 | 路由加载插件 + backend bridge | F5 |
 | U32 | SSR、服务端 loader/渲染入口 | 待实现 | 独立 SSR renderer/profile，复用可共享契约 | F5 |
 | U33 | exportStatic/预渲染/静态导出 | 部分已有（F5e）：可选 staticExportPlugin 为每个字面路径路由生成带 `meta.head` 的 HTML 外壳；prerender、404.html、sitemap 与 SSR 组合待后续（外壳不等于预渲染） | 静态导出插件 | F5 |
-| U34 | MPA | 待实现多入口应用编排 | 独立 MPA profile | F5 |
+| U34 | MPA | 部分已有（F5q）：mpaPlugin 按 `src/pages` 顶层目录生成独立 HTML 与 React 入口，dev/build/preview 可用，与 SPA 共存；自定义模板、布局/App 包装、页面级 Provider 与热更新待后续 | 独立 MPA profile | F5 |
 | U35 | apiRoute | 部分已有（F5n）：apiRoutePlugin 将 `src/api/**` 的 Fetch 处理器注册为路由，dev 由 Vite 中间件运行、build 用 esbuild 编译、preview 提供编译产物；独立生产服务、中间件链与流式响应待后续 | 独立服务端路由插件 | F5 |
 | U36 | qiankun、Module Federation | 待实现 | 可选主/子应用与 federation adapter | F6 |
 | U37 | dva、valtio、react-query | 待实现可选集成，不全塞入默认数据流 | 各状态库/服务端状态 adapter | F6 |
@@ -107,7 +107,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5o | 875f2be | ICU 富文本消息 | docs/97 |
 | F5p | 125e037 | 视口可见预取 | docs/98 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 532/532、`pnpm test:browser` 50/50、`pnpm test:package` 310 阶段通过；证据见 `artifacts/f4a…f5p-validation.json`。仍未覆盖的大项见 U32/U34、U17 与 F6。
+最新冻结验证（2026-10-21）：`pnpm check` 535/535、`pnpm test:browser` 51/51、`pnpm test:package` 318 阶段通过；证据见 `artifacts/f4a…f5q-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -212,6 +212,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5o 状态（2026-10-21）：** U16 的富文本已交付：ICU 消息中的 `<tag>` 在显式提供渲染器时由 `useIntl().rich()`/`FormattedMessage.tags` 渲染为 React 节点，支持嵌套、标签内 ICU 参数与 `#`；`t()`/`tp()` 仍把标签当普通文本，未列出/错配/未闭合标签抛 `LOCALE_INVALID`，纯函数 `formatIcuParts`/`richNodes` 可脱离 React 使用。富文本只支持成对字母数字标签、无属性/HTML 字符串，`defaultMessage` 在 `tags` 模式不生效。U16 剩余 Antd/dayjs 语言联动。用法、差异与验证见 [F5o 富文本消息](97-f5o-rich-text.md)。
 
 **F5p 状态（2026-10-21）：** U31 的视口触发已交付：`usePrefetchOnVisible(id, { rootMargin, threshold, delayMs })` 返回 ref 回调，元素首次进入视口后经注册表预取路由模块并断开观察；ref 变化/卸载释放观察器与定时器，无 `IntersectionObserver` 时为空操作，参数越界抛 `PREFETCH_INVALID`。只预取模块，不预取 loader 数据。用法、差异与验证见 [F5p 视口预取](98-f5p-viewport-prefetch.md)。
+
+**F5q 状态（2026-10-21）：** U34 的目录约定 MPA 已交付：`mpaPlugin` 把 `src/pages` 顶层目录（含可选 `config.json` 的 title/mountElementId）生成为独立 `<name>.html` 与 React 入口；dev 通过内部重写提供，build 以 Vite 多 HTML 输入构建并把页面移到 `dist/<name>.html`，preview 直接静态提供；`index` 保留给 SPA，页面不继承 SPA 路由/Provider，自定义模板、布局/App 包装、页面级 Provider 与热更新待后续。用法、差异与验证见 [F5q MPA](99-f5q-mpa.md)。
 
 ### F3：权限、布局、菜单和国际化
 

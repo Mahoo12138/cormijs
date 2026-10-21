@@ -937,6 +937,16 @@ const visible = usePrefetchOnVisible('config:guide', { rootMargin: '200px' });
 
 `rootMargin` 默认 `200px`、`threshold` 默认 0.01、`delayMs` 默认 0；首次相交后预取并断开观察，ref 变化/卸载释放。没有 `IntersectionObserver` 时为空操作；只预取模块，不预取 loader 数据。规则见 [F5p 视口预取](98-f5p-viewport-prefetch.md)。
 
+### 4.38 多页应用
+
+需要多个独立 HTML 页面时，启用 `mpaPlugin`：
+
+```ts
+plugins: [{ id: 'mpa', plugin: mpaPlugin }]
+```
+
+`src/pages/home/index.tsx` 生成 `/home.html`，可在同目录 `config.json` 配 `{ "title": "Home page", "mountElementId": "app" }`；`src/pages` 顶层目录即页面，`index` 保留给 SPA。每个页面是独立 React 根，不继承 SPA 路由与 Provider；dev/build/preview 均可用，构建产物为 `dist/<name>.html`。新增/删除页面需重启开发服务。规则见 [F5q MPA](99-f5q-mpa.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：
