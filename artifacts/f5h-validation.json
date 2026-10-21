@@ -1,24 +1,14 @@
 {
   "format": "cormi:f5h-validation:1",
-  "verifiedAt": "2026-10-21T03:35:59.933Z",
-  "base": "6241abf77eda0d5c0e8f6fcba8c243e610df8c91",
+  "verifiedAt": "2026-10-21T03:40:52.641Z",
+  "base": "a6924fa8f41ad6f2a6544e13164b9e7d2e56535b",
   "branch": "main",
   "worktree": {
     "state": "uncommitted",
     "changedFiles": [
-      "M README.md",
-      " M docs/08-routes-and-react.md",
-      " M docs/49-application-guide.md",
-      " M docs/59-umi-feature-roadmap.md",
-      " M docs/89-f5f-locale-formatting.md",
-      " M packages/plugin-react/src/index.ts",
-      " M packages/runtime/src/index.tsx",
-      " M scripts/test-package.ts",
-      "?? docs/90-f5h-analytics.md",
-      "?? packages/plugin-react/src/analytics.ts",
-      "?? packages/runtime/src/analytics.ts",
-      "?? scripts/analytics-fixture.ts",
-      "?? tests/browser/analytics.test.ts"
+      "M artifacts/f5h-validation.json",
+      " M docs/90-f5h-analytics.md",
+      " M scripts/test-package.ts"
     ]
   },
   "environment": {
@@ -68,18 +58,27 @@
     },
     "package": {
       "command": "pnpm test:package",
-      "result": ".cache/package-test-1792553400510/result.json",
-      "sha256": "a76aeff9cbd62fbab485f4b9becb21e3d76453d16c784b76ddd36b0d2ab0d996",
-      "bytes": 67260,
-      "passed": false,
-      "stages": 261,
-      "startedAt": "2026-10-21T03:30:00.510Z",
-      "packageBlocked": true,
-      "attemptedStages": 261,
-      "analyticsStages": [],
+      "result": ".cache/package-test-1792553958815/result.json",
+      "sha256": "10cd0b662151f68873a94b220a88ade7939d35d86c5201cad5d3b275270897d9",
+      "bytes": 26363,
+      "passed": true,
+      "stages": 83,
+      "startedAt": "2026-10-21T03:39:18.815Z",
+      "subset": "analytics",
+      "newSinceF5g": 0,
+      "analyticsStages": [
+        "analytics-install",
+        "isolated-links:analytics",
+        "analytics-typecheck",
+        "analytics-public-types",
+        "analytics-dev-session",
+        "analytics-build",
+        "analytics-preview-session",
+        "installed-pageview-analytics-dev-build-and-static-preview"
+      ],
       "finalStage": {
-        "label": "installed-route-prefetch-dev-build-and-static-preview",
-        "mode": "manual",
+        "label": "installed-pageview-analytics-dev-build-and-static-preview",
+        "event": "page_view",
         "previewRegenerated": false
       }
     },
@@ -474,7 +473,7 @@
     "scripts/static-export-fixture.ts": "e9dfa79999c218c6afca7e04c2dd90a48320a88d8f09c1e9683ecab4ac084fad",
     "scripts/test-application.ts": "4202871d40c3faaf5d4de5c85bcb3c333a9b607a9f96aeadf7b74c0fbd0270a8",
     "scripts/test-linux.ts": "bdf97d0aabb05ee3c92634a7ba3a6577cddf403ee53c54fdfc80adc4286a380d",
-    "scripts/test-package.ts": "27ff8efb2c623a16b22f203f0f4ec7504886f1d9bc1acb13812cf1c31caaa554",
+    "scripts/test-package.ts": "464b827d6afccbd6191ac5636691d78217e17e9d0c29646bfb3bca9712c0856b",
     "scripts/test-plugin-author.ts": "a57b79d62fa3152ffeccc4b1aaec1b8a5f4b7a6c4b9662e3809e222f91197725",
     "scripts/test-reliability.ts": "e94b0d6c254e2be990435c274462b4deef1120992d1d568e11dbef78df73c129",
     "scripts/test-windows.ts": "eb3c741166c8c9fa0993c5bc3adbc0c721a18669d4020e2424116a26e6d1eab6",
@@ -636,7 +635,7 @@
     "tsconfig.json": "3dc2b20d3fe968c8474c4cbabb8cded5fcf85f7c0b73e02c79020548e7c83e4f"
   },
   "sourceInputCount": 536,
-  "sourceInputsDigest": "7b73a15c449e14f9a46e907b1386e10b9c8ad8de04229cc31ebce112bd71d6a0",
+  "sourceInputsDigest": "a52e3a60fc81b5201547489720ed9689f1b50fb5cc2717550f72c4f9ceb21db4",
   "documentationInputs": {
     "README.md": "4a07b495eba777d1ea79945ac3935a07cfb89aa32022b797a6f0e2a9c13408f1",
     "docs/08-routes-and-react.md": "a0700aff15541de8d9ad585f78afe382135037ba3e0bce00adbb4b60f9dbffc0",
@@ -672,7 +671,7 @@
     "docs/87-f4k-generator.md": "7f82d3963f93e010acd0b37cc4149f7d16fa07934f43247b277cf78bf7b8ddad",
     "docs/88-f5e-static-export.md": "9f5717c09c21838f317443134fd21c28e7ece30835d57f8f15edaa19c40ae105",
     "docs/89-f5f-locale-formatting.md": "edf1481b4b7600985fc2556d6fbf030ef67d7aeabf7115bcbc9711d78f210731",
-    "docs/90-f5h-analytics.md": "6c0d7005c7a7862f437e27b0da4de8b5b20b6372d59801eea6fc979fa316b31e"
+    "docs/90-f5h-analytics.md": "99d7aed85b780ff308d53b15ded4fffb97834b1b4f19c3ec3bae6a25e876ff8c"
   },
   "visual": [],
   "references": [
@@ -703,7 +702,7 @@
     "page-path-includes-basename-event-path-does-not",
     "no-consent-or-anonymization-handling",
     "initial-pageview-fires-before-react-mount",
-    "package-consumer-stage-pending-enospc",
+    "package-suite-verified-through-a-filtered-subset",
     "no-custom-events-beyond-pageview",
     "no-umijs-plugin-binary-compatibility",
     "finite-test-sample-not-long-term-leak-proof",

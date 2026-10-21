@@ -134,6 +134,9 @@ async function withServer(cwd: string, name: 'dev' | 'preview', action: (url: st
   }
 }
 try {
+  // Subset runs keep the suite usable on small disks: CORMI_PACKAGE_ONLY=analytics,locale
+  const packageOnly = (process.env.CORMI_PACKAGE_ONLY ?? '').split(',').map(value => value.trim()).filter(Boolean);
+  const selected = (name: string) => !packageOnly.length || packageOnly.includes(name);
   kit = await packWorkspace(root, delivery); report.packages = kit.packages; report.blockers = kit.blockers;
   report.stages.push({ label: 'archive-exports-imports-maps-bins', packages: kit.packages.length });
   console.log('PASS packed archives', kit.packages.length);
@@ -357,6 +360,7 @@ checker.check('.',[]);`);
       const response=await fetch(new URL('/api/hello',url));assert.doesNotMatch(await response.text(),/"message":"Hello/);
       assert.deepEqual(errors,[]);
     });
+    if (selected('environment')) {
     const environmentConsumer=await create('environment','react');await writeEnvironmentFixture(environmentConsumer);
     await install('environment-install',environmentConsumer);await auditLinks(environmentConsumer);
     const environmentBin=join(environmentConsumer,'node_modules/.bin/cormi');
@@ -395,6 +399,8 @@ const measuredExecution={name:'fixture:worker-execution',inject:['commands'],app
       report.stages.push({label:'installed-native-worker-execution-with-cli-carrier',development:true,build:true,preview:true});
     }finally{await writeFile(configFile,originalConfig);await writeFile(join(environmentConsumer,'.env'),defaultEnv);await rm(customFile);await rm(carrierFile);}
 
+    }
+    if (selected('solution')) {
     const solutionConsumer=await create('solution','react');await writeEnvironmentFixture(solutionConsumer,'/solution/');await writeTypecheckGraph(solutionConsumer,true);
     await install('solution-install',solutionConsumer);await auditLinks(solutionConsumer);
     const solutionBin=join(solutionConsumer,'node_modules/.bin/cormi');
@@ -423,6 +429,8 @@ const measuredExecution={name:'fixture:worker-execution',inject:['commands'],app
     assert.deepEqual(await compilerFootprint(solutionConsumer),beforePreview);
     report.stages.push({label:'installed-typescript-solution-browser-and-output-isolation',projects:summary.projects.length,virtualDeclarations:summary.virtualDeclarations,unmodifiedSourcesAndCompilerOutputs:true});
 
+    }
+    if (selected('app-runtime')) {
     const runtimeConsumer=await create('app-runtime','react');await writeAppRuntimeFixture(runtimeConsumer);
     const runtimeManifest=consumerManifest(kit,'react');runtimeManifest.dependencies['@cormijs/plugin-react']=runtimeManifest.pnpm.overrides['@cormijs/plugin-react']!;
     await writeFile(join(runtimeConsumer,'package.json'),JSON.stringify(runtimeManifest,null,2));
@@ -448,6 +456,8 @@ resolveAppConfig({default:config,setup(){}});
     assert.deepEqual(await readFile(join(runtimeConsumer,'.cormi/app.tsx')),runtimeEntry);
     report.stages.push({label:'installed-app-runtime-initialization-routes-and-static-preview',nodeEvaluation:false,events:['POP','PUSH','POP','REPLACE'],convention:'src/app.tsx',previewRegenerated:false});
 
+    }
+    if (selected('config-routes')) {
     const routesConsumer=await create('config-routes','react');await writeConfigRoutesFixture(routesConsumer);
     const routesManifest=consumerManifest(kit,'react');
     routesManifest.dependencies['@cormijs/plugin-react']=routesManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -486,6 +496,8 @@ const badAccess:ConfigRoute={path:'x',component:'./src/pages/Home.tsx',access:1}
     assert.deepEqual(await readFile(join(routesConsumer,'.cormi/app.tsx')),routesEntry);
     report.stages.push({label:'installed-config-routes-nested-index-params-and-static-preview',convention:'explicit app.routes',previewRegenerated:false});
 
+    }
+    if (selected('conventions')) {
     const conventionsConsumer=await create('conventions','react');await writeConventionsFixture(conventionsConsumer);
     const conventionsManifest=consumerManifest(kit,'react');
     conventionsManifest.dependencies['@cormijs/plugin-react']=conventionsManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -505,6 +517,8 @@ const bad:LoadingPluginOptions={files:[1]};
     await withServer(conventionsConsumer,'preview',async url=>{await verifyConventionsPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'conventions-preview.png')});});
     report.stages.push({label:'installed-conventions-custom-404-loading-and-static-preview',convention:'src/pages/404.tsx + src/loading.tsx',previewRegenerated:false});
 
+    }
+    if (selected('history')) {
     const historyConsumer=await create('history','react');await writeHistoryFixture(historyConsumer,'hash','/history/');
     const historyManifest=consumerManifest(kit,'react');
     historyManifest.dependencies['@cormijs/plugin-react']=historyManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -522,6 +536,8 @@ const bad:HistoryType='abstract';
     await withServer(historyConsumer,'preview',async url=>{await verifyHistoryPage(page,url,'hash','/history/');assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'history-preview.png')});});
     report.stages.push({label:'installed-history-hash-navigation-query-and-static-preview',history:'hash',previewRegenerated:false});
 
+    }
+    if (selected('model')) {
     const modelConsumer=await create('model','react');await writeModelFixture(modelConsumer);
     const modelManifest=consumerManifest(kit,'react');
     modelManifest.dependencies['@cormijs/plugin-react']=modelManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -541,6 +557,8 @@ const bad:ModelDescriptor={namespace:'x',model:1};
     await withServer(modelConsumer,'preview',async url=>{await verifyModelPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'model-preview.png')});});
     report.stages.push({label:'installed-model-shared-state-selector-and-static-preview',convention:'src/models',previewRegenerated:false});
 
+    }
+    if (selected('initial-state')) {
     const initialStateConsumer=await create('initial-state','react');await writeInitialStateFixture(initialStateConsumer);
     const initialStateManifest=consumerManifest(kit,'react');
     initialStateManifest.dependencies['@cormijs/plugin-react']=initialStateManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -560,6 +578,8 @@ const bad:InitialStatePluginOptions={id:42};
     await withServer(initialStateConsumer,'preview',async url=>{await verifyInitialStatePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'initial-state-preview.png')});});
     report.stages.push({label:'installed-initial-state-loading-refresh-and-static-preview',convention:'getInitialState',previewRegenerated:false});
 
+    }
+    if (selected('request')) {
     const requestConsumer=await create('request','react');await writeRequestFixture(requestConsumer);
     const requestManifest=consumerManifest(kit,'react');
     requestManifest.dependencies['@cormijs/plugin-react']=requestManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -580,6 +600,8 @@ const bad:RequestConfig={baseURL:42};
     await withServer(requestConsumer,'preview',async url=>{await verifyRequestPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'request-preview.png')});});
     report.stages.push({label:'installed-request-useRequest-cancel-errors-and-static-preview',hooks:'useRequest',previewRegenerated:false});
 
+    }
+    if (selected('locale')) {
     const localeConsumer=await create('locale','react');await writeLocaleFixture(localeConsumer);
     const localeManifest=consumerManifest(kit,'react');
     localeManifest.dependencies['@cormijs/plugin-react']=localeManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -599,6 +621,8 @@ const bad:LocaleConfig={messages:{en:{hello:1}}};
     await withServer(localeConsumer,'preview',async url=>{await verifyLocalePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'locale-preview.png')});});
     report.stages.push({label:'installed-locale-switch-fallback-persistence-and-static-preview',hooks:'useIntl',previewRegenerated:false});
 
+    }
+    if (selected('access')) {
     const accessConsumer=await create('access','react');await writeAccessFixture(accessConsumer);
     const accessManifest=consumerManifest(kit,'react');
     accessManifest.dependencies['@cormijs/plugin-react']=accessManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -618,6 +642,8 @@ const bad:AccessConfig=()=>({canAdmin:'yes'});
     await withServer(accessConsumer,'preview',async url=>{await verifyAccessPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'access-preview.png')});});
     report.stages.push({label:'installed-access-from-initial-state-and-static-preview',hooks:'useAccess',previewRegenerated:false});
 
+    }
+    if (selected('menu')) {
     const menuConsumer=await create('menu','react');await writeMenuFixture(menuConsumer);
     const menuManifest=consumerManifest(kit,'react');
     menuManifest.dependencies['@cormijs/plugin-react']=menuManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -638,6 +664,8 @@ const bad:MenuItem['title']=42;
     await withServer(menuConsumer,'preview',async url=>{await verifyMenuPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'menu-preview.png')});});
     report.stages.push({label:'installed-menu-breadcrumb-access-filter-and-static-preview',hooks:'useMenu',previewRegenerated:false});
 
+    }
+    if (selected('html')) {
     const htmlConsumer=await create('html','react');await writeHtmlFixture(htmlConsumer);
     const htmlManifest=consumerManifest(kit,'react');
     htmlManifest.dependencies['@cormijs/plugin-react-vite']=htmlManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
@@ -656,6 +684,8 @@ const bad:HtmlPluginOptions={metas:[{name:'description'}]};
     await withServer(htmlConsumer,'preview',async url=>{await verifyHtmlPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'html-preview.png')});});
     report.stages.push({label:'installed-html-head-dev-build-and-static-preview',options:'title/lang/meta/link/favicon',previewRegenerated:false});
 
+    }
+    if (selected('mock')) {
     const mockConsumer=await create('mock','react');await writeMockFixture(mockConsumer);
     const mockManifest=consumerManifest(kit,'react');
     mockManifest.dependencies['@cormijs/plugin-dev-api']=mockManifest.pnpm.overrides['@cormijs/plugin-dev-api']!;
@@ -673,6 +703,8 @@ const bad:MockPluginOptions={intervalMs:'fast'};
     await withServer(mockConsumer,'preview',async url=>{await page.goto(url);await page.getByRole('heading',{name:'Mock home',exact:true}).waitFor();assert.equal(await page.locator('[data-dev]').innerText(),'false');assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'mock-preview.png')});});
     report.stages.push({label:'installed-mock-convention-dev-build-and-preview',mockDirectory:'mock',previewRegenerated:false});
 
+    }
+    if (selected('alias')) {
     const aliasConsumer=await create('alias','react');await writeAliasFixture(aliasConsumer);
     const aliasManifest=consumerManifest(kit,'react');
     aliasManifest.dependencies['@cormijs/plugin-react-vite']=aliasManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
@@ -691,6 +723,8 @@ const bad:AliasPluginOptions={aliases:{'@':1}};
     await withServer(aliasConsumer,'preview',async url=>{await verifyAliasPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'alias-preview.png')});});
     report.stages.push({label:'installed-alias-resolution-dev-build-and-static-preview',aliases:{'@':'src','@shared':'src/shared'},previewRegenerated:false});
 
+    }
+    if (selected('define')) {
     const defineConsumer=await create('define','react');await writeDefineFixture(defineConsumer);
     const defineManifest=consumerManifest(kit,'react');
     defineManifest.dependencies['@cormijs/plugin-react-vite']=defineManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
@@ -710,6 +744,8 @@ const bad:DefinePluginOptions={};
     await withServer(defineConsumer,'preview',async url=>{await verifyDefinePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'define-preview.png')});});
     report.stages.push({label:'installed-define-and-builtin-alias-dev-build-and-static-preview',values:{APP_NAME:'cormi define',APP_FLAGS:{beta:true,retries:2},'process.env.APP_MODE':'fixture-mode'},builtins:true,previewRegenerated:false});
 
+    }
+    if (selected('global-style')) {
     const styleConsumer=await create('global-style','react');await writeGlobalStyleFixture(styleConsumer);
     const styleManifest=consumerManifest(kit,'react');
     styleManifest.dependencies['@cormijs/plugin-react']=styleManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -729,6 +765,8 @@ const bad:GlobalStylePluginOptions={files:1};
     await withServer(styleConsumer,'preview',async url=>{await verifyGlobalStylePage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'global-style-preview.png')});});
     report.stages.push({label:'installed-global-style-convention-dev-build-and-static-preview',files:['src/global.css'],previewRegenerated:false});
 
+    }
+    if (selected('access-convention')) {
     const accessConvConsumer=await create('access-convention','react');await writeAccessConventionFixture(accessConvConsumer);
     const accessConvManifest=consumerManifest(kit,'react');
     accessConvManifest.dependencies['@cormijs/plugin-react']=accessConvManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -748,6 +786,8 @@ const bad:AccessPluginOptions={files:1};
     await withServer(accessConvConsumer,'preview',async url=>{await verifyAccessConventionPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'access-convention-preview.png')});});
     report.stages.push({label:'installed-access-convention-dev-build-and-static-preview',files:['src/access.ts','src/access.tsx'],previewRegenerated:false});
 
+    }
+    if (selected('locale-catalog')) {
     const localeCatalogConsumer=await create('locale-catalog','react');await writeLocaleCatalogFixture(localeCatalogConsumer);
     const localeCatalogManifest=consumerManifest(kit,'react');
     localeCatalogManifest.dependencies['@cormijs/plugin-react']=localeCatalogManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -767,6 +807,8 @@ const bad:LocalePluginOptions={directory:1};
     await withServer(localeCatalogConsumer,'preview',async url=>{await verifyLocaleCatalogPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'locale-catalog-preview.png')});});
     report.stages.push({label:'installed-locale-catalog-dev-build-and-static-preview',directory:'src/locales',locales:['en','zh-CN'],previewRegenerated:false});
 
+    }
+    if (selected('client-loader')) {
     const loaderConsumer=await create('client-loader','react');await writeClientLoaderFixture(loaderConsumer);
     const loaderManifest=consumerManifest(kit,'react');
     loaderManifest.dependencies['@cormijs/plugin-react']=loaderManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -785,6 +827,8 @@ const bad:ClientLoaderFunction=1;
     await withServer(loaderConsumer,'preview',async url=>{await verifyClientLoaderPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'client-loader-preview.png')});});
     report.stages.push({label:'installed-route-client-loader-dev-build-and-static-preview',routes:['member/:id'],previewRegenerated:false});
 
+    }
+    if (selected('route-head')) {
     const headConsumer=await create('route-head','react');await writeHeadFixture(headConsumer);
     const headManifest=consumerManifest(kit,'react');
     headManifest.dependencies['@cormijs/plugin-react']=headManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -806,6 +850,8 @@ const bad:HeadPluginOptions={titleTemplate:1};
     await withServer(headConsumer,'preview',async url=>{await verifyHeadPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'route-head-preview.png')});});
     report.stages.push({label:'installed-route-head-dev-build-and-static-preview',meta:'meta.head',titleTemplate:' · demo',previewRegenerated:false});
 
+    }
+    if (selected('prefetch')) {
     const prefetchConsumer=await create('prefetch','react');await writePrefetchFixture(prefetchConsumer);
     const prefetchManifest=consumerManifest(kit,'react');
     prefetchManifest.dependencies['@cormijs/plugin-react']=prefetchManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -825,6 +871,8 @@ const bad:RoutePrefetchOptions={mode:'later'};
     await withServer(prefetchConsumer,'preview',async url=>{await verifyPrefetchPage(page,url,true);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'prefetch-preview.png')});});
     report.stages.push({label:'installed-route-prefetch-dev-build-and-static-preview',mode:'manual',previewRegenerated:false});
 
+    }
+    if (selected('output')) {
     const outputConsumer=await create('output','react');await writeOutputFixture(outputConsumer);
     const outputManifest=consumerManifest(kit,'react');
     outputManifest.dependencies['@cormijs/plugin-react-vite']=outputManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
@@ -845,6 +893,8 @@ const bad:OutputPluginOptions={hash:1};
     await withServer(outputConsumer,'preview',async url=>{await verifyOutputPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'output-preview.png')});});
     report.stages.push({label:'installed-output-copy-and-stable-names-dev-build-and-static-preview',hash:false,previewRegenerated:false});
 
+    }
+    if (selected('generator')) {
     const generatorConsumer=await create('generator','react');await writeGeneratorFixture(generatorConsumer);
     const generatorManifest=consumerManifest(kit,'react');
     generatorManifest.dependencies['@cormijs/plugin-react']=generatorManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -867,6 +917,8 @@ const bad:GeneratePlan=planGeneration(1);
     await execute('generator-page-force',generatorConsumer,cormiBin,['generate','page','generated','--json','--','--force']);
     report.stages.push({label:'installed-generator-cli-page-force-and-typecheck',kinds:['page'],previewRegenerated:false});
 
+    }
+    if (selected('static-export')) {
     const exportConsumer=await create('static-export','react');await writeStaticExportFixture(exportConsumer);
     const exportManifest=consumerManifest(kit,'react');
     exportManifest.dependencies['@cormijs/plugin-react']=exportManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -888,6 +940,8 @@ const bad:StaticExportOptions={titleTemplate:1};
     await withServer(exportConsumer,'preview',async url=>{await verifyStaticExportPages(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'static-export-preview.png')});});
     report.stages.push({label:'installed-static-export-dev-build-and-static-preview',routes:['/','/guide'],previewRegenerated:false});
 
+    }
+    if (selected('analytics')) {
     const analyticsConsumer=await create('analytics','react');await writeAnalyticsFixture(analyticsConsumer);
     const analyticsManifest=consumerManifest(kit,'react');
     analyticsManifest.dependencies['@cormijs/plugin-react']=analyticsManifest.pnpm.overrides['@cormijs/plugin-react']!;
@@ -898,8 +952,8 @@ const bad:StaticExportOptions={titleTemplate:1};
 import {analyticsRuntime,type AnalyticsOptions,type PageViewEvent} from '@cormijs/runtime';
 const options:AnalyticsPluginOptions={id:'app:analytics',measurementId:'G-TEST1234',dispatch:true};
 const page:PageViewEvent={path:'/',search:'',hash:'',title:'t',referrer:''};void [analyticsPlugin,options,analyticsRuntime,page];
-// @ts-expect-error measurement ids look like G-XXXX
-const bad:AnalyticsPluginOptions={measurementId:'UA-1'};
+// @ts-expect-error dispatch must be a boolean
+const bad:AnalyticsPluginOptions={dispatch:'yes'};
 `);
     await execute('analytics-public-types',analyticsConsumer,process.execPath,typeArguments);
     await withServer(analyticsConsumer,'dev',async url=>{await verifyAnalyticsPage(page,url);assert.deepEqual(errors,[]);});
@@ -907,6 +961,7 @@ const bad:AnalyticsPluginOptions={measurementId:'UA-1'};
     await withServer(analyticsConsumer,'preview',async url=>{await verifyAnalyticsPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'analytics-preview.png')});});
     report.stages.push({label:'installed-pageview-analytics-dev-build-and-static-preview',event:'page_view',previewRegenerated:false});
 
+    }
   } finally { await browser.close(); }
   report.passed = true;
 } catch (error) {
