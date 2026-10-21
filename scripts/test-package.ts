@@ -599,14 +599,14 @@ const bad:InitialStatePluginOptions={id:42};
     await install('request-install',requestConsumer);await auditLinks(requestConsumer);
     await command('request-typecheck',requestConsumer,'typecheck');
     await writeFile(join(requestConsumer,'types.mts'),`import {requestPlugin,type RequestPluginOptions} from '@cormijs/plugin-react';import {RequestError,usePagination,useRequest,type PaginationResponse,type RequestClient,type RequestConfig,type RequestOptions,type UsePaginationResult,type UseRequestOptions,type UseRequestResult} from '@cormijs/runtime';
-const config:RequestConfig={baseURL:'/api',headers:{'x-app':'cormi'},timeout:1000};
+const config:RequestConfig={baseURL:'/api',headers:{'x-app':'cormi'},timeout:1000,cacheLimit:10};
 const options:RequestPluginOptions={id:'consumer:request'};
 const hookOptions:UseRequestOptions<string>={retry:2,retryDelay:attempt=>attempt*10,pollingInterval:1000,pollingWhenHidden:false,refreshDeps:['q']};
-const cacheOptions:RequestOptions={cacheTime:5000,cacheBust:true};
+const cacheOptions:RequestOptions={cacheTime:5000,cacheBust:true,cacheTags:['group']};
 declare const pagination:UsePaginationResult<{id:number}>;
 declare const pageResponse:PaginationResponse<{id:number}>;
-declare const client:RequestClient;declare const result:UseRequestResult<string>;
-void [requestPlugin,options,hookOptions,cacheOptions,config,client,result,useRequest,usePagination,pagination,pageResponse,RequestError];
+declare const client:RequestClient;declare const result:UseRequestResult<string>;const removed:number=client.invalidateCache(['group']);
+void [requestPlugin,options,hookOptions,cacheOptions,config,client,result,useRequest,usePagination,pagination,pageResponse,removed,RequestError];
 // @ts-expect-error retry is a number
 const badHook:UseRequestOptions<string>={retry:'2'};
 // @ts-expect-error baseURL must be a string

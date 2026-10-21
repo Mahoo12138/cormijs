@@ -10,6 +10,8 @@ export interface RequestOptions extends Omit<RequestInit, 'body' | 'headers'> {
   readonly cacheTime?: number;
   /** Skip an existing cache entry and do not store this response. */
   readonly cacheBust?: boolean;
+  /** Tags used by `invalidateCache`; at most 16 bounded identifiers. */
+  readonly cacheTags?: readonly string[];
 }
 export interface RequestClient {
   request<T = unknown>(path: string, options?: RequestOptions): Promise<T>;
@@ -17,6 +19,8 @@ export interface RequestClient {
   post<T = unknown>(path: string, body?: unknown, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<T>;
   put<T = unknown>(path: string, body?: unknown, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<T>;
   delete<T = unknown>(path: string, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<T>;
+  /** Drop cached GETs by tag, or every cached GET when no tag is given. Returns the removed count. */
+  invalidateCache(tags?: readonly string[]): number;
 }
 export class RequestError extends Error {
   constructor(message: string, readonly status: number, readonly data: unknown) {
@@ -29,6 +33,7 @@ function validate(config: RequestConfig) {
   if (!config || typeof config !== 'object' || Array.isArray(config)) throw new TypeError('REQUEST_INVALID: request config must be an object');
   if (config.baseURL !== undefined && (typeof config.baseURL !== 'string' || !config.baseURL)) throw new TypeError('REQUEST_INVALID: baseURL must be a non-empty string');
   if (config.timeout !== undefined && (!Number.isFinite(config.timeout) || config.timeout <= 0)) throw new TypeError('REQUEST_INVALID: timeout must be a positive number');
+  if (config.cacheLimit !== undefined && (!Number.isInteger(config.cacheLimit) || config.cacheLimit < 1 || config.cacheLimit > 10_000)) throw new TypeError('REQUEST_INVALID: cacheLimit must be an integer from 1 to 10000');
   if (config.headers !== undefined) {
     if (!config.headers || typeof config.headers !== 'object' || Array.isArray(config.headers)
       || Object.entries(config.headers).some(([name, value]) => !name || typeof value !== 'string')) throw new TypeError('REQUEST_INVALID: headers must contain string values');
@@ -48,12 +53,15 @@ const bodyLike = (body: unknown) => typeof body === 'string'
 export function createRequestClient(input: RequestConfig = {}): RequestClient {
   validate(input);
   const config = Object.freeze({ ...input, ...(input.headers ? { headers: Object.freeze({ ...input.headers }) } : {}) });
-  const cache = new Map<string, { readonly expires: number; readonly value: unknown }>();
+  const cache = new Map<string, { readonly expires: number; readonly value: unknown; readonly tags: readonly string[] }>();
   const inflight = new Map<string, Promise<unknown>>();
+  const cacheLimit = config.cacheLimit ?? 100;
   const request = async <T,>(path: string, options: RequestOptions = {}): Promise<T> => {
     if (typeof path !== 'string' || !path) throw new TypeError('REQUEST_INVALID: path must be a non-empty string');
     if (options.cacheTime !== undefined && (!Number.isFinite(options.cacheTime) || options.cacheTime < 0 || options.cacheTime > 3_600_000)) throw new TypeError('REQUEST_INVALID: cacheTime must be 0–3600000ms');
     if (options.cacheBust !== undefined && typeof options.cacheBust !== 'boolean') throw new TypeError('REQUEST_INVALID: cacheBust must be boolean');
+    if (options.cacheTags !== undefined && (!Array.isArray(options.cacheTags) || options.cacheTags.length > 16
+      || options.cacheTags.some(tag => typeof tag !== 'string' || !/^[A-Za-z0-9:._-]{1,64}$/.test(tag)))) throw new TypeError('REQUEST_INVALID: cacheTags must contain at most 16 bounded tags');
     let url = resolveURL(path, config.baseURL);
     const search = new URLSearchParams();
     for (const [key, value] of Object.entries(options.params ?? {})) {
@@ -75,7 +83,10 @@ export function createRequestClient(input: RequestConfig = {}): RequestClient {
       : undefined;
     if (key) {
       const hit = cache.get(key);
-      if (hit && hit.expires > Date.now()) return hit.value as T;
+      if (hit && hit.expires > Date.now()) {
+        cache.delete(key); cache.set(key, hit);
+        return hit.value as T;
+      }
       if (hit) cache.delete(key);
       const pending = inflight.get(key);
       if (pending) return pending as Promise<T>;
@@ -83,13 +94,22 @@ export function createRequestClient(input: RequestConfig = {}): RequestClient {
     const signals = [options.signal, config.timeout === undefined ? undefined : AbortSignal.timeout(config.timeout)]
       .filter((signal): signal is AbortSignal => signal !== undefined);
     const signal = signals.length === 0 ? undefined : signals.length === 1 ? signals[0] : AbortSignal.any(signals);
-    const { params: _params, headers: _headers, body: _body, cacheTime: _cacheTime, cacheBust: _cacheBust, ...init } = options;
+    const { params: _params, headers: _headers, body: _body, cacheTime: _cacheTime, cacheBust: _cacheBust, cacheTags: _cacheTags, ...init } = options;
+    const cacheTags = options.cacheTags ?? [];
     const task = (async (): Promise<T> => {
       const response = await fetch(url, { ...init, headers, body: body as BodyInit | null | undefined, signal });
       const text = response.status === 204 ? '' : await response.text();
       const data = text && (response.headers.get('content-type') ?? '').includes('json') ? JSON.parse(text) : text;
       if (!response.ok) throw new RequestError(`Request failed with status ${response.status}`, response.status, data);
-      if (key) cache.set(key, { expires: Date.now() + cacheTime, value: data });
+      if (key) {
+        for (const [cachedKey, entry] of cache) if (entry.expires <= Date.now()) cache.delete(cachedKey);
+        while (cache.size >= cacheLimit) {
+          const oldest = cache.keys().next();
+          if (oldest.done) break;
+          cache.delete(oldest.value);
+        }
+        cache.set(key, { expires: Date.now() + cacheTime, value: data, tags: Object.freeze([...cacheTags]) });
+      }
       return data as T;
     })();
     if (key) {
@@ -104,6 +124,14 @@ export function createRequestClient(input: RequestConfig = {}): RequestClient {
     post: <T = unknown>(path: string, body?: unknown, options?: Omit<RequestOptions, 'method' | 'body'>) => request<T>(path, { ...options, method: 'POST', body }),
     put: <T = unknown>(path: string, body?: unknown, options?: Omit<RequestOptions, 'method' | 'body'>) => request<T>(path, { ...options, method: 'PUT', body }),
     delete: <T = unknown>(path: string, options?: Omit<RequestOptions, 'method' | 'body'>) => request<T>(path, { ...options, method: 'DELETE' }),
+    invalidateCache(tags?: readonly string[]) {
+      if (tags !== undefined && (!Array.isArray(tags) || tags.some(tag => typeof tag !== 'string' || !tag))) throw new TypeError('REQUEST_INVALID: invalidateCache tags must be non-empty strings');
+      let removed = 0;
+      for (const [key, entry] of cache) {
+        if (tags === undefined || tags.length === 0 || entry.tags.some(tag => tags.includes(tag))) { cache.delete(key); removed++; }
+      }
+      return removed;
+    },
   }) satisfies RequestClient;
 }
 

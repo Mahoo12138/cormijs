@@ -6,6 +6,8 @@ export interface RequestConfig {
   readonly baseURL?: string;
   readonly headers?: Readonly<Record<string, string>>;
   readonly timeout?: number;
+  /** Maximum cached GET entries; oldest is evicted first. Default 100. */
+  readonly cacheLimit?: number;
 }
 export interface LocaleConfig {
   readonly default?: string;

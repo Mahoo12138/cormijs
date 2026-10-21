@@ -1,0 +1,110 @@
+{
+  "format": "cormi:u12-4-cache-tags-validation:1",
+  "verifiedAt": "2026-10-21T22:06:13.076Z",
+  "base": "210a3b53a6a51e6adfe8bfa9480f5c2df76a2ce8",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/app-config.ts",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts",
+      "docs/125-u12-cache-tags.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-4-cache-tags/check.log",
+      "sha256": "539b17a04551f70e7e741dc189a4991a5b6fefc38318018a824131479d708157",
+      "seconds": 119.3,
+      "tests": 565,
+      "pass": 565,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-4-cache-tags/browser.log",
+      "sha256": "2a4bdfc11178dfaef02d9801b706ac946f62f5bfe876f835f9fa40c60eafb993",
+      "seconds": 553.8,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-4-cache-tags/package.log",
+      "sha256": "222883b58e51c56235f27c66bbf71a1a6514e8345a7ee16ed4042bb09245410e",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-4-cache-tags/targeted.log",
+      "sha256": "ee8804ce30bccb77c7a5fd3728906d67f85890b65102a9c9c21311a263ef6112",
+      "seconds": 11.4,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "tagged cache hit, invalidation refetch via invalidateCache, LRU eviction with cacheLimit=1, plus existing cache/retry/pagination cases"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "105a2828c129fd3455e31dc2303988cc83137cdd11d25c7bbb853efdc490169d",
+    "docs/49-application-guide.md": "9bd9c66d83e990a0b30a6ab83107be1c5aed56055cc9878c00d793fba5207389",
+    "docs/59-umi-feature-roadmap.md": "f303630fea9c95c77df2d60353d520f307f62a91bdef20469d826fd745960d09",
+    "packages/runtime/src/app-config.ts": "a3208351b351e6d2778dc1986bda4f0ebf13659061861143b1a9a73b63c8f42d",
+    "packages/runtime/src/request.tsx": "8a1de34b37f75ce1d904ed9f9f4595f344fd264ffad5fcbc70080c38bf32e65b",
+    "scripts/request-fixture.ts": "1a9bc8b81b79653191a94afcaf01d577763012e8414bbfcf187e1592306b6b55",
+    "scripts/test-package.ts": "4738872ab6fbb785e6e1f67d56370401a3638cc414de93a3df1c8541260b1a98",
+    "docs/125-u12-cache-tags.md": "906269eef48fab2f51e56140de0d672f7067bd5b383ad818cd4a18108f9017f5"
+  },
+  "sourceInputCount": 8,
+  "sourceInputsDigest": "d3d0651fc294751cb0e4f22c1dd1e7c913c2b5692c054f3a1a902f479c3a8a9e",
+  "documentationInputs": {
+    "docs/125-u12-cache-tags.md": "906269eef48fab2f51e56140de0d672f7067bd5b383ad818cd4a18108f9017f5",
+    "docs/59-umi-feature-roadmap.md": "f303630fea9c95c77df2d60353d520f307f62a91bdef20469d826fd745960d09",
+    "docs/112-roadmap-audit-2026-10-21.md": "105a2828c129fd3455e31dc2303988cc83137cdd11d25c7bbb853efdc490169d",
+    "docs/49-application-guide.md": "9bd9c66d83e990a0b30a6ab83107be1c5aed56055cc9878c00d793fba5207389"
+  },
+  "evidence": [
+    ".cache/u12-4-cache-tags/check.log",
+    ".cache/u12-4-cache-tags/browser.log",
+    ".cache/u12-4-cache-tags/package.log",
+    ".cache/u12-4-cache-tags/targeted.log",
+    "artifacts/u12-4-cache-tags-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "memory-cache-per-client",
+    "no-background-expiry-sweep",
+    "tags-have-no-wildcards",
+    "invalidating-does-not-cancel-inflight-requests",
+    "no-persistence",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}
