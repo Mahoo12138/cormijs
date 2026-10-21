@@ -2,6 +2,7 @@ import test, { type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright-core';
 import { existsSync } from 'node:fs';
+import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { app, cli } from '../launcher-helpers.js';
 import { assertPortFree } from '../helpers.js';
@@ -27,6 +28,8 @@ test('SSR renders routes and loader data in preview and hydrates without errors'
   const types = cli(t, f.root, 'typecheck', ['--startup-timeout', '30000']); assert.equal(await types.finish(30000), 0, JSON.stringify(types.events) + types.stderr);
   const build = cli(t, f.root, 'build', ['--startup-timeout', '30000']); assert.equal(await build.finish(60000), 0, JSON.stringify(build.events) + build.stderr);
   assert.ok(existsSync(join(f.root, 'dist/.cormi/ssr/ssr.mjs')));
+  assert.ok((await readdir(join(f.root, 'dist/assets'))).filter(name => name.endsWith('.js')).length >= 2, 'pages stay in separate chunks');
+  assert.match(await readFile(join(f.root, '.cormi/app.tsx'), 'utf8'), /lazy:async\(\)=>/);
   const preview = cli(t, f.root, 'preview'), production = await preview.waitFor(event => event.type === 'ready');
   await verifySsrPage(page, production.url);
   assert.deepEqual(errors, []);

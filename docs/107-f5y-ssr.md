@@ -31,7 +31,7 @@ cormi preview
 - 生成：`generateApplication` 导出 `cormiApplication`（routes/plugins/models/appConfig/base/strict/history 等），客户端入口仅在 `typeof document !== 'undefined'` 时挂载；服务端入口导入该描述；
 - 服务端渲染：`@cormijs/runtime/server` 的 `renderServerApplication` 用 React Router `createStaticHandler` 查询请求（执行 loader），`StaticRouterProvider` + `renderToString` 输出标记；`patchClientRoutes` 与 `rootContainer` 生效；`appConfig.setup`/`render`/`onRouteChange` 属客户端生命周期，不在服务端执行；
 - head：渲染后收集匹配链的 `meta.head` 与页面 `<Helmet>` 条目，合并/应用 titleTemplate，把 title、meta、link、JSON-LD 作为受管标签写入 shell；客户端 hydration 后接管同一批受管节点；
-- 组件：`app.ssr: true` 时页面与布局组件直接导入，不使用 `lazy()`；`app.ssr` 为 false 时保持按路由懒加载（本切片要求 true 才能稳定 hydration）；
+- 组件：路由继续按页面懒加载；hydration 前只解析当前匹配链的 `lazy()`，其他路由保持独立 chunk；服务端 static handler 可直接解析 lazy 路由；
 - 开发：`configureServer` 生成临时 `.cormi/ssr.tsx`，通过 Vite `ssrLoadModule` 按请求渲染；shell 走 `transformIndexHtml`，保留 HMR/React Refresh 注入；
 - 构建：`ssrPlugin` 在客户端构建后写临时 `.cormi/ssr.tsx`，用同一 `define`/`resolve.alias` 与 React 插件做 Vite SSR 构建，输出到 `dist/.cormi/ssr`，随后删除临时入口；
 - 预览：中间件只接管 `Accept: text/html` 的 GET/HEAD 导航；把服务端标记注入空挂载点，把 hydration script 放在挂载点之外；资产、API 与 `/.cormi/*` 不接管；SSR 失败时记录错误并回退 CSR 外壳；
@@ -47,7 +47,7 @@ Umi SSR 在 dev 与生产服务中执行服务端渲染，支持 serverLoader/�
 | dev SSR | 支持 | 支持（Vite SSR 模块图） |
 | 生产运行 | Umi 服务 | `cormi preview` 中间件 |
 | loader | serverLoader/clientLoader | clientLoader 在服务端执行 |
-| 代码分割 | 保留 | `app.ssr` 下 eager |
+| 代码分割 | 保留 | 保留（仅预解析当前匹配链） |
 | 流式/独立服务 | 支持 | 未提供 |
 | base | 支持 | 支持（测试 `/ssr/`） |
 
@@ -57,8 +57,8 @@ Umi SSR 在 dev 与生产服务中执行服务端渲染，支持 serverLoader/�
 - dev 与 preview 中间件只处理 HTML 导航；SSR 错误回退 CSR，不承诺错误页语义；
 - 页面/Provider 若依赖 `window`、localStorage 或浏览器插件，服务端渲染可能失败或 hydration 不一致；
 - 服务端 bundle 使用 Vite SSR 构建，CSS 资源不进入服务端产物；
-- 没有流式渲染、serverLoader 或 SSR 数据预取；
-- `app.ssr` 下所有页面进入首屏 bundle，失去按路由拆包；
+- 没有流式渲染、serverLoader 或 SSR 数据预取；hydration 前解析当前匹配链会延后首屏 hydration 的启动；
+- hydration 前会解析当前匹配链的组件 chunk；其他页面仍按需加载；
 - 开发与预览的 API/代理/MPA 中间件与 SSR 的接管顺序由插件注册顺序决定。
 
 ## 5. 验证
@@ -73,7 +73,7 @@ Umi SSR 在 dev 与生产服务中执行服务端渲染，支持 serverLoader/�
 | `pnpm test:browser` | 52/52，0 失败/取消/跳过（F5x 为 51，新增 SSR 用例） |
 | `pnpm test:package` | 328 阶段通过（完整套件；`ssr` consumer 覆盖安装、typecheck、公共类型、build、hydrated preview 与 serve） |
 
-详细计数、日志哈希和源码哈希见 [机器证据](../artifacts/f5y-validation.json)；head 收集增量见 [SSR head 证据](../artifacts/f5y-ssr-head-validation.json)。这些是本机证据，不是公开发布或跨平台承诺。
+详细计数、日志哈希和源码哈希见 [机器证据](../artifacts/f5y-validation.json)；head 收集增量见 [SSR head 证据](../artifacts/f5y-ssr-head-validation.json)，按路由拆包见 [SSR 拆包证据](../artifacts/f5y-ssr-splitting-validation.json)。这些是本机证据，不是公开发布或跨平台承诺。
 
 ## 6. 下一步
 

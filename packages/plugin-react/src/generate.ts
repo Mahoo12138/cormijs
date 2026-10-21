@@ -34,7 +34,7 @@ function styleSpecifier(root: string, file: string): string {
 /** Static imports and JSON string literals only; no user-provided expression interpolation. */
 export async function generateApplication(root: string, routes: readonly RouteRecord[], runtimes: readonly RuntimeContribution[],
   base: string, mountId: string, serverOnlyFiles: readonly string[] = [], strict = false, appRuntime?: AppRuntimePlan, loading?: ModuleRef,
-  history: HistoryType = 'browser', models: readonly ModelPlan[] = [], styles: readonly GlobalStylePlan[] = [], access?: ModuleRef, localeCatalogs: readonly LocaleCatalog[] = [], ssr = false): Promise<string> {
+  history: HistoryType = 'browser', models: readonly ModelPlan[] = [], styles: readonly GlobalStylePlan[] = [], access?: ModuleRef, localeCatalogs: readonly LocaleCatalog[] = []): Promise<string> {
   if (typeof strict !== 'boolean') throw new CormiError('CONFIG_INVALID', 'strict must be boolean.');
   routes = validateRoutes(routes); runtimes = runtimeContributions(runtimes);
   const forbidden = new Set(serverOnlyFiles);
@@ -46,8 +46,6 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   const historyOption = history === 'browser' ? '' : `,history:${JSON.stringify(history)} as const`;
   const routeModules = new Map<string, string>();
   await Promise.all(routes.map(async route => { if (route.module) routeModules.set(route.id, await clientSpecifier(root, route.module, forbidden)); }));
-  const pageAliases = new Map<string, string>();
-  for (const specifier of [...routeModules.values()]) if (!pageAliases.has(specifier)) pageAliases.set(specifier, `page${pageAliases.size}`);
   const runtimeModules = await Promise.all(runtimes.map(item => clientSpecifier(root, item.module, forbidden)));
   const modelModules = await Promise.all(models.map(model => clientSpecifier(root, model.module, forbidden)));
   // Boundaries must exist before page lazy resolution. Loading both in one lazy callback cannot catch its own import failure.
@@ -65,20 +63,13 @@ export async function generateApplication(root: string, routes: readonly RouteRe
     if (route.index) pageFields.push('index:true'); else if (route.path !== undefined) pageFields.push(`path:${JSON.stringify(route.access ? '' : route.path)}`);
     if (route.redirect) pageFields.push(`element:<RedirectRoute to=${JSON.stringify(route.redirect)}${route.keepQuery ? ' keepQuery' : ''}/>`);
     else if (route.module) {
-      const specifier = JSON.stringify(routeModules.get(route.id)), alias = pageAliases.get(routeModules.get(route.id)!)!;
-      if (ssr) {
-        pageFields.push(`Component:${alias}[${JSON.stringify(route.module.exportName)}]`);
-        if (route.clientLoader !== undefined) {
-          pageFields.push(`loader:(args)=>clientLoaderOf(${alias},${JSON.stringify(route.clientLoader)},${JSON.stringify(route.id)})(args)`);
-        }
-      } else {
-        // A loader returned from `lazy` is never merged when it throws, so the loader stays a static property that
-        // imports the page itself; only the component is lazy. This keeps the route's own boundary reachable.
-        if (route.clientLoader !== undefined) {
-          pageFields.push(`loader:async(args)=>{const page=await import(${specifier});return clientLoaderOf(page,${JSON.stringify(route.clientLoader)},${JSON.stringify(route.id)})(args)}`);
-        }
-        pageFields.push(`lazy:async()=>({Component:await resolveRouteComponent(async()=>(await import(${specifier}))[${JSON.stringify(route.module.exportName)}])})`);
+      const specifier = JSON.stringify(routeModules.get(route.id));
+      // A loader returned from `lazy` is never merged when it throws, so the loader stays a static property that
+      // imports the page itself; only the component is lazy. This keeps the route's own boundary reachable.
+      if (route.clientLoader !== undefined) {
+        pageFields.push(`loader:async(args)=>{const page=await import(${specifier});return clientLoaderOf(page,${JSON.stringify(route.clientLoader)},${JSON.stringify(route.id)})(args)}`);
       }
+      pageFields.push(`lazy:async()=>({Component:await resolveRouteComponent(async()=>(await import(${specifier}))[${JSON.stringify(route.module.exportName)}])})`);
     }
     if (route.errorBoundary) pageFields.push('hasErrorBoundary:true', `ErrorBoundary:${boundaryAliases.get(route.id)}[${JSON.stringify(route.errorBoundary.exportName)}]`);
     if (children.has(route.id)) pageFields.push(`children:${render(route.id)}`);
@@ -109,7 +100,6 @@ export async function generateApplication(root: string, routes: readonly RouteRe
     `import type { RouteObject } from 'react-router';`,
     ...[...boundaryImports].map(([path, alias]) => `import * as ${alias} from ${JSON.stringify(path)};`),
     ...runtimeModules.map((path, i) => `import * as runtime${i} from ${JSON.stringify(path)};`),
-    ...(ssr ? [...pageAliases].map(([path, alias]) => `import * as ${alias} from ${JSON.stringify(path)};`) : []),
     `const routes: RouteObject[] = ${render()};`,
     ...(modelEntries.length ? [`const models = [${modelEntries.join(',')}];`] : []),
     `const plugins: RuntimeEntry[] = [${runtimes.map((item, i) => `{id:${JSON.stringify(item.id)},plugin:runtime${i}[${JSON.stringify(item.module.exportName)}],options:${JSON.stringify(item.options)}}`).join(',')}];`,

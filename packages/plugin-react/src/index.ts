@@ -262,7 +262,7 @@ export const reactPlugin: Plugin.Object<void> = {
             rememberModules(next); phase = 'runtime';
             const plugins = runtimeContributions([...runtimeContributions(input.runtime ?? []), ...await runtime.collect(undefined)]);
             rememberModules(plugins); phase = 'generate';
-            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict, observed.applicationRuntime, globalLoading?.module, history, modelPlans, globalStyles, accessPlan?.module, catalogs, input.ssr === true);
+            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict, observed.applicationRuntime, globalLoading?.module, history, modelPlans, globalStyles, accessPlan?.module, catalogs);
             await transform(code, { loader: 'tsx', format: 'esm', jsx: 'automatic', logLevel: 'silent' });
             const types = generateRouteTypes(next, modelPlans.map(model => model.namespace));
             const localeTypes = generateLocaleTypes(catalogs);

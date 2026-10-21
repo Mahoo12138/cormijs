@@ -1,6 +1,6 @@
 import { createElement, StrictMode, type ComponentType, type PropsWithChildren, type ReactNode } from 'react';
 import { createRoot, hydrateRoot, type Root } from 'react-dom/client';
-import { createBrowserRouter, createHashRouter, createMemoryRouter, generatePath, Navigate, useLocation, useParams, type RouteObject, type Location } from 'react-router';
+import { createBrowserRouter, createHashRouter, createMemoryRouter, generatePath, matchRoutes, Navigate, useLocation, useParams, type RouteObject, type Location } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { copyClientRoutes, runAppRender, type HistoryType, type RuntimeConfig, type RouteChangeEvent, type RuntimeCleanup } from './app-config.js';
 import { ModelProvider, type ModelDescriptor } from './model.js';
@@ -100,6 +100,18 @@ export async function mountApplication(options: {
       lifetime.signal.throwIfAborted();
       // Validate the patched tree before constructing a router, preserving its normal lazy boundaries.
       const clientRoutes = copyClientRoutes(routes);
+      // Hydration must reuse the server markup, so resolve only the currently matched lazy routes first.
+      if (options.hydrate) {
+        const matched = matchRoutes(clientRoutes, typeof window === 'undefined' ? '/' : window.location.pathname, basename) ?? [];
+        for (const match of matched) {
+          const route = match.route as RouteObject & { lazy?: () => Promise<Partial<RouteObject>> };
+          if (typeof route.lazy !== 'function') continue;
+          const resolved = await route.lazy();
+          Object.assign(route, resolved);
+          delete route.lazy;
+          lifetime.signal.throwIfAborted();
+        }
+      }
       // A pathless layout matches every URL; `path: '/'` would not match `*` at the basename itself.
       const LoadingComponent = options.loading ?? DefaultLoading;
       const tree: RouteObject[] = [{ id: 'cormi:root', HydrateFallback: LoadingComponent, ErrorBoundary: RouteFailure,
