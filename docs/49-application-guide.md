@@ -766,6 +766,21 @@ cormi generate page preview -- --dry-run
 
 生成器只写文件，不会把页面注册进路由，也不会格式化内容；模型模板遵循 `src/models/<kebab>.ts` 的 Hook 模型约定。规则与边界见 [F4k 微生成器](87-f4k-generator.md)。
 
+### 4.27 静态导出外壳
+
+需要让静态托管和爬虫直接拿到每个页面的标题与 meta 时，加入 `staticExportPlugin`：
+
+```ts
+plugins: [
+  { id: 'export', plugin: staticExportPlugin, options: { id: 'app:export', titleTemplate: ' · cormi' } },
+  { id: 'head', plugin: headPlugin, options: { id: 'app:head', titleTemplate: ' · cormi' } },
+]
+```
+
+构建后 `dist/index.html`、`dist/guide/index.html` 等各自带有该路由（含祖先）的 `meta.head`；动态段、catch-all 与 redirect 路由不会生成文件。它只是 HTML 外壳：页面内容仍需浏览器挂载，不是预渲染。`index.html` 必须声明 `<meta charset>`，否则非 ASCII 标题可能按错误编码返回。与 `headPlugin` 搭配可在客户端导航后继续同步标题。规则见 [F5e 静态导出](88-f5e-static-export.md)。
+
+示例：`pnpm cormi build --root examples/static-export`，再 `pnpm cormi preview --root examples/static-export`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

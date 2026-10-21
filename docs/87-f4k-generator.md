@@ -71,4 +71,4 @@ Umi 的生成器由 `packages/core/src/service/generator.ts` 提供服务，预�
 
 - U27 剩余：mock/API 生成器、模板贡献面与交互式提问；
 - U28：lint/format/test 等可选工程命令；U29：API 生成与类型工作流；
-- U32/U33/U34/U35：SSR、静态导出、MPA、生产 API 路由。
+- F5e 已交付静态导出外壳，见 [F5e 静态导出](88-f5e-static-export.md)；后续为 U32 SSR、U34 MPA、U35 生产 API 路由。

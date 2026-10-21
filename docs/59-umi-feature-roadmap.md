@@ -62,7 +62,7 @@
 | U30 | TypeScript、prepare、导出类型、monorepo | 基础已有至 P16；仍需配合新功能生成类型与别名 | 既有 TS/prepare + monorepo adapter | 随功能 |
 | U31 | code splitting、routePrefetch、routePreloadOnLoad | 部分已有（F5d）：页面按路由懒加载，生成入口提供路由模块注册表，`usePrefetch()` 手动预热或 `mode:"idle"` 空闲全量；链接 intent/视口触发、数据预取与 SSR 侧预取待后续 | 路由加载插件 + backend bridge | F5 |
 | U32 | SSR、服务端 loader/渲染入口 | 待实现 | 独立 SSR renderer/profile，复用可共享契约 | F5 |
-| U33 | exportStatic/预渲染/静态导出 | 当前只有 SPA 静态产物，不等于逐路由预渲染 | 静态导出插件 | F5 |
+| U33 | exportStatic/预渲染/静态导出 | 部分已有（F5e）：可选 staticExportPlugin 为每个字面路径路由生成带 `meta.head` 的 HTML 外壳；prerender、404.html、sitemap 与 SSR 组合待后续（外壳不等于预渲染） | 静态导出插件 | F5 |
 | U34 | MPA | 待实现多入口应用编排 | 独立 MPA profile | F5 |
 | U35 | apiRoute | 当前只开发 Mock，不是生产 API route | 独立服务端路由插件 | F5 |
 | U36 | qiankun、Module Federation | 待实现 | 可选主/子应用与 federation adapter | F6 |
@@ -155,6 +155,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F4j 状态（2026-10-20）：** U25 的构建输出能力已交付：可选 `outputPlugin` 在 `closeBundle` 把项目内文件/目录复制进输出目录（路径与符号链接校验、默认目标为 basename），并用 `hash:false` 生成稳定资源名（保留 `assets/` 目录，与自定义命名冲突时失败）；复制只在构建发生，preview 直接提供复制后的文件。externals、runtimePublicPath、CDN 与按 chunk 命名策略仍待后续。用法、差异与验证见 [F4j 构建输出策略](86-f4j-output-policy.md)。
 
 **F4k 状态（2026-10-20）：** U27 的首批生成器已交付，同时把 CLI 的入参协议扩展为「命令 + 至多 32 个位置参数」（`CommandRequest.positionals` 经 CLI → supervisor → worker 传递，全局选项仍严格）。`generatorPlugin` 注册 `generate` 命令，内置 page/component/model 模板，默认拒绝覆盖、`--force` 覆盖、`--dry-run` 只返回计划，名称与路径校验齐全。mock/API 生成器、模板贡献面与交互式提问仍待后续。用法、差异与验证见 [F4k 微生成器](87-f4k-generator.md)。
+
+**F5e 状态（2026-10-20）：** U33 的第一步已交付：`staticExportPlugin` 在构建后读取路由 IR，为字面路径的模块路由生成 `dist/<path>/index.html`，按运行时相同规则合并祖先 `meta.head` 并追加 `titleTemplate`；`/` 的 head 写回 `dist/index.html`，动态段/catch-all/redirect 跳过。外壳不是预渲染：没有 SSR 内容与数据，静态页面仍依赖 JS 挂载。prerender、404.html 与 SSR 组合仍待后续。用法、差异与验证见 [F5e 静态导出](88-f5e-static-export.md)。
 
 ### F3：权限、布局、菜单和国际化
 

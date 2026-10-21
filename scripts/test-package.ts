@@ -30,6 +30,7 @@ import { writeHeadFixture, verifyHeadPage } from './head-fixture.js';
 import { writePrefetchFixture, verifyPrefetchPage } from './prefetch-fixture.js';
 import { writeOutputFixture, verifyOutputBuild, verifyOutputPage } from './output-fixture.js';
 import { writeGeneratorFixture } from './generator-fixture.js';
+import { writeStaticExportFixture, verifyStaticExport, verifyStaticExportPages } from './static-export-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -864,6 +865,27 @@ const bad:GeneratePlan=planGeneration(1);
     await execute('generator-exists',generatorConsumer,cormiBin,['generate','page','generated'],1,/GENERATE_EXISTS/);
     await execute('generator-page-force',generatorConsumer,cormiBin,['generate','page','generated','--json','--','--force']);
     report.stages.push({label:'installed-generator-cli-page-force-and-typecheck',kinds:['page'],previewRegenerated:false});
+
+    const exportConsumer=await create('static-export','react');await writeStaticExportFixture(exportConsumer);
+    const exportManifest=consumerManifest(kit,'react');
+    exportManifest.dependencies['@cormijs/plugin-react']=exportManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    exportManifest.dependencies['@cormijs/plugin-react-vite']=exportManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
+    await writeFile(join(exportConsumer,'package.json'),JSON.stringify(exportManifest,null,2));
+    await install('static-export-install',exportConsumer);await auditLinks(exportConsumer);
+    await command('static-export-typecheck',exportConsumer,'typecheck');
+    await writeFile(join(exportConsumer,'types.mts'),`import {staticExportPlugin,staticPages,renderStaticPage,writeStaticPages,type StaticExportOptions,type StaticPage} from '@cormijs/plugin-react-vite';
+const options:StaticExportOptions={id:'app:export',titleTemplate:' · demo'};
+const pages:readonly StaticPage[]=staticPages([]);
+void [staticExportPlugin,options,pages,renderStaticPage('<html><head><title>x</title></head></html>',{path:'/',head:{title:'x'}}),writeStaticPages];
+// @ts-expect-error titleTemplate must be a string
+const bad:StaticExportOptions={titleTemplate:1};
+`);
+    await execute('static-export-public-types',exportConsumer,process.execPath,typeArguments);
+    await withServer(exportConsumer,'dev',async url=>{await page.goto(url);await page.getByRole('heading',{name:'Export home',exact:true}).waitFor();assert.deepEqual(errors,[]);});
+    await command('static-export-build',exportConsumer,'build');
+    await verifyStaticExport(exportConsumer);
+    await withServer(exportConsumer,'preview',async url=>{await verifyStaticExportPages(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'static-export-preview.png')});});
+    report.stages.push({label:'installed-static-export-dev-build-and-static-preview',routes:['/','/guide'],previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

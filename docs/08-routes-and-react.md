@@ -54,6 +54,8 @@ F4j 起，显式启用的 `outputPlugin`（Vite 桥）可在构建后把项目�
 
 F4k 起，CLI 支持「命令 + 至多 32 个位置参数」，`generatorPlugin` 提供 `cormi generate page|component|model <name>`（`--force`/`--dry-run` 需写在 `--` 之后）；生成器只写文件，不会自动注册路由。详见 [F4k 微生成器](87-f4k-generator.md)。
 
+F5e 起，显式启用的 `staticExportPlugin` 在构建后为每个字面路径路由生成带 `meta.head` 的 HTML 外壳（`dist/guide/index.html` 等），与 `headPlugin` 搭配覆盖首屏与客户端导航；这不是预渲染。详见 [F5e 静态导出](88-f5e-static-export.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic
