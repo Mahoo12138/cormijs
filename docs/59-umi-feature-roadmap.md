@@ -50,7 +50,7 @@
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b/F5s）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；proxyPlugin 把路径前缀代理到 http(s) 上游，dev 与 preview 一致；req/res 兼容与统一配置入口待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c/F4d）：aliasPlugin 支持项目内相对别名与可选内置 `@`→src，definePlugin 在 dev 与 build 替换 JSON 常量；`@@`、环境分层自动映射与 define 类型生成待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
 | U20 | HTML title/metas/links/headScripts/scripts/favicon | 部分已有（F4a/F4e）：可选 htmlPlugin 注入 title/lang/meta/link/favicon，并按 Umi 位置约定注入 headScripts/scripts（封闭属性集合、转义与逃逸消解）；每路由 head 与任意 raw head HTML 待后续 | HTML/head 插件 | F4 |
-| U21 | helmet、页面标题/SEO 元数据 | 部分已有（F5c/F5t/F5x）：可选 headPlugin 按 `meta.head` 在导航后同步标题/meta/link/JSON-LD，并提供 `<Helmet>` 组件级贡献（路由→组件合并、受管节点可替换、卸载恢复）；SSR 头部收集待后续 | head 客户端插件 | F3/F4 |
+| U21 | helmet、页面标题/SEO 元数据 | 部分已有（F5c/F5t/F5x）：可选 headPlugin 按 `meta.head` 在导航后同步标题/meta/link/JSON-LD，并提供 `<Helmet>` 组件级贡献（路由→组件合并、受管节点可替换、卸载恢复）与 SSR 头部收集 | head 客户端插件 | F3/F4 |
 | U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有（F4f/F4m）：globalStylePlugin 发现 src/global.{css,scss,sass,less} 并由生成入口按 hook 顺序副作用导入；可选 styleTypesPlugin 生成 CSS Modules/静态资源的环境类型声明；精确类名类型、PostCSS/Tailwind/SVGR 仍待后续 | 样式/资源插件 + backend adapter | F4 |
 | U23 | Tailwind、UnoCSS、styled-components | 待实现可选集成 | 各生态 adapter | F4 |
 | U24 | icons | 待实现公共图标方案 | 图标资源/代码生成插件 | F4 |
@@ -120,7 +120,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F4m | abbe5aa | CSS Modules/资源类型声明 | docs/110 |
 | U16-1 | ba6ea1f | locale 变更订阅 | docs/111 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 548/548、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/f4a…f5z-validation.json`、`artifacts/u17-menu-adapters-validation.json`、`artifacts/f4m-style-types-validation.json` 、`artifacts/f4m-style-types-validation.json` 与 `artifacts/u16-locale-subscription-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态。
+最新冻结验证（2026-10-21）：`pnpm check` 548/548、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/f4a…f5z-validation.json`、`artifacts/u17-menu-adapters-validation.json`、`artifacts/f4m-style-types-validation.json`、`artifacts/u16-locale-subscription-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。
 
 ## 4. 实施顺序与可审阅交付
 
