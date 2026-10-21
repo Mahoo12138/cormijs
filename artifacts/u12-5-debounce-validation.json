@@ -1,0 +1,109 @@
+{
+  "format": "cormi:u12-5-debounce-validation:1",
+  "verifiedAt": "2026-10-21T22:51:11.606Z",
+  "base": "89cfc919e8c7348d837a15e1793edf3c891ee7a4",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "docs/127-u12-debounce.md",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-5-debounce/check.log",
+      "sha256": "9aa90707d3a45740cdf9d4874eddaa2e51b6dd44ee028470f72c314e741786de",
+      "seconds": 123.8,
+      "tests": 565,
+      "pass": 565,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-5-debounce/browser.log",
+      "sha256": "9b55d7965b56b452e6cb2ff4098489f00999f1008b93b1ddec9c1c28eb2411ef",
+      "seconds": 565.5,
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-5-debounce/package.log",
+      "sha256": "c590445140ee174dc43ca496557b00d0b8a373c46305df87a6095d9ba77e5dde",
+      "stages": 336,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-5-debounce/targeted.log",
+      "sha256": "e61146dd0b614a07f2e142936963b7e081648a85ff8a92b8e1fe3c7444f3b354",
+      "seconds": 12,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "two rapid runs coalesce into one request with debounceWait, plus existing retry/polling/pagination/cache cases"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "e2c62577853ac165b7c8ec7850347a43a5d5d7693eb384cfd79027cc0680d8d1",
+    "docs/49-application-guide.md": "fe446492239b5a5dcda99dd4e24da9570aff67f51c827a5f7919ca14290a05f5",
+    "docs/59-umi-feature-roadmap.md": "f27f71c34a6c3eeea360fccb6a87e6dc5b7dd294cbf418de0299a192c3ce4e9f",
+    "docs/127-u12-debounce.md": "1fd4fce9c8a011e25197fae27bf056ee7f7ef9b661c824e5773367c23c597890",
+    "packages/runtime/src/request.tsx": "dcc577d9467a19d73b04df9be19bc006c2170b259f07e05fc9553ab5274ab34a",
+    "scripts/request-fixture.ts": "a8274cf770cd1c71af84bd0d31f08e04ab98c7961ac0ccb58a63e33a00de68ef",
+    "scripts/test-package.ts": "b9532a71f1ead476cc695d91a80826296ed036a597924663f14d74f1286d015f"
+  },
+  "sourceInputCount": 7,
+  "sourceInputsDigest": "0cdfc401c2c5c4a6f87948db1ba2503b9332529159a3b0961c5fd8950f88b466",
+  "documentationInputs": {
+    "docs/127-u12-debounce.md": "1fd4fce9c8a011e25197fae27bf056ee7f7ef9b661c824e5773367c23c597890",
+    "docs/59-umi-feature-roadmap.md": "f27f71c34a6c3eeea360fccb6a87e6dc5b7dd294cbf418de0299a192c3ce4e9f",
+    "docs/112-roadmap-audit-2026-10-21.md": "e2c62577853ac165b7c8ec7850347a43a5d5d7693eb384cfd79027cc0680d8d1",
+    "docs/49-application-guide.md": "fe446492239b5a5dcda99dd4e24da9570aff67f51c827a5f7919ca14290a05f5"
+  },
+  "evidence": [
+    ".cache/u12-5-debounce/check.log",
+    ".cache/u12-5-debounce/browser.log",
+    ".cache/u12-5-debounce/package.log",
+    ".cache/u12-5-debounce/targeted.log",
+    "artifacts/u12-5-debounce-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "no-leading-debounce",
+    "no-max-wait",
+    "no-throttle",
+    "polling-bypasses-debounce",
+    "merged-calls-resolve-undefined",
+    "no-server-side-dedupe",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

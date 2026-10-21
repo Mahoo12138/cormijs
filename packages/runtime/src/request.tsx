@@ -162,6 +162,8 @@ export interface UseRequestOptions<T> {
   readonly pollingWhenHidden?: boolean;
   /** Re-run when these JSON-serializable values change; ignored for manual requests. */
   readonly refreshDeps?: readonly unknown[];
+  /** Coalesce run/refresh calls within this window (0–60000ms); polling bypasses it. */
+  readonly debounceWait?: number;
 }
 export interface UseRequestResult<T> {
   readonly data: T | undefined;
@@ -189,6 +191,7 @@ function validateUseRequest<T>(options: UseRequestOptions<T>): void {
   if (options.pollingInterval !== undefined && (!Number.isInteger(options.pollingInterval) || options.pollingInterval < 100 || options.pollingInterval > 3_600_000)) throw new TypeError('REQUEST_INVALID: pollingInterval must be an integer from 100 to 3600000');
   if (options.pollingWhenHidden !== undefined && typeof options.pollingWhenHidden !== 'boolean') throw new TypeError('REQUEST_INVALID: pollingWhenHidden must be boolean');
   if (options.refreshDeps !== undefined && (!Array.isArray(options.refreshDeps) || options.refreshDeps.length > 16)) throw new TypeError('REQUEST_INVALID: refreshDeps must be an array of at most 16 values');
+  if (options.debounceWait !== undefined && (!Number.isInteger(options.debounceWait) || options.debounceWait < 0 || options.debounceWait > 60_000)) throw new TypeError('REQUEST_INVALID: debounceWait must be an integer from 0 to 60000');
 }
 
 export function useRequest<T>(service: (client: RequestClient, signal: AbortSignal) => Promise<T>, options: UseRequestOptions<T> = {}): UseRequestResult<T> {
@@ -201,8 +204,15 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
   serviceRef.current = service; optionsRef.current = options;
   const mounted = useRef(true), generation = useRef(0), controller = useRef<AbortController | undefined>(undefined);
   const polling = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), poll = useRef<() => void>(() => {});
+  const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), debounceResolve = useRef<((value: T | undefined) => void) | undefined>(undefined);
   const stopPolling = () => { if (polling.current) { clearTimeout(polling.current); polling.current = undefined; } };
-  const run = useCallback(async (): Promise<T | undefined> => {
+  const stopDebounce = () => {
+    if (debounce.current) clearTimeout(debounce.current);
+    debounce.current = undefined;
+    debounceResolve.current?.(undefined);
+    debounceResolve.current = undefined;
+  };
+  const execute = useCallback(async (): Promise<T | undefined> => {
     const token = ++generation.current;
     controller.current?.abort();
     stopPolling();
@@ -242,6 +252,20 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
       }
     }
   }, [client]);
+  const executeRef = useRef(execute); executeRef.current = execute;
+  const run = useCallback((): Promise<T | undefined> => {
+    const wait = optionsRef.current.debounceWait ?? 0;
+    if (!wait) return executeRef.current();
+    stopDebounce();
+    return new Promise<T | undefined>(resolve => {
+      debounceResolve.current = resolve;
+      debounce.current = setTimeout(() => {
+        debounce.current = undefined;
+        debounceResolve.current = undefined;
+        void executeRef.current().then(resolve, () => resolve(undefined));
+      }, wait);
+    });
+  }, []);
   const runRef = useRef(run); runRef.current = run;
   poll.current = () => {
     stopPolling();
@@ -250,13 +274,14 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
     polling.current = setTimeout(async () => {
       if (!mounted.current) return;
       if (optionsRef.current.pollingWhenHidden !== true && typeof document !== 'undefined' && document.hidden) { poll.current(); return; }
-      await runRef.current();
+      await executeRef.current();
     }, interval);
   };
   const cancel = useCallback(() => {
     generation.current++;
     controller.current?.abort();
     stopPolling();
+    stopDebounce();
     setState(value => ({ ...value, loading: false }));
   }, []);
   const manual = options.manual === true;
@@ -268,6 +293,7 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
       mounted.current = false;
       controller.current?.abort();
       stopPolling();
+      stopDebounce();
     };
   }, [manual, run, deps]);
   return { ...state, run, refresh: run, cancel };

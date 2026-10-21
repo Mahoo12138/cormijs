@@ -623,7 +623,7 @@ const bad:InitialStatePluginOptions={id:42};
     await writeFile(join(requestConsumer,'types.mts'),`import {requestPlugin,type RequestPluginOptions} from '@cormijs/plugin-react';import {RequestError,usePagination,useRequest,type PaginationResponse,type RequestClient,type RequestConfig,type RequestOptions,type UsePaginationResult,type UseRequestOptions,type UseRequestResult} from '@cormijs/runtime';
 const config:RequestConfig={baseURL:'/api',headers:{'x-app':'cormi'},timeout:1000,cacheLimit:10};
 const options:RequestPluginOptions={id:'consumer:request'};
-const hookOptions:UseRequestOptions<string>={retry:2,retryDelay:attempt=>attempt*10,pollingInterval:1000,pollingWhenHidden:false,refreshDeps:['q']};
+const hookOptions:UseRequestOptions<string>={retry:2,retryDelay:attempt=>attempt*10,pollingInterval:1000,pollingWhenHidden:false,refreshDeps:['q'],debounceWait:50};
 const cacheOptions:RequestOptions={cacheTime:5000,cacheBust:true,cacheTags:['group']};
 declare const pagination:UsePaginationResult<{id:number}>;
 declare const pageResponse:PaginationResponse<{id:number}>;
