@@ -72,6 +72,8 @@ F5m 起，`useIntl()` 新增 `formatRelativeTime`（平台 `Intl.RelativeTimeFor
 
 F5n 起，显式启用的 `apiRoutePlugin` 把 `src/api/**` 的 Fetch 处理器映射为 `/api/**`：dev 由 Vite 中间件运行，build 用 esbuild 编译，preview 从编译产物提供服务；`[param]`/index 映射、请求与响应上限、JSON 错误稳定。详见 [F5n API 路由](96-f5n-api-routes.md)。
 
+F5o 起，`useIntl().rich()` 与 `FormattedMessage` 的 `tags` 把 ICU 消息中的成对标签渲染为 React 节点，标签内可嵌套 ICU 参数与 `#`；`t`/`tp` 不解析标签，纯函数 `formatIcuParts`/`richNodes` 同步导出。详见 [F5o 富文本消息](97-f5o-rich-text.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

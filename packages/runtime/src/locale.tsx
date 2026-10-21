@@ -1,6 +1,19 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { Fragment, createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import type { LocaleConfig, RuntimeConfig } from './app-config.js';
-import { formatIcu } from './icu.js';
+import { formatIcu, formatIcuParts, type RichPart } from './icu.js';
+
+export type RichTag = (children: ReactNode[]) => ReactNode;
+export type RichTags = Readonly<Record<string, RichTag>>;
+
+/** Turn rich parts into React nodes; tag renderers receive their already-rendered children. */
+export function richNodes(parts: readonly RichPart[], tags: RichTags): ReactNode[] {
+  return parts.map((part, index) => {
+    if (typeof part === 'string') return part;
+    const render = tags[part.tag];
+    if (!render) throw new TypeError(`LOCALE_INVALID: missing rich tag renderer: ${part.tag}`);
+    return <Fragment key={index}>{render(richNodes(part.children, tags))}</Fragment>;
+  });
+}
 
 export interface IntlApi {
   readonly locale: string;
@@ -14,6 +27,8 @@ export interface IntlApi {
   formatRelativeTime(value: number, unit: Intl.RelativeTimeFormatUnit, options?: Intl.RelativeTimeFormatOptions): string;
   /** Plural-aware lookup: `${key}_${category}` → `${key}_other` → the plain key, with `{count}` interpolation. */
   tp(key: string, count: number, values?: Readonly<Record<string, string | number>>): string;
+  /** ICU message with `<tag>` elements rendered through the supplied React renderers. */
+  rich(key: string, values: Readonly<Record<string, string | number>>, tags: RichTags): ReactNode;
 }
 
 /** Pure plural selection shared by the provider and tests; `locales` is ordered (current, then fallback). */
@@ -112,7 +127,17 @@ export function LocaleProvider({ appConfig, children }: { readonly appConfig: Re
       ?? config.messages[locale]?.[key] ?? (config.fallback ? config.messages[config.fallback]?.[key] : undefined) ?? key;
     return formatIcu(text, { count, ...(values ?? {}) }, locale);
   }, [config, locale]);
-  const value = useMemo<IntlApi>(() => ({ locale, setLocale, t, peek, formatNumber, formatDate, formatRelativeTime, tp }), [locale, setLocale, t, peek, formatNumber, formatDate, formatRelativeTime, tp]);
+  const rich = useCallback((key: string, values: Readonly<Record<string, string | number>>, tags: RichTags) => {
+    if (typeof key !== 'string' || !key) return '';
+    if (!tags || typeof tags !== 'object' || Array.isArray(tags)) throw new TypeError('LOCALE_INVALID: rich tags must be an object');
+    const names = Object.keys(tags);
+    if (names.length > 32 || names.some(name => !/^[A-Za-z][A-Za-z0-9]*$/.test(name) || typeof tags[name] !== 'function')) {
+      throw new TypeError('LOCALE_INVALID: rich tags must be named renderers');
+    }
+    const text = config.messages[locale]?.[key] ?? (config.fallback ? config.messages[config.fallback]?.[key] : undefined) ?? key;
+    return <>{richNodes(formatIcuParts(text, values ?? {}, locale, names), tags)}</>;
+  }, [config, locale]);
+  const value = useMemo<IntlApi>(() => ({ locale, setLocale, t, peek, formatNumber, formatDate, formatRelativeTime, tp, rich }), [locale, setLocale, t, peek, formatNumber, formatDate, formatRelativeTime, tp, rich]);
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 
@@ -127,10 +152,13 @@ export function useIntl(): IntlApi {
   return value;
 }
 
-export function FormattedMessage({ id, values, defaultMessage }: {
-  readonly id: string; readonly values?: Readonly<Record<string, string | number>>; readonly defaultMessage?: string;
+export function FormattedMessage({ id, values, defaultMessage, tags }: {
+  readonly id: string; readonly values?: Readonly<Record<string, string | number>>;
+  readonly defaultMessage?: string; readonly tags?: RichTags;
 }) {
-  const { t } = useIntl(), text = t(id, values);
+  const intl = useIntl();
+  if (tags) return <>{intl.rich(id, values ?? {}, tags)}</>;
+  const text = intl.t(id, values);
   return <>{text === id && defaultMessage !== undefined ? defaultMessage : text}</>;
 }
 

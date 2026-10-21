@@ -1,6 +1,7 @@
 /**
  * Small ICU MessageFormat subset: simple arguments, number/date/time, plural/selectordinal and select.
- * Skeletons, currency codes and full apostrophe quoting are intentionally out of scope.
+ * Rich tags are only recognized when a tag-name set is supplied; skeletons, currency codes and full
+ * apostrophe quoting are intentionally out of scope.
  */
 type Values = Readonly<Record<string, string | number>>;
 
@@ -8,17 +9,34 @@ interface Segment { readonly kind: 'text'; readonly text: string }
 interface Simple { readonly kind: 'simple'; readonly name: string }
 interface Formatted { readonly kind: 'formatted'; readonly name: string; readonly type: 'number' | 'date' | 'time'; readonly style?: string }
 interface Choice { readonly kind: 'choice'; readonly name: string; readonly type: 'plural' | 'selectordinal' | 'select'; readonly offset: number; readonly options: Readonly<Record<string, string>> }
-type Node = Segment | Simple | Formatted | Choice;
+interface Tag { readonly kind: 'tag'; readonly name: string; readonly children: readonly Node[] }
+type Node = Segment | Simple | Formatted | Choice | Tag;
+/** Rendered text or a rich tag; the runtime turns tags into React nodes at the boundary. */
+export type RichPart = string | { readonly tag: string; readonly children: readonly RichPart[] };
 
 class Parser {
   private index = 0;
-  constructor(private readonly input: string) {}
+  constructor(private readonly input: string, private readonly tags?: ReadonlySet<string>) {}
   parse(): readonly Node[] { return this.message(false); }
-  private message(nested: boolean): readonly Node[] {
+  private message(nested: boolean, expectedTag?: string): readonly Node[] {
     const nodes: Node[] = []; let text = '';
     const flush = () => { if (text) { nodes.push({ kind: 'text', text }); text = ''; } };
     while (this.index < this.input.length) {
       const char = this.input[this.index]!;
+      if (char === '<' && this.tags) {
+        const match = /^<(\/?)([A-Za-z][A-Za-z0-9]*)>/.exec(this.input.slice(this.index));
+        if (match) {
+          const closing = match[1] === '/', name = match[2]!;
+          if (!this.tags.has(name)) throw new TypeError(`LOCALE_INVALID: unknown rich tag: ${name}`);
+          if (closing) {
+            if (name !== expectedTag) throw new TypeError(`LOCALE_INVALID: unexpected rich tag close: ${name}`);
+            flush(); this.index += match[0].length; return nodes;
+          }
+          flush(); this.index += match[0].length;
+          nodes.push({ kind: 'tag', name, children: this.message(true, name) });
+          continue;
+        }
+      }
       if (char === "'") {
         const next = this.input[this.index + 1];
         if (next === "'") { text += "'"; this.index += 2; continue; }
@@ -26,9 +44,13 @@ class Parser {
         text += char; this.index++; continue;
       }
       if (char === '{') { flush(); nodes.push(this.argument()); continue; }
-      if (char === '}' && nested) { if (text) nodes.push({ kind: 'text', text }); this.index++; return nodes; }
+      if (char === '}' && nested) {
+        if (expectedTag !== undefined) throw new TypeError(`LOCALE_INVALID: unterminated rich tag: ${expectedTag}`);
+        if (text) nodes.push({ kind: 'text', text }); this.index++; return nodes;
+      }
       text += char; this.index++;
     }
+    if (expectedTag !== undefined) throw new TypeError(`LOCALE_INVALID: unterminated rich tag: ${expectedTag}`);
     if (nested) throw new TypeError('LOCALE_INVALID: unterminated ICU argument');
     flush(); return nodes;
   }
@@ -130,14 +152,16 @@ function formatter(locale: string) {
   return entry;
 }
 
-function render(nodes: readonly Node[], values: Values, locale: string, count?: number): string {
-  let output = '';
+function renderParts(nodes: readonly Node[], values: Values, locale: string, tags?: ReadonlySet<string>, count?: number): RichPart[] {
+  const output: RichPart[] = [];
+  const push = (part: RichPart) => { if (typeof part !== 'string' || part) output.push(part); };
   for (const node of nodes) {
     if (node.kind === 'text') {
-      output += count === undefined ? node.text.replace(/\u0000/g, '') : node.text.replace(/\u0000#|#/g, match => (match === '#' ? String(count) : '#'));
+      push(count === undefined ? node.text.replace(/\u0000/g, '') : node.text.replace(/\u0000#|#/g, match => (match === '#' ? String(count) : '#')));
       continue;
     }
-    if (node.kind === 'simple') { const value = values[node.name]; output += value === undefined ? `{${node.name}}` : String(value); continue; }
+    if (node.kind === 'tag') { push({ tag: node.name, children: renderParts(node.children, values, locale, tags, count) }); continue; }
+    if (node.kind === 'simple') { const value = values[node.name]; push(value === undefined ? `{${node.name}}` : String(value)); continue; }
     if (node.kind === 'formatted') {
       const value = values[node.name];
       if (value === undefined) throw new TypeError(`LOCALE_INVALID: missing value for ${node.name}`);
@@ -146,13 +170,13 @@ function render(nodes: readonly Node[], values: Values, locale: string, count?: 
         const key = node.style ?? '';
         let format = cache.numbers.get(key);
         if (!format) { format = new Intl.NumberFormat(locale, node.style === 'integer' ? { maximumFractionDigits: 0 } : node.style === 'percent' ? { style: 'percent' } : {}); cache.numbers.set(key, format); }
-        output += format.format(Number(value));
+        push(format.format(Number(value)));
       } else {
         const options: Intl.DateTimeFormatOptions = node.style === 'short' || node.style === 'medium' || node.style === 'long' || node.style === 'full' ? { [node.type === 'date' ? 'dateStyle' : 'timeStyle']: node.style } : {};
         const key = JSON.stringify(options);
         let format = cache.dates.get(key);
         if (!format) { format = new Intl.DateTimeFormat(locale, options); cache.dates.set(key, format); }
-        output += format.format(new Date(value));
+        push(format.format(new Date(value)));
       }
       continue;
     }
@@ -161,7 +185,7 @@ function render(nodes: readonly Node[], values: Values, locale: string, count?: 
       if (typeof raw !== 'string' && typeof raw !== 'number') throw new TypeError(`LOCALE_INVALID: missing value for ${node.name}`);
       const body = node.options[String(raw)] ?? node.options.other;
       if (body === undefined) throw new TypeError(`LOCALE_INVALID: no ICU option for ${node.name}`);
-      output += render(new Parser(body).parse(), values, locale, count);
+      output.push(...renderParts(new Parser(body, tags).parse(), values, locale, tags, count));
       continue;
     }
     const numeric = Number(raw);
@@ -171,12 +195,18 @@ function render(nodes: readonly Node[], values: Values, locale: string, count?: 
     const category = new Intl.PluralRules(locale, { type: node.type === 'selectordinal' ? 'ordinal' : 'cardinal' }).select(numeric - node.offset);
     const body = exact ?? node.options[category] ?? node.options.other;
     if (body === undefined) throw new TypeError(`LOCALE_INVALID: no ICU plural option for ${node.name}`);
-    output += render(new Parser(body).parse(), values, locale, node.offset ? numeric - node.offset : numeric);
+    output.push(...renderParts(new Parser(body, tags).parse(), values, locale, tags, node.offset ? numeric - node.offset : numeric));
   }
   return output;
 }
 
 /** Formats a message subset: `{name}`, `{n, number|date|time[, style]}`, `{n, plural|selectordinal|select, ...}`. */
 export function formatIcu(message: string, values: Values, locale: string): string {
-  return render(new Parser(message).parse(), values, locale);
+  return renderParts(new Parser(message).parse(), values, locale).map(part => (typeof part === 'string' ? part : '')).join('');
+}
+
+/** Rich variant: tags listed in `tags` become parts; unlisted angle brackets stay literal text. */
+export function formatIcuParts(message: string, values: Values, locale: string, tags: readonly string[]): readonly RichPart[] {
+  const allowed = new Set(tags);
+  return Object.freeze(renderParts(new Parser(message, allowed).parse(), values, locale, allowed));
 }

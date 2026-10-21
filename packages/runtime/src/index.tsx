@@ -12,8 +12,8 @@ export { collectHead, normalizeHead, routeHeadRuntime, HEAD_ATTRIBUTE, type Head
 export { ModelProvider, useModel, type ModelDescriptor } from './model.js';
 export { InitialStateProvider, initialStateRuntime, useInitialState, type InitialState } from './initial-state.js';
 export { createRequestClient, RequestError, RequestProvider, requestRuntime, useRequest, useRequestClient, type RequestClient, type RequestOptions, type RequestParams, type UseRequestOptions, type UseRequestResult } from './request.js';
-export { applyLocaleCatalogs, FormattedMessage, LocaleProvider, localeRuntime, formatDateFor, formatNumberFor, formatRelativeTimeFor, selectPluralKey, useIntl, useLocaleOptional, type IntlApi } from './locale.js';
-export { formatIcu } from './icu.js';
+export { applyLocaleCatalogs, FormattedMessage, LocaleProvider, localeRuntime, formatDateFor, formatNumberFor, formatRelativeTimeFor, richNodes, selectPluralKey, useIntl, useLocaleOptional, type IntlApi, type RichTag, type RichTags } from './locale.js';
+export { formatIcu, formatIcuParts, type RichPart } from './icu.js';
 export { Access, AccessProvider, accessRuntime, AccessRoute, applyAccessConvention, useAccess, useAccessOptional, type Access as AccessMap } from './access.js';
 export { MenuProvider, menuRuntime, useActiveMenuKeys, useBreadcrumb, useMenu, useMenuCollapse, type BreadcrumbItem, type MenuItem } from './menu.js';
 export { defineApp, resolveAppConfig, type HistoryType, type RequestConfig, type LocaleConfig, type AccessConfig, type RuntimeConfig, type AppRuntimeContext, type AppRoutesContext, type RootContainerContext, type RouteChangeEvent } from './app-config.js';

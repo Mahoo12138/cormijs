@@ -32,19 +32,21 @@ export default defineApp({
         guests: '{count, plural, offset:1 =0 {no guests} =1 {just you} other {you and # others}}',
         reply: '{gender, select, female {She replied} male {He replied} other {They replied}}',
         total: 'Total {amount, number} ({fee, number, percent} fee)',
+        richText: '<b>Hello {name}</b>, you have {count, plural, one {# message} other {# messages}}',
       },
       zh: {
         title: '语言演示', greeting: '你好 {name}', items_other: '{count} 项',
         guests: '{count, plural, offset:1 =0 {没有客人} other {你和 # 位其他客人}}',
         reply: '{gender, select, female {她回复了} other {他们回复了}}',
         total: '总计 {amount, number}（{fee, number, percent} 手续费）',
+        richText: '<b>你好 {name}</b>，你有 {count, plural, other {# 条消息}}',
       },
     },
   },
 });`,
     'src/pages/index.tsx': `import { FormattedMessage, useIntl } from '@cormijs/runtime';
 export default function Home(){
-  const {locale,setLocale,t,tp,formatNumber,formatDate,formatRelativeTime}=useIntl();
+  const {locale,setLocale,t,tp,rich,formatNumber,formatDate,formatRelativeTime}=useIntl();
   return <main>
     <h1 data-title>{t('title')}</h1>
     <p data-locale>{locale}</p>
@@ -58,6 +60,8 @@ export default function Home(){
     <p data-icu-select>{t('reply',{gender:'female'})}</p>
     <p data-icu-number>{t('total',{amount:1234.5,fee:0.25})}</p>
     <p data-formatted-plural><FormattedMessage id="guests" values={{count:4}} /></p>
+    <p data-rich>{rich('richText',{name:'Ada',count:2},{b:chunks=><b data-rich-bold>{chunks}</b>})}</p>
+    <p data-rich-formatted><FormattedMessage id="richText" values={{name:'Grace',count:1}} tags={{b:chunks=><strong data-rich-strong>{chunks}</strong>}} /></p>
     <p data-number>{formatNumber(1234.5)}</p>
     <p data-relative>{formatRelativeTime(-2,'day')}</p>
     <p data-relative-auto>{formatRelativeTime(-1,'day',{numeric:'auto'})}</p>
@@ -86,6 +90,10 @@ export async function verifyLocalePage(page: Page, url: string) {
   assert.equal(await page.locator('[data-icu-select]').innerText(), 'She replied');
   assert.equal(await page.locator('[data-icu-number]').innerText(), 'Total 1,234.5 (25% fee)');
   assert.equal(await page.locator('[data-formatted-plural]').innerText(), 'you and 3 others');
+  assert.equal(await page.locator('[data-rich]').innerText(), 'Hello Ada, you have 2 messages');
+  assert.equal(await page.locator('b[data-rich-bold]').count(), 1);
+  assert.equal(await page.locator('[data-rich-formatted]').innerText(), 'Hello Grace, you have 1 message');
+  assert.equal(await page.locator('strong[data-rich-strong]').count(), 1);
   assert.equal(await page.locator('[data-number]').innerText(), '1,234.5');
   assert.equal(await page.locator('[data-relative]').innerText(), '2 days ago');
   assert.equal(await page.locator('[data-relative-auto]').innerText(), 'yesterday');
@@ -102,6 +110,10 @@ export async function verifyLocalePage(page: Page, url: string) {
   assert.equal(await page.locator('[data-icu-select]').innerText(), '她回复了');
   assert.equal(await page.locator('[data-icu-number]').innerText(), '总计 1,234.5（25% 手续费）');
   assert.equal(await page.locator('[data-formatted-plural]').innerText(), '你和 3 位其他客人');
+  assert.equal(await page.locator('[data-rich]').innerText(), '你好 Ada，你有 2 条消息');
+  assert.equal(await page.locator('b[data-rich-bold]').count(), 1);
+  assert.equal(await page.locator('[data-rich-formatted]').innerText(), '你好 Grace，你有 1 条消息');
+  assert.equal(await page.locator('strong[data-rich-strong]').count(), 1);
   assert.equal(await page.locator('[data-number]').innerText(), '1,234.5');
   assert.equal(await page.locator('[data-relative]').innerText(), '2天前');
   assert.equal(await page.locator('[data-relative-auto]').innerText(), '昨天');

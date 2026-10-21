@@ -910,6 +910,22 @@ export default (request: Request, { params }: ApiHandlerContext) =>
 
 `src/api/**` 的文件映射为 `/api/**`（`index.ts` 是目录本身，`[id].ts` 捕获一段）；处理器是标准 Fetch `Request`/`Response`，自行判断 method。`cormi dev` 直接运行源码，`cormi build` 把处理器打包进 `dist/.cormi/api`，`cormi preview` 从编译产物提供服务。请求/响应缓冲上限为 1 MiB/8 MiB，错误返回 JSON 码且不泄漏堆栈；新增/删除路由文件需重启开发服务。规则见 [F5n API 路由](96-f5n-api-routes.md)。
 
+### 4.36 富文本消息
+
+消息中需要强调或链接结构时，用成对标签并在渲染时显式提供渲染器：
+
+```jsonc
+{ "notice": "<b>Hello {name}</b>, you have {count, plural, one {# message} other {# messages}}" }
+```
+
+```tsx
+const { rich } = useIntl();
+rich('notice', { name: 'Ada', count: 2 }, { b: children => <strong>{children}</strong> });
+// FormattedMessage 也可传 tags={{ b: children => <b>{children}</b> }}
+```
+
+`t()`/`tp()` 不解析标签，按普通文本返回；只有 `rich`/`FormattedMessage.tags` 会解析。标签可嵌套、内部可用 ICU 参数与 `#`，未列出/错配/未闭合标签抛 `LOCALE_INVALID`。不生成 HTML 字符串，标签渲染器由应用提供。规则见 [F5o 富文本消息](97-f5o-rich-text.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

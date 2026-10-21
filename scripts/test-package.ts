@@ -611,12 +611,15 @@ const bad:RequestConfig={baseURL:42};
     await writeFile(join(localeConsumer,'package.json'),JSON.stringify(localeManifest,null,2));
     await install('locale-install',localeConsumer);await auditLinks(localeConsumer);
     await command('locale-typecheck',localeConsumer,'typecheck');
-    await writeFile(join(localeConsumer,'types.mts'),`import {localePlugin,type LocalePluginOptions} from '@cormijs/plugin-react';import {FormattedMessage,formatIcu,formatRelativeTimeFor,useIntl,type IntlApi,type LocaleConfig} from '@cormijs/runtime';
+    await writeFile(join(localeConsumer,'types.mts'),`import {localePlugin,type LocalePluginOptions} from '@cormijs/plugin-react';import {FormattedMessage,formatIcu,formatIcuParts,formatRelativeTimeFor,useIntl,type IntlApi,type LocaleConfig,type RichPart,type RichTags} from '@cormijs/runtime';
 const config:LocaleConfig={default:'en',messages:{en:{hello:'Hello'}}};
 const options:LocalePluginOptions={id:'consumer:locale'};
 const formatted:string=formatIcu('{count, plural, one {# item} other {# items}}',{count:1},'en');
 const relative:string=formatRelativeTimeFor('en',-2,'day');
-declare const intl:IntlApi;void [localePlugin,options,config,intl,useIntl,FormattedMessage,formatted,relative];
+const parts:readonly RichPart[]=formatIcuParts('<b>x</b>',{},'en',['b']);
+const tags:RichTags={b:chunks=>chunks};
+declare const intl:IntlApi;const richNode=intl.rich('x',{},tags);
+void [localePlugin,options,config,intl,useIntl,FormattedMessage,formatted,relative,parts,richNode];
 // @ts-expect-error message values are strings
 const bad:LocaleConfig={messages:{en:{hello:1}}};
 // @ts-expect-error ICU values are strings or numbers
