@@ -86,6 +86,8 @@ F5t 起，`meta.head.jsonLd` 由 `headPlugin` 同步为受管的 JSON-LD 脚本�
 
 F5u 起，带 client loader 的路由生成 `.cormi/loaders.d.ts`，提供 `CormiLoaderData.Data<'<route-id>'>` 返回类型；运行时读取仍用 `useClientLoaderData<T>()`。详见 [F5u loader 类型](103-f5u-loader-types.md)。
 
+F5v 起，约定扫描识别静态值导出列表与跨文件重导出（`export { load as clientLoader } from …`），`export type`、`clientLoader as other` 与 `export *` 不识别。详见 [F5v 重导出 loader](104-f5v-reexport-loaders.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

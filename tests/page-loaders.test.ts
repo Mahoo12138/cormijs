@@ -15,7 +15,11 @@ test('detectClientLoader reads exported declarations through the AST', () => {
   assert.equal(detectClientLoader('declare function clientLoader(): void; export default () => null;'), undefined);
   assert.equal(detectClientLoader('export type clientLoader = () => void;'), undefined);
   assert.equal(detectClientLoader('function clientLoader(){ return {}; } export default function Page(){ return null; }'), undefined);
-  assert.equal(detectClientLoader('export { clientLoader } from "./loaders";'), undefined);
+  assert.equal(detectClientLoader('export { clientLoader } from "./loaders";'), 'clientLoader');
+  assert.equal(detectClientLoader('export { load as clientLoader } from "./loaders";'), 'clientLoader');
+  assert.equal(detectClientLoader('function load(){ return {}; } export { load as clientLoader };'), 'clientLoader');
+  assert.equal(detectClientLoader('export type { clientLoader } from "./loaders";'), undefined);
+  assert.equal(detectClientLoader('export { clientLoader as load } from "./loaders";'), undefined);
 });
 
 test('conventional routes pick up clientLoader exports from page files', async t => {

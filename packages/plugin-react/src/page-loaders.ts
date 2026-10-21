@@ -37,11 +37,26 @@ export function stripCommentsAndStrings(source: string): string {
 
 const functionForm = /\bexport\s+(?:async\s+)?function\s+clientLoader\b/;
 const constForm = /\bexport\s+(?:const|let|var)\s+clientLoader\s*=/;
+const exportList = /\bexport\s+(type\s+)?\{([^}]*)\}/g;
+const entryPattern = /^([A-Za-z_$][A-Za-z0-9_$]*)(?:\s+as\s+([A-Za-z_$][A-Za-z0-9_$]*))?$/;
 
-/** Detects the three supported direct export forms; re-exports, `declare` and type aliases never match. */
+function exportsClientLoader(code: string): boolean {
+  for (const match of code.matchAll(exportList)) {
+    if (match[1]) continue;
+    for (const raw of match[2]!.split(',')) {
+      const entry = entryPattern.exec(raw.trim());
+      if (!entry) continue;
+      const exported = entry[2] ?? entry[1];
+      if (exported === CLIENT_LOADER_EXPORT) return true;
+    }
+  }
+  return false;
+}
+
+/** Direct declarations and value re-exports count; `declare`, type aliases and type-only exports never match. */
 export function detectClientLoader(source: string): string | undefined {
   const code = stripCommentsAndStrings(source);
-  return functionForm.test(code) || constForm.test(code) ? CLIENT_LOADER_EXPORT : undefined;
+  return functionForm.test(code) || constForm.test(code) || exportsClientLoader(code) ? CLIENT_LOADER_EXPORT : undefined;
 }
 
 /** Reads conventional page sources and returns `file → exportName` for pages that export a client loader. */

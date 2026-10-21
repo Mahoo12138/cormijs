@@ -987,6 +987,17 @@ const data = useClientLoaderData<MemberData>();
 
 按路由 id 索引，类型来自 `Awaited<ReturnType<typeof import(module)[exportName]>>`；没有 loader 时为空接口。删除/改名 loader 导出会导致 typecheck 失败。规则见 [F5u loader 类型](103-f5u-loader-types.md)。
 
+### 4.43 重导出 clientLoader
+
+页面可以用值导出列表重导出 loader：
+
+```ts
+export { clientLoader } from './reused-loader';
+// 或 export { load as clientLoader } from './loader';
+```
+
+静态 `export { … }`/`export { … } from` 被约定扫描识别；`export type`、`clientLoader as other`、`export *` 与运行时拼接不识别。目标绑定是否存在由打包与 typecheck 报告。规则见 [F5v 重导出 loader](104-f5v-reexport-loaders.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：
