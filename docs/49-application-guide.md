@@ -926,6 +926,17 @@ rich('notice', { name: 'Ada', count: 2 }, { b: children => <strong>{children}</s
 
 `t()`/`tp()` 不解析标签，按普通文本返回；只有 `rich`/`FormattedMessage.tags` 会解析。标签可嵌套、内部可用 ICU 参数与 `#`，未列出/错配/未闭合标签抛 `LOCALE_INVALID`。不生成 HTML 字符串，标签渲染器由应用提供。规则见 [F5o 富文本消息](97-f5o-rich-text.md)。
 
+### 4.37 视口预取
+
+让链接在进入视口时预取其路由模块：
+
+```tsx
+const visible = usePrefetchOnVisible('config:guide', { rootMargin: '200px' });
+<Link ref={visible} to="/guide">Guide</Link>
+```
+
+`rootMargin` 默认 `200px`、`threshold` 默认 0.01、`delayMs` 默认 0；首次相交后预取并断开观察，ref 变化/卸载释放。没有 `IntersectionObserver` 时为空操作；只预取模块，不预取 loader 数据。规则见 [F5p 视口预取](98-f5p-viewport-prefetch.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

@@ -74,6 +74,8 @@ F5n 起，显式启用的 `apiRoutePlugin` 把 `src/api/**` 的 Fetch 处理器�
 
 F5o 起，`useIntl().rich()` 与 `FormattedMessage` 的 `tags` 把 ICU 消息中的成对标签渲染为 React 节点，标签内可嵌套 ICU 参数与 `#`；`t`/`tp` 不解析标签，纯函数 `formatIcuParts`/`richNodes` 同步导出。详见 [F5o 富文本消息](97-f5o-rich-text.md)。
 
+F5p 起，`usePrefetchOnVisible(id, { rootMargin, threshold, delayMs })` 返回 ref 回调，元素首次进入视口时预取对应路由模块并断开观察；与手动/意图预取共用注册表与在途 Promise。详见 [F5p 视口预取](98-f5p-viewport-prefetch.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

@@ -872,11 +872,14 @@ const bad:HeadPluginOptions={titleTemplate:1};
     await install('prefetch-install',prefetchConsumer);await auditLinks(prefetchConsumer);
     await command('prefetch-typecheck',prefetchConsumer,'typecheck');
     await writeFile(join(prefetchConsumer,'types.mts'),`import {routePrefetchPlugin,type RoutePrefetchOptions} from '@cormijs/plugin-react';
-import {usePrefetch,type PrefetchApi} from '@cormijs/runtime';
+import {usePrefetch,usePrefetchOnVisible,type PrefetchApi,type PrefetchVisibleOptions} from '@cormijs/runtime';
 const options:RoutePrefetchOptions={id:'app:prefetch',mode:'idle'};
-const api:PrefetchApi|null=null as unknown as PrefetchApi|null;void [routePrefetchPlugin,options,usePrefetch,api];
+const visible:PrefetchVisibleOptions={rootMargin:'0px',threshold:0.5,delayMs:0};
+const api:PrefetchApi|null=null as unknown as PrefetchApi|null;void [routePrefetchPlugin,options,usePrefetch,usePrefetchOnVisible,visible,api];
 // @ts-expect-error mode is manual or idle
 const bad:RoutePrefetchOptions={mode:'later'};
+// @ts-expect-error rootMargin is a string
+const badVisible:PrefetchVisibleOptions={rootMargin:1};
 `);
     await execute('prefetch-public-types',prefetchConsumer,process.execPath,typeArguments);
     await withServer(prefetchConsumer,'dev',async url=>{await verifyPrefetchPage(page,url,false);assert.deepEqual(errors,[]);});
