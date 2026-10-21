@@ -998,6 +998,14 @@ export { clientLoader } from './reused-loader';
 
 静态 `export { … }`/`export { … } from` 被约定扫描识别；`export type`、`clientLoader as other`、`export *` 与运行时拼接不识别。目标绑定是否存在由打包与 typecheck 报告。规则见 [F5v 重导出 loader](104-f5v-reexport-loaders.md)。
 
+### 4.44 自定义生成模板
+
+```ts
+plugins: [{ id: 'generator', plugin: generatorPlugin, options: { templates: { note: { path: 'src/notes/{{kebab}}.md', content: '# {{pascal}} ({{name}})\n' } } } }]
+```
+
+`cormi generate note Hello-World` 写 `src/notes/hello-world.md`。最多 16 个类型，不能同名内置类型；路径必须留在项目源码内（禁止 `node_modules`、`.git`、`.cormi`、`.env*`、`cormi.config.ts`），内容 ≤64 KiB。覆盖/试运行沿用原规则。规则见 [F5w 自定义生成模板](105-f5w-generator-templates.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

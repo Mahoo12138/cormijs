@@ -56,7 +56,7 @@
 | U24 | icons | 待实现公共图标方案 | 图标资源/代码生成插件 | F4 |
 | U25 | publicPath/runtimePublicPath、CDN、hash、copy/externals | 部分已有（F4j）：base 表达部署前缀，可选 outputPlugin 在构建后复制文件并支持 `hash:false` 稳定文件名；externals、runtimePublicPath 与 CDN 运行时切换待后续；Vite 7 的 `renderBuiltUrl` runtime 只覆盖 JS 内资源引用，不覆盖代码分割 chunk 导入，未交付等价 runtimePublicPath | 输出/资源策略插件，差异显式 | F4 |
 | U26 | targets、polyfill、legacy、ReactCompiler/SWC/transform | 可用既有 Vite 原生插件口；未交付对应官方配置面 | 可选转换 provider/bridge | F4/F6 |
-| U27 | page/component/mock/API 等微生成器 | 部分已有（F4k/F5r）：通用「命令+位置参数」协议 + 内置 `generate page/component/model/api/mock`（含 --force/--dry-run）；模板贡献与交互式提问待后续 | generators 插件与模板贡献 | F4 |
+| U27 | page/component/mock/API 等微生成器 | 部分已有（F4k/F5r/F5w）：通用「命令+位置参数」协议、内置 `generate page/component/model/api/mock` 与 16 个自定义静态模板（含 --force/--dry-run 与路径白名单）；交互式提问与模板函数待后续 | generators 插件与模板贡献 | F4 |
 | U28 | lint/format/test/precommit/deadcode 等工程命令 | 部分已有（F5i）：可选 toolPlugin 包装项目已安装的 lint/format 二进制（参数透传、错误码、stderr 转发）；文件发现、subcommand 模式与 precommit/deadcode 待后续 | 可选命令插件 | F4 |
 | U29 | request/接口代码生成与类型工作流 | 待实现；API generator 入口已登记，具体协议/规范需读实现 | API generator 插件 | F4 |
 | U30 | TypeScript、prepare、导出类型、monorepo | 基础已有至 P16；仍需配合新功能生成类型与别名 | 既有 TS/prepare + monorepo adapter | 随功能 |
@@ -113,7 +113,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5u | 1a2dbb8 | loader 返回类型 | docs/103 |
 | F5v | 65120e9 | 重导出 clientLoader 识别 | docs/104 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 541/541、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5v-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
+最新冻结验证（2026-10-21）：`pnpm check` 541/541、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5w-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -230,6 +230,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5u 状态（2026-10-21）：** U13 的类型部分已交付：编译生成 `.cormi/loaders.d.ts`，按路由 id 暴露 `Awaited<ReturnType<clientLoader>>` 为 `CormiLoaderData.Data<'id'>`，加入 typecheck 生成输入白名单；没有 loader 时为空接口/`never`，删除 loader 导出会在 typecheck 中暴露。运行时 `useClientLoaderData<T>()` 不变；重导出识别、数据预取与 SSR loader 仍待后续。用法、差异与验证见 [F5u loader 类型](103-f5u-loader-types.md)。
 
 **F5v 状态（2026-10-21）：** U13 的重导出识别已交付：词法扫描在原有函数/const 形式之外识别静态 `export { … }` 与 `export { … } from '…'` 值导出（含 `x as clientLoader`），`export type` 与 `clientLoader as other` 不计入；生成入口仍调用页面的 `clientLoader` 绑定，`loaders.d.ts` 通过页面导出得到正确返回类型。`export *`/运行时拼接仍不支持。用法、差异与验证见 [F5v 重导出 loader](104-f5v-reexport-loaders.md)。
+
+**F5w 状态（2026-10-21）：** U27 的模板贡献面已交付：`generatorPlugin` 的 `templates` 接受最多 16 个 `{ path, content }` 静态模板，支持 `{{name}}`/`{{kebab}}`/`{{pascal}}` 占位符，禁止覆盖内置类型与写入 `node_modules/.git/.cormi/.env*/cormi.config.ts` 等受保护路径；覆盖、试运行与项目内校验沿用原生成器。交互式提问、模板函数与目录树模板仍待后续。用法、差异与验证见 [F5w 自定义生成模板](105-f5w-generator-templates.md)。
 
 ### F3：权限、布局、菜单和国际化
 

@@ -88,6 +88,8 @@ F5u 起，带 client loader 的路由生成 `.cormi/loaders.d.ts`，提供 `Corm
 
 F5v 起，约定扫描识别静态值导出列表与跨文件重导出（`export { load as clientLoader } from …`），`export type`、`clientLoader as other` 与 `export *` 不识别。详见 [F5v 重导出 loader](104-f5v-reexport-loaders.md)。
 
+F5w 起，`generatorPlugin` 的 `templates` 可贡献最多 16 个静态生成类型，支持 name/kebab/pascal 占位符；禁止覆盖内置类型与写入受保护路径。详见 [F5w 自定义生成模板](105-f5w-generator-templates.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

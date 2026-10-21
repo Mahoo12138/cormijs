@@ -29,7 +29,7 @@ export { analyticsPlugin, type AnalyticsPluginOptions } from './analytics.js';
 export { toolPlugin, runTool, type ToolPluginOptions, type ToolSpec } from './tools.js';
 export { detectClientLoader, pageLoaders, CLIENT_LOADER_EXPORT } from './page-loaders.js';
 export { generateLoaderTypes, type LoaderTypeEntry } from './loaders.js';
-export { generatorPlugin, planGeneration, applyGeneration, type GeneratorPluginOptions, type GeneratePlan, type PlannedFile } from './generate-command.js';
+export { generatorPlugin, planGeneration, normalizeTemplates, applyGeneration, type GeneratorPluginOptions, type GeneratePlan, type GenerateTemplate, type PlannedFile } from './generate-command.js';
 export { modelPlugin, modelContributions, resolveModels, type ModelPluginOptions, type ModelContribution, type ModelPlan } from './model.js';
 export { initialStatePlugin, type InitialStatePluginOptions } from './initial-state.js';
 export { requestPlugin, type RequestPluginOptions } from './request.js';

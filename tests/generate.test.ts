@@ -4,7 +4,7 @@ import { mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { planGeneration } from '@cormijs/plugin-react';
+import { normalizeTemplates, planGeneration } from '@cormijs/plugin-react';
 
 const hasCode = (code: string) => (error: any) => (error?.code ?? error?.cause?.code) === code;
 
@@ -17,8 +17,15 @@ test('generator plans page, component, model, API and mock files with flag parsi
   assert.match(planGeneration(['api', 'health-check']).files[0]!.content, /Response\.json\(\{ ok: true, method: request\.method \}\)/);
   assert.equal(planGeneration(['mock', 'health-check']).files[0]!.path, 'mock/health-check.ts');
   assert.match(planGeneration(['mock', 'health-check']).files[0]!.content, /'GET \/api\/health-check'/);
+  const custom = normalizeTemplates({ note: { path: 'src/notes/{{kebab}}.md', content: '# {{pascal}} ({{name}})\n' } });
+  const note = planGeneration(['note', 'Hello-World'], custom);
+  assert.deepEqual(note.files, [{ path: 'src/notes/hello-world.md', content: '# HelloWorld (Hello-World)\n' }]);
   const forced = planGeneration(['page', 'about', '--force', '--dry-run']);
   assert.equal(forced.force, true); assert.equal(forced.dryRun, true);
+  for (const templates of [{ page: { path: 'x', content: 'y' } }, { 'bad kind': { path: 'x', content: 'y' } }, { note: { path: '../escape', content: 'x' } }, { note: { path: 'x', content: 1 } }, { note: { path: 'x', content: 'y' }, other: { path: 'x', content: 'y' } }]) {
+    if (templates.other) { for (let index = 2; index < 18; index++) (templates as any)[`kind${index}`] = { path: 'x', content: 'y' }; }
+    assert.throws(() => normalizeTemplates(templates), hasCode('GENERATE_INVALID'), JSON.stringify(templates));
+  }
   for (const input of [[], ['page'], ['widget', 'x'], ['page', '2bad'], ['page', 'a/b'], ['page', 'ok', '--clean'], ['page', 'ok', '--force', '--force']]) {
     assert.throws(() => planGeneration(input), hasCode('GENERATE_INVALID'), JSON.stringify(input));
   }

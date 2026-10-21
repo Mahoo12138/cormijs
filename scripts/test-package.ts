@@ -918,9 +918,12 @@ const bad:OutputPluginOptions={hash:1};
     await writeFile(join(generatorConsumer,'package.json'),JSON.stringify(generatorManifest,null,2));
     await install('generator-install',generatorConsumer);await auditLinks(generatorConsumer);
     await command('generator-typecheck-before',generatorConsumer,'typecheck');
-    await writeFile(join(generatorConsumer,'types.mts'),`import {generatorPlugin,planGeneration,type GeneratePlan,type PlannedFile} from '@cormijs/plugin-react';
+    await writeFile(join(generatorConsumer,'types.mts'),`import {generatorPlugin,normalizeTemplates,planGeneration,type GeneratePlan,type GenerateTemplate,type PlannedFile} from '@cormijs/plugin-react';
 const plan:GeneratePlan=planGeneration(['page','typed']);
-const files:readonly PlannedFile[]=plan.files;void [generatorPlugin,plan,files];
+const files:readonly PlannedFile[]=plan.files;
+const template:GenerateTemplate={path:'src/notes/{{kebab}}.md',content:'# {{pascal}}'};
+const custom:GeneratePlan=planGeneration(['note','typed'],normalizeTemplates({note:template}));
+void [generatorPlugin,plan,files,custom];
 // @ts-expect-error positionals must be an array of strings
 const bad:GeneratePlan=planGeneration(1);
 `);
