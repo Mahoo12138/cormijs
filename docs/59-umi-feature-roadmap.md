@@ -50,7 +50,7 @@
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b/F5s）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；proxyPlugin 把路径前缀代理到 http(s) 上游，dev 与 preview 一致；req/res 兼容与统一配置入口待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c/F4d）：aliasPlugin 支持项目内相对别名与可选内置 `@`→src，definePlugin 在 dev 与 build 替换 JSON 常量；`@@`、环境分层自动映射与 define 类型生成待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
 | U20 | HTML title/metas/links/headScripts/scripts/favicon | 部分已有（F4a/F4e）：可选 htmlPlugin 注入 title/lang/meta/link/favicon，并按 Umi 位置约定注入 headScripts/scripts（封闭属性集合、转义与逃逸消解）；每路由 head 与任意 raw head HTML 待后续 | HTML/head 插件 | F4 |
-| U21 | helmet、页面标题/SEO 元数据 | 部分已有（F5c/F5t）：可选 headPlugin 按 `meta.head` 在导航后同步标题/meta/link/JSON-LD（根→深合并、受管节点可替换、卸载恢复）；`<Helmet>` 组件 API 与 SSR 头部收集待后续 | head 客户端插件 | F3/F4 |
+| U21 | helmet、页面标题/SEO 元数据 | 部分已有（F5c/F5t/F5x）：可选 headPlugin 按 `meta.head` 在导航后同步标题/meta/link/JSON-LD，并提供 `<Helmet>` 组件级贡献（路由→组件合并、受管节点可替换、卸载恢复）；SSR 头部收集待后续 | head 客户端插件 | F3/F4 |
 | U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有（F4f）：globalStylePlugin 发现 src/global.{css,scss,sass,less} 并由生成入口按 hook 顺序副作用导入，dev 新建/删除可触发生成；CSS Modules 类型声明、PostCSS/Tailwind/SVGR 与预处理集成仍待后续 | 样式/资源插件 + backend adapter | F4 |
 | U23 | Tailwind、UnoCSS、styled-components | 待实现可选集成 | 各生态 adapter | F4 |
 | U24 | icons | 待实现公共图标方案 | 图标资源/代码生成插件 | F4 |
@@ -114,7 +114,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5v | 65120e9 | 重导出 clientLoader 识别 | docs/104 |
 | F5w | bb1a8c5 | 自定义生成模板 | docs/105 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 541/541、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5w-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
+最新冻结验证（2026-10-21）：`pnpm check` 542/542、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5x-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -233,6 +233,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5v 状态（2026-10-21）：** U13 的重导出识别已交付：词法扫描在原有函数/const 形式之外识别静态 `export { … }` 与 `export { … } from '…'` 值导出（含 `x as clientLoader`），`export type` 与 `clientLoader as other` 不计入；生成入口仍调用页面的 `clientLoader` 绑定，`loaders.d.ts` 通过页面导出得到正确返回类型。`export *`/运行时拼接仍不支持。用法、差异与验证见 [F5v 重导出 loader](104-f5v-reexport-loaders.md)。
 
 **F5w 状态（2026-10-21）：** U27 的模板贡献面已交付：`generatorPlugin` 的 `templates` 接受最多 16 个 `{ path, content }` 静态模板，支持 `{{name}}`/`{{kebab}}`/`{{pascal}}` 占位符，禁止覆盖内置类型与写入 `node_modules/.git/.cormi/.env*/cormi.config.ts` 等受保护路径；覆盖、试运行与项目内校验沿用原生成器。交互式提问、模板函数与目录树模板仍待后续。用法、差异与验证见 [F5w 自定义生成模板](105-f5w-generator-templates.md)。
+
+**F5x 状态（2026-10-21）：** U21 的组件 API 已交付：`@cormijs/runtime` 导出 `<Helmet>`、`HeadProvider` 与 `headRuntime`，headPlugin 的 runtime 贡献改为带 Provider；页面组件可声明 title/metas/links/jsonLd，按路由 head→组件挂载顺序合并（标题/JSON-LD 后者胜、meta/link 按选择器替换），卸载/导航移除受管节点，首帧用当前地址 seed 路由 head。对象 props API，SSR 头部收集仍待后续。用法、差异与验证见 [F5x Helmet](106-f5x-helmet.md)。
 
 ### F3：权限、布局、菜单和国际化
 

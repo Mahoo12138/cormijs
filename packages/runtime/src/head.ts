@@ -115,17 +115,38 @@ export function collectHead(routes: readonly RouteObject[], pathname: string, ba
 interface HeadState {
   readonly options: HeadOptions;
   readonly initialTitle: string;
+  routeHead: RouteHead;
+  location?: { pathname: string; basename: string };
+  readonly entries: Map<number, RouteHead>;
 }
 
 const states = new WeakMap<AbortSignal, HeadState>();
+let nextHeadId = 1;
 
 function removeManaged(document: Document) {
   for (const node of [...document.querySelectorAll(`[${HEAD_ATTRIBUTE}]`)]) node.parentNode?.removeChild(node);
 }
 
-function apply(routes: readonly RouteObject[], pathname: string, basename: string, state: HeadState) {
+function mergeHead(base: RouteHead, entries: readonly RouteHead[]): RouteHead {
+  let title = base.title, jsonLd = base.jsonLd;
+  const metas = new Map<string, HeadMeta>(), links = new Map<string, HeadLink>();
+  for (const meta of base.metas ?? []) metas.set(meta.name !== undefined ? `name:${meta.name}` : `property:${meta.property}`, meta);
+  for (const link of base.links ?? []) links.set(`${link.rel} ${link.href}`, link);
+  for (const entry of entries) {
+    if (entry.title !== undefined) title = entry.title;
+    if (entry.jsonLd !== undefined) jsonLd = entry.jsonLd;
+    for (const meta of entry.metas ?? []) metas.set(meta.name !== undefined ? `name:${meta.name}` : `property:${meta.property}`, meta);
+    for (const link of entry.links ?? []) links.set(`${link.rel} ${link.href}`, link);
+  }
+  return Object.freeze({ ...(title !== undefined ? { title } : {}), ...(metas.size ? { metas: Object.freeze([...metas.values()]) } : {}), ...(links.size ? { links: Object.freeze([...links.values()]) } : {}), ...(jsonLd !== undefined ? { jsonLd } : {}) });
+}
+
+/** Pure merge used by the runtime and tests: route head first, then mounted Helmet entries in order. */
+export function mergeHeads(base: RouteHead, entries: readonly RouteHead[]): RouteHead { return mergeHead(base, entries); }
+
+function apply(state: HeadState) {
   if (typeof document === 'undefined') return;
-  const head = collectHead(routes, pathname, basename);
+  const head = mergeHead(state.routeHead, [...state.entries.values()]);
   const title = head.title === undefined ? state.initialTitle : `${head.title}${state.options.titleTemplate ?? ''}`;
   if (document.title !== title) document.title = title;
   removeManaged(document);
@@ -152,6 +173,32 @@ function apply(routes: readonly RouteObject[], pathname: string, basename: strin
   }
 }
 
+/** Re-applies the route head plus currently mounted Helmet entries. */
+export function refreshHead(signal: AbortSignal): void {
+  const state = states.get(signal);
+  if (state) apply(state);
+}
+
+/** Component-level head contribution; returns an unregister function for the owning effect. */
+export function registerHead(signal: AbortSignal, head: RouteHead): () => void {
+  const state = states.get(signal);
+  if (!state) return () => {};
+  const id = nextHeadId++;
+  state.entries.set(id, head);
+  apply(state);
+  return () => { if (state.entries.delete(id)) apply(state); };
+}
+
+/** Seeds the initial route head when no router event has arrived yet. */
+export function seedHead(signal: AbortSignal, routes: readonly RouteObject[], basename: string): void {
+  const state = states.get(signal);
+  if (!state || state.location || typeof window === 'undefined') return;
+  const pathname = window.location.pathname;
+  state.location = { pathname, basename };
+  state.routeHead = collectHead(routes, pathname, basename);
+  apply(state);
+}
+
 export interface RouteHeadRuntimeOptions extends HeadOptions {
   /** When false only the plugin's explicit API is used; defaults to syncing every route change. */
   readonly auto?: boolean;
@@ -167,6 +214,8 @@ export const routeHeadRuntime = {
         ...(typeof parsed.baseTitle === 'string' ? { baseTitle: parsed.baseTitle } : {}),
       },
       initialTitle: typeof document === 'undefined' ? '' : parsed.baseTitle ?? document.title,
+      routeHead: Object.freeze({}),
+      entries: new Map(),
     };
     states.set(signal, state);
     return () => {
@@ -179,6 +228,8 @@ export const routeHeadRuntime = {
   onRouteChange(location: Readonly<{ pathname: string }>, event: RouteChangeEvent, context?: { readonly signal: AbortSignal; readonly options: unknown }) {
     const state = context && states.get(context.signal);
     if (!state || (context.options as RouteHeadRuntimeOptions | undefined)?.auto === false) return;
-    apply(event.clientRoutes, location.pathname, event.basename, state);
+    state.location = { pathname: location.pathname, basename: event.basename };
+    state.routeHead = collectHead(event.clientRoutes, location.pathname, event.basename);
+    apply(state);
   },
 };

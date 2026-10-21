@@ -8,7 +8,8 @@ export { useRouteMatches, type CormiRouteMatch } from './route-matches.js';
 export { clientLoaderOf, useClientLoaderData, useClientLoaderError, useRouteLoaderDataFor, type ClientLoaderArgs, type ClientLoaderFunction } from './client-loader.js';
 export { analyticsRuntime, type AnalyticsOptions, type PageViewEvent } from './analytics.js';
 export { PrefetchProvider, prefetchRuntime, usePrefetch, usePrefetchOnIntent, usePrefetchOnVisible, type PrefetchApi, type PrefetchLoader, type PrefetchIntentHandlers, type PrefetchIntentOptions, type PrefetchVisibleOptions } from './prefetch.js';
-export { collectHead, normalizeHead, routeHeadRuntime, serializeJsonLd, HEAD_ATTRIBUTE, type JsonLd, type HeadMeta, type HeadLink, type RouteHead, type HeadOptions, type RouteHeadRuntimeOptions } from './head.js';
+export { collectHead, mergeHeads, normalizeHead, routeHeadRuntime, serializeJsonLd, HEAD_ATTRIBUTE, type JsonLd, type HeadMeta, type HeadLink, type RouteHead, type HeadOptions, type RouteHeadRuntimeOptions } from './head.js';
+export { HeadProvider, Helmet, headRuntime } from './helmet.js';
 export { ModelProvider, useModel, type ModelDescriptor } from './model.js';
 export { InitialStateProvider, initialStateRuntime, useInitialState, type InitialState } from './initial-state.js';
 export { createRequestClient, RequestError, RequestProvider, requestRuntime, useRequest, useRequestClient, type RequestClient, type RequestOptions, type RequestParams, type UseRequestOptions, type UseRequestResult } from './request.js';
@@ -20,7 +21,7 @@ export { defineApp, resolveAppConfig, type HistoryType, type RequestConfig, type
 export { Link, NavLink, Navigate, Outlet, createSearchParams, useHref, useLocation, useMatch, useNavigate, useNavigation, useParams, useSearchParams } from 'react-router';
 
 export interface RuntimePlugin {
-  Provider?: ComponentType<PropsWithChildren<{ options: unknown; appConfig: Readonly<RuntimeConfig>; routes: readonly RouteObject[]; basename: string; prefetch?: Readonly<Record<string, () => Promise<unknown>>> }>>;
+  Provider?: ComponentType<PropsWithChildren<{ options: unknown; appConfig: Readonly<RuntimeConfig>; routes: readonly RouteObject[]; basename: string; prefetch?: Readonly<Record<string, () => Promise<unknown>>>; signal?: AbortSignal }>>;
   setup?(context: { signal: AbortSignal; options: unknown; appConfig: Readonly<RuntimeConfig> }): void | RuntimeCleanup | Promise<void | RuntimeCleanup>;
   /** The first argument keeps the original location-only contract. */
   onRouteChange?(location: Readonly<Location>, event: RouteChangeEvent, context?: { readonly options: unknown; readonly signal: AbortSignal }): void;
@@ -122,7 +123,7 @@ export async function mountApplication(options: {
       let node: ReactNode = <ModelProvider models={options.models ?? []}><RouterProvider router={router} /></ModelProvider>;
       for (let i = entries.length - 1; i >= 0; i--) {
         const entry = entries[i]!;
-        if (entry.plugin.Provider) node = createElement(entry.plugin.Provider, { options: entry.options ?? {}, appConfig, routes: clientRoutes, basename, prefetch: options.prefetch ?? {} }, node);
+        if (entry.plugin.Provider) node = createElement(entry.plugin.Provider, { options: entry.options ?? {}, appConfig, routes: clientRoutes, basename, prefetch: options.prefetch ?? {}, signal: lifetime.signal }, node);
       }
       if (appConfig.rootContainer) node = appConfig.rootContainer(node, { ...context, routes: clientRoutes });
       lifetime.signal.throwIfAborted();

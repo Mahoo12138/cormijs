@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import type { RouteObject } from 'react-router';
-import { collectHead, normalizeHead, serializeJsonLd } from '@cormijs/runtime';
+import { collectHead, mergeHeads, normalizeHead, serializeJsonLd } from '@cormijs/runtime';
 
 const route = (id: string, path: string | undefined, head?: unknown, children?: RouteObject[]): RouteObject => ({
   id, ...(path === undefined ? {} : { path }), handle: { cormi: { meta: head === undefined ? {} : { head } } }, ...(children ? { children } : {}),
@@ -45,6 +45,19 @@ test('jsonLd validates JSON data, replaces on deeper routes and escapes script c
   for (const bad of [{ jsonLd: null }, { jsonLd: [] }, { jsonLd: 'x' }, { jsonLd: [{ name: 'ok' }, 'x'] }, { jsonLd: { run: () => 1 } }, { jsonLd: { value: Number.POSITIVE_INFINITY } }]) {
     assert.throws(() => normalizeHead(bad), /HEAD_INVALID/, JSON.stringify(bad));
   }
+});
+
+test('mergeHeads lets component entries override route fields in mount order', () => {
+  const base = { title: 'Route', metas: [{ name: 'description', content: 'route' }], links: [{ rel: 'canonical', href: '/route' }], jsonLd: { '@type': 'WebSite' } };
+  const merged = mergeHeads(base, [
+    { title: 'First', metas: [{ name: 'description', content: 'first' }] },
+    { title: 'Second', metas: [{ property: 'og:title', content: 'og' }], links: [{ rel: 'alternate', href: '/alt' }], jsonLd: { '@type': 'WebPage' } },
+  ]);
+  assert.equal(merged.title, 'Second');
+  assert.deepEqual(merged.metas, [{ name: 'description', content: 'first' }, { property: 'og:title', content: 'og' }]);
+  assert.deepEqual(merged.links, [{ rel: 'canonical', href: '/route' }, { rel: 'alternate', href: '/alt' }]);
+  assert.deepEqual(merged.jsonLd, { '@type': 'WebPage' });
+  assert.deepEqual(mergeHeads({}, []), {});
 });
 
 test('basename accepts both stripped and full pathnames', () => {

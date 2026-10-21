@@ -1006,6 +1006,17 @@ plugins: [{ id: 'generator', plugin: generatorPlugin, options: { templates: { no
 
 `cormi generate note Hello-World` 写 `src/notes/hello-world.md`。最多 16 个类型，不能同名内置类型；路径必须留在项目源码内（禁止 `node_modules`、`.git`、`.cormi`、`.env*`、`cormi.config.ts`），内容 ≤64 KiB。覆盖/试运行沿用原规则。规则见 [F5w 自定义生成模板](105-f5w-generator-templates.md)。
 
+### 4.45 `<Helmet>` 组件
+
+页面内可直接声明 head：
+
+```tsx
+import { Helmet } from '@cormijs/runtime';
+<Helmet title="Home" metas={[{ name: 'description', content: 'D' }]} jsonLd={{ '@type': 'WebPage' }} />
+```
+
+需要启用 `headPlugin`。合并顺序为路由 `meta.head` → Helmet 挂载顺序：标题/JSON-LD 后者胜，meta 按 name/property、link 按 rel+href 替换；卸载/导航移除条目。使用对象 props，不支持 children 标签或 SSR 收集。规则见 [F5x Helmet](106-f5x-helmet.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

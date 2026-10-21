@@ -29,7 +29,10 @@ export async function writeHeadFixture(root: string) {
     'cormi.config.ts': headConfiguration,
     'src/Shell.tsx': `import { Link, Outlet } from '@cormijs/runtime';
 export default function Shell(){return <section><header><h1>Head demo</h1><nav><Link to="/">Home</Link><Link to="/guide/7">Guide</Link></nav></header><Outlet/></section>;}`,
-    'src/Home.tsx': 'export default function Home(){return <main><h2>Head home</h2></main>;}',
+    'src/Home.tsx': `import { Helmet } from '@cormijs/runtime';
+export default function Home(){return <main>
+  <Helmet title="Helmet home" metas={[{ name: 'description', content: 'helmet description' }]} links={[{ rel: 'alternate', href: '/home-alt' }]} jsonLd={{ '@type': 'WebPage', name: 'Helmet home' }} />
+  <h2>Head home</h2></main>;}`,
     'src/Guide.tsx': 'export default function Guide(){return <main><h2>Guide page</h2></main>;}',
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
       strict: true, noEmit: true, skipLibCheck: false, allowImportingTsExtensions: true, lib: ['ES2023', 'DOM', 'DOM.Iterable'], types: ['react', 'react-dom', 'node'] },
@@ -42,10 +45,13 @@ const managed = (page: Page, selector: string) => page.locator(`${selector}[data
 
 export async function verifyHeadPage(page: Page, url: string) {
   await page.goto(url); await page.getByRole('heading', { name: 'Head home', exact: true }).waitFor();
-  assert.equal(await page.title(), 'Home · demo');
-  assert.equal(await page.locator('meta[name="description"]').getAttribute('content'), 'shell description');
+  assert.equal(await page.title(), 'Helmet home · demo');
+  assert.equal(await page.locator('meta[name="description"]').getAttribute('content'), 'helmet description');
   assert.equal(await managed(page, 'meta'), 1);
-  assert.equal(await managed(page, 'link'), 0);
+  assert.equal(await managed(page, 'link'), 1);
+  const homeJsonLd = page.locator('script[type="application/ld+json"][data-cormi-head]');
+  assert.equal(await homeJsonLd.count(), 1);
+  assert.deepEqual(JSON.parse(await homeJsonLd.textContent() ?? ''), { '@type': 'WebPage', name: 'Helmet home' });
   assert.equal(await page.locator('meta[name="author"]').getAttribute('content'), 'static author');
 
   await page.getByRole('link', { name: 'Guide', exact: true }).click();
@@ -62,11 +68,13 @@ export async function verifyHeadPage(page: Page, url: string) {
 
   await page.getByRole('link', { name: 'Home', exact: true }).click();
   await page.getByRole('heading', { name: 'Head home', exact: true }).waitFor();
-  assert.equal(await page.title(), 'Home · demo');
+  assert.equal(await page.title(), 'Helmet home · demo');
   assert.equal(await managed(page, 'meta'), 1, 'returning to a route does not duplicate tags');
-  assert.equal(await managed(page, 'link'), 0);
+  assert.equal(await managed(page, 'link'), 1);
   assert.equal(await page.locator('meta[property="og:title"]').count(), 0);
-  assert.equal(await page.locator('script[type="application/ld+json"]').count(), 0);
+  const returned = page.locator('script[type="application/ld+json"][data-cormi-head]');
+  assert.equal(await returned.count(), 1);
+  assert.deepEqual(JSON.parse(await returned.textContent() ?? ''), { '@type': 'WebPage', name: 'Helmet home' });
 
   await page.goto(new URL('guide/9', url).href);
   await page.getByRole('heading', { name: 'Guide page', exact: true }).waitFor();

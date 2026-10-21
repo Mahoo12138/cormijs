@@ -850,11 +850,11 @@ const bad:ClientLoaderFunction=1;
     await install('route-head-install',headConsumer);await auditLinks(headConsumer);
     await command('route-head-typecheck',headConsumer,'typecheck');
     await writeFile(join(headConsumer,'types.mts'),`import {headPlugin,type HeadPluginOptions} from '@cormijs/plugin-react';
-import {collectHead,normalizeHead,HEAD_ATTRIBUTE,type RouteHead} from '@cormijs/runtime';
+import {collectHead,Helmet,HeadProvider,headRuntime,mergeHeads,normalizeHead,HEAD_ATTRIBUTE,type RouteHead} from '@cormijs/runtime';
 const options:HeadPluginOptions={id:'app:head',titleTemplate:' · demo'};
 const head:RouteHead=normalizeHead({title:'T',metas:[{name:'description',content:'D'}]});
 const collected:RouteHead=collectHead([]," / ");
-void [headPlugin,options,head,collected,HEAD_ATTRIBUTE];
+const merged:RouteHead=mergeHeads(head,[]);void [headPlugin,options,head,collected,merged,Helmet,HeadProvider,headRuntime,HEAD_ATTRIBUTE];
 // @ts-expect-error titleTemplate must be a string
 const bad:HeadPluginOptions={titleTemplate:1};
 `);

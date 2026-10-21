@@ -28,7 +28,7 @@ export const headPlugin: Plugin.Object<HeadPluginOptions> = {
     }
     if (options.auto !== undefined && typeof options.auto !== 'boolean') throw new CormiError('HEAD_INVALID', 'auto must be a boolean.');
     const runtime: RuntimeContribution = {
-      id, module: { specifier: '@cormijs/runtime', exportName: 'routeHeadRuntime' },
+      id, module: { specifier: '@cormijs/runtime', exportName: 'headRuntime' },
       options: {
         ...(options.titleTemplate !== undefined ? { titleTemplate: options.titleTemplate } : {}),
         ...(options.baseTitle !== undefined ? { baseTitle: options.baseTitle } : {}),

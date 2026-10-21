@@ -90,6 +90,8 @@ F5v 起，约定扫描识别静态值导出列表与跨文件重导出（`export
 
 F5w 起，`generatorPlugin` 的 `templates` 可贡献最多 16 个静态生成类型，支持 name/kebab/pascal 占位符；禁止覆盖内置类型与写入受保护路径。详见 [F5w 自定义生成模板](105-f5w-generator-templates.md)。
 
+F5x 起，`@cormijs/runtime` 导出 `<Helmet>`，与路由 `meta.head` 合并（路由→组件），支持 title/metas/links/jsonLd；仍在 `headPlugin` 的受管节点与卸载恢复机制内。详见 [F5x Helmet](106-f5x-helmet.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic
