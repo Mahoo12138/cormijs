@@ -1,4 +1,4 @@
-import { Fragment, createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { Fragment, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { LocaleConfig, RuntimeConfig } from './app-config.js';
 import { formatIcu, formatIcuParts, type RichPart } from './icu.js';
 
@@ -18,6 +18,8 @@ export function richNodes(parts: readonly RichPart[], tags: RichTags): ReactNode
 export interface IntlApi {
   readonly locale: string;
   setLocale(locale: string): void;
+  /** Subscribes to successful locale changes; returns an unsubscribe function. */
+  subscribe(listener: (locale: string) => void): () => void;
   t(key: string, values?: Readonly<Record<string, string | number>>): string;
   /** Catalog lookup without the key-as-text fallback. */
   peek(key: string): string | undefined;
@@ -96,6 +98,7 @@ export function applyLocaleCatalogs(config: Readonly<RuntimeConfig>, catalogs: r
 
 export function LocaleProvider({ appConfig, children }: { readonly appConfig: Readonly<RuntimeConfig>; readonly children?: ReactNode }) {
   const config = useMemo(() => normalize(appConfig.locale), [appConfig.locale]);
+  const listeners = useRef(new Set<(locale: string) => void>());
   const [locale, setLocaleState] = useState(() => {
     const stored = readStored(config.storageKey);
     if (stored && (!Object.keys(config.messages).length || Object.hasOwn(config.messages, stored))) return stored;
@@ -104,8 +107,20 @@ export function LocaleProvider({ appConfig, children }: { readonly appConfig: Re
   const setLocale = useCallback((next: string) => {
     if (typeof next !== 'string' || !next) throw new TypeError('LOCALE_INVALID: locale must be a non-empty string');
     if (Object.keys(config.messages).length && !Object.hasOwn(config.messages, next)) throw new Error(`LOCALE_UNKNOWN: ${next}`);
+    const previous = locale;
     setLocaleState(next); store(config.storageKey, next);
-  }, [config]);
+    // External UI adapters (dayjs/antd) subscribe here or listen for the DOM event.
+    for (const listener of [...listeners.current]) { try { listener(next); } catch (error) { console.error('[cormi:locale-listener]', error); } }
+    if (typeof window !== 'undefined') {
+      try { window.dispatchEvent(new CustomEvent('cormi:localechange', { detail: { locale: next, previous } })); } catch { /* best-effort notification */ }
+    }
+  }, [config, locale]);
+  const subscribe = useCallback((listener: (locale: string) => void) => {
+    if (typeof listener !== 'function') throw new TypeError('LOCALE_INVALID: subscribe expects a function');
+    listeners.current.add(listener);
+    return () => { listeners.current.delete(listener); };
+  }, []);
+  useEffect(() => () => { listeners.current.clear(); }, []);
   const t = useCallback((key: string, values?: Readonly<Record<string, string | number>>) => {
     if (typeof key !== 'string' || !key) return '';
     const text = config.messages[locale]?.[key] ?? (config.fallback ? config.messages[config.fallback]?.[key] : undefined) ?? key;
@@ -137,7 +152,7 @@ export function LocaleProvider({ appConfig, children }: { readonly appConfig: Re
     const text = config.messages[locale]?.[key] ?? (config.fallback ? config.messages[config.fallback]?.[key] : undefined) ?? key;
     return <>{richNodes(formatIcuParts(text, values ?? {}, locale, names), tags)}</>;
   }, [config, locale]);
-  const value = useMemo<IntlApi>(() => ({ locale, setLocale, t, peek, formatNumber, formatDate, formatRelativeTime, tp, rich }), [locale, setLocale, t, peek, formatNumber, formatDate, formatRelativeTime, tp, rich]);
+  const value = useMemo<IntlApi>(() => ({ locale, setLocale, subscribe, t, peek, formatNumber, formatDate, formatRelativeTime, tp, rich }), [locale, setLocale, subscribe, t, peek, formatNumber, formatDate, formatRelativeTime, tp, rich]);
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 

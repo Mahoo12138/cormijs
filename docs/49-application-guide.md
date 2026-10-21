@@ -1053,7 +1053,16 @@ const items = toAntdMenuItems(useMenu());
 
 ### 4.49 CSS Modules 与资源类型
 
-启用 `styleTypesPlugin` 后生成 `.cormi/styles.d.ts`，声明 `*.module.{css,scss,sass,less}`、纯 CSS 副作用导入与常见图片/字体资源；默认关闭以免与应用自有 `*.d.ts` 冲突。类名为字符串索引，不解析具体选择器，也不支持 `?url` 等后缀。规则见 [F4m 样式类型](110-f4m-style-types.md)。规则见 [F5y SSR](107-f5y-ssr.md)。
+启用 `styleTypesPlugin` 后生成 `.cormi/styles.d.ts`，声明 `*.module.{css,scss,sass,less}`、纯 CSS 副作用导入与常见图片/字体资源；默认关闭以免与应用自有 `*.d.ts` 冲突。类名为字符串索引，不解析具体选择器，也不支持 `?url` 等后缀。规则见 [F4m 样式类型](110-f4m-style-types.md)。
+
+### 4.50 locale 变更订阅
+
+```tsx
+useEffect(() => intl.subscribe(locale => dayjs.locale(locale)), [intl]);
+// 或监听 window 的 cormi:localechange，detail 为 { locale, previous }
+```
+
+只在 `setLocale` 成功后通知，初始挂载不回调；框架不自动修改 dayjs/Antd 语言包。规则见 [U16 locale 订阅](111-u16-locale-subscription.md)。规则见 [F5y SSR](107-f5y-ssr.md)。
 
 ## 5. 环境和 Mock 使用同一个部署前缀
 

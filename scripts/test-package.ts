@@ -620,8 +620,8 @@ const formatted:string=formatIcu('{count, plural, one {# item} other {# items}}'
 const relative:string=formatRelativeTimeFor('en',-2,'day');
 const parts:readonly RichPart[]=formatIcuParts('<b>x</b>',{},'en',['b']);
 const tags:RichTags={b:chunks=>chunks};
-declare const intl:IntlApi;const richNode=intl.rich('x',{},tags);
-void [localePlugin,options,config,intl,useIntl,FormattedMessage,formatted,relative,parts,richNode];
+declare const intl:IntlApi;const richNode=intl.rich('x',{},tags);const stopLocale=intl.subscribe(()=>{});
+void [localePlugin,options,config,intl,useIntl,FormattedMessage,formatted,relative,parts,richNode,stopLocale];
 // @ts-expect-error message values are strings
 const bad:LocaleConfig={messages:{en:{hello:1}}};
 // @ts-expect-error ICU values are strings or numbers

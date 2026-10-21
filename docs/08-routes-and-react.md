@@ -80,6 +80,8 @@ F5q 起，显式启用的 `mpaPlugin` 把 `src/pages` 顶层目录生成为独�
 
 可选 `styleTypesPlugin` 生成 CSS Modules/静态资源导入类型（默认关闭，避免与自有通配声明冲突）。
 
+U16 增量起，`useIntl().subscribe` 与 `cormi:localechange` 在成功切换语言后通知外部 UI 库；初始挂载不回调。
+
 U17 增量提供 `toAntdMenuItems`/`toLayoutRoutes`，把菜单树转成 Antd Menu/ProLayout 的结构；框架不依赖 UI 库，主题/图表/locale 联动待后续。详见 [U17 菜单适配器](109-ui-menu-adapters.md)。
 
 F5r 起，`cormi generate api <name>` 与 `generate mock <name>` 分别生成 `src/api/<name>.ts` Fetch 骨架与 `mock/<name>.ts` 的 `GET /api/<name>` 示例；沿用覆盖/试运行规则，由 API 路由与 Mock 插件按约定发现。详见 [F5r API/Mock 生成器](100-f5r-generators.md)。
