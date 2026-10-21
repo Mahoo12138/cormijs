@@ -23,6 +23,7 @@ export { loadingPlugin, loadingContributions, resolveGlobalLoading, type Loading
 export { globalStylePlugin, styleContributions, resolveGlobalStyles, DEFAULT_STYLE_FILES, type GlobalStylePluginOptions, type StyleContribution, type GlobalStylePlan } from './global-style.js';
 export { headPlugin, type HeadPluginOptions } from './head.js';
 export { routePrefetchPlugin, type RoutePrefetchOptions } from './prefetch.js';
+export { analyticsPlugin, type AnalyticsPluginOptions } from './analytics.js';
 export { generatorPlugin, planGeneration, applyGeneration, type GeneratorPluginOptions, type GeneratePlan, type PlannedFile } from './generate-command.js';
 export { modelPlugin, modelContributions, resolveModels, type ModelPluginOptions, type ModelContribution, type ModelPlan } from './model.js';
 export { initialStatePlugin, type InitialStatePluginOptions } from './initial-state.js';

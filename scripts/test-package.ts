@@ -31,6 +31,7 @@ import { writePrefetchFixture, verifyPrefetchPage } from './prefetch-fixture.js'
 import { writeOutputFixture, verifyOutputBuild, verifyOutputPage } from './output-fixture.js';
 import { writeGeneratorFixture } from './generator-fixture.js';
 import { writeStaticExportFixture, verifyStaticExport, verifyStaticExportPages } from './static-export-fixture.js';
+import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -886,6 +887,25 @@ const bad:StaticExportOptions={titleTemplate:1};
     await verifyStaticExport(exportConsumer);
     await withServer(exportConsumer,'preview',async url=>{await verifyStaticExportPages(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'static-export-preview.png')});});
     report.stages.push({label:'installed-static-export-dev-build-and-static-preview',routes:['/','/guide'],previewRegenerated:false});
+
+    const analyticsConsumer=await create('analytics','react');await writeAnalyticsFixture(analyticsConsumer);
+    const analyticsManifest=consumerManifest(kit,'react');
+    analyticsManifest.dependencies['@cormijs/plugin-react']=analyticsManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(analyticsConsumer,'package.json'),JSON.stringify(analyticsManifest,null,2));
+    await install('analytics-install',analyticsConsumer);await auditLinks(analyticsConsumer);
+    await command('analytics-typecheck',analyticsConsumer,'typecheck');
+    await writeFile(join(analyticsConsumer,'types.mts'),`import {analyticsPlugin,type AnalyticsPluginOptions} from '@cormijs/plugin-react';
+import {analyticsRuntime,type AnalyticsOptions,type PageViewEvent} from '@cormijs/runtime';
+const options:AnalyticsPluginOptions={id:'app:analytics',measurementId:'G-TEST1234',dispatch:true};
+const page:PageViewEvent={path:'/',search:'',hash:'',title:'t',referrer:''};void [analyticsPlugin,options,analyticsRuntime,page];
+// @ts-expect-error measurement ids look like G-XXXX
+const bad:AnalyticsPluginOptions={measurementId:'UA-1'};
+`);
+    await execute('analytics-public-types',analyticsConsumer,process.execPath,typeArguments);
+    await withServer(analyticsConsumer,'dev',async url=>{await verifyAnalyticsPage(page,url);assert.deepEqual(errors,[]);});
+    await command('analytics-build',analyticsConsumer,'build');
+    await withServer(analyticsConsumer,'preview',async url=>{await verifyAnalyticsPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'analytics-preview.png')});});
+    report.stages.push({label:'installed-pageview-analytics-dev-build-and-static-preview',event:'page_view',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

@@ -67,7 +67,7 @@
 | U35 | apiRoute | 当前只开发 Mock，不是生产 API route | 独立服务端路由插件 | F5 |
 | U36 | qiankun、Module Federation | 待实现 | 可选主/子应用与 federation adapter | F6 |
 | U37 | dva、valtio、react-query | 待实现可选集成，不全塞入默认数据流 | 各状态库/服务端状态 adapter | F6 |
-| U38 | analytics、moment2dayjs、confetti 等官方插件 | 登记待细读；不把存在文件当作已移植 | 独立可选插件 | F6 |
+| U38 | analytics、moment2dayjs、confetti 等官方插件 | 部分已有（F5h）：可选 analyticsPlugin 在路由变化时发送 GA4 `page_view` 与 `cormi:pageview`（不注入脚本、不做 consent）；moment2dayjs/confetti 等仍未移植 | 独立可选插件 | F6 |
 | U39 | analyze、MFSU、depsOnDemand、esmi 等优化 | 部分有 Vite 原生优化；无 Umi 功能等价结论 | 构建优化插件，按真实后端分别验证 | F6 |
 | U40 | webpack/Vite/Mako/Utoopack/bundler 选择 | 只有 Vite 实现；契约可替换不等于多后端已实现 | 独立 builder provider/preset | F6 |
 | U41 | monorepo redirect/phantomDependency/overrides/check | 部分已有包边界校验，非 Umi 等价全套 | 工程/依赖策略插件 | F4/F6 |
@@ -161,6 +161,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5f 状态（2026-10-20）：** U16 的格式化部分已交付：`useIntl()` 新增 `formatNumber`、`formatDate` 与复数感知的 `tp`；复数类别由 `Intl.PluralRules` 决定，消息按 `${key}_${category}` → `${key}_other` → `${key}`（含 fallback 语言）解析，插值与既有 `t` 一致；纯函数 `formatNumberFor`/`formatDateFor`/`selectPluralKey` 从 `@cormijs/runtime` 导出。ICU 复数语法、相对时间、富文本与 locale key 类型仍待后续。用法、差异与验证见 [F5f 格式化与复数](89-f5f-locale-formatting.md)。
 
 **F5g 状态（2026-10-20）：** U31 的意图预取已交付：`usePrefetchOnIntent(id, { delayMs })` 提供 `onMouseEnter`/`onFocus` 延迟加载与 `onMouseLeave`/`onBlur` 取消（默认 50ms，0–5000 校验），复用既有注册表与在途 Promise；浏览器用例验证悬停即取模块且随后导航正常。视口触发、数据预取与 SSR 侧预取仍待后续。见 [F5d 路由预取](85-f5d-route-prefetch.md)。
+
+**F5h 状态（2026-10-20）：** U38 的 analytics 已交付：`analyticsPlugin` 在每次路由变化（含首屏）发送 page-view；配置 `measurementId` 时维护 GA4 `dataLayer`/`gtag` 队列并发送 `page_view`（`page_path` 含 base、referrer 为上一个实际路径），`dispatch: true` 时额外发出 `cormi:pageview`（detail 中的 `path` 不含 basename）。不注入第三方脚本、不做 Cookie 同意；其他官方插件仍未移植。用法、差异与验证见 [F5h pageview 分析](90-f5h-analytics.md)。
 
 ### F3：权限、布局、菜单和国际化
 

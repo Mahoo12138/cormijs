@@ -68,5 +68,5 @@ Umi 的 locale 插件基于 `react-intl` 3.12.1（`packages/plugins/src/locale.t
 ## 6. 下一步
 
 - U16 剩余：ICU 复数/相对时间/富文本、locale key 类型生成、Antd/dayjs 语言联动；
-- U32/U34/U35：SSR、MPA、生产 API 路由；U33 剩余：prerender 与 404.html；
+- F5h 已交付 pageview 分析，见 [F5h pageview 分析](90-f5h-analytics.md)；U32/U34/U35：SSR、MPA、生产 API 路由；U33 剩余：prerender 与 404.html；
 - F4 剩余：U28 工程命令、U25 externals/runtimePublicPath。

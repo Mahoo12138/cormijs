@@ -805,6 +805,16 @@ tp('items', 1);                             // items_one；缺失时 items_other
 
 复数类别由 `Intl.PluralRules(locale)` 决定，`{count}` 自动插值；`tp` 会先在当前语言、再在 fallback 语言中查找。非法数字/日期与非法 count 会抛 `TypeError`（`LOCALE_INVALID`）。这里没有 ICU 复数语法、相对时间或富文本消息。规则见 [F5f 格式化与复数](89-f5f-locale-formatting.md)。
 
+### 4.29 页面访问分析
+
+需要在每次路由变化时记录 page-view 时，显式启用 `analyticsPlugin`：
+
+```ts
+plugins: [{ id: 'analytics', plugin: analyticsPlugin, options: { id: 'app:analytics', measurementId: 'G-XXXXXXX', dispatch: true } }]
+```
+
+配置 `measurementId` 后，插件维护 GA4 的 `dataLayer`/`gtag` 队列并发送 `page_view`（`page_path` 含部署 base）；`dispatch: true` 还会发出 `cormi:pageview`，detail 为 `{ path, search, hash, title, referrer }`（`path` 不含 base）。GA 脚本仍由应用通过 `htmlPlugin` 的 `headScripts` 自行引入；首屏事件在 React 挂载前发出，宿主如需在 UI 中展示请在模块作用域监听。插件不处理 Cookie 同意。规则见 [F5h pageview 分析](90-f5h-analytics.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

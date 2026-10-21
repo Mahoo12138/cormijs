@@ -58,6 +58,8 @@ F5e 起，显式启用的 `staticExportPlugin` 在构建后为每个字面路径
 
 F5f 起，`useIntl()` 提供 `formatNumber`/`formatDate`（平台 Intl）与 `tp` 复数选择（`_one`/`_other` 后缀，含 fallback 语言）；不引入 ICU 解析器。详见 [F5f 格式化与复数](89-f5f-locale-formatting.md)。
 
+F5h 起，显式启用的 `analyticsPlugin` 在每次路由变化时发送 page-view：`measurementId` 走 GA4 的 `gtag`/`dataLayer`，`dispatch: true` 额外发出 `cormi:pageview`；插件不注入供应商脚本。详见 [F5h pageview 分析](90-f5h-analytics.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic
