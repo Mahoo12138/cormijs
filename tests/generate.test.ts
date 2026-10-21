@@ -8,11 +8,15 @@ import { planGeneration } from '@cormijs/plugin-react';
 
 const hasCode = (code: string) => (error: any) => (error?.code ?? error?.cause?.code) === code;
 
-test('generator plans page, component and model files with flag parsing', () => {
+test('generator plans page, component, model, API and mock files with flag parsing', () => {
   assert.deepEqual(planGeneration(['page', 'about-us']).files.map(file => file.path), ['src/pages/about-us.tsx']);
   assert.match(planGeneration(['component', 'profile-card']).files[0]!.content, /export default function ProfileCard\(/);
   assert.equal(planGeneration(['model', 'counter']).files[0]!.path, 'src/models/counter.ts');
   assert.match(planGeneration(['model', 'counter']).files[0]!.content, /export default function useCounter\(/);
+  assert.equal(planGeneration(['api', 'health-check']).files[0]!.path, 'src/api/health-check.ts');
+  assert.match(planGeneration(['api', 'health-check']).files[0]!.content, /Response\.json\(\{ ok: true, method: request\.method \}\)/);
+  assert.equal(planGeneration(['mock', 'health-check']).files[0]!.path, 'mock/health-check.ts');
+  assert.match(planGeneration(['mock', 'health-check']).files[0]!.content, /'GET \/api\/health-check'/);
   const forced = planGeneration(['page', 'about', '--force', '--dry-run']);
   assert.equal(forced.force, true); assert.equal(forced.dryRun, true);
   for (const input of [[], ['page'], ['widget', 'x'], ['page', '2bad'], ['page', 'a/b'], ['page', 'ok', '--clean'], ['page', 'ok', '--force', '--force']]) {
@@ -37,6 +41,12 @@ export default defineConfig({ plugins: [{ id: 'app:generator', plugin: generator
   const again = run(['generate', 'page', 'about']);
   assert.equal(again.status, 1);
   assert.match(again.stderr, /GENERATE_EXISTS/);
+  const api = run(['generate', 'api', 'health']);
+  assert.equal(api.status, 0, api.stderr);
+  assert.match(await readFile(join(root, 'src/api/health.ts'), 'utf8'), /export default function handler\(request: Request\)/);
+  const mock = run(['generate', 'mock', 'health']);
+  assert.equal(mock.status, 0, mock.stderr);
+  assert.match(await readFile(join(root, 'mock/health.ts'), 'utf8'), /'GET \/api\/health'/);
   const forced = run(['generate', 'page', 'about'], ['--force']);
   assert.equal(forced.status, 0, forced.stderr);
   const dry = run(['generate', 'page', 'dry-run-only'], ['--dry-run']);

@@ -23,6 +23,14 @@ const templates: Record<string, (name: string) => PlannedFile> = {
     path: `src/models/${kebab(name)}.ts`,
     content: `import { useState } from 'react';\n\nexport default function use${pascal(name)}() {\n  const [value, setValue] = useState<string | undefined>();\n  return { value, setValue };\n}\n`,
   }),
+  api: name => ({
+    path: `src/api/${kebab(name)}.ts`,
+    content: `export default function handler(request: Request) {\n  return Response.json({ ok: true, method: request.method });\n}\n`,
+  }),
+  mock: name => ({
+    path: `mock/${kebab(name)}.ts`,
+    content: `export default {\n  'GET /api/${kebab(name)}': () => ({ ok: true }),\n};\n`,
+  }),
 };
 
 export interface GeneratePlan {
@@ -33,9 +41,9 @@ export interface GeneratePlan {
   readonly files: readonly PlannedFile[];
 }
 
-/** Grammar: `generate <page|component|model> <name> [--force] [--dry-run]`. */
+/** Grammar: `generate <page|component|model|api|mock> <name> [--force] [--dry-run]`. */
 export function planGeneration(positionals: readonly string[]): GeneratePlan {
-  if (!Array.isArray(positionals) || positionals.length < 2) throw new CormiError('GENERATE_INVALID', 'Usage: generate <page|component|model> <name> [--force] [--dry-run]');
+  if (!Array.isArray(positionals) || positionals.length < 2) throw new CormiError('GENERATE_INVALID', 'Usage: generate <page|component|model|api|mock> <name> [--force] [--dry-run]');
   const flagList = positionals.slice(2);
   if (flagList.some(flag => flag !== '--force' && flag !== '--dry-run') || new Set(flagList).size !== flagList.length) {
     throw new CormiError('GENERATE_INVALID', 'Unknown or repeated generate flag; supported flags are --force and --dry-run.', { flags: flagList });
@@ -68,7 +76,7 @@ export async function applyGeneration(root: string, plan: GeneratePlan): Promise
   return Object.freeze(targets.map(file => file.path));
 }
 
-/** Opt-in project generator: creates page, component and model source files from built-in templates. */
+/** Opt-in project generator: creates page, component, model, API and mock source files. */
 export const generatorPlugin: Plugin.Object<GeneratorPluginOptions> = {
   name: 'cormi:generator', inject: ['commands', 'projectRoot'],
   apply(ctx, options = {}) {

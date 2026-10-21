@@ -947,6 +947,15 @@ plugins: [{ id: 'mpa', plugin: mpaPlugin }]
 
 `src/pages/home/index.tsx` 生成 `/home.html`，可在同目录 `config.json` 配 `{ "title": "Home page", "mountElementId": "app" }`；`src/pages` 顶层目录即页面，`index` 保留给 SPA。每个页面是独立 React 根，不继承 SPA 路由与 Provider；dev/build/preview 均可用，构建产物为 `dist/<name>.html`。新增/删除页面需重启开发服务。规则见 [F5q MPA](99-f5q-mpa.md)。
 
+### 4.39 生成 API 与 Mock 文件
+
+```sh
+cormi generate api health
+cormi generate mock health
+```
+
+第一条写 `src/api/health.ts`（Fetch 处理器骨架），由 [F5n API 路由](96-f5n-api-routes.md) 发现；第二条写 `mock/health.ts`（`GET /api/health` 示例），由 [F4b Mock](75-f4b-mock.md) 发现。生成器不注册路由或 Mock、不安装依赖；`--force` 覆盖、`--dry-run` 只预览。规则见 [F5r API/Mock 生成器](100-f5r-generators.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

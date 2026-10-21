@@ -54,9 +54,9 @@
 | U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有（F4f）：globalStylePlugin 发现 src/global.{css,scss,sass,less} 并由生成入口按 hook 顺序副作用导入，dev 新建/删除可触发生成；CSS Modules 类型声明、PostCSS/Tailwind/SVGR 与预处理集成仍待后续 | 样式/资源插件 + backend adapter | F4 |
 | U23 | Tailwind、UnoCSS、styled-components | 待实现可选集成 | 各生态 adapter | F4 |
 | U24 | icons | 待实现公共图标方案 | 图标资源/代码生成插件 | F4 |
-| U25 | publicPath/runtimePublicPath、CDN、hash、copy/externals | 部分已有（F4j）：base 表达部署前缀，可选 outputPlugin 在构建后复制文件并支持 `hash:false` 稳定文件名；externals、runtimePublicPath 与 CDN 运行时切换待后续 | 输出/资源策略插件，差异显式 | F4 |
+| U25 | publicPath/runtimePublicPath、CDN、hash、copy/externals | 部分已有（F4j）：base 表达部署前缀，可选 outputPlugin 在构建后复制文件并支持 `hash:false` 稳定文件名；externals、runtimePublicPath 与 CDN 运行时切换待后续；Vite 7 的 `renderBuiltUrl` runtime 只覆盖 JS 内资源引用，不覆盖代码分割 chunk 导入，未交付等价 runtimePublicPath | 输出/资源策略插件，差异显式 | F4 |
 | U26 | targets、polyfill、legacy、ReactCompiler/SWC/transform | 可用既有 Vite 原生插件口；未交付对应官方配置面 | 可选转换 provider/bridge | F4/F6 |
-| U27 | page/component/mock/API 等微生成器 | 部分已有（F4k）：通用「命令+位置参数」协议 + 内置 `generate page/component/model`（含 --force/--dry-run）；mock/API 生成器、模板贡献与交互式提问待后续 | generators 插件与模板贡献 | F4 |
+| U27 | page/component/mock/API 等微生成器 | 部分已有（F4k/F5r）：通用「命令+位置参数」协议 + 内置 `generate page/component/model/api/mock`（含 --force/--dry-run）；模板贡献与交互式提问待后续 | generators 插件与模板贡献 | F4 |
 | U28 | lint/format/test/precommit/deadcode 等工程命令 | 部分已有（F5i）：可选 toolPlugin 包装项目已安装的 lint/format 二进制（参数透传、错误码、stderr 转发）；文件发现、subcommand 模式与 precommit/deadcode 待后续 | 可选命令插件 | F4 |
 | U29 | request/接口代码生成与类型工作流 | 待实现；API generator 入口已登记，具体协议/规范需读实现 | API generator 插件 | F4 |
 | U30 | TypeScript、prepare、导出类型、monorepo | 基础已有至 P16；仍需配合新功能生成类型与别名 | 既有 TS/prepare + monorepo adapter | 随功能 |
@@ -108,7 +108,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5p | 125e037 | 视口可见预取 | docs/98 |
 | F5q | 74d0b3a | 目录约定 MPA | docs/99 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 535/535、`pnpm test:browser` 51/51、`pnpm test:package` 318 阶段通过；证据见 `artifacts/f4a…f5q-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
+最新冻结验证（2026-10-21）：`pnpm check` 535/535、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5r-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -215,6 +215,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5p 状态（2026-10-21）：** U31 的视口触发已交付：`usePrefetchOnVisible(id, { rootMargin, threshold, delayMs })` 返回 ref 回调，元素首次进入视口后经注册表预取路由模块并断开观察；ref 变化/卸载释放观察器与定时器，无 `IntersectionObserver` 时为空操作，参数越界抛 `PREFETCH_INVALID`。只预取模块，不预取 loader 数据。用法、差异与验证见 [F5p 视口预取](98-f5p-viewport-prefetch.md)。
 
 **F5q 状态（2026-10-21）：** U34 的目录约定 MPA 已交付：`mpaPlugin` 把 `src/pages` 顶层目录（含可选 `config.json` 的 title/mountElementId）生成为独立 `<name>.html` 与 React 入口；dev 通过内部重写提供，build 以 Vite 多 HTML 输入构建并把页面移到 `dist/<name>.html`，preview 直接静态提供；`index` 保留给 SPA，页面不继承 SPA 路由/Provider，自定义模板、布局/App 包装、页面级 Provider 与热更新待后续。用法、差异与验证见 [F5q MPA](99-f5q-mpa.md)。
+
+**F5r 状态（2026-10-21）：** U27 的 API/Mock 模板已交付：沿用 `generatorPlugin` 与「命令+位置参数」协议，`generate api <name>` 写 `src/api/<name>.ts`（Fetch 骨架），`generate mock <name>` 写 `mock/<name>.ts`（`GET /api/<name>` 示例）；覆盖/试运行/路径限制沿用既有规则，生成器不注册路由或 Mock，文件由 `apiRoutePlugin`/`mockPlugin` 按约定发现。模板贡献与交互式提问仍待后续。用法、差异与验证见 [F5r API/Mock 生成器](100-f5r-generators.md)。
 
 ### F3：权限、布局、菜单和国际化
 
