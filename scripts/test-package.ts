@@ -27,6 +27,7 @@ import { writeAccessConventionFixture, verifyAccessConventionPage } from './acce
 import { writeLocaleCatalogFixture, verifyLocaleCatalogPage } from './locale-catalog-fixture.js';
 import { writeClientLoaderFixture, verifyClientLoaderPage } from './client-loader-fixture.js';
 import { writeHeadFixture, verifyHeadPage } from './head-fixture.js';
+import { writePrefetchFixture, verifyPrefetchPage } from './prefetch-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -800,6 +801,25 @@ const bad:HeadPluginOptions={titleTemplate:1};
     await command('route-head-build',headConsumer,'build');
     await withServer(headConsumer,'preview',async url=>{await verifyHeadPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'route-head-preview.png')});});
     report.stages.push({label:'installed-route-head-dev-build-and-static-preview',meta:'meta.head',titleTemplate:' · demo',previewRegenerated:false});
+
+    const prefetchConsumer=await create('prefetch','react');await writePrefetchFixture(prefetchConsumer);
+    const prefetchManifest=consumerManifest(kit,'react');
+    prefetchManifest.dependencies['@cormijs/plugin-react']=prefetchManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(prefetchConsumer,'package.json'),JSON.stringify(prefetchManifest,null,2));
+    await install('prefetch-install',prefetchConsumer);await auditLinks(prefetchConsumer);
+    await command('prefetch-typecheck',prefetchConsumer,'typecheck');
+    await writeFile(join(prefetchConsumer,'types.mts'),`import {routePrefetchPlugin,type RoutePrefetchOptions} from '@cormijs/plugin-react';
+import {usePrefetch,type PrefetchApi} from '@cormijs/runtime';
+const options:RoutePrefetchOptions={id:'app:prefetch',mode:'idle'};
+const api:PrefetchApi|null=null as unknown as PrefetchApi|null;void [routePrefetchPlugin,options,usePrefetch,api];
+// @ts-expect-error mode is manual or idle
+const bad:RoutePrefetchOptions={mode:'later'};
+`);
+    await execute('prefetch-public-types',prefetchConsumer,process.execPath,typeArguments);
+    await withServer(prefetchConsumer,'dev',async url=>{await verifyPrefetchPage(page,url,false);assert.deepEqual(errors,[]);});
+    await command('prefetch-build',prefetchConsumer,'build');
+    await withServer(prefetchConsumer,'preview',async url=>{await verifyPrefetchPage(page,url,true);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'prefetch-preview.png')});});
+    report.stages.push({label:'installed-route-prefetch-dev-build-and-static-preview',mode:'manual',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

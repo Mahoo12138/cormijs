@@ -53,6 +53,8 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   const boundaryImports = new Map<string, string>();
   for (const path of boundaryPaths) if (path && !boundaryImports.has(path)) boundaryImports.set(path, `boundary${boundaryImports.size}`);
   const boundaryAliases = new Map(routes.map((route, index) => [route.id, boundaryPaths[index] ? boundaryImports.get(boundaryPaths[index]!) : undefined]));
+  const prefetchEntries = routes.filter(route => route.module).map(route => `${JSON.stringify(route.id)}:()=>import(${JSON.stringify(routeModules.get(route.id))})`);
+  const prefetchOption = prefetchEntries.length ? ',prefetch' : '';
   const children = new Map<string | undefined, RouteRecord[]>();
   for (const route of routes) { const list = children.get(route.parentId) ?? []; list.push(route); children.set(route.parentId, list); }
   const render = (parent?: string): string => '[' + (children.get(parent) ?? []).map(route => {
@@ -101,9 +103,10 @@ export async function generateApplication(root: string, routes: readonly RouteRe
     `const routes: RouteObject[] = ${render()};`,
     ...(modelEntries.length ? [`const models = [${modelEntries.join(',')}];`] : []),
     `const plugins: RuntimeEntry[] = [${runtimes.map((item, i) => `{id:${JSON.stringify(item.id)},plugin:runtime${i}[${JSON.stringify(item.module.exportName)}],options:${JSON.stringify(item.options)}}`).join(',')}];`,
+    ...(prefetchEntries.length ? [`const prefetch = {${prefetchEntries.join(',')}};`] : []),
     `const element = document.getElementById(${JSON.stringify(mountId)});`,
     `if (!element) throw new Error('cormi mount element is missing');`,
-    `void Promise.resolve().then(()=>mountApplication({element,routes${modelsOption},plugins,base:${JSON.stringify(base)},strict:${JSON.stringify(strict)}${appOption}${loadingOption}${historyOption}})).catch(error=>{console.error(error);element.textContent='Application startup failed';});`,
+    `void Promise.resolve().then(()=>mountApplication({element,routes${modelsOption},plugins${prefetchOption},base:${JSON.stringify(base)},strict:${JSON.stringify(strict)}${appOption}${loadingOption}${historyOption}})).catch(error=>{console.error(error);element.textContent='Application startup failed';});`,
     '',
   ].join('\n');
 }

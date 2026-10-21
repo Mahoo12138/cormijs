@@ -75,5 +75,5 @@ Umi 通过内置插件接入 `react-helmet-async`（`packages/preset-umi/src/fea
 ## 6. 下一步
 
 - U21 剩余：`<Helmet>` 式组件 API、JSON-LD、SSR 头部收集（依赖 U32）；
-- U31：路由预取；U32/U33/U34/U35：SSR、静态导出、MPA、生产 API 路由；
+- F5d 已交付路由模块预取，见 [F5d 路由预取](85-f5d-route-prefetch.md)；U32/U33/U34/U35：SSR、静态导出、MPA、生产 API 路由；
 - F4 剩余：U25 输出与资源策略、U27 微生成器（需 CLI 多参数协议）、U28 工程命令。

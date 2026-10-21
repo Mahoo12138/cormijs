@@ -60,7 +60,7 @@
 | U28 | lint/format/test/precommit/deadcode 等工程命令 | 框架自身有测试；不是面向用户的完整工具集成 | 可选命令插件 | F4 |
 | U29 | request/接口代码生成与类型工作流 | 待实现；API generator 入口已登记，具体协议/规范需读实现 | API generator 插件 | F4 |
 | U30 | TypeScript、prepare、导出类型、monorepo | 基础已有至 P16；仍需配合新功能生成类型与别名 | 既有 TS/prepare + monorepo adapter | 随功能 |
-| U31 | code splitting、routePrefetch、routePreloadOnLoad | 部分已有页面 lazy；无预取策略/配置面 | 路由加载插件 + backend bridge | F5 |
+| U31 | code splitting、routePrefetch、routePreloadOnLoad | 部分已有（F5d）：页面按路由懒加载，生成入口提供路由模块注册表，`usePrefetch()` 手动预热或 `mode:"idle"` 空闲全量；链接 intent/视口触发、数据预取与 SSR 侧预取待后续 | 路由加载插件 + backend bridge | F5 |
 | U32 | SSR、服务端 loader/渲染入口 | 待实现 | 独立 SSR renderer/profile，复用可共享契约 | F5 |
 | U33 | exportStatic/预渲染/静态导出 | 当前只有 SPA 静态产物，不等于逐路由预渲染 | 静态导出插件 | F5 |
 | U34 | MPA | 待实现多入口应用编排 | 独立 MPA profile | F5 |
@@ -149,6 +149,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5b 状态（2026-10-20）：** U13 的错误呈现缺口已闭环：loader 从 `lazy()` 返回值改为路由的静态属性，修复了“loader 抛错后 lazy 未合并、匹配被截断到根路由而整页空白”的行为；错误现在落到该路由自己的 `errorBoundary`（导航与深链接一致），`useClientLoaderError` 可读取原始错误对象。代价是页面模块被 loader 与 lazy 各导入一次（浏览器模块缓存复用），约定式路由识别、类型生成与预取仍待后续。见 [F5a 路由 client loader](83-f5a-client-loader.md)。
 
 **F5c 状态（2026-10-20）：** U21 的配置侧能力已交付：`headPlugin` 注册 `routeHeadRuntime`，每次导航合并根→深的 `meta.head`（标题取最深、meta 按 name/property 覆盖、link 按 rel+href 去重），写入带 `data-cormi-head` 标记的受管节点，卸载时移除并恢复挂载时标题；运行时 `onRouteChange` 新增可选 `{options, signal}` 第三参数（向后兼容）。`<Helmet>` 式组件、JSON-LD、多语言标题与 SSR 头部收集仍待后续。用法、差异与验证见 [F5c 路由级页面头部](84-f5c-route-head.md)。
+
+**F5d 状态（2026-10-20）：** U31 的模块预取已交付：生成入口为每个带模块的路由生成惰性注册表并传给 `mountApplication`，`routePrefetchPlugin` 提供 `usePrefetch()`（`ids`/`prefetch`/`prefetchAll`，在途复用、失败返回 false）与 `mode: "idle"` 的空闲全量预热（`requestIdleCallback`，2 秒超时，卸载取消）。链接 intent/视口预取、client loader 数据预取与 SSR 侧预取仍待后续。用法、差异与验证见 [F5d 路由预取](85-f5d-route-prefetch.md)。
 
 ### F3：权限、布局、菜单和国际化
 

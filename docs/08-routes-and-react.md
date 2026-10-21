@@ -48,6 +48,8 @@ F5a/F5b 起，配置式路由可声明 `clientLoader` 导出名：loader 是路�
 
 F5c 起，显式启用的 `headPlugin` 在每次导航后把 `meta.head` 同步到 document（标题取最深、meta 覆盖、link 去重，受管节点带 `data-cormi-head`，卸载恢复原标题）；仅客户端，SSR 头部仍待 U32。详见 [F5c 路由级页面头部](84-f5c-route-head.md)。
 
+F5d 起，生成入口带有路由模块注册表，显式启用的 `routePrefetchPlugin` 提供 `usePrefetch()` 手动预热，或 `mode: "idle"` 在首屏空闲时预热全部路由；只预取代码，不预取 loader 数据。详见 [F5d 路由预取](85-f5d-route-prefetch.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

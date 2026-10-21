@@ -715,6 +715,23 @@ plugins: [
 
 示例：`pnpm cormi dev --root examples/route-head`，默认监听 `/route-head/`。
 
+### 4.24 路由预取
+
+页面按路由懒加载后，可用 `routePrefetchPlugin` 暴露的注册表提前加载目标模块：
+
+```ts
+plugins: [{ id: 'prefetch', plugin: routePrefetchPlugin, options: { id: 'app:prefetch', mode: 'idle' } }]
+```
+
+```tsx
+const { ids, prefetch } = usePrefetch();
+void prefetch('config:guide');
+```
+
+`ids` 是当前生成入口中的路由 id（含布局路由），`prefetch(id)` 返回布尔 Promise，未知 id 返回 `false`，并发调用复用同一在途 Promise；`mode: 'idle'` 会在首屏后通过 `requestIdleCallback` 预热全部路由（2 秒超时，卸载取消），路由较多时建议用手动模式。它只预取代码，不预取 `clientLoader` 的数据。规则与限制见 [F5d 路由预取](85-f5d-route-prefetch.md)。
+
+示例：`pnpm cormi dev --root examples/prefetch`，默认监听 `/prefetch/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：
