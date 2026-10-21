@@ -18,7 +18,11 @@ test('SSR renders routes and loader data in preview and hydrates without errors'
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   const dev = cli(t, f.root, 'dev', ['--startup-timeout', '30000']), ready = await dev.waitFor(event => event.type === 'ready', 0, 30000);
+  const devHome = await page.request.get(ready.url, { headers: { accept: 'text/html' } });
+  assert.equal(devHome.status(), 200);
+  assert.match(await devHome.text(), /<div id="root"><main><h1>SSR home<\/h1><\/main><\/div>/);
   await page.goto(ready.url); await page.getByRole('heading', { name: 'SSR home', exact: true }).waitFor();
+  assert.deepEqual(errors, []);
   await page.goto('about:blank'); assert.equal(await dev.stop(), 0, JSON.stringify(dev.events) + dev.stderr); await assertPortFree(Number(new URL(ready.url).port));
   const types = cli(t, f.root, 'typecheck', ['--startup-timeout', '30000']); assert.equal(await types.finish(30000), 0, JSON.stringify(types.events) + types.stderr);
   const build = cli(t, f.root, 'build', ['--startup-timeout', '30000']); assert.equal(await build.finish(60000), 0, JSON.stringify(build.events) + build.stderr);

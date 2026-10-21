@@ -1,29 +1,18 @@
 {
   "format": "cormi:f5y-validation:1",
-  "verifiedAt": "2026-10-21T11:34:36.869Z",
-  "base": "7e20397293d5f7563e0a51faecf6b4c8518c2dee",
+  "verifiedAt": "2026-10-21T11:55:35.087Z",
+  "base": "81b5e255680640fd8c85d59e8f687307176e0db1",
   "branch": "main",
   "worktree": {
     "state": "uncommitted",
     "changedFiles": [
       "M README.md",
       " M docs/08-routes-and-react.md",
+      " M docs/107-f5y-ssr.md",
       " M docs/49-application-guide.md",
       " M docs/59-umi-feature-roadmap.md",
-      " M packages/plugin-react-vite/src/index.ts",
-      " M packages/plugin-react/src/generate.ts",
-      " M packages/plugin-react/src/index.ts",
-      " M packages/runtime/package.json",
-      " M packages/runtime/src/index.tsx",
-      " M scripts/test-package.ts",
-      " M tests/model.test.ts",
-      " M tests/prefetch.test.ts",
-      "?? docs/107-f5y-ssr.md",
-      "?? packages/plugin-react-vite/src/ssr.ts",
-      "?? packages/runtime/src/server.tsx",
-      "?? scripts/ssr-fixture.ts",
-      "?? tests/browser/ssr.test.ts",
-      "?? tests/ssr.test.ts"
+      " M packages/plugin-react-vite/src/ssr.ts",
+      " M tests/browser/ssr.test.ts"
     ]
   },
   "environment": {
@@ -38,8 +27,8 @@
     "node": {
       "command": "pnpm check",
       "log": ".cache/f5y-final/check.log",
-      "sha256": "7e13cc04b2fd087c89a2f7f0d361e0209a51c39ad32a2c9429eb73da0ee7bfc7",
-      "seconds": 120.3,
+      "sha256": "9e7b3ca1830c43b35881620ae239ff5c29d1914416cbd777d2fa0891d098031a",
+      "seconds": 119.1,
       "tests": 544,
       "pass": 544,
       "fail": 0,
@@ -51,8 +40,8 @@
     "targetedRepeat": {
       "command": "node --import tsx --test --test-concurrency=1 tests/ssr.test.ts",
       "log": ".cache/f5y-final/targeted.log",
-      "sha256": "7cf5a1293730a3ad2b3e538eff36e90c5cffd370f2b6a538a55faab07f7a0f7e",
-      "seconds": 0.4,
+      "sha256": "d40baaec8b979059b7bcee6694c0ef2f4d114eba6c20b8b8641bc98db9fa39f0",
+      "seconds": 0.5,
       "tests": 2,
       "pass": 2,
       "fail": 0,
@@ -64,8 +53,8 @@
     "browser": {
       "command": "pnpm test:browser",
       "log": ".cache/f5y-final/browser.log",
-      "sha256": "7d5e321ff4422454bc53a25b87a73ab0c906a4f2702b3fb47af2f29bb248123d",
-      "seconds": 559.6,
+      "sha256": "6c1d46ddc15321d4e95cae862325cf195c63383c06d2f743a41d4e34b32e5226",
+      "seconds": 556.3,
       "tests": 52,
       "pass": 52,
       "fail": 0,
@@ -74,15 +63,15 @@
       "todo": 0,
       "newSinceF5x": 1,
       "engine": "155.0.4283.62",
-      "note": "SSR case covers dev CSR, build output, server markup with loader data and hydrated preview without page errors"
+      "note": "SSR case covers dev and preview server markup, loader data and hydrated pages without errors"
     },
     "package": {
       "command": "pnpm test:package",
-      "result": ".cache/package-test-1792582050240/result.json",
-      "sha256": "e0e955adcaf70b54b05e6857f8da8079719ac704ad517b89a2aacf36b09b6166",
+      "result": ".cache/package-test-1792583294274/result.json",
+      "sha256": "6c2d8964acdcd0240d7555f872f1ac2d427093e5bfe06a2398c3619fa4f98c75",
       "bytes": 83071,
       "log": ".cache/f5y-final/package.log",
-      "logSha256": "2ed11bddda94a99a0e9996ac87220ce2378497d292628f94d08bc9b0a22d65b0",
+      "logSha256": "70f1d6e413302f153cb1a7a2fe70270bd6cb604b7b4be89b53776a120f5a896e",
       "passed": true,
       "stages": 327,
       "ssrStages": [
@@ -99,15 +88,15 @@
         "detection": "ast",
         "previewRegenerated": false
       },
-      "startedAt": "2026-10-21T11:27:30.240Z",
+      "startedAt": "2026-10-21T11:48:14.275Z",
       "ssrConsumerAdded": true
     }
   },
   "evidence": {
     "plugin": {
       "path": "packages/plugin-react-vite/src/ssr.ts",
-      "sha256": "c3d9d8ce05718467ecd084442b9c4a0722ffbe18522899d872300ad617621d8f",
-      "bytes": 6963
+      "sha256": "3992edebd7e3b420802adb5690c8c340685edfaaa9c83b28d06643dd67cb3eab",
+      "bytes": 8740
     },
     "renderer": {
       "path": "packages/runtime/src/server.tsx",
@@ -131,16 +120,16 @@
     },
     "browserCase": {
       "path": "tests/browser/ssr.test.ts",
-      "sha256": "3ccb6b113edf061af73b529b32bf5231f278c5b0e2bec3172ba09df0c14fb494",
-      "bytes": 2350
+      "sha256": "e0b66518631cfffd8e461578eeac932141bf27230be70620c80047dfdcfe0adf",
+      "bytes": 2608
     },
-    "note": "SSR is verified through static rendering, a real Vite client+server build, server loader data, hydration data and an installed consumer."
+    "note": "SSR is verified in dev and preview, through static rendering, server loader data, hydration data and an installed consumer."
   },
   "sourceInputs": {
     ".npmrc": "d089b05fc08a36af3a3eb500ffd9d2087c0c2517ee6a820980377dc95bede2f9",
     ".nvmrc": "c989649ac5c541692f22f2e41f5fbc34927c02bf1644e5dcca46bb4c88281f87",
     "AGENTS.md": "9add5d4d2e3b64331824e854c8e956d344149cff9070c07d202fcaa727b06c60",
-    "README.md": "a0499b1fde143aba3e29962612f90e22fe7af3b88f58c025fba6be5b8f2081ff",
+    "README.md": "39f144729d7fc301e1dbc48e03fbaf569261c97325705825d01c89f4bd18cc31",
     "examples/access-convention/cormi.config.ts": "a31340caaa9b2eb846582ae1de3f7c196427f735a078bff22c81ce64a1e06484",
     "examples/access-convention/index.html": "98657be99bf833dd197c2b4b5bb56126a7259bb5e1da4fca3192ed3171c320b7",
     "examples/access-convention/src/access.ts": "73a161367f777d30f45f4341f8910073aa0f437b821b09d1da802f5474243446",
@@ -382,7 +371,7 @@
     "packages/plugin-react-vite/src/mpa.ts": "2c10a8d9f5566aeed51de4bae58c23a39b99060ba27c31df7064372653b073e2",
     "packages/plugin-react-vite/src/output.ts": "b82f3134a1b1fa3fd56a59dc030275575eeb901094b06a0a592d80cbc24d9d29",
     "packages/plugin-react-vite/src/proxy.ts": "d9f89e7877e724b58dc398f13fe474ccac8ecdde2ec3f0b83c0cc27011756b47",
-    "packages/plugin-react-vite/src/ssr.ts": "c3d9d8ce05718467ecd084442b9c4a0722ffbe18522899d872300ad617621d8f",
+    "packages/plugin-react-vite/src/ssr.ts": "3992edebd7e3b420802adb5690c8c340685edfaaa9c83b28d06643dd67cb3eab",
     "packages/plugin-react-vite/src/static-export.ts": "54417f9e26f65f808fd33b17fb9e8dde160f0db525e364ed3ef43432caf71b4f",
     "packages/plugin-react-vite/tsconfig.json": "6dff251ba0e8067dc31ef48390d0615fd7a4f8e17aa7190b9d0be4fe602459a5",
     "packages/plugin-react/package.json": "435c75b26a172e365c15fa369746407985f9e26240dc6780498b14ebcb3388a2",
@@ -582,7 +571,7 @@
     "tests/browser/request.test.ts": "11a1899146a134ebb36246be7a818997c33ab364ded94856763c0d9722f521f2",
     "tests/browser/route-boundaries.test.ts": "c75fb93302e353d5890129f87eba6148e13a4055e41ac56577d557f89024b77d",
     "tests/browser/route-head.test.ts": "469e395dee946989e150fde83f374d9a5ae25a4c1f8fe9edb551707b04b0c14b",
-    "tests/browser/ssr.test.ts": "3ccb6b113edf061af73b529b32bf5231f278c5b0e2bec3172ba09df0c14fb494",
+    "tests/browser/ssr.test.ts": "e0b66518631cfffd8e461578eeac932141bf27230be70620c80047dfdcfe0adf",
     "tests/browser/static-export.test.ts": "a253ff23a5f7ee9eb88bd08b6b4536e3f44b8c27c62910d3a17943497d5b35db",
     "tests/cli-carrier.test.ts": "8cf1de741a02384048b9e51bf84478b2d36a0874393b8c9e6225df38b221c5b7",
     "tests/client-loader.test.ts": "a988442e743c567b5a4da70eddc5b5c23dc7542ad735e0a10ebf377bd951ac8a",
@@ -696,9 +685,9 @@
     "tsconfig.json": "3dc2b20d3fe968c8474c4cbabb8cded5fcf85f7c0b73e02c79020548e7c83e4f"
   },
   "sourceInputCount": 557,
-  "sourceInputsDigest": "ff76515dee0c5a6aae2ee7b086ce715971ff41605094d07bb08aa3cb37371cb3",
+  "sourceInputsDigest": "047cc935a378decbcc0b82201225415e2fa3a92001fecbc5d7c4f0bf690c44c9",
   "documentationInputs": {
-    "README.md": "a0499b1fde143aba3e29962612f90e22fe7af3b88f58c025fba6be5b8f2081ff",
+    "README.md": "39f144729d7fc301e1dbc48e03fbaf569261c97325705825d01c89f4bd18cc31",
     "docs/01-source-study.md": "384ae2c0b9c5d22529b9aa4fa9ceb4505092489a41b990f11dc647694b4207d4",
     "docs/02-architecture.md": "5c4e324b8e846953a33dd5445420d8a70eaaabc69edd03b3a37a6d61a2bb2a71",
     "docs/03-mvp-plan.md": "1bab997354a947788ff5ecffa3ccb78f070cc82205b3c9c620688a59197c207a",
@@ -706,7 +695,7 @@
     "docs/05-p0-results.md": "51d1f0ca71b66a0f93264e8edfef8c94d4ca02e598fd0b1beef3c8f82a9cede6",
     "docs/06-naming-and-launcher.md": "9f3462b42b6e8caa223c2b8a80b5d40247e89f413255f00304504253460de0b4",
     "docs/07-p1a-results.md": "35ecddd1a10cd722bf5b07a4a13f1b6f3eac89076878b3bdc95409a65792cf30",
-    "docs/08-routes-and-react.md": "d3efcf79852f0feb26b0e225defe028b087ca720827e21c2bad2248c5645205f",
+    "docs/08-routes-and-react.md": "62411be4d922c2a8e9f63f1b12ac60157ebb60fdc056910d849b3d07698025f7",
     "docs/09-p1b-results.md": "ba7dfc69d4b5be0ff6371dc11f362656e9f10ceb350d21a1dda6a7288778da6a",
     "docs/10-publication-and-tools.md": "96a416ed41cec32072b2992b77467cebe49b4ec3b6dc53862af4b751a28a4fff",
     "docs/100-f5r-generators.md": "a0e6929dbb478c0823acad29395390ee0f7d29606e0f452265a9df99b45622ce",
@@ -716,7 +705,7 @@
     "docs/104-f5v-reexport-loaders.md": "012734f93710d9c6e73983f0c1cf6704de50ad00e7cfdda4cf33dcd8b292d89b",
     "docs/105-f5w-generator-templates.md": "06904330e9b82bde9b4627cfea1e5b0c300227eebf0db47aebe587b5c6c4fab8",
     "docs/106-f5x-helmet.md": "329281591085a680ff9eb2b5f624e14a61bef3d9142aac43f7504c50e7173f8e",
-    "docs/107-f5y-ssr.md": "46ae4b60bb3727ae941c43ce4b5aa0990fdb352c6e8fdf85c19142aad7fe5dce",
+    "docs/107-f5y-ssr.md": "ecc4d053dacbdaeb49ee595160352177c41bdb5d271a039dcd9b15c9447e2126",
     "docs/11-p1c-results.md": "ee4ccf2c18ab922ffeaeb2f2642cc2bc27b8c7d9416b60f63dd4d88e4594cb87",
     "docs/12-development-recovery.md": "d30ee61bf724844e8a1954bd85f24007d59050ae100dfddea1239b130e130d8c",
     "docs/13-p2a-results.md": "3ffc368d4d40b6c02bf0c7fc276a4f862b695d305fe089d4f6bd749b9a90d3f3",
@@ -755,7 +744,7 @@
     "docs/46-p10-results.md": "eaea054b22d5838996c4a54722b77379c3b9303e19e52cf90987281f2107eb86",
     "docs/47-environment-configuration.md": "17d499494e7b6e60094f21c8fc5bd8ca6c2c2cf25cade1f16b58dbe11ff6dc5f",
     "docs/48-p11-results.md": "fe270f4249b32408969bd086b72d5c3eddf8485c364398fc380469831f397764",
-    "docs/49-application-guide.md": "b2d1cb9315e1d9b9beee9131a877167d43203543417a4a6816c4be1b2ca6e8f1",
+    "docs/49-application-guide.md": "6a174b4eb0a399880affd5bc4aac3f5c9661a2868e5108cf7f5cfd274cd36f1e",
     "docs/50-p12-results.md": "de4229ef84966abfe8e49836f7b6cf7576e5ee89fc806770da5618c2b962e20b",
     "docs/51-plugin-first-reliability.md": "653a50c44f8809e7632693c1a246382eec6b4611ed643c25cf367fc8231e7203",
     "docs/52-p13-results.md": "cafd44d030c30e1ef672fe86b27ca8e63f655f7a54071c00ac1ca7b26257ad47",
@@ -765,7 +754,7 @@
     "docs/56-p15-results.md": "2f40c0acb9ad686a16bdb484bea5e5190bf2691f166778ad395555b1fcaa471a",
     "docs/57-typescript-projects.md": "ce90b44568c971739dd31b1f674c8bd53f3373f44d7de53e25a9cb82fe5a5bb5",
     "docs/58-p16-results.md": "06d20747852e0cfdf7c2ac083854d009992061664d2c866d2fec339f71d3c772",
-    "docs/59-umi-feature-roadmap.md": "ad6a2445f6adbca4f488ecf0b5630e852752839780967cbbb92f93e24fd9ef7e",
+    "docs/59-umi-feature-roadmap.md": "20295654c453a2465695d646a89c78432d9763056605760a3bf6d7d4560d453b",
     "docs/60-f1a-app-runtime.md": "8c8ef18afce74c96d21c0cfeb57acb41aa843ca78514d81bc37e41f8138cb1d3",
     "docs/61-f1b-config-routes.md": "674c8679c7ff7c25b0f7748dfcb3674dd71df1a7d3fc46ddeafda5d2b3e092f8",
     "docs/62-f1c-redirects-and-wrappers.md": "6465adb6d14aa8e3c9d9c9898d9279d83499028be9660bf33c3161755098815a",
@@ -821,16 +810,11 @@
       "worktreeChanges": 8,
       "readFiles": [],
       "note": "Umi 4.7.25 baseline is retained from earlier slices; no Umi source was read for F5y. Reference worktree contains unrelated edits that predate F5y and were not modified by this round."
-    },
-    {
-      "path": "react-router 7.18.2 static handler",
-      "evidence": "Spike confirmed lazy routes and loaders render through createStaticHandler/renderToString; app.ssr switches generation to eager components so hydration matches."
     }
   ],
   "limits": [
     "macOS-arm64-only",
     "uncommitted-worktree",
-    "preview-only-ssr-dev-remains-csr",
     "root-base-only",
     "eager-route-components-under-app-ssr",
     "no-server-loader",

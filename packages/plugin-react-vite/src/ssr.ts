@@ -1,9 +1,9 @@
 import { CormiError, type Plugin } from '@cormijs/core';
 import react from '@vitejs/plugin-react';
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { build as viteBuild, type ResolvedConfig } from 'vite';
+import { build as viteBuild, type PreviewServer, type ResolvedConfig, type ViteDevServer } from 'vite';
 import type {} from '@cormijs/plugin-vite';
 
 export interface SsrPluginOptions {
@@ -11,6 +11,9 @@ export interface SsrPluginOptions {
   /** Client mount element replaced with server markup; default `root`. */
   readonly mountId?: string;
 }
+
+type Render = (request: Request) => Promise<unknown>;
+const hydrationPattern = /<script>window\.__staticRouterHydrationData = [\s\S]*?<\/script>/;
 
 const entrySource = `import { renderServerApplication } from '@cormijs/runtime/server';
 import { cormiApplication } from './app';
@@ -27,7 +30,36 @@ function sendResult(response: Response, res: import('node:http').ServerResponse,
   })();
 }
 
-/** Opt-in production SSR: builds a server entry beside the client bundle and renders in preview. */
+function toRequest(request: import('node:http').IncomingMessage): Request {
+  const url = new URL(request.url ?? '/', `http://${typeof request.headers.host === 'string' ? request.headers.host : 'localhost'}`);
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(request.headers)) if (value !== undefined && name !== 'content-length' && name !== 'transfer-encoding') {
+    if (Array.isArray(value)) for (const item of value) headers.append(name, item); else headers.set(name, value);
+  }
+  return new Request(url, { method: request.method, headers });
+}
+
+function injectShell(shell: string, rendered: { html?: unknown; status?: unknown; headers?: unknown }, mountId: string): Response {
+  if (typeof rendered.html !== 'string') throw new CormiError('SSR_RENDER_INVALID', 'SSR result has no html.');
+  const marker = `<div id="${mountId}"></div>`;
+  if (!shell.includes(marker)) throw new CormiError('SSR_SHELL_INVALID', 'index.html has no empty mount element.', { mountId });
+  const hydration = hydrationPattern.exec(rendered.html)?.[0] ?? '';
+  const markup = hydration ? rendered.html.replace(hydration, '') : rendered.html;
+  const headers = rendered.headers instanceof Headers ? rendered.headers : new Headers();
+  headers.set('content-type', 'text/html; charset=utf-8');
+  // Hydration data must execute before the client module, but must not become a child of the hydration root.
+  return new Response(shell.replace(marker, `<div id="${mountId}">${markup}</div>${hydration}`), {
+    status: typeof rendered.status === 'number' ? rendered.status : 200, headers,
+  });
+}
+
+function navigation(request: import('node:http').IncomingMessage): boolean {
+  const accept = request.headers.accept ?? '';
+  return (request.method === 'GET' || request.method === 'HEAD') && accept.includes('text/html')
+    && !request.url?.startsWith('/.cormi/') && !request.url?.startsWith('/assets/');
+}
+
+/** Opt-in SSR: dev renders through Vite's SSR module graph, preview through a built server bundle. */
 export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
   name: 'cormi:ssr', inject: ['vite'],
   apply(ctx, options = {}) {
@@ -42,68 +74,71 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
       let resolved: ResolvedConfig | undefined;
       let building = false;
       const serverOut = () => resolved ? join(resolved.build.outDir, '.cormi/ssr') : '';
+      const entryFile = () => resolved ? join(resolved.root, '.cormi', 'ssr.tsx') : '';
+
+      const devRender = async (server: ViteDevServer, request: import('node:http').IncomingMessage): Promise<Response> => {
+        if (server.config.base !== '/') throw new CormiError('SSR_BASE_UNSUPPORTED', 'SSR currently requires app.base to be /.', { base: server.config.base });
+        const entry = entryFile();
+        await mkdir(join(server.config.root, '.cormi'), { recursive: true });
+        await writeFile(entry, entrySource);
+        const module = await server.ssrLoadModule('/.cormi/ssr.tsx') as { render?: unknown };
+        if (typeof module.render !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR entry has no render export.');
+        const result = await (module.render as Render)(toRequest(request));
+        if (result instanceof Response) return result;
+        const shell = await server.transformIndexHtml(request.url ?? '/', await readFile(join(server.config.root, 'index.html'), 'utf8'));
+        return injectShell(shell, result as { html?: unknown }, mountId);
+      };
+
       return {
         name: id,
         configResolved(config) { resolved = config; building = config.command === 'build'; },
         async closeBundle() {
-          if (!building || !resolved) return;
+          if (!building) { if (resolved) await rm(entryFile(), { force: true }); return; }
+          if (!resolved) return;
           if (resolved.base !== '/') throw new CormiError('SSR_BASE_UNSUPPORTED', 'SSR currently requires app.base to be /.', { base: resolved.base });
-          const entryFile = join(resolved.root, '.cormi', 'ssr.tsx');
           await mkdir(join(resolved.root, '.cormi'), { recursive: true });
-          await writeFile(entryFile, entrySource);
+          await writeFile(entryFile(), entrySource);
           try {
             await viteBuild({
               root: resolved.root, configFile: false, mode: resolved.mode, base: resolved.base, define: resolved.define,
               resolve: { alias: resolved.resolve.alias, dedupe: resolved.resolve.dedupe, extensions: resolved.resolve.extensions },
               publicDir: false, logLevel: 'silent', clearScreen: false, plugins: [react()],
-              build: { ssr: entryFile, outDir: serverOut(), emptyOutDir: true, write: true, minify: false, target: 'node22', ssrEmitAssets: false,
+              build: { ssr: entryFile(), outDir: serverOut(), emptyOutDir: true, write: true, minify: false, target: 'node22', ssrEmitAssets: false,
                 rollupOptions: { output: { entryFileNames: 'ssr.mjs', chunkFileNames: 'chunks/[name]-[hash].mjs' } } },
               ssr: { noExternal: true, target: 'node' },
             });
           } catch (cause) {
             throw new CormiError('SSR_BUILD_FAILED', 'The SSR bundle could not be built.', {}, { cause });
           } finally {
-            await rm(entryFile, { force: true });
+            await rm(entryFile(), { force: true });
           }
         },
-        configurePreviewServer(server) {
-          const shellFile = join(server.config.build.outDir, 'index.html'), moduleFile = join(serverOut(), 'ssr.mjs');
-          let handler: Promise<(request: Request) => Promise<unknown>> | undefined;
+        configureServer(server) {
           server.middlewares.use((request, response, next) => {
-            const accept = request.headers.accept ?? '';
-            if ((request.method !== 'GET' && request.method !== 'HEAD') || !accept.includes('text/html')
-              || request.url?.startsWith('/.cormi/') || request.url?.startsWith('/assets/')) return next();
-            const task = (async () => {
+            if (!navigation(request)) return next();
+            void (async () => {
+              try { return sendResult(await devRender(server, request), response, request.method === 'HEAD'); }
+              catch (error) { console.error('[cormi:ssr]', error); next(); }
+            })();
+          });
+        },
+        configurePreviewServer(server: PreviewServer) {
+          const shellFile = join(server.config.build.outDir, 'index.html'), moduleFile = join(serverOut(), 'ssr.mjs');
+          let handler: Promise<Render> | undefined;
+          server.middlewares.use((request, response, next) => {
+            if (!navigation(request)) return next();
+            void (async () => {
               try {
+                if (server.config.base !== '/') throw new CormiError('SSR_BASE_UNSUPPORTED', 'SSR currently requires app.base to be /.', { base: server.config.base });
                 handler ??= import(pathToFileURL(moduleFile).href).then((module: { render?: unknown }) => {
                   if (typeof module.render !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR bundle has no render export.');
-                  return module.render as (request: Request) => Promise<unknown>;
+                  return module.render as Render;
                 });
-                const render = await handler;
-                const url = new URL(request.url ?? '/', `http://${typeof request.headers.host === 'string' ? request.headers.host : 'localhost'}`);
-                const headers = new Headers();
-                for (const [name, value] of Object.entries(request.headers)) if (value !== undefined && name !== 'content-length' && name !== 'transfer-encoding') {
-                  if (Array.isArray(value)) for (const item of value) headers.append(name, item); else headers.set(name, value);
-                }
-                const result = await render(new Request(url, { method: request.method, headers }));
+                const result = await (await handler)(toRequest(request));
                 if (result instanceof Response) return sendResult(result, response, request.method === 'HEAD');
-                const rendered = result as { html?: unknown; status?: unknown; headers?: unknown };
-                if (typeof rendered.html !== 'string') throw new CormiError('SSR_RENDER_INVALID', 'SSR result has no html.');
-                const shell = await readFile(shellFile, 'utf8');
-                const marker = `<div id="${mountId}"></div>`;
-                if (!shell.includes(marker)) throw new CormiError('SSR_SHELL_INVALID', 'Built index.html has no empty mount element.', { mountId });
-                const hydration = /<script>window\.__staticRouterHydrationData = [\s\S]*?<\/script>/.exec(rendered.html)?.[0] ?? '';
-                const markup = hydration ? rendered.html.replace(hydration, '') : rendered.html;
-                const body = shell.replace(marker, `<div id="${mountId}">${markup}</div>${hydration}`);
-                const responseHeaders = rendered.headers instanceof Headers ? rendered.headers : new Headers();
-                responseHeaders.set('content-type', 'text/html; charset=utf-8');
-                return sendResult(new Response(request.method === 'HEAD' ? null : body, { status: typeof rendered.status === 'number' ? rendered.status : 200, headers: responseHeaders }), response, request.method === 'HEAD');
-              } catch (error) {
-                console.error('[cormi:ssr]', error);
-                next();
-              }
+                return sendResult(injectShell(await readFile(shellFile, 'utf8'), result as { html?: unknown }, mountId), response, request.method === 'HEAD');
+              } catch (error) { console.error('[cormi:ssr]', error); next(); }
             })();
-            void task;
           });
         },
       };
