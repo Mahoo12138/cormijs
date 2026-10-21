@@ -847,6 +847,19 @@ export async function clientLoader({ params }: { params: Record<string, string |
 
 检测使用零依赖的词法扫描（忽略注释与字符串），只识别 `export function/async function/const clientLoader`；注释、字符串、`declare` 与类型导出不会误判，重导出（`export { clientLoader } from …`）不被识别。配置式路由仍用 `clientLoader` 字段显式声明。规则与边界见 [F5j 约定式 loader](92-f5j-conventional-loader.md)。
 
+### 4.32 locale key 类型
+
+启用 `src/locales` 目录后，编译会生成环境类型，给语言代码与消息 key 提供编译期约束：
+
+```ts
+const key: CormiLocale.MessageKey = 'greeting';
+const code: CormiLocale.Code = 'zh-CN';
+// @ts-expect-error 未知 key 会失败
+const typo: CormiLocale.MessageKey = 'missing';
+```
+
+文件位于 `.cormi/locale.d.ts`，无需 import（tsconfig 已包含 `.cormi/**/*`）；无目录时为 `never`。它只覆盖目录来源——`app.tsx` 内联消息不参与生成，`t()` 的参数仍是 `string`，不会自动拒绝动态 key。规则见 [F5k locale 类型](93-f5k-locale-types.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

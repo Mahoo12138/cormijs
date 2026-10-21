@@ -59,7 +59,8 @@ async function execute(label: string, cwd: string, executable: string, args: str
   console.log('PASS', label); return result;
 }
 async function install(label: string, cwd: string, expected = 0, pattern?: RegExp) {
-  return execute(label, cwd, 'pnpm', ['install', '--offline', '--ignore-scripts', '--no-frozen-lockfile'], expected, pattern);
+  // A cold cache after cleanup needs one online warm-up: CORMI_PACKAGE_OFFLINE=0.
+  return execute(label, cwd, 'pnpm', ['install', ...(process.env.CORMI_PACKAGE_OFFLINE === '0' ? [] : ['--offline']), '--ignore-scripts', '--no-frozen-lockfile'], expected, pattern);
 }
 async function create(name: string, profile: 'core' | 'launcher' | 'react', patched = true) {
   const path = join(delivery, name); await mkdir(path);
@@ -262,7 +263,7 @@ checker.check('.',[]);`);
   assert.equal(existsSync(originalDelivery), false); assert.equal(existsSync(join(app, 'node_modules')), false);
   for (const item of kit.packages) assert.equal(sha256(await readFile(join(delivery, item.file))), item.sha256);
   assert.equal(sha256(await readFile(join(delivery, kit.compatibility.patch))), kit.compatibility.sha256);
-  await execute('relocated-frozen-reinstall', app, 'pnpm', ['install', '--offline', '--ignore-scripts', '--frozen-lockfile']);
+  await execute('relocated-frozen-reinstall', app, 'pnpm', ['install', ...(process.env.CORMI_PACKAGE_OFFLINE === '0' ? [] : ['--offline']), '--ignore-scripts', '--frozen-lockfile']);
   assert.equal(sha256(await readFile(join(app, 'pnpm-lock.yaml'))), sha256(originalLock), 'Relocation must not rewrite the resolved dependency graph');
   await auditLinks(app);
   report.stages.push({ label: 'relocated-clean-install', oldLocationExists: false, reusedNodeModules: false, lockUnchanged: true });
@@ -802,6 +803,7 @@ const sources:readonly LocaleCatalogSource[]=localeCatalogSources([{id:'app:loca
 void [localePlugin,options,sources,readLocaleCatalogs(process.cwd(),sources)];
 // @ts-expect-error locale directory must be a string
 const bad:LocalePluginOptions={directory:1};
+
 `);
     await execute('locale-catalog-public-types',localeCatalogConsumer,process.execPath,typeArguments);
     await withServer(localeCatalogConsumer,'dev',async url=>{await verifyLocaleCatalogPage(page,url);assert.deepEqual(errors,[]);});

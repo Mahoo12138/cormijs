@@ -17,8 +17,8 @@ function existing(file: string): string | undefined {
 /** Only this single executable entry is published atomically; no cross-file transaction is claimed. */
 export class AtomicEntry {
   private constructor(readonly directory: string, private readonly identity: Stats, private readonly filename: string) {}
-  static async open(root: string, filename: 'app.tsx' | 'routes.d.ts' | 'inspect.jsonc' = 'app.tsx'): Promise<AtomicEntry> {
-    if (!['app.tsx', 'routes.d.ts', 'inspect.jsonc'].includes(filename)) throw new CormiError('GENERATED_PATH_INVALID', 'Unsupported managed filename.');
+  static async open(root: string, filename: 'app.tsx' | 'routes.d.ts' | 'locale.d.ts' | 'inspect.jsonc' = 'app.tsx'): Promise<AtomicEntry> {
+    if (!['app.tsx', 'routes.d.ts', 'locale.d.ts', 'inspect.jsonc'].includes(filename)) throw new CormiError('GENERATED_PATH_INVALID', 'Unsupported managed filename.');
     root = await realpath(root);
     const directory = join(root, '.cormi');
     try { await mkdir(directory); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }

@@ -16,7 +16,7 @@ import { loadingContributions, loadingFilesToWatch, resolveGlobalLoading, type L
 import { resolveGlobalStyles, styleContributions, styleFilesToWatch, type StyleContribution } from './global-style.js';
 import { accessContributions, accessFilesToWatch, resolveAccessPlan, type AccessContribution } from './access.js';
 import { pageLoaders } from './page-loaders.js';
-import { localeCatalogSources, mergeLocaleCatalogs, readLocaleCatalogs, type LocaleCatalog, type LocaleCatalogSource } from './locale.js';
+import { generateLocaleTypes, localeCatalogSources, mergeLocaleCatalogs, readLocaleCatalogs, type LocaleCatalog, type LocaleCatalogSource } from './locale.js';
 import { modelContributions, modelFiles, modelWatchPaths, resolveModels, type ModelContribution, type ModelPlan } from './model.js';
 export { appRuntimePlugin, appConfigContributions, resolveAppRuntime, type AppRuntimeOptions, type AppConfigContribution, type AppRuntimePlan } from './app-runtime.js';
 export { layoutPlugin, layoutContributions, resolveGlobalLayout, type LayoutPluginOptions, type LayoutContribution } from './layout.js';
@@ -31,7 +31,7 @@ export { generatorPlugin, planGeneration, applyGeneration, type GeneratorPluginO
 export { modelPlugin, modelContributions, resolveModels, type ModelPluginOptions, type ModelContribution, type ModelPlan } from './model.js';
 export { initialStatePlugin, type InitialStatePluginOptions } from './initial-state.js';
 export { requestPlugin, type RequestPluginOptions } from './request.js';
-export { localePlugin, localeCatalogSources, readLocaleCatalogs, mergeLocaleCatalogs, type LocalePluginOptions, type LocaleCatalog, type LocaleCatalogSource } from './locale.js';
+export { localePlugin, localeCatalogSources, readLocaleCatalogs, mergeLocaleCatalogs, generateLocaleTypes, type LocalePluginOptions, type LocaleCatalog, type LocaleCatalogSource } from './locale.js';
 export { accessPlugin, accessContributions, resolveAccessPlan, DEFAULT_ACCESS_FILES, type AccessPluginOptions, type AccessContribution, type AccessPlan } from './access.js';
 export { menuPlugin, type MenuPluginOptions } from './menu.js';
 export { clientModule } from './modules.js';
@@ -104,7 +104,7 @@ export const reactPlugin: Plugin.Object<void> = {
       if (request.command === 'preview') return { plan, snapshot: null, async close() {} };
       const html = await readFile(join(root, 'index.html'), 'utf8');
       if (!html.includes('/.cormi/app.tsx')) throw new CormiError('GENERATED_ENTRY_MISSING', 'index.html must import /.cormi/app.tsx.');
-      const entry = await AtomicEntry.open(root), typeFile = await AtomicEntry.open(root, 'routes.d.ts'), manifestFile = await AtomicEntry.open(root, 'inspect.jsonc');
+      const entry = await AtomicEntry.open(root), typeFile = await AtomicEntry.open(root, 'routes.d.ts'), localeTypesFile = await AtomicEntry.open(root, 'locale.d.ts'), manifestFile = await AtomicEntry.open(root, 'inspect.jsonc');
       signal.throwIfAborted();
       let latestSnapshot: GeneratedInspection | undefined, lastSignature = '', lastError = '', accepted = 0;
       let polling: Promise<void> | undefined, closing: Promise<void> | undefined;
@@ -154,11 +154,12 @@ export const reactPlugin: Plugin.Object<void> = {
         const published = state = Object.freeze({ ...next, revision: state.revision + 1 });
         await deliver(statusListeners, published, () => state === published);
       };
-      const queue = new RevisionQueue<{ code: string; types: string; inspection: GeneratedInspection }>(async (value, current) => {
+      const queue = new RevisionQueue<{ code: string; types: string; localeTypes: string; inspection: GeneratedInspection }>(async (value, current) => {
         const valid = () => current() && !signal.aborted, first = !state.hasOutput;
         let changed: boolean;
         try {
           await typeFile.publish(value.types, valid);
+          await localeTypesFile.publish(value.localeTypes, valid);
           changed = await entry.publish(value.code, valid);
           await manifestFile.publish(JSON.stringify(value.inspection, null, 2) + '\n', valid);
           if (!valid()) throw new CormiError('STALE_GENERATION', 'Inputs changed before publishing diagnostics.');
@@ -173,7 +174,7 @@ export const reactPlugin: Plugin.Object<void> = {
       });
       const session: PreparedApplication = {
         plan, get snapshot() { return latestSnapshot; },
-        typecheck: { files: ['.cormi/app.tsx', '.cormi/routes.d.ts'] },
+        typecheck: { files: ['.cormi/app.tsx', '.cormi/routes.d.ts', '.cormi/locale.d.ts'] },
         ...(developing ? { development: { entry: '.cormi/app.tsx', current: () => state,
           subscribe(listener: (value: DevelopmentState) => Promise<void>) {
             signal.throwIfAborted();
@@ -260,6 +261,7 @@ export const reactPlugin: Plugin.Object<void> = {
             const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict, observed.applicationRuntime, globalLoading?.module, history, modelPlans, globalStyles, accessPlan?.module, catalogs);
             await transform(code, { loader: 'tsx', format: 'esm', jsx: 'automatic', logLevel: 'silent' });
             const types = generateRouteTypes(next, modelPlans.map(model => model.namespace));
+            const localeTypes = generateLocaleTypes(catalogs);
             const hookInfo = (items: readonly { id: string; owner: string; stage?: number }[]) => items.map(({ id, owner, stage }) => ({ id, owner, stage: stage ?? 0 }));
             const inspection = inspectionManifest(code, types, { renderer: 'react', mode: request.mode, base: plan.base, entry: '.cormi/app.tsx', strict, history,
               routes: next.map(route => ({ ...route, ...(route.module ? { module: inspectModule(root, route.module) } : {}),
@@ -274,7 +276,7 @@ export const reactPlugin: Plugin.Object<void> = {
               appRuntime: { ...observed.applicationRuntime, ...(observed.applicationRuntime.module ? { module: inspectModule(root, observed.applicationRuntime.module) } : {}) },
               hooks: { routes: hookInfo(routeOrder), runtime: hookInfo(runtimeOrder), layouts: hookInfo(layoutOrder), loading: hookInfo(loadingOrder), styles: hookInfo(styleOrder), access: hookInfo(accessOrder), locale: hookInfo(localeOrder), models: hookInfo(modelOrder) } });
             if (routes.revision !== routeRevision || runtime.revision !== runtimeRevision || layouts.revision !== layoutRevision || loading.revision !== loadingRevision || styles.revision !== styleRevision || access.revision !== accessRevision || locale.revision !== localeRevision || models.revision !== modelRevision || appConfig.revision !== observed.appRevision) throw new CormiError('CONTRIBUTIONS_CHANGED', 'Plugin contributions changed during compilation; this result cannot be published.');
-            combined.throwIfAborted(); phase = 'commit'; return { code, types, inspection };
+            combined.throwIfAborted(); phase = 'commit'; return { code, types, localeTypes, inspection };
           });
         } catch (error) {
           if (!developing || initial && !recoverable(error)) throw error;

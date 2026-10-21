@@ -68,4 +68,4 @@ Umi 的 clientLoader 功能（`packages/preset-umi/src/features/clientLoader/cli
 
 - U13 剩余：loader 数据类型生成、重导出支持；
 - U32/U34/U35：SSR、MPA、生产 API 路由；U25 externals/runtimePublicPath；
-- U16 ICU 与 locale key 类型、U17 UI adapter；F6 多 builder 与微前端。
+- F5k 已交付 locale key 类型，见 [F5k locale 类型](93-f5k-locale-types.md)；U16 ICU、U17 UI adapter、F6 多 builder 与微前端待后续。

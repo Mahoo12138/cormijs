@@ -64,6 +64,8 @@ F5i 起，显式启用的 `toolPlugin` 提供 `cormi lint`/`cormi format`：运�
 
 F5j 起，约定式页面只要导出 `clientLoader`（function/async function/const）就自动获得 loader：经零依赖词法扫描（忽略注释与字符串）后写入路由 IR，配置式路由仍用显式字段。详见 [F5j 约定式 loader](92-f5j-conventional-loader.md)。
 
+F5k 起，启用 `src/locales` 目录时会生成 `.cormi/locale.d.ts`，提供环境类型 `CormiLocale.Code`/`CormiLocale.MessageKey`（字符串联合，无目录时为 `never`）；运行时 `t` 仍收 `string`。详见 [F5k locale 类型](93-f5k-locale-types.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

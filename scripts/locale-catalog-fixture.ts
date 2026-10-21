@@ -29,6 +29,11 @@ export default defineApp({
     'src/locales/en.json': JSON.stringify({ greeting: 'Hello {name}', fromCatalog: 'catalog only' }),
     'src/locales/zh-CN.json': JSON.stringify({ title: '目录标题', greeting: '你好 {name}', fromCatalog: '仅目录提供' }),
     'src/pages/index.tsx': `import { FormattedMessage, useIntl } from '@cormijs/runtime';
+// Generated catalog types are ambient: no import is needed.
+const typedKey: CormiLocale.MessageKey = 'greeting';
+const typedCode: CormiLocale.Code = 'zh-CN';
+// @ts-expect-error unknown message keys are rejected
+const missingKey: CormiLocale.MessageKey = 'missing';
 export default function Home(){
   const {locale,setLocale,t}=useIntl();
   return <main>
@@ -36,6 +41,7 @@ export default function Home(){
     <p data-locale>{locale}</p>
     <p data-greeting><FormattedMessage id="greeting" values={{name:'Ada'}} /></p>
     <p data-catalog>{t('fromCatalog')}</p>
+    <p data-typed>{typedKey + ':' + typedCode}</p>
     <button data-switch onClick={()=>setLocale(locale === 'en' ? 'zh-CN' : 'en')}>Switch</button>
   </main>;
 }`,
@@ -51,6 +57,7 @@ export async function verifyLocaleCatalogPage(page: Page, url: string) {
   assert.equal(await page.locator('[data-locale]').innerText(), 'en');
   assert.equal(await page.locator('[data-greeting]').innerText(), 'Hello Ada');
   assert.equal(await page.locator('[data-catalog]').innerText(), 'catalog only');
+  assert.equal(await page.locator('[data-typed]').innerText(), 'greeting:zh-CN');
   await page.locator('[data-switch]').click();
   await page.waitForFunction(() => document.querySelector('[data-locale]')?.textContent === 'zh-CN');
   assert.equal(await page.locator('[data-title]').innerText(), '目录标题');
