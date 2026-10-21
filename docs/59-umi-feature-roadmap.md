@@ -45,7 +45,7 @@
 | U13 | clientLoader/useClientLoaderData/routeProps | 部分已有（F5a/F5b）：配置式路由的 `clientLoader` 导出名映射到 React Router 静态 loader，页面用 `useClientLoaderData`/`useRouteLoaderDataFor`/`useClientLoaderError` 读取，loader 抛错由该路由的 `errorBoundary` 呈现；约定式路由识别、类型生成与预取待后续 | 路由数据插件 | F3 |
 | U14 | access.ts/useAccess/Access、路由访问控制 | 基础已有（F3b/F3d/F3e/F4g）：accessPlugin 从 initialState 计算权限，useAccess/Access、路由 access 守卫、自定义 accessForbidden 与 `src/access.ts` 约定（配置优先于约定）可用；服务端授权边界与权限类型生成待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
 | U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e/F4i）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys、access 过滤、`meta.locale` 目录化标题与 `useMenuCollapse` 折叠状态；无 ProLayout/Antd adapter 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
-| U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a/F4h）：localePlugin 提供内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage，并可用 `directory` 构建期内联 `src/locales/<locale>.json` 消息目录；复数/日期格式化、按语言懒加载与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
+| U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a/F4h/F5f）：内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage、`src/locales` 目录，以及 `formatNumber`/`formatDate`/`tp`（Intl + `_one/_other` 复数）；ICU 语法、相对时间、富文本、locale key 类型与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
 | U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；req/res 兼容与统一代理配置待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c/F4d）：aliasPlugin 支持项目内相对别名与可选内置 `@`→src，definePlugin 在 dev 与 build 替换 JSON 常量；`@@`、环境分层自动映射与 define 类型生成待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
@@ -157,6 +157,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F4k 状态（2026-10-20）：** U27 的首批生成器已交付，同时把 CLI 的入参协议扩展为「命令 + 至多 32 个位置参数」（`CommandRequest.positionals` 经 CLI → supervisor → worker 传递，全局选项仍严格）。`generatorPlugin` 注册 `generate` 命令，内置 page/component/model 模板，默认拒绝覆盖、`--force` 覆盖、`--dry-run` 只返回计划，名称与路径校验齐全。mock/API 生成器、模板贡献面与交互式提问仍待后续。用法、差异与验证见 [F4k 微生成器](87-f4k-generator.md)。
 
 **F5e 状态（2026-10-20）：** U33 的第一步已交付：`staticExportPlugin` 在构建后读取路由 IR，为字面路径的模块路由生成 `dist/<path>/index.html`，按运行时相同规则合并祖先 `meta.head` 并追加 `titleTemplate`；`/` 的 head 写回 `dist/index.html`，动态段/catch-all/redirect 跳过。外壳不是预渲染：没有 SSR 内容与数据，静态页面仍依赖 JS 挂载。prerender、404.html 与 SSR 组合仍待后续。用法、差异与验证见 [F5e 静态导出](88-f5e-static-export.md)。
+
+**F5f 状态（2026-10-20）：** U16 的格式化部分已交付：`useIntl()` 新增 `formatNumber`、`formatDate` 与复数感知的 `tp`；复数类别由 `Intl.PluralRules` 决定，消息按 `${key}_${category}` → `${key}_other` → `${key}`（含 fallback 语言）解析，插值与既有 `t` 一致；纯函数 `formatNumberFor`/`formatDateFor`/`selectPluralKey` 从 `@cormijs/runtime` 导出。ICU 复数语法、相对时间、富文本与 locale key 类型仍待后续。用法、差异与验证见 [F5f 格式化与复数](89-f5f-locale-formatting.md)。
 
 ### F3：权限、布局、菜单和国际化
 

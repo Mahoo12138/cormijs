@@ -69,4 +69,4 @@ Umi 的 exportStatic（`packages/preset-umi/src/features/exportStatic/exportStat
 
 - U33 剩余：prerender、`404.html`、与 SSR 组合；
 - U32/U34/U35：SSR、MPA、生产 API 路由；
-- F4 剩余：U28 工程命令；U23：样式生态；U16：格式化与 locale key 类型。
+- F4 剩余：U28 工程命令；U23：样式生态；U16 格式化/复数已由 [F5f](89-f5f-locale-formatting.md) 交付，locale key 类型待后续。

@@ -781,6 +781,23 @@ plugins: [
 
 示例：`pnpm cormi build --root examples/static-export`，再 `pnpm cormi preview --root examples/static-export`。
 
+### 4.28 数字、日期与复数消息
+
+`useIntl()` 直接绑定当前语言到平台 `Intl`：
+
+```tsx
+const { formatNumber, formatDate, tp } = useIntl();
+formatNumber(1234.5);                       // en: 1,234.5；de: 1.234,5
+formatDate(Date.now(), { dateStyle: 'medium' });
+tp('items', 1);                             // items_one；缺失时 items_other，再回退 items
+```
+
+```jsonc
+{ "items_one": "{count} item", "items_other": "{count} items" }
+```
+
+复数类别由 `Intl.PluralRules(locale)` 决定，`{count}` 自动插值；`tp` 会先在当前语言、再在 fallback 语言中查找。非法数字/日期与非法 count 会抛 `TypeError`（`LOCALE_INVALID`）。这里没有 ICU 复数语法、相对时间或富文本消息。规则见 [F5f 格式化与复数](89-f5f-locale-formatting.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

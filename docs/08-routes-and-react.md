@@ -56,6 +56,8 @@ F4k 起，CLI 支持「命令 + 至多 32 个位置参数」，`generatorPlugin`
 
 F5e 起，显式启用的 `staticExportPlugin` 在构建后为每个字面路径路由生成带 `meta.head` 的 HTML 外壳（`dist/guide/index.html` 等），与 `headPlugin` 搭配覆盖首屏与客户端导航；这不是预渲染。详见 [F5e 静态导出](88-f5e-static-export.md)。
 
+F5f 起，`useIntl()` 提供 `formatNumber`/`formatDate`（平台 Intl）与 `tp` 复数选择（`_one`/`_other` 后缀，含 fallback 语言）；不引入 ICU 解析器。详见 [F5f 格式化与复数](89-f5f-locale-formatting.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

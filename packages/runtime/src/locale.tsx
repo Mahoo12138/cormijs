@@ -7,6 +7,32 @@ export interface IntlApi {
   t(key: string, values?: Readonly<Record<string, string | number>>): string;
   /** Catalog lookup without the key-as-text fallback. */
   peek(key: string): string | undefined;
+  formatNumber(value: number, options?: Intl.NumberFormatOptions): string;
+  formatDate(value: Date | number | string, options?: Intl.DateTimeFormatOptions): string;
+  /** Plural-aware lookup: `${key}_${category}` → `${key}_other` → the plain key, with `{count}` interpolation. */
+  tp(key: string, count: number, values?: Readonly<Record<string, string | number>>): string;
+}
+
+/** Pure plural selection shared by the provider and tests; `locales` is ordered (current, then fallback). */
+export function selectPluralKey(messages: Readonly<Record<string, Readonly<Record<string, string>>>>, locales: readonly string[], key: string, category: string): string | undefined {
+  for (const locale of locales) {
+    const table = messages[locale];
+    if (!table) continue;
+    const text = table[`${key}_${category}`] ?? table[`${key}_other`] ?? table[key];
+    if (text !== undefined) return text;
+  }
+  return undefined;
+}
+
+export function formatNumberFor(locale: string, value: number, options?: Intl.NumberFormatOptions): string {
+  if (typeof value !== 'number' || !Number.isFinite(value)) throw new TypeError('LOCALE_INVALID: formatNumber expects a finite number');
+  return new Intl.NumberFormat(locale, options).format(value);
+}
+
+export function formatDateFor(locale: string, value: Date | number | string, options?: Intl.DateTimeFormatOptions): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) throw new TypeError('LOCALE_INVALID: formatDate expects a valid date');
+  return new Intl.DateTimeFormat(locale, options).format(date);
 }
 const LocaleContext = createContext<IntlApi | null>(null);
 const DEFAULT_STORAGE_KEY = 'cormi:locale';
@@ -65,7 +91,18 @@ export function LocaleProvider({ appConfig, children }: { readonly appConfig: Re
     if (typeof key !== 'string' || !key) return undefined;
     return config.messages[locale]?.[key] ?? (config.fallback ? config.messages[config.fallback]?.[key] : undefined);
   }, [config, locale]);
-  const value = useMemo<IntlApi>(() => ({ locale, setLocale, t, peek }), [locale, setLocale, t, peek]);
+  const formatNumber = useCallback((input: number, options?: Intl.NumberFormatOptions) => formatNumberFor(locale, input, options), [locale]);
+  const formatDate = useCallback((input: Date | number | string, options?: Intl.DateTimeFormatOptions) => formatDateFor(locale, input, options), [locale]);
+  const tp = useCallback((key: string, count: number, values?: Readonly<Record<string, string | number>>) => {
+    if (typeof key !== 'string' || !key) return '';
+    if (typeof count !== 'number' || !Number.isFinite(count)) throw new TypeError('LOCALE_INVALID: tp expects a finite count');
+    const category = new Intl.PluralRules(locale).select(count);
+    const text = selectPluralKey(config.messages, config.fallback ? [locale, config.fallback] : [locale], key, category)
+      ?? config.messages[locale]?.[key] ?? (config.fallback ? config.messages[config.fallback]?.[key] : undefined) ?? key;
+    const all: Record<string, string | number> = { count, ...(values ?? {}) };
+    return text.replace(/\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (match, name: string) => Object.hasOwn(all, name) ? String(all[name]) : match);
+  }, [config, locale]);
+  const value = useMemo<IntlApi>(() => ({ locale, setLocale, t, peek, formatNumber, formatDate, tp }), [locale, setLocale, t, peek, formatNumber, formatDate, tp]);
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 
