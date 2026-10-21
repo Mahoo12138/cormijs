@@ -31,4 +31,8 @@ test('SSR renders routes and loader data in preview and hydrates without errors'
   await verifySsrPage(page, production.url);
   assert.deepEqual(errors, []);
   await page.goto('about:blank'); assert.equal(await preview.stop(), 0, JSON.stringify(preview.events) + preview.stderr);
+  const serve = cli(t, f.root, 'serve'), served = await serve.waitFor(event => event.type === 'ready');
+  await verifySsrPage(page, served.url);
+  assert.deepEqual(errors, []);
+  await page.goto('about:blank'); assert.equal(await serve.stop(), 0, JSON.stringify(serve.events) + serve.stderr);
 });

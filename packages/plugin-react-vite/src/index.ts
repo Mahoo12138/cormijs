@@ -12,6 +12,7 @@ export { apiRoutePlugin, resolveApiRoutes, matchApiRoute, runApiHandler, type Ap
 export { mpaPlugin, resolveMpaEntries, mpaEntrySource, mpaHtml, type MpaPluginOptions, type MpaCandidate, type MpaEntry } from './mpa.js';
 export { proxyPlugin, normalizeProxy, type ProxyPluginOptions, type ProxyTarget, type ProxyTargetOptions, type NormalizedProxyTarget } from './proxy.js';
 export { ssrPlugin, type SsrPluginOptions } from './ssr.js';
+export { servePlugin, type ServePluginOptions } from './serve.js';
 
 /** All Vite-specific React behavior stays in this optional bridge. */
 export const reactVitePlugin: Plugin.Object<void> = {

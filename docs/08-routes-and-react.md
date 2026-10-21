@@ -92,7 +92,9 @@ F5w 起，`generatorPlugin` 的 `templates` 可贡献最多 16 个静态生成�
 
 F5x 起，`@cormijs/runtime` 导出 `<Helmet>`，与路由 `meta.head` 合并（路由→组件），支持 title/metas/links/jsonLd；仍在 `headPlugin` 的受管节点与卸载恢复机制内。详见 [F5x Helmet](106-f5x-helmet.md)。
 
-F5y 起，可选 `app.ssr: true` + `ssrPlugin`：dev 与 preview 对 HTML 导航做服务端渲染与 hydration，build 产出服务端 bundle；支持 `app.base` 前缀，`app.ssr` 下页面 eager 导入。详见 [F5y SSR](107-f5y-ssr.md)。
+F5y 起，可选 `app.ssr: true` + `ssrPlugin`：dev 与 preview 对 HTML 导航做服务端渲染与 hydration，build 产出服务端 bundle；支持 `app.base` 前缀，`app.ssr` 下页面 eager 导入。
+
+F5z 起，`servePlugin` 注册 `cormi serve`，从已完成构建的 dist 提供 SSR 页面与静态资产，不启动 Vite、不执行 API/proxy。详见 [F5z cormi serve](108-f5z-serve.md)。详见 [F5y SSR](107-f5y-ssr.md)。
 
 ```sh
 pnpm build

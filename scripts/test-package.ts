@@ -100,7 +100,7 @@ const coreTypes = `import {ProjectRuntime,type Context} from '@cormijs/core';con
 async function command(label: string, cwd: string, name: string, expected = 0, pattern?: RegExp) {
   return execute(label, cwd, join(cwd, 'node_modules/.bin/cormi'), [name, '--json', '--startup-timeout', '30000'], expected, pattern);
 }
-async function withServer(cwd: string, name: 'dev' | 'preview', action: (url: string) => Promise<void>, args: string[] = [], carrierFile?: string) {
+async function withServer(cwd: string, name: 'dev' | 'preview' | 'serve', action: (url: string) => Promise<void>, args: string[] = [], carrierFile?: string) {
   const sessionLabel = cwd.split(sep).at(-1) + '-' + name + (carrierFile ? '-bootstrap' : '');
   const executable = carrierFile ? process.execPath : join(cwd, 'node_modules/.bin/cormi');
   const argv = carrierFile ? [carrierFile,name] : [name, '--json', '--startup-timeout', '30000', ...args];
@@ -886,7 +886,8 @@ const bad:SsrPluginOptions={mountId:1};
     await command('ssr-build',ssrConsumer,'build');
     assert.ok(existsSync(join(ssrConsumer,'dist/.cormi/ssr/ssr.mjs')));
     await withServer(ssrConsumer,'preview',async url=>{await verifySsrPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'ssr-preview.png')});});
-    report.stages.push({label:'installed-ssr-build-and-hydrated-preview',serverLoader:true,previewRegenerated:false});
+    await withServer(ssrConsumer,'serve',async url=>{await verifySsrPage(page,url);assert.deepEqual(errors,[]);});
+    report.stages.push({label:'installed-ssr-build-hydrated-preview-and-serve',serverLoader:true,serveCommand:true,previewRegenerated:false});
 
     }
     if (selected('prefetch')) {

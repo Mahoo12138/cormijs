@@ -1029,7 +1029,17 @@ export default defineConfig({
 });
 ```
 
-`cormi dev` 与 `cormi preview` 的 HTML 导航都由 static handler 渲染（clientLoader 在服务端执行）并注入 hydration 数据，客户端 hydrateRoot 接管；`cormi build` 额外产出 `dist/.cormi/ssr/ssr.mjs` 供 preview。`app.ssr: true` 会改为 eager 页面组件（牺牲路由拆包）；`app.base` 前缀由服务端剥离并与客户端 basename 对齐。无 serverLoader/流式/独立 server 命令。规则见 [F5y SSR](107-f5y-ssr.md)。
+`cormi dev` 与 `cormi preview` 的 HTML 导航都由 static handler 渲染（clientLoader 在服务端执行）并注入 hydration 数据，客户端 hydrateRoot 接管；`cormi build` 额外产出 `dist/.cormi/ssr/ssr.mjs` 供 preview。`app.ssr: true` 会改为 eager 页面组件（牺牲路由拆包）；`app.base` 前缀由服务端剥离并与客户端 basename 对齐。无 serverLoader/流式。
+
+### 4.47 独立生产服务 `cormi serve`
+
+启用 `servePlugin` 后可用 `cormi serve` 提供已构建产物：
+
+```ts
+plugins: [{ id: 'serve', plugin: servePlugin, options: { id: 'application:serve', port: 4173, base: '/' } }]
+```
+
+服务读取 `dist/index.html` 与 `dist/.cormi/ssr/ssr.mjs`：HTML 导航执行 SSR/hydration，其余请求按 dist 白名单提供静态文件；需先 `cormi build`。支持 `host`/`port`/`outDir`/`base`/`mountId` 选项；不执行 API 路由、Mock、代理，无压缩/流式/TLS。规则见 [F5z cormi serve](108-f5z-serve.md)。规则见 [F5y SSR](107-f5y-ssr.md)。
 
 ## 5. 环境和 Mock 使用同一个部署前缀
 

@@ -20,7 +20,7 @@ import { cormiApplication } from './app';
 export const render = (request) => renderServerApplication(cormiApplication, request);
 `;
 
-function sendResult(response: Response, res: import('node:http').ServerResponse, head: boolean): Promise<void> {
+export function sendResult(response: Response, res: import('node:http').ServerResponse, head: boolean): Promise<void> {
   return (async () => {
     res.statusCode = response.status;
     for (const [name, value] of response.headers) res.setHeader(name, value);
@@ -30,7 +30,7 @@ function sendResult(response: Response, res: import('node:http').ServerResponse,
   })();
 }
 
-function toRequest(request: import('node:http').IncomingMessage): Request {
+export function toRequest(request: import('node:http').IncomingMessage): Request {
   const url = new URL(request.url ?? '/', `http://${typeof request.headers.host === 'string' ? request.headers.host : 'localhost'}`);
   const headers = new Headers();
   for (const [name, value] of Object.entries(request.headers)) if (value !== undefined && name !== 'content-length' && name !== 'transfer-encoding') {
@@ -39,7 +39,7 @@ function toRequest(request: import('node:http').IncomingMessage): Request {
   return new Request(url, { method: request.method, headers });
 }
 
-function injectShell(shell: string, rendered: { html?: unknown; status?: unknown; headers?: unknown }, mountId: string): Response {
+export function injectShell(shell: string, rendered: { html?: unknown; status?: unknown; headers?: unknown }, mountId: string): Response {
   if (typeof rendered.html !== 'string') throw new CormiError('SSR_RENDER_INVALID', 'SSR result has no html.');
   const marker = `<div id="${mountId}"></div>`;
   if (!shell.includes(marker)) throw new CormiError('SSR_SHELL_INVALID', 'index.html has no empty mount element.', { mountId });
@@ -53,14 +53,14 @@ function injectShell(shell: string, rendered: { html?: unknown; status?: unknown
   });
 }
 
-function withinBase(request: import('node:http').IncomingMessage, base: string): boolean {
+export function withinBase(request: import('node:http').IncomingMessage, base: string): boolean {
   if (base === '/') return true;
   const pathname = new URL(request.url ?? '/', 'http://localhost').pathname;
   const prefix = base.endsWith('/') ? base.slice(0, -1) : base;
   return pathname === prefix || pathname.startsWith(prefix + '/');
 }
 
-function navigation(request: import('node:http').IncomingMessage): boolean {
+export function navigation(request: import('node:http').IncomingMessage): boolean {
   const accept = request.headers.accept ?? '';
   return (request.method === 'GET' || request.method === 'HEAD') && accept.includes('text/html')
     && !request.url?.startsWith('/.cormi/') && !request.url?.startsWith('/assets/');

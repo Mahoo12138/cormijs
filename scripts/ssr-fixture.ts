@@ -5,10 +5,13 @@ import type { Page } from 'playwright-core';
 
 export const ssrConfiguration = `import { defineConfig } from 'cormijs';
 import preset from '@cormijs/preset-react-vite';
-import { ssrPlugin } from '@cormijs/plugin-react-vite';
+import { servePlugin, ssrPlugin } from '@cormijs/plugin-react-vite';
 export default defineConfig({
   presets: [preset],
-  plugins: [{ id: 'ssr', plugin: ssrPlugin, options: { id: 'application:ssr' } }],
+  plugins: [
+    { id: 'ssr', plugin: ssrPlugin, options: { id: 'application:ssr' } },
+    { id: 'serve', plugin: servePlugin, options: { id: 'application:serve', port: 0, base: '/ssr/' } },
+  ],
   app: { ssr: true, base: '/ssr/', server: { port: 0 } },
 });
 `;
