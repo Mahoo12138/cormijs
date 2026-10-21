@@ -79,7 +79,8 @@ test('ssr plugin registers its Vite bridge, validates options and withdraws', as
 
   for (const options of [{ mountId: '9bad' }, { mountId: 1 }, { extra: true }, { prerender: 'yes' }, { sitemap: 'https://example.com' }, { prerender: true, sitemap: 'ftp://example.com' },
     { prerenderPaths: ['/x'] }, { prerender: true, prerenderPaths: ['relative'] }, { prerender: true, prerenderPaths: ['/a/../b'] },
-    { prerender: true, prerenderIgnoreErrors: 'yes' }, { prerender: true, prerenderPaths: 1 }]) {
+    { prerender: true, prerenderIgnoreErrors: 'yes' }, { prerender: true, prerenderPaths: 1 },
+    { prerender: true, prerenderIncremental: 'yes' }, { prerender: true, prerenderPaths: [{ path: '/x', prerender: 'yes' }] }, { prerender: true, prerenderPaths: [{ path: '/x', extra: true }] }]) {
     const rejecting = new ProjectRuntime(3000, root);
     rejecting.mount('vite', vitePlugin);
     rejecting.mount('react', reactPlugin);
@@ -120,6 +121,7 @@ test('prerenderStaticPages writes literal routes, skips redirects and emits a si
 
 test('resolvePrerenderPaths accepts arrays and async producers, and prerender can skip page errors', async () => {
   assert.deepEqual(await resolvePrerenderPaths(['/users/2', '/users/1', '/users/2']), ['/users/1', '/users/2']);
+  assert.deepEqual(await resolvePrerenderPaths(['/users/1', { path: '/users/2', prerender: false }, { path: '/users/3' }]), ['/users/1', '/users/3']);
   assert.deepEqual(await resolvePrerenderPaths(async () => ['/guide']), ['/guide']);
   await assert.rejects(resolvePrerenderPaths(async () => ['relative']), hasCode('SSR_INVALID'));
   await assert.rejects(resolvePrerenderPaths(1 as never), hasCode('SSR_INVALID'));
@@ -136,6 +138,10 @@ test('resolvePrerenderPaths accepts arrays and async producers, and prerender ca
     assert.deepEqual(result.written, ['/ok']);
     assert.deepEqual(result.skipped, [{ path: '/broken', status: 0, error: 'boom' }]);
     assert.ok(!(await readFile(join(root, 'sitemap.xml'), 'utf8')).includes('broken'));
+    const second = await prerenderStaticPages({ output: root, shell, mountId: 'root', base: '/', pages, render, ignoreErrors: true, incremental: true, sitemap: 'https://example.com' });
+    assert.deepEqual(second.written, []);
+    assert.deepEqual(second.unchanged, ['/ok']);
+    assert.ok((await readFile(join(root, 'sitemap.xml'), 'utf8')).includes('https://example.com/ok'));
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 

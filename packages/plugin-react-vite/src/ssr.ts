@@ -10,16 +10,24 @@ import type { RouteRecord } from '@cormijs/routes';
 import type { ServerStreamResult } from '@cormijs/runtime/server';
 import { staticPages, type StaticPage } from './static-export.js';
 
+export interface PrerenderPathEntry {
+  readonly path: string;
+  /** Set false to keep the path out of this build while retaining it in configuration. */
+  readonly prerender?: boolean;
+}
+export type PrerenderPath = string | PrerenderPathEntry;
 export interface SsrPluginOptions {
   readonly id?: string;
   /** Client mount element replaced with server markup; default `root`. */
   readonly mountId?: string;
   /** Render every literal route into its own HTML file after the SSR bundle is built. */
   readonly prerender?: boolean;
-  /** Extra application paths (or an async path producer) to prerender; requires prerender. */
-  readonly prerenderPaths?: readonly string[] | (() => readonly string[] | Promise<readonly string[]>);
+  /** Extra application paths (or an async path producer) to prerender; object entries can disable a path. */
+  readonly prerenderPaths?: readonly PrerenderPath[] | (() => readonly PrerenderPath[] | Promise<readonly PrerenderPath[]>);
   /** Log and skip pages whose render throws instead of failing the build. */
   readonly prerenderIgnoreErrors?: boolean;
+  /** Keep existing HTML files when their rendered content is unchanged. */
+  readonly prerenderIncremental?: boolean;
   /** Absolute site origin used to write sitemap.xml for prerendered routes. Requires prerender. */
   readonly sitemap?: string;
   /** Stream HTML through React's streaming renderer instead of buffering the whole page. */
@@ -198,14 +206,25 @@ function extraPrerenderPaths(value: unknown): readonly string[] {
   if (!Array.isArray(value) || value.length > 10000) throw new CormiError('SSR_INVALID', 'prerenderPaths must be an array of at most 10000 paths.');
   const paths = new Set<string>();
   for (const raw of value) {
-    if (typeof raw !== 'string' || !raw.startsWith('/') || raw.startsWith('//') || raw.length > 512 || /[\0\r\n?#%\\]/.test(raw)
-      || raw.split('/').some(segment => segment === '..' || segment === '.')) throw new CormiError('SSR_INVALID', 'prerenderPaths entries must be internal application paths.');
-    paths.add(raw === '/' ? '/' : raw.replace(/\/+$/, ''));
+    let path: unknown = raw, prerender = true;
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+      const entry = raw as Record<string, unknown>;
+      if (Object.keys(entry).some(key => !['path', 'prerender'].includes(key)) || typeof entry.path !== 'string'
+        || entry.prerender !== undefined && typeof entry.prerender !== 'boolean') {
+        throw new CormiError('SSR_INVALID', 'prerenderPaths entries must be a path string or { path, prerender? }.');
+      }
+      path = entry.path;
+      prerender = entry.prerender !== false;
+    }
+    if (!prerender) continue;
+    if (typeof path !== 'string' || !path.startsWith('/') || path.startsWith('//') || path.length > 512 || /[\0\r\n?#%\\]/.test(path)
+      || path.split('/').some(segment => segment === '..' || segment === '.')) throw new CormiError('SSR_INVALID', 'prerenderPaths entries must be internal application paths.');
+    paths.add(path === '/' ? '/' : path.replace(/\/+$/, ''));
   }
   return Object.freeze([...paths].sort());
 }
 
-/** Resolve an array or async path producer (Umi extraRoutePaths) with the same validation. */
+/** Resolve an array or async path producer (Umi extraRoutePaths) with per-page disable and validation. */
 export async function resolvePrerenderPaths(value: SsrPluginOptions['prerenderPaths']): Promise<readonly string[]> {
   if (value === undefined) return Object.freeze([]);
   if (typeof value !== 'function' && !Array.isArray(value)) throw new CormiError('SSR_INVALID', 'prerenderPaths must be an array or an async function.');
@@ -230,9 +249,11 @@ export interface PrerenderOptions {
   readonly render: Render;
   readonly sitemap?: string;
   readonly ignoreErrors?: boolean;
+  readonly incremental?: boolean;
 }
 export interface PrerenderResult {
   readonly written: readonly string[];
+  readonly unchanged: readonly string[];
   readonly skipped: readonly { readonly path: string; readonly status: number; readonly error?: string }[];
   readonly sitemap?: string;
 }
@@ -242,7 +263,7 @@ export interface PrerenderResult {
  * (redirects cannot be frozen into HTML); their paths are excluded from the sitemap.
  */
 export async function prerenderStaticPages(options: PrerenderOptions): Promise<PrerenderResult> {
-  const written: string[] = [], skipped: { path: string; status: number; error?: string }[] = [], urls: string[] = [];
+  const written: string[] = [], unchanged: string[] = [], skipped: { path: string; status: number; error?: string }[] = [], urls: string[] = [];
   for (const page of options.pages) {
     const target = page.path === '/' ? join(options.output, 'index.html') : join(options.output, ...page.path.split('/').filter(Boolean), 'index.html');
     const local = relative(options.output, target);
@@ -254,6 +275,14 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
       const status = (rendered as { status?: unknown }).status;
       if (typeof status === 'number' && status >= 400) { skipped.push({ path: page.path, status }); continue; }
       const html = await injectShell(options.shell, rendered as { html?: unknown }, options.mountId).text();
+      if (options.incremental) {
+        const existing = await readFile(target, 'utf8').catch((error: NodeJS.ErrnoException) => error.code === 'ENOENT' ? undefined : Promise.reject(error));
+        if (existing === html) {
+          unchanged.push(page.path);
+          if (options.sitemap) urls.push(publicUrl(options.sitemap, options.base, page.path));
+          continue;
+        }
+      }
       if (page.path !== '/') await mkdir(dirname(target), { recursive: true });
       await writeFile(target, html);
       written.push(page.path);
@@ -268,22 +297,24 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
     sitemap = join(options.output, 'sitemap.xml');
     await writeFile(sitemap, sitemapXml(urls));
   }
-  return Object.freeze({ written: Object.freeze(written), skipped: Object.freeze(skipped), ...(sitemap ? { sitemap } : {}) });
+  return Object.freeze({ written: Object.freeze(written), unchanged: Object.freeze(unchanged), skipped: Object.freeze(skipped), ...(sitemap ? { sitemap } : {}) });
 }
 
 /** Opt-in SSR: dev renders through Vite's SSR module graph, preview through a built server bundle. */
 export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
   name: 'cormi:ssr', inject: ['vite', 'react'],
   apply(ctx, options = {}) {
-    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'prerenderIgnoreErrors', 'sitemap', 'streaming'].includes(key))) {
+    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'prerenderIgnoreErrors', 'prerenderIncremental', 'sitemap', 'streaming'].includes(key))) {
       throw new CormiError('SSR_INVALID', 'Invalid SSR plugin options.');
     }
     if (options.prerender !== undefined && typeof options.prerender !== 'boolean') throw new CormiError('SSR_INVALID', 'prerender must be boolean.');
     if (options.streaming !== undefined && typeof options.streaming !== 'boolean') throw new CormiError('SSR_INVALID', 'streaming must be boolean.');
     if (options.prerenderIgnoreErrors !== undefined && typeof options.prerenderIgnoreErrors !== 'boolean') throw new CormiError('SSR_INVALID', 'prerenderIgnoreErrors must be boolean.');
+    if (options.prerenderIncremental !== undefined && typeof options.prerenderIncremental !== 'boolean') throw new CormiError('SSR_INVALID', 'prerenderIncremental must be boolean.');
     if (options.prerenderPaths !== undefined && typeof options.prerenderPaths !== 'function' && !Array.isArray(options.prerenderPaths)) throw new CormiError('SSR_INVALID', 'prerenderPaths must be an array or an async function.');
     if (options.prerenderPaths !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderPaths requires prerender: true.');
     if (options.prerenderIgnoreErrors !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderIgnoreErrors requires prerender: true.');
+    if (options.prerenderIncremental !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderIncremental requires prerender: true.');
     if (Array.isArray(options.prerenderPaths)) extraPrerenderPaths(options.prerenderPaths);
     const sitemap = options.sitemap === undefined ? undefined : sitemapSite(options.sitemap);
     if (sitemap !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'sitemap requires prerender: true.');
@@ -355,7 +386,7 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
               const extraPaths = await resolvePrerenderPaths(options.prerenderPaths);
               const result = await prerenderStaticPages({ output: resolved.build.outDir, shell, mountId, base: resolved.base,
                 pages: prerenderPages(routes, extraPaths), render: module.render as Render, ignoreErrors: options.prerenderIgnoreErrors === true,
-                ...(sitemap !== undefined ? { sitemap } : {}) });
+                incremental: options.prerenderIncremental === true, ...(sitemap !== undefined ? { sitemap } : {}) });
               if (result.skipped.length) console.warn('[cormi:ssr:prerender] skipped routes', JSON.stringify(result.skipped));
             } catch (cause) {
               if (cause instanceof CormiError) throw cause;

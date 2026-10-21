@@ -56,6 +56,8 @@ test('SSR renders routes and loader data in preview and hydrates without errors'
   const dynamicPage = await readFile(join(f.root, 'dist/backend/7/index.html'), 'utf8');
   assert.match(dynamicPage, /server loader<!-- -->:<!-- -->7<!-- -->:<!-- -->\/ssr\/backend\/7/);
   assert.match(dynamicPage, /__staticRouterHydrationData/);
+  assert.equal(existsSync(join(f.root, 'dist/backend/8/index.html')), false, 'per-page prerender:false is honored');
+  assert.doesNotMatch(sitemap, /backend\/8/);
   assert.match(await readFile(join(f.root, 'dist/.cormi/shell.html'), 'utf8'), /<div id="root"><\/div>/);
   const preview = cli(t, f.root, 'preview'), production = await preview.waitFor(event => event.type === 'ready');
   await verifySsrPage(page, production.url);

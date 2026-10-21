@@ -9,8 +9,9 @@ plugins: [
   { id: 'ssr', plugin: ssrPlugin, options: {
     id: 'application:ssr',
     prerender: true,
-    prerenderPaths: async () => ['/users/1', '/users/2'],
+    prerenderPaths: async () => [{ path: '/users/1' }, { path: '/users/2', prerender: false }],
     prerenderIgnoreErrors: false,
+    prerenderIncremental: true,
     sitemap: 'https://example.com',
   } },
 ],
@@ -31,7 +32,7 @@ cormi build
 
 ## 2. 契约与语义
 
-- **触发**：`ssrPlugin` 的 `prerender: true`；`sitemap` 是可选绝对 http(s) 站点地址，`prerenderPaths` 是可选内部应用路径数组或异步函数（构建时调用，用于枚举 `:id` 等动态页），`prerenderIgnoreErrors` 允许单页异常跳过。三者都必须与 `prerender` 同时出现，否则 `SSR_INVALID`。
+- **触发**：`ssrPlugin` 的 `prerender: true`；`sitemap` 是可选绝对 http(s) 站点地址，`prerenderPaths` 是可选内部应用路径数组/异步函数（对象条目可 `prerender:false` 跳过），`prerenderIgnoreErrors` 允许单页异常跳过，`prerenderIncremental` 跳过未变化 HTML 的写入。均需与 `prerender` 同时出现，否则 `SSR_INVALID`。
 - **路由集合**：复用 `staticPages`：只处理有页面模块、无 redirect、路径不含 `:param` 或 `*` 的路由；再合并 `prerenderPaths`（去重、排序，非法路径或 `..` 被拒绝）。
 - **渲染**：构建完成后导入 `dist/.cormi/ssr/ssr.mjs`，对每个路径构造包含 `app.base` 的 GET 请求，执行与运行时相同的 `renderServerApplication`。clientLoader 与 serverLoader 都会执行，数据进入 hydration；`meta.head` 与 `<Helmet>` 通过 `injectShell` 写入页面。
 - **重定向与错误**：loader 返回 `Response` 或 SSR 结果状态 `>= 400` 的页面不会写成 HTML；`prerenderIgnoreErrors: true` 时单页渲染异常也记录并跳过，默认抛错使构建失败。跳过项不进入 sitemap。
@@ -42,7 +43,7 @@ cormi build
 
 ## 3. 边界
 
-- 动态参数路径必须由 `prerenderPaths` 显式枚举（对应 Umi `exportStatic.extraRoutePaths`）；不会从数据源自动发现路径。
+- 动态参数路径必须由 `prerenderPaths` 显式枚举（对应 Umi `exportStatic.extraRoutePaths`）；对象条目可关闭单页。不会从数据源自动发现路径。
 - 没有增量预渲染、页面级开关、并发控制或渲染结果缓存；每个字面路由顺序渲染一次。
 - 与 `staticExportPlugin` 同时启用时，后执行的壳写入可能覆盖预渲染结果；需要预渲染时不要同时启用静态外壳导出（或确保 staticExport 先执行）。本切片不自动协调插件顺序。
 - sitemap 不包含 `lastmod`、优先级、多语言 alternates、robots.txt 或 sitemap index。
