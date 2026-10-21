@@ -1,0 +1,116 @@
+{
+  "format": "cormi:u32-streaming-validation:1",
+  "verifiedAt": "2026-10-21T18:55:26.190Z",
+  "base": "d6365b36feae3c72e7e9fdfbc650cca464439e2a",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/plugin-react-vite/src/serve.ts",
+      "packages/plugin-react-vite/src/ssr.ts",
+      "packages/runtime/src/server.tsx",
+      "scripts/ssr-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/ssr.test.ts",
+      "docs/115-u32-streaming.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u32-streaming/check.log",
+      "sha256": "f9cd4eed90da2d621aeaccf948e5e11e25fb1d367327d15573575d3ce2279b4b",
+      "seconds": 120.3,
+      "tests": 559,
+      "pass": 559,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u32-streaming/browser.log",
+      "sha256": "0685b841fbf9aec0b81fad66acf5f595e04c6cd20966887c5e8b04cb3cd2f3ae",
+      "seconds": 556.1,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u32-streaming/package.log",
+      "sha256": "72e78e68763b5e6ac50d53460c17cedd6e3b720e072caa9786f84bff0ee53b4b",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/ssr.test.ts",
+      "log": ".cache/u32-streaming/targeted.log",
+      "sha256": "7c062d62de7ac3e6268d2bf71fd36464e59616ff695634670c1f524962eabd7b",
+      "seconds": 0.5,
+      "tests": 5,
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "early shell flush before suspended content, hydration script relocation, loader data, prerender and option validation"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "98f38fdc7023b4668760be0ae65c99ca841cf2b44a9fdb79a5a980580f26bdcc",
+    "docs/49-application-guide.md": "672dcdc24e64785c87c1f77035856701a40048e40ff3737050f45bfa7c6cb725",
+    "docs/59-umi-feature-roadmap.md": "f95658268961fbf4777a98235a6013cfcb9272172b3614c65ef58669ab56458d",
+    "packages/plugin-react-vite/src/serve.ts": "2d0e7026aed329e2544ac307d3907e99e57dcfcd9491d583daa2004ec66eabd0",
+    "packages/plugin-react-vite/src/ssr.ts": "2047417823ffa943ce431a4b8a661b1f8e72f024ff103e097c7db41038d7e860",
+    "packages/runtime/src/server.tsx": "2c1f5d016734592712cbdcc575a1bea60194678ca6e6b456f42b63f33c62879f",
+    "scripts/ssr-fixture.ts": "ef223eee063a58cff2e73b764d65bdd894bfe99d463b0acc569908925f4968e7",
+    "scripts/test-package.ts": "31c450c5c0b88196ad05cc2f0185a72593b19caf81b3854f790a10242b8e055c",
+    "tests/ssr.test.ts": "caae82f5784df11748ec7de42fde7c097ba4c20d3efd4a4e43af1180de8643c0",
+    "docs/115-u32-streaming.md": "181d02e64763bf1c5e291d1610cd5fe008da52e904a13f336779aba4acd95d97"
+  },
+  "sourceInputCount": 10,
+  "sourceInputsDigest": "a3bb857d09161aea2a89a9175efd650d58afa4701f95ac87c5882354697e5ad8",
+  "documentationInputs": {
+    "docs/115-u32-streaming.md": "181d02e64763bf1c5e291d1610cd5fe008da52e904a13f336779aba4acd95d97",
+    "docs/59-umi-feature-roadmap.md": "f95658268961fbf4777a98235a6013cfcb9272172b3614c65ef58669ab56458d",
+    "docs/112-roadmap-audit-2026-10-21.md": "98f38fdc7023b4668760be0ae65c99ca841cf2b44a9fdb79a5a980580f26bdcc",
+    "docs/49-application-guide.md": "672dcdc24e64785c87c1f77035856701a40048e40ff3737050f45bfa7c6cb725"
+  },
+  "evidence": [
+    ".cache/u32-streaming/check.log",
+    ".cache/u32-streaming/browser.log",
+    ".cache/u32-streaming/package.log",
+    ".cache/u32-streaming/targeted.log",
+    "artifacts/u32-streaming-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "requires-static-content-outside-suspense-for-early-flush",
+    "server-loaders-still-resolve-before-render",
+    "helmet-inside-suspended-content-misses-initial-head",
+    "no-compression-tls-http2",
+    "ignores-node-write-backpressure",
+    "stream-errors-after-headers-are-logged-only",
+    "proxy-buffering-not-verified",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createElement } from 'react';
-import { redirect } from 'react-router';
+import { createElement, Suspense } from 'react';
+import { Outlet, redirect } from 'react-router';
 import { existsSync } from 'node:fs';
 import { mkdtemp, readFile, realpath, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -10,7 +10,7 @@ import { ProjectRuntime } from '@cormijs/core';
 import { vitePlugin } from '@cormijs/plugin-vite';
 import { reactPlugin } from '@cormijs/plugin-react';
 import { prerenderPages, prerenderStaticPages, sitemapXml, ssrPlugin } from '@cormijs/plugin-react-vite';
-import { renderServerApplication, type ServerApplication } from '@cormijs/runtime/server';
+import { renderServerApplication, renderServerApplicationStream, type ServerApplication } from '@cormijs/runtime/server';
 
 const hasCode = (code: string) => (error: any) => (error?.code ?? error?.cause?.code) === code;
 
@@ -30,6 +30,38 @@ test('renderServerApplication renders routes and loader data, and returns redire
   assert.ok(moved instanceof Response);
   assert.equal(moved.status, 302);
   assert.equal(moved.headers.get('location'), '/');
+});
+
+test('renderServerApplicationStream flushes the shell early and moves hydration outside the markup', async () => {
+  let release!: (value: string) => void;
+  const gate = new Promise<string>(resolve => { release = resolve; });
+  let data: string | undefined;
+  function Async() {
+    if (data === undefined) throw gate.then(value => { data = value; });
+    return createElement('p', null, data);
+  }
+  const Shell = () => createElement('main', null, createElement('h1', null, 'stream shell'),
+    createElement(Suspense, { fallback: createElement('p', null, 'loading'.repeat(20)) }, createElement(Outlet)));
+  const app: ServerApplication = {
+    routes: [{ id: 'shell', path: '', Component: Shell, handle: { cormi: { meta: { head: { title: 'Stream title' } } } },
+      children: [{ id: 'home', index: true, Component: Async, loader: async () => ({ ok: true }) }] }],
+  };
+  const result = await renderServerApplicationStream(app, new Request('http://localhost/'));
+  assert.ok(!(result instanceof Response));
+  assert.equal(result.head.title, 'Stream title');
+  const reader = result.stream.getReader(), decoder = new TextDecoder();
+  const first = await reader.read();
+  const chunk = decoder.decode(first.value);
+  assert.match(chunk, /stream shell/);
+  assert.match(chunk, /loading/);
+  release('streamed');
+  let markup = chunk;
+  for (;;) { const { done, value } = await reader.read(); if (done) break; markup += decoder.decode(value); }
+  assert.match(markup, /streamed/);
+  assert.doesNotMatch(markup, /__staticRouterHydrationData/);
+  const hydration = await result.hydration;
+  assert.match(hydration, /^<script>window\.__staticRouterHydrationData/);
+  assert.match(hydration, /\\"home\\":\{\\"ok\\":true\}/);
 });
 
 test('ssr plugin registers its Vite bridge, validates options and withdraws', async t => {

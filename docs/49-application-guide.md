@@ -1031,7 +1031,7 @@ export default defineConfig({
 });
 ```
 
-`cormi dev` 与 `cormi preview` 的 HTML 导航都由 static handler 渲染（clientLoader 在服务端执行）并注入 hydration 数据，客户端 hydrateRoot 接管；服务端同时输出路由 `meta.head`/`<Helmet>` 的 title/meta/link/JSON-LD 到 shell。`cormi build` 额外产出 `dist/.cormi/ssr/ssr.mjs` 供 preview/serve。serverLoader 仅在服务端执行并写入 hydration，客户端导航经 `<base>.cormi/server-loader` 取数；hydration 前只预解析当前匹配链，其他页面仍按需加载；`app.base` 前缀由服务端剥离并与客户端 basename 对齐。无流式。
+`cormi dev` 与 `cormi preview` 的 HTML 导航都由 static handler 渲染（clientLoader 在服务端执行）并注入 hydration 数据，客户端 hydrateRoot 接管；服务端同时输出路由 `meta.head`/`<Helmet>` 的 title/meta/link/JSON-LD 到 shell。`cormi build` 额外产出 `dist/.cormi/ssr/ssr.mjs` 供 preview/serve。serverLoader 仅在服务端执行并写入 hydration，客户端导航经 `<base>.cormi/server-loader` 取数；`streaming: true` 时 dev/preview/serve 使用 React 流式渲染，Suspense 边界继续流入，hydration 脚本放在挂载根之外。hydration 前只预解析当前匹配链，其他页面仍按需加载；`app.base` 前缀由服务端剥离并与客户端 basename 对齐。规则分别见 [U32-1](113-u32-server-loader.md) 与 [U32-2](115-u32-streaming.md)。
 
 ### 4.47 独立生产服务 `cormi serve`
 

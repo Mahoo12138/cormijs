@@ -3,7 +3,8 @@ import { createServer, type Server } from 'node:http';
 import { readFile, realpath, stat } from 'node:fs/promises';
 import { extname, isAbsolute, join, relative, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { injectShell, navigation, readServerShell, sendLoaderFailure, sendResult, serverLoaderRequest, toRequest, withinBase } from './ssr.js';
+import { injectShell, navigation, readServerShell, sendLoaderFailure, sendResult, sendShellStream, serverLoaderRequest, toRequest, withinBase } from './ssr.js';
+import type { ServerStreamResult } from '@cormijs/runtime/server';
 
 export interface ServePluginOptions {
   readonly id?: string;
@@ -14,8 +15,11 @@ export interface ServePluginOptions {
   readonly outDir?: string;
   /** Deployment prefix matching app.base; default `/`. */
   readonly base?: string;
+  /** Stream HTML using the build's streaming renderer. */
+  readonly streaming?: boolean;
 }
 type Render = (request: Request) => Promise<unknown>;
+type StreamRender = (request: Request) => Promise<ServerStreamResult | Response>;
 type Load = (request: Request) => Promise<Response>;
 const mime: Record<string, string> = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
@@ -33,9 +37,10 @@ function send(res: import('node:http').ServerResponse, status: number, body: str
 export const servePlugin: Plugin.Object<ServePluginOptions> = {
   name: 'cormi:serve', inject: ['commands', 'projectRoot'],
   apply(ctx, options = {}) {
-    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'host', 'port', 'outDir', 'base'].includes(key))) {
+    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'host', 'port', 'outDir', 'base', 'streaming'].includes(key))) {
       throw new CormiError('SERVE_INVALID', 'Invalid serve plugin options.');
     }
+    if (options.streaming !== undefined && typeof options.streaming !== 'boolean') throw new CormiError('SERVE_INVALID', 'streaming must be boolean.');
     const id = options.id ?? 'cormi:serve';
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('SERVE_INVALID', 'Invalid serve plugin id.');
     const mountId = options.mountId ?? 'root';
@@ -61,9 +66,10 @@ export const servePlugin: Plugin.Object<ServePluginOptions> = {
       if (!info.isDirectory()) throw new CormiError('SERVE_BUILD_MISSING', 'Build output is not a directory.', { output });
       const module = await import(pathToFileURL(moduleFile).href).catch((cause) => {
         throw new CormiError('SERVE_BUILD_MISSING', 'SSR bundle is missing; build with app.ssr and ssrPlugin.', { module: moduleFile }, { cause });
-      }) as { render?: unknown; load?: unknown };
-      if (typeof module.render !== 'function' || typeof module.load !== 'function') throw new CormiError('SERVE_BUILD_INVALID', 'SSR bundle has no render/load export.');
-      const render = module.render as Render, load = module.load as Load;
+      }) as { render?: unknown; load?: unknown; renderStream?: unknown };
+      if (typeof module.render !== 'function' || typeof module.load !== 'function'
+        || options.streaming === true && typeof module.renderStream !== 'function') throw new CormiError('SERVE_BUILD_INVALID', 'SSR bundle has no render/load/renderStream export.');
+      const render = module.render as Render, load = module.load as Load, renderStream = module.renderStream as StreamRender | undefined;
       const root = await realpath(output);
       const server: Server = createServer((req, res) => {
         void (async () => {
@@ -85,11 +91,17 @@ export const servePlugin: Plugin.Object<ServePluginOptions> = {
             }
             if (navigation(req)) {
               try {
+                if (options.streaming === true) {
+                  const result = await renderStream!(toRequest(req));
+                  if (result instanceof Response) return sendResult(result, res, head);
+                  return await sendShellStream(result, shell, mountId, res, head);
+                }
                 const result = await render(toRequest(req));
                 if (result instanceof Response) return sendResult(result, res, head);
                 return sendResult(injectShell(shell, result as { html?: unknown }, mountId), res, head);
               } catch (error) {
                 console.error('[cormi:serve:ssr]', error);
+                if (res.headersSent) { res.destroy(); return; }
                 return send(res, 200, shell, mime['.html']!, head);
               }
             }

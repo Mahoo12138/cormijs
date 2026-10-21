@@ -7,6 +7,7 @@ import { build as viteBuild, type PreviewServer, type ResolvedConfig, type ViteD
 import type {} from '@cormijs/plugin-vite';
 import type {} from '@cormijs/plugin-react';
 import type { RouteRecord } from '@cormijs/routes';
+import type { ServerStreamResult } from '@cormijs/runtime/server';
 import { staticPages, type StaticPage } from './static-export.js';
 
 export interface SsrPluginOptions {
@@ -19,17 +20,21 @@ export interface SsrPluginOptions {
   readonly prerenderPaths?: readonly string[];
   /** Absolute site origin used to write sitemap.xml for prerendered routes. Requires prerender. */
   readonly sitemap?: string;
+  /** Stream HTML through React's streaming renderer instead of buffering the whole page. */
+  readonly streaming?: boolean;
 }
 
 type Render = (request: Request) => Promise<unknown>;
+type StreamRender = (request: Request) => Promise<ServerStreamResult | Response>;
 type Load = (request: Request) => Promise<Response>;
 const hydrationPattern = /<script>window\.__staticRouterHydrationData = [\s\S]*?<\/script>/;
 
-const entrySource = `import { renderServerApplication, renderServerLoaderData } from '@cormijs/runtime/server';
+const entrySource = `import { renderServerApplication, renderServerApplicationStream, renderServerLoaderData } from '@cormijs/runtime/server';
 import { cormiApplication } from './app';
 import { serverLoaders } from './server-loaders';
 const application = { ...cormiApplication, serverLoaders };
 export const render = (request) => renderServerApplication(application, request);
+export const renderStream = (request) => renderServerApplicationStream(application, request);
 export const load = (request) => renderServerLoaderData(application, request);
 `;
 
@@ -65,6 +70,39 @@ export function sendLoaderFailure(response: import('node:http').ServerResponse, 
   response.statusCode = 500;
   response.setHeader('content-type', 'application/json; charset=utf-8');
   response.end(JSON.stringify({ error: 'SERVER_LOADER_FAILED' }));
+}
+
+/** Writes the shell around a streaming render; hydration script is appended outside the mount root. */
+export async function sendShellStream(result: ServerStreamResult, shell: string, mountId: string,
+  response: import('node:http').ServerResponse, head: boolean): Promise<void> {
+  const marker = `<div id="${mountId}"></div>`;
+  if (!shell.includes(marker)) throw new CormiError('SSR_SHELL_INVALID', 'index.html has no empty mount element.', { mountId });
+  const injected = injectHead(shell, result.head);
+  const index = injected.indexOf(marker);
+  const prefix = injected.slice(0, index), suffix = injected.slice(index + marker.length);
+  response.statusCode = result.status;
+  for (const [name, value] of result.headers) response.setHeader(name, value);
+  response.setHeader('content-type', 'text/html; charset=utf-8');
+  if (head) { await result.stream.cancel().catch(() => {}); response.end(); return; }
+  const reader = result.stream.getReader();
+  let closed = false;
+  const abandon = () => { closed = true; void reader.cancel().catch(() => {}); };
+  response.once('close', abandon);
+  response.write(prefix + `<div id="${mountId}">`);
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) response.write(value);
+    }
+    if (closed) return;
+    const hydration = await result.hydration;
+    response.off('close', abandon);
+    response.end(`</div>${hydration}${suffix}`);
+  } catch (error) {
+    response.off('close', abandon);
+    throw error;
+  }
 }
 
 export function sendResult(response: Response, res: import('node:http').ServerResponse, head: boolean): Promise<void> {
@@ -221,10 +259,11 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
 export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
   name: 'cormi:ssr', inject: ['vite', 'react'],
   apply(ctx, options = {}) {
-    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'sitemap'].includes(key))) {
+    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'sitemap', 'streaming'].includes(key))) {
       throw new CormiError('SSR_INVALID', 'Invalid SSR plugin options.');
     }
     if (options.prerender !== undefined && typeof options.prerender !== 'boolean') throw new CormiError('SSR_INVALID', 'prerender must be boolean.');
+    if (options.streaming !== undefined && typeof options.streaming !== 'boolean') throw new CormiError('SSR_INVALID', 'streaming must be boolean.');
     const extraPaths = options.prerenderPaths === undefined ? [] : extraPrerenderPaths(options.prerenderPaths);
     if (extraPaths.length && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderPaths requires prerender: true.');
     const sitemap = options.sitemap === undefined ? undefined : sitemapSite(options.sitemap);
@@ -239,21 +278,29 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
       const serverOut = () => resolved ? join(resolved.build.outDir, '.cormi/ssr') : '';
       const entryFile = () => resolved ? join(resolved.root, '.cormi', 'ssr.tsx') : '';
 
-      const devModule = async (server: ViteDevServer): Promise<{ render: Render; load: Load }> => {
+      const devModule = async (server: ViteDevServer): Promise<{ render: Render; load: Load; renderStream?: StreamRender }> => {
         const entry = entryFile();
         await mkdir(join(server.config.root, '.cormi'), { recursive: true });
         await writeFile(entry, entrySource);
-        const module = await server.ssrLoadModule('/.cormi/ssr.tsx') as { render?: unknown; load?: unknown };
-        if (typeof module.render !== 'function' || typeof module.load !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR entry has no render/load export.');
-        return module as { render: Render; load: Load };
+        const module = await server.ssrLoadModule('/.cormi/ssr.tsx') as { render?: unknown; load?: unknown; renderStream?: unknown };
+        if (typeof module.render !== 'function' || typeof module.load !== 'function'
+          || options.streaming === true && typeof module.renderStream !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR entry has no render/load/renderStream export.');
+        return module as { render: Render; load: Load; renderStream?: StreamRender };
       };
 
-      const devRender = async (server: ViteDevServer, request: import('node:http').IncomingMessage): Promise<Response> => {
+      const devRespond = async (server: ViteDevServer, request: import('node:http').IncomingMessage, response: import('node:http').ServerResponse): Promise<void> => {
+        const head = request.method === 'HEAD';
         const module = await devModule(server);
+        if (options.streaming === true) {
+          const result = await module.renderStream!(toRequest(request));
+          if (result instanceof Response) return sendResult(result, response, head);
+          const shell = await server.transformIndexHtml(request.url ?? '/', await readFile(join(server.config.root, 'index.html'), 'utf8'));
+          return sendShellStream(result, shell, mountId, response, head);
+        }
         const result = await module.render(toRequest(request));
-        if (result instanceof Response) return result;
+        if (result instanceof Response) return sendResult(result, response, head);
         const shell = await server.transformIndexHtml(request.url ?? '/', await readFile(join(server.config.root, 'index.html'), 'utf8'));
-        return injectShell(shell, result as { html?: unknown }, mountId);
+        return sendResult(injectShell(shell, result as { html?: unknown }, mountId), response, head);
       };
 
       return {
@@ -307,17 +354,21 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
             }
             if (!navigation(request) || !withinBase(request, server.config.base)) return next();
             void (async () => {
-              try { return sendResult(await devRender(server, request), response, request.method === 'HEAD'); }
-              catch (error) { console.error('[cormi:ssr]', error); next(); }
+              try { return await devRespond(server, request, response); }
+              catch (error) {
+                console.error('[cormi:ssr]', error);
+                if (response.headersSent) response.destroy(); else next();
+              }
             })();
           });
         },
         configurePreviewServer(server: PreviewServer) {
           const outDir = server.config.build.outDir, moduleFile = join(serverOut(), 'ssr.mjs');
-          let handler: Promise<{ render: Render; load: Load }> | undefined, shell: Promise<string> | undefined;
-          const loadModule = () => handler ??= import(pathToFileURL(moduleFile).href).then((module: { render?: unknown; load?: unknown }) => {
-            if (typeof module.render !== 'function' || typeof module.load !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR bundle has no render/load export.');
-            return module as { render: Render; load: Load };
+          let handler: Promise<{ render: Render; load: Load; renderStream?: StreamRender }> | undefined, shell: Promise<string> | undefined;
+          const loadModule = () => handler ??= import(pathToFileURL(moduleFile).href).then((module: { render?: unknown; load?: unknown; renderStream?: unknown }) => {
+            if (typeof module.render !== 'function' || typeof module.load !== 'function'
+              || options.streaming === true && typeof module.renderStream !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR bundle has no render/load/renderStream export.');
+            return module as { render: Render; load: Load; renderStream?: StreamRender };
           });
           const loadShell = () => shell ??= readServerShell(outDir);
           server.middlewares.use((request, response, next) => {
@@ -332,10 +383,19 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
             if (!navigation(request) || !withinBase(request, server.config.base)) return next();
             void (async () => {
               try {
-                const result = await (await loadModule()).render(toRequest(request));
-                if (result instanceof Response) return sendResult(result, response, request.method === 'HEAD');
-                return sendResult(injectShell(await loadShell(), result as { html?: unknown }, mountId), response, request.method === 'HEAD');
-              } catch (error) { console.error('[cormi:ssr]', error); next(); }
+                const module = await loadModule(), head = request.method === 'HEAD';
+                if (options.streaming === true) {
+                  const result = await module.renderStream!(toRequest(request));
+                  if (result instanceof Response) return sendResult(result, response, head);
+                  return sendShellStream(result, await loadShell(), mountId, response, head);
+                }
+                const result = await module.render(toRequest(request));
+                if (result instanceof Response) return sendResult(result, response, head);
+                return sendResult(injectShell(await loadShell(), result as { html?: unknown }, mountId), response, head);
+              } catch (error) {
+                console.error('[cormi:ssr]', error);
+                if (response.headersSent) response.destroy(); else next();
+              }
             })();
           });
         },
