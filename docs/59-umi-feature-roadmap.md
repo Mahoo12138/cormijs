@@ -76,6 +76,34 @@
 
 Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基础配置项在阻塞首批应用时前移，不把“一次做完所有配置项”作为前置。模型、权限、国际化等条目的“待实现”基于当前包/运行时/贡献接口核对，不根据几百项测试的总数推导完成率。
 
+### 已交付索引（2026-10-21，按切片顺序）
+
+| 切片 | 提交 | 能力 | 文档 |
+| --- | --- | --- | --- |
+| F1a–F1f | 早期提交 | app runtime、配置式路由、redirect/wrappers、全局布局、404/loading、history | docs/60–65 |
+| F2a–F2c | 早期提交 | model、initial-state、request/useRequest | docs/66–68 |
+| F3a–F3e | 早期提交 | locale、access、menu/面包屑、路由守卫、自定义 403 | docs/69–73 |
+| F4a | b72593a 前 | HTML head | docs/74 |
+| F4b | b72593a | Mock 目录约定 | docs/75 |
+| F4c | 69d35d0 | 路径别名 | docs/76 |
+| F4d | 4d86029 | 编译期常量与内置 `@` | docs/77 |
+| F4e | 3ee2dda | headScripts/scripts | docs/78 |
+| F4f | 75bbd67 | 全局样式约定 | docs/79 |
+| F4g | b3574bf | `src/access.ts` 约定 | docs/80 |
+| F4h | 95a46a3 | 消息目录 | docs/81 |
+| F4i | 49255c8 | 菜单折叠与目录化标题 | docs/82 |
+| F5a/F5b | 30e556d、586ddc3 | clientLoader 与错误边界 | docs/83 |
+| F5c | cf1637f | 路由级 `meta.head` | docs/84 |
+| F5d/F5g | 5198867、6241abf | 路由预取（手动/空闲/意图） | docs/85 |
+| F5e | a25e9c5 | 静态导出外壳 | docs/88 |
+| F5f | ac9b43d | 数字/日期/复数格式化 | docs/89 |
+| F5h | a6924fa | GA4/自定义 pageview | docs/90 |
+| F5i | 331a445 | lint/format 包装命令 | docs/91 |
+| F5j | 78d518f | 约定式 clientLoader 识别 | docs/92 |
+| F5k | f82c2e3 | locale key 类型 | docs/93 |
+
+最新冻结验证（2026-10-21）：`pnpm check` 517/517、`pnpm test:browser` 49/49、`pnpm test:package` 310 阶段通过；证据见 `artifacts/f4a…f5k-validation.json`。仍未覆盖的大项见 U32/U34/U35、U17 与 F6。
+
 ## 4. 实施顺序与可审阅交付
 
 ### F1：应用运行时与路由使用体验——下一开发批次
