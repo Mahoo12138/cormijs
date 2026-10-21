@@ -26,8 +26,19 @@ export default defineApp({
   locale: {
     default: 'en', fallback: 'en', storageKey: 'demo:locale',
     messages: {
-      en: { title: 'Locale demo', greeting: 'Hello {name}', fallbackOnly: 'English fallback', items_one: '{count} item', items_other: '{count} items' },
-      zh: { title: '语言演示', greeting: '你好 {name}', items_other: '{count} 项' },
+      en: {
+        title: 'Locale demo', greeting: 'Hello {name}', fallbackOnly: 'English fallback',
+        items_one: '{count} item', items_other: '{count} items',
+        guests: '{count, plural, offset:1 =0 {no guests} =1 {just you} other {you and # others}}',
+        reply: '{gender, select, female {She replied} male {He replied} other {They replied}}',
+        total: 'Total {amount, number} ({fee, number, percent} fee)',
+      },
+      zh: {
+        title: '语言演示', greeting: '你好 {name}', items_other: '{count} 项',
+        guests: '{count, plural, offset:1 =0 {没有客人} other {你和 # 位其他客人}}',
+        reply: '{gender, select, female {她回复了} other {他们回复了}}',
+        total: '总计 {amount, number}（{fee, number, percent} 手续费）',
+      },
     },
   },
 });`,
@@ -42,6 +53,11 @@ export default function Home(){
     <p data-formatted><FormattedMessage id="greeting" values={{name:'Grace'}} /></p>
     <p data-plural-one>{tp('items', 1)}</p>
     <p data-plural>{tp('items', 5)}</p>
+    <p data-icu-offset>{t('guests',{count:3})}</p>
+    <p data-icu-exact>{t('guests',{count:0})}</p>
+    <p data-icu-select>{t('reply',{gender:'female'})}</p>
+    <p data-icu-number>{t('total',{amount:1234.5,fee:0.25})}</p>
+    <p data-formatted-plural><FormattedMessage id="guests" values={{count:4}} /></p>
     <p data-number>{formatNumber(1234.5)}</p>
     <p data-date>{formatDate(Date.UTC(2024, 0, 2), { timeZone: 'UTC', dateStyle: 'short' })}</p>
     <button data-switch onClick={()=>setLocale(locale === 'en' ? 'zh' : 'en')}>Switch</button>
@@ -63,6 +79,11 @@ export async function verifyLocalePage(page: Page, url: string) {
   assert.equal(await page.locator('[data-fallback]').innerText(), 'English fallback');
   assert.equal(await page.locator('[data-plural-one]').innerText(), '1 item');
   assert.equal(await page.locator('[data-plural]').innerText(), '5 items');
+  assert.equal(await page.locator('[data-icu-offset]').innerText(), 'you and 2 others');
+  assert.equal(await page.locator('[data-icu-exact]').innerText(), 'no guests');
+  assert.equal(await page.locator('[data-icu-select]').innerText(), 'She replied');
+  assert.equal(await page.locator('[data-icu-number]').innerText(), 'Total 1,234.5 (25% fee)');
+  assert.equal(await page.locator('[data-formatted-plural]').innerText(), 'you and 3 others');
   assert.equal(await page.locator('[data-number]').innerText(), '1,234.5');
   assert.equal(await page.locator('[data-date]').innerText(), '1/2/24');
   await page.locator('[data-switch]').click();
@@ -72,6 +93,11 @@ export async function verifyLocalePage(page: Page, url: string) {
   assert.equal(await page.locator('[data-formatted]').innerText(), '你好 Grace');
   assert.equal(await page.locator('[data-fallback]').innerText(), 'English fallback');
   assert.equal(await page.locator('[data-plural]').innerText(), '5 项');
+  assert.equal(await page.locator('[data-icu-offset]').innerText(), '你和 2 位其他客人');
+  assert.equal(await page.locator('[data-icu-exact]').innerText(), '没有客人');
+  assert.equal(await page.locator('[data-icu-select]').innerText(), '她回复了');
+  assert.equal(await page.locator('[data-icu-number]').innerText(), '总计 1,234.5（25% 手续费）');
+  assert.equal(await page.locator('[data-formatted-plural]').innerText(), '你和 3 位其他客人');
   assert.equal(await page.locator('[data-number]').innerText(), '1,234.5');
   assert.equal(await page.locator('[data-date]').innerText(), '2024/1/2');
   await page.reload(); await page.getByRole('heading', { name: '语言演示', exact: true }).waitFor();

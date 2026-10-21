@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import type { LocaleConfig, RuntimeConfig } from './app-config.js';
+import { formatIcu } from './icu.js';
 
 export interface IntlApi {
   readonly locale: string;
@@ -85,7 +86,7 @@ export function LocaleProvider({ appConfig, children }: { readonly appConfig: Re
     if (typeof key !== 'string' || !key) return '';
     const text = config.messages[locale]?.[key] ?? (config.fallback ? config.messages[config.fallback]?.[key] : undefined) ?? key;
     if (!values) return text;
-    return text.replace(/\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (match, name: string) => Object.hasOwn(values, name) ? String(values[name]) : match);
+    return formatIcu(text, values, locale);
   }, [config, locale]);
   const peek = useCallback((key: string) => {
     if (typeof key !== 'string' || !key) return undefined;
@@ -99,8 +100,7 @@ export function LocaleProvider({ appConfig, children }: { readonly appConfig: Re
     const category = new Intl.PluralRules(locale).select(count);
     const text = selectPluralKey(config.messages, config.fallback ? [locale, config.fallback] : [locale], key, category)
       ?? config.messages[locale]?.[key] ?? (config.fallback ? config.messages[config.fallback]?.[key] : undefined) ?? key;
-    const all: Record<string, string | number> = { count, ...(values ?? {}) };
-    return text.replace(/\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (match, name: string) => Object.hasOwn(all, name) ? String(all[name]) : match);
+    return formatIcu(text, { count, ...(values ?? {}) }, locale);
   }, [config, locale]);
   const value = useMemo<IntlApi>(() => ({ locale, setLocale, t, peek, formatNumber, formatDate, tp }), [locale, setLocale, t, peek, formatNumber, formatDate, tp]);
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

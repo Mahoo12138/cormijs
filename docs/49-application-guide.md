@@ -803,7 +803,7 @@ tp('items', 1);                             // items_one；缺失时 items_other
 { "items_one": "{count} item", "items_other": "{count} items" }
 ```
 
-复数类别由 `Intl.PluralRules(locale)` 决定，`{count}` 自动插值；`tp` 会先在当前语言、再在 fallback 语言中查找。非法数字/日期与非法 count 会抛 `TypeError`（`LOCALE_INVALID`）。这里没有 ICU 复数语法、相对时间或富文本消息。规则见 [F5f 格式化与复数](89-f5f-locale-formatting.md)。
+复数类别由 `Intl.PluralRules(locale)` 决定，`{count}` 自动插值；`tp` 会先在当前语言、再在 fallback 语言中查找。非法数字/日期与非法 count 会抛 `TypeError`（`LOCALE_INVALID`）。需要单条消息内组合复数、选择与格式化时，使用下一节的 ICU 子集；相对时间与富文本仍待后续。规则见 [F5f 格式化与复数](89-f5f-locale-formatting.md)。
 
 ### 4.29 页面访问分析
 
@@ -859,6 +859,27 @@ const typo: CormiLocale.MessageKey = 'missing';
 ```
 
 文件位于 `.cormi/locale.d.ts`，无需 import（tsconfig 已包含 `.cormi/**/*`）；无目录时为 `never`。它只覆盖目录来源——`app.tsx` 内联消息不参与生成，`t()` 的参数仍是 `string`，不会自动拒绝动态 key。规则见 [F5k locale 类型](93-f5k-locale-types.md)。
+
+### 4.33 ICU 消息子集
+
+单条消息需要复数、性别选择与数字/日期格式化时，直接在消息目录中写 ICU 子集，`t` 传入值即可：
+
+```jsonc
+{
+  "guests": "{count, plural, offset:1 =0 {no guests} =1 {just you} other {you and # others}}",
+  "reply": "{gender, select, female {She replied} male {He replied} other {They replied}}",
+  "total": "Total {amount, number} ({fee, number, percent} fee)"
+}
+```
+
+```tsx
+t('guests', { count: 3 });                          // you and 2 others
+t('reply', { gender: 'female' });                   // She replied
+t('total', { amount: 1234.5, fee: 0.25 });          // Total 1,234.5 (25% fee)
+t('guests', { count: 0 });                          // no guests
+```
+
+支持 `{name}`、`{n, number|date|time[, integer|percent|short|medium|long|full]}`、`plural`/`selectordinal`/`select`（可嵌套、可带 `offset:N`）、`#` 计数占位与单引号字面量；`=N` 始终匹配原始值，`offset` 只影响复数类别与 `#`。未传值时 `t` 不解析消息、原样返回目录文本；传值后语法错误会抛 `LOCALE_INVALID`。也导出纯函数 `formatIcu(message, values, locale)`。富文本标签、货币/骨架格式、相对时间与编译期消息校验仍未提供。规则见 [F5l ICU 子集](94-f5l-icu.md)。
 
 ## 5. 环境和 Mock 使用同一个部署前缀
 

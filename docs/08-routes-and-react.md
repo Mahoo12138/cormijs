@@ -56,7 +56,7 @@ F4k 起，CLI 支持「命令 + 至多 32 个位置参数」，`generatorPlugin`
 
 F5e 起，显式启用的 `staticExportPlugin` 在构建后为每个字面路径路由生成带 `meta.head` 的 HTML 外壳（`dist/guide/index.html` 等），与 `headPlugin` 搭配覆盖首屏与客户端导航；这不是预渲染。详见 [F5e 静态导出](88-f5e-static-export.md)。
 
-F5f 起，`useIntl()` 提供 `formatNumber`/`formatDate`（平台 Intl）与 `tp` 复数选择（`_one`/`_other` 后缀，含 fallback 语言）；不引入 ICU 解析器。详见 [F5f 格式化与复数](89-f5f-locale-formatting.md)。
+F5f 起，`useIntl()` 提供 `formatNumber`/`formatDate`（平台 Intl）与 `tp` 复数选择（`_one`/`_other` 后缀，含 fallback 语言）；最初的插值器不解析 ICU，F5l 起改由内置子集解析。详见 [F5f 格式化与复数](89-f5f-locale-formatting.md)。
 
 F5h 起，显式启用的 `analyticsPlugin` 在每次路由变化时发送 page-view：`measurementId` 走 GA4 的 `gtag`/`dataLayer`，`dispatch: true` 额外发出 `cormi:pageview`；插件不注入供应商脚本。详见 [F5h pageview 分析](90-f5h-analytics.md)。
 
@@ -65,6 +65,8 @@ F5i 起，显式启用的 `toolPlugin` 提供 `cormi lint`/`cormi format`：运�
 F5j 起，约定式页面只要导出 `clientLoader`（function/async function/const）就自动获得 loader：经零依赖词法扫描（忽略注释与字符串）后写入路由 IR，配置式路由仍用显式字段。详见 [F5j 约定式 loader](92-f5j-conventional-loader.md)。
 
 F5k 起，启用 `src/locales` 目录时会生成 `.cormi/locale.d.ts`，提供环境类型 `CormiLocale.Code`/`CormiLocale.MessageKey`（字符串联合，无目录时为 `never`）；运行时 `t` 仍收 `string`。详见 [F5k locale 类型](93-f5k-locale-types.md)。
+
+F5l 起，`t()`/`tp()`/`FormattedMessage` 在传入值时按 ICU 子集格式化：`{name}`、`number/date/time`、`plural/selectordinal/select`（含 `offset` 与 `#`）、嵌套与单引号转义；零依赖、不引入 formatjs。未传值时 `t` 仍直接返回目录文本。详见 [F5l ICU 子集](94-f5l-icu.md)。
 
 ```sh
 pnpm build
