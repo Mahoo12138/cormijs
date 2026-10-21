@@ -1,0 +1,119 @@
+{
+  "format": "cormi:u33-prerender-validation:1",
+  "verifiedAt": "2026-10-21T18:16:39.982Z",
+  "base": "a033cb378a355b8c569011a36dc487e481801502",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/plugin-react-vite/src/index.ts",
+      "packages/plugin-react-vite/src/serve.ts",
+      "packages/plugin-react-vite/src/ssr.ts",
+      "scripts/ssr-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/browser/ssr.test.ts",
+      "tests/ssr.test.ts",
+      "docs/114-u33-prerender-sitemap.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u33-prerender/check.log",
+      "sha256": "ce3d622d4d4d66cbd64bd0a1eca8c81fca42f536a736e5af3791c1ea4d6b7d55",
+      "seconds": 121.9,
+      "tests": 557,
+      "pass": 557,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u33-prerender/browser.log",
+      "sha256": "6fff65ae471d576eaf3c3b2c53a8959eb8d7b6a3ca530bf7c955d60d16bb1526",
+      "seconds": 556.1,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u33-prerender/package.log",
+      "sha256": "170c5bef905069f573da5c94beb28103e33ff8228fd5e0fd01b52190f8158f60",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/ssr.test.ts tests/static-export.test.ts",
+      "log": ".cache/u33-prerender/targeted.log",
+      "sha256": "1199192048da811bf181d276861d54c48e7c251ec60a5211b065ff9dd4c4bf73",
+      "seconds": 0.7,
+      "tests": 7,
+      "pass": 7,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "prerender writes/skip/sitemap, shell isolation, SSR head and serverLoader markup, static export shells"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "da812c807af966ffd469aaa48e4953a37ac46acd296595e8c62ecb51694ca242",
+    "docs/49-application-guide.md": "cc960980a265bd143ee6fa61660ddcb7f04efff3d954334ea0a02add5d8454e5",
+    "docs/59-umi-feature-roadmap.md": "99e683a794850a2efb456c5b40564afb4ef265527f52fceb16d3a9742ef2f759",
+    "packages/plugin-react-vite/src/index.ts": "9f6500819af6e208dbf6ad94525f0b1145deb5fb99268cc1a06179e5e23b0892",
+    "packages/plugin-react-vite/src/serve.ts": "7fdc980b1b7389bdfa40190839c72f26d62927054883900ea98b7ab45b7f281a",
+    "packages/plugin-react-vite/src/ssr.ts": "34530d19f705186937fc84ff83cdef3d8749b388e47cdd89c81a01ef03075479",
+    "scripts/ssr-fixture.ts": "3caed424d399bf6b87f7c6dd3471aa79e88dc275527a74acd325d0f04cf84556",
+    "scripts/test-package.ts": "73729f1b002f85926d2167cad8c993abdb350b2ea20068601b3a002b5f4fe5b3",
+    "tests/browser/ssr.test.ts": "699c13b4d0c94a98c2adfc5886d4ae0513e272784b5953c03e01a50817e083ad",
+    "tests/ssr.test.ts": "659373c371242b60deeff66f4863e42fd5674a8614fce9a04a6df3806421fc15",
+    "docs/114-u33-prerender-sitemap.md": "81e65a4d88485e66509177d620daf1a2bfaf11e4d60a99713856c8e8cf21b4e4"
+  },
+  "sourceInputCount": 11,
+  "sourceInputsDigest": "a6263d06dd1b355b72c066010eb2c1af2804a8d45b58493f871662e7a7e69223",
+  "documentationInputs": {
+    "docs/114-u33-prerender-sitemap.md": "81e65a4d88485e66509177d620daf1a2bfaf11e4d60a99713856c8e8cf21b4e4",
+    "docs/59-umi-feature-roadmap.md": "99e683a794850a2efb456c5b40564afb4ef265527f52fceb16d3a9742ef2f759",
+    "docs/112-roadmap-audit-2026-10-21.md": "da812c807af966ffd469aaa48e4953a37ac46acd296595e8c62ecb51694ca242",
+    "docs/49-application-guide.md": "cc960980a265bd143ee6fa61660ddcb7f04efff3d954334ea0a02add5d8454e5"
+  },
+  "evidence": [
+    ".cache/u33-prerender/check.log",
+    ".cache/u33-prerender/browser.log",
+    ".cache/u33-prerender/package.log",
+    ".cache/u33-prerender/targeted.log",
+    "artifacts/u33-prerender-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "literal-routes-only",
+    "skips-loader-responses",
+    "no-incremental-prerender",
+    "no-page-level-toggle",
+    "sitemap-lists-written-pages-only",
+    "no-sitemap-index-robots-or-alternates",
+    "static-export-and-prerender-order-is-not-coordinated",
+    "no-streaming",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

@@ -11,13 +11,14 @@ const routes = [
   { id: 'home', path: '/', component: './src/pages/index.tsx', meta: { head: { title: 'SSR home page', metas: [{ name: 'description', content: 'server description' }] } } },
   { id: 'guide', path: 'guide', component: './src/pages/guide.tsx', clientLoader: 'clientLoader', meta: { head: { title: 'SSR guide page', jsonLd: { '@type': 'Article', headline: 'Guide' } } } },
   { id: 'backend', path: 'backend/:id', component: './src/pages/backend.tsx', serverLoader: 'serverLoader', meta: { head: { title: 'SSR backend page' } } },
+  { id: 'status', path: 'status', component: './src/pages/status.tsx', serverLoader: 'serverLoader', meta: { head: { title: 'SSR status page' } } },
 ];
 export default defineConfig({
   presets: [preset],
   plugins: [
     { id: 'routes', plugin: routeConfigPlugin, options: { id: 'application:routes', routes } },
     { id: 'head', plugin: headPlugin, options: { id: 'application:head', titleTemplate: ' · demo' } },
-    { id: 'ssr', plugin: ssrPlugin, options: { id: 'application:ssr' } },
+    { id: 'ssr', plugin: ssrPlugin, options: { id: 'application:ssr', prerender: true, sitemap: 'https://example.com' } },
     { id: 'serve', plugin: servePlugin, options: { id: 'application:serve', port: 0, base: '/ssr/' } },
   ],
   app: { ssr: true, base: '/ssr/', routes: [], server: { port: 0 } },
@@ -46,6 +47,15 @@ export default function Backend(){
 }
 export async function serverLoader({ request, params }: { request: Request; params: { id?: string } }): Promise<Data> {
   return { message: 'server loader', id: params.id ?? 'none', path: new URL(request.url).pathname };
+}`,
+    'src/pages/status.tsx': `import { Link, useServerLoaderData } from '@cormijs/runtime';
+interface Data { source: string }
+export default function Status(){
+  const data = useServerLoaderData<Data>();
+  return <main><h1>SSR status</h1><p data-status="true">{data.source}</p><Link to="/">Home</Link></main>;
+}
+export async function serverLoader({ request }: { request: Request; params: Record<string, string | undefined> }): Promise<Data> {
+  return { source: new URL(request.url).pathname };
 }`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
       strict: true, noEmit: true, skipLibCheck: false, allowImportingTsExtensions: true, lib: ['ES2023', 'DOM', 'DOM.Iterable'], types: ['react', 'react-dom', 'node'] },

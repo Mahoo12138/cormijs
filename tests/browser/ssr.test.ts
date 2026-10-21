@@ -43,6 +43,18 @@ test('SSR renders routes and loader data in preview and hydrates without errors'
   const clientSources = await Promise.all((await readdir(join(f.root, 'dist/assets'))).filter(name => name.endsWith('.js'))
     .map(name => readFile(join(f.root, 'dist/assets', name), 'utf8')));
   assert.ok(clientSources.some(source => source.includes('.cormi/server-loader')), 'client navigation uses the fallback endpoint');
+  const statusPage = await readFile(join(f.root, 'dist/status/index.html'), 'utf8');
+  assert.match(statusPage, /<h1>SSR status<\/h1>/);
+  assert.match(statusPage, /data-status="true">\/ssr\/status</);
+  assert.match(statusPage, /__staticRouterHydrationData/);
+  assert.match(statusPage, /<title>SSR status page · demo<\/title>/);
+  assert.match(await readFile(join(f.root, 'dist/index.html'), 'utf8'), /<h1>SSR home<\/h1>/);
+  assert.match(await readFile(join(f.root, 'dist/index.html'), 'utf8'), /<title>Helmet home title · demo<\/title>/);
+  assert.match(await readFile(join(f.root, 'dist/guide/index.html'), 'utf8'), /data-guide="true">loaded on server</);
+  const sitemap = await readFile(join(f.root, 'dist/sitemap.xml'), 'utf8');
+  for (const url of ['https://example.com/ssr/', 'https://example.com/ssr/guide', 'https://example.com/ssr/status']) assert.ok(sitemap.includes(`<loc>${url}</loc>`), url);
+  assert.doesNotMatch(sitemap, /backend/);
+  assert.match(await readFile(join(f.root, 'dist/.cormi/shell.html'), 'utf8'), /<div id="root"><\/div>/);
   const preview = cli(t, f.root, 'preview'), production = await preview.waitFor(event => event.type === 'ready');
   await verifySsrPage(page, production.url);
   assert.deepEqual(errors, []);

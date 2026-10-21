@@ -3,7 +3,7 @@ import { createServer, type Server } from 'node:http';
 import { readFile, realpath, stat } from 'node:fs/promises';
 import { extname, isAbsolute, join, relative, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { injectShell, navigation, sendLoaderFailure, sendResult, serverLoaderRequest, toRequest, withinBase } from './ssr.js';
+import { injectShell, navigation, readServerShell, sendLoaderFailure, sendResult, serverLoaderRequest, toRequest, withinBase } from './ssr.js';
 
 export interface ServePluginOptions {
   readonly id?: string;
@@ -54,8 +54,8 @@ export const servePlugin: Plugin.Object<ServePluginOptions> = {
     ctx.effect(() => ctx.commands.register('serve', async request => {
       request.signal.throwIfAborted();
       const output = join(ctx.projectRoot.root, outDir);
-      const shellFile = join(output, 'index.html'), moduleFile = join(output, '.cormi/ssr/ssr.mjs');
-      const [shell, info] = await Promise.all([readFile(shellFile, 'utf8'), stat(output)]).catch((error: NodeJS.ErrnoException) => {
+      const moduleFile = join(output, '.cormi/ssr/ssr.mjs');
+      const [shell, info] = await Promise.all([readServerShell(output), stat(output)]).catch((error: NodeJS.ErrnoException) => {
         throw error.code === 'ENOENT' ? new CormiError('SERVE_BUILD_MISSING', 'Run cormi build with SSR enabled before cormi serve.', { output }) : error;
       });
       if (!info.isDirectory()) throw new CormiError('SERVE_BUILD_MISSING', 'Build output is not a directory.', { output });

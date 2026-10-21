@@ -1,15 +1,22 @@
 import { CormiError, type Plugin } from '@cormijs/core';
 import react from '@vitejs/plugin-react';
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { build as viteBuild, type PreviewServer, type ResolvedConfig, type ViteDevServer } from 'vite';
 import type {} from '@cormijs/plugin-vite';
+import type {} from '@cormijs/plugin-react';
+import type { RouteRecord } from '@cormijs/routes';
+import { staticPages, type StaticPage } from './static-export.js';
 
 export interface SsrPluginOptions {
   readonly id?: string;
   /** Client mount element replaced with server markup; default `root`. */
   readonly mountId?: string;
+  /** Render every literal route into its own HTML file after the SSR bundle is built. */
+  readonly prerender?: boolean;
+  /** Absolute site origin used to write sitemap.xml for prerendered routes. Requires prerender. */
+  readonly sitemap?: string;
 }
 
 type Render = (request: Request) => Promise<unknown>;
@@ -26,6 +33,19 @@ export const load = (request) => renderServerLoaderData(application, request);
 
 export function serverLoaderPath(base: string): string {
   return `${base === '/' ? '/' : base}.cormi/server-loader`;
+}
+
+/** Empty SSR shell kept apart from prerendered index.html; preview and serve must not reuse filled markup. */
+export function serverShellPath(outDir: string): string {
+  return join(outDir, '.cormi', 'shell.html');
+}
+
+export async function readServerShell(outDir: string): Promise<string> {
+  try { return await readFile(serverShellPath(outDir), 'utf8'); }
+  catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    return readFile(join(outDir, 'index.html'), 'utf8');
+  }
 }
 
 /** Rebuilds the client-side fallback request from `?url=`; returns undefined when this is another request. */
@@ -112,13 +132,78 @@ export function navigation(request: import('node:http').IncomingMessage): boolea
     && !request.url?.startsWith('/.cormi/') && !request.url?.startsWith('/assets/');
 }
 
+const xml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+export function sitemapXml(urls: readonly string[]): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <url><loc>${xml(url)}</loc></url>`).join('\n')}${urls.length ? '\n' : ''}</urlset>\n`;
+}
+
+function sitemapSite(value: unknown): string {
+  if (typeof value !== 'string' || !value || value.length > 2048) throw new CormiError('SSR_INVALID', 'sitemap must be an absolute site URL.');
+  let url: URL;
+  try { url = new URL(value); } catch { throw new CormiError('SSR_INVALID', 'sitemap must be an absolute site URL.'); }
+  if ((url.protocol !== 'http:' && url.protocol !== 'https:') || url.username || url.password || url.search || url.hash) {
+    throw new CormiError('SSR_INVALID', 'sitemap must be a plain http(s) site URL.');
+  }
+  return value.replace(/\/+$/, '');
+}
+
+function publicUrl(site: string, base: string, path: string): string {
+  const prefix = base.endsWith('/') ? base : `${base}/`;
+  return `${site}${prefix}${path === '/' ? '' : path.slice(1)}`;
+}
+
+export interface PrerenderOptions {
+  readonly output: string;
+  readonly shell: string;
+  readonly mountId: string;
+  readonly base: string;
+  readonly pages: readonly StaticPage[];
+  readonly render: Render;
+  readonly sitemap?: string;
+}
+export interface PrerenderResult {
+  readonly written: readonly string[];
+  readonly skipped: readonly { readonly path: string; readonly status: number }[];
+  readonly sitemap?: string;
+}
+
+/**
+ * Renders literal routes through the built SSR bundle. Pages whose loader returns a Response are skipped
+ * (redirects cannot be frozen into HTML); their paths are excluded from the sitemap.
+ */
+export async function prerenderStaticPages(options: PrerenderOptions): Promise<PrerenderResult> {
+  const written: string[] = [], skipped: { path: string; status: number }[] = [], urls: string[] = [];
+  for (const page of options.pages) {
+    const target = page.path === '/' ? join(options.output, 'index.html') : join(options.output, ...page.path.split('/').filter(Boolean), 'index.html');
+    const local = relative(options.output, target);
+    if (!local || isAbsolute(local) || local === '..' || local.startsWith('..' + sep)) throw new CormiError('SSR_PRERENDER_FAILED', 'Prerendered pages must stay inside the output.', { path: page.path });
+    const url = new URL(`${options.base}${page.path === '/' ? '' : page.path.slice(1)}`, 'http://localhost');
+    const rendered = await options.render(new Request(url));
+    if (rendered instanceof Response) { skipped.push({ path: page.path, status: rendered.status }); continue; }
+    const html = await injectShell(options.shell, rendered as { html?: unknown }, options.mountId).text();
+    if (page.path !== '/') await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, html);
+    written.push(page.path);
+    if (options.sitemap) urls.push(publicUrl(options.sitemap, options.base, page.path));
+  }
+  let sitemap: string | undefined;
+  if (options.sitemap) {
+    sitemap = join(options.output, 'sitemap.xml');
+    await writeFile(sitemap, sitemapXml(urls));
+  }
+  return Object.freeze({ written: Object.freeze(written), skipped: Object.freeze(skipped), ...(sitemap ? { sitemap } : {}) });
+}
+
 /** Opt-in SSR: dev renders through Vite's SSR module graph, preview through a built server bundle. */
 export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
-  name: 'cormi:ssr', inject: ['vite'],
+  name: 'cormi:ssr', inject: ['vite', 'react'],
   apply(ctx, options = {}) {
-    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId'].includes(key))) {
+    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'sitemap'].includes(key))) {
       throw new CormiError('SSR_INVALID', 'Invalid SSR plugin options.');
     }
+    if (options.prerender !== undefined && typeof options.prerender !== 'boolean') throw new CormiError('SSR_INVALID', 'prerender must be boolean.');
+    const sitemap = options.sitemap === undefined ? undefined : sitemapSite(options.sitemap);
+    if (sitemap !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'sitemap requires prerender: true.');
     const id = options.id ?? 'cormi:ssr';
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('SSR_INVALID', 'Invalid SSR plugin id.');
     const mountId = options.mountId ?? 'root';
@@ -168,6 +253,22 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
           } finally {
             await rm(entryFile(), { force: true });
           }
+          if (options.prerender === true) {
+            try {
+              const routes = await ctx.react.routes.reduce([] as readonly RouteRecord[], (value): value is readonly RouteRecord[] => Array.isArray(value));
+              const module = await import(pathToFileURL(join(serverOut(), 'ssr.mjs')).href) as { render?: unknown };
+              if (typeof module.render !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR bundle has no render export.');
+              const shell = await readFile(join(resolved.build.outDir, 'index.html'), 'utf8');
+              await mkdir(join(resolved.build.outDir, '.cormi'), { recursive: true });
+              await writeFile(serverShellPath(resolved.build.outDir), shell);
+              const result = await prerenderStaticPages({ output: resolved.build.outDir, shell, mountId, base: resolved.base,
+                pages: staticPages(routes), render: module.render as Render, ...(sitemap !== undefined ? { sitemap } : {}) });
+              if (result.skipped.length) console.warn('[cormi:ssr:prerender] skipped routes', JSON.stringify(result.skipped));
+            } catch (cause) {
+              if (cause instanceof CormiError) throw cause;
+              throw new CormiError('SSR_PRERENDER_FAILED', 'Prerendering failed.', {}, { cause });
+            }
+          }
         },
         configureServer(server) {
           server.middlewares.use((request, response, next) => {
@@ -187,12 +288,13 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
           });
         },
         configurePreviewServer(server: PreviewServer) {
-          const shellFile = join(server.config.build.outDir, 'index.html'), moduleFile = join(serverOut(), 'ssr.mjs');
-          let handler: Promise<{ render: Render; load: Load }> | undefined;
+          const outDir = server.config.build.outDir, moduleFile = join(serverOut(), 'ssr.mjs');
+          let handler: Promise<{ render: Render; load: Load }> | undefined, shell: Promise<string> | undefined;
           const loadModule = () => handler ??= import(pathToFileURL(moduleFile).href).then((module: { render?: unknown; load?: unknown }) => {
             if (typeof module.render !== 'function' || typeof module.load !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR bundle has no render/load export.');
             return module as { render: Render; load: Load };
           });
+          const loadShell = () => shell ??= readServerShell(outDir);
           server.middlewares.use((request, response, next) => {
             const loader = serverLoaderRequest(request, server.config.base);
             if (loader) {
@@ -207,7 +309,7 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
               try {
                 const result = await (await loadModule()).render(toRequest(request));
                 if (result instanceof Response) return sendResult(result, response, request.method === 'HEAD');
-                return sendResult(injectShell(await readFile(shellFile, 'utf8'), result as { html?: unknown }, mountId), response, request.method === 'HEAD');
+                return sendResult(injectShell(await loadShell(), result as { html?: unknown }, mountId), response, request.method === 'HEAD');
               } catch (error) { console.error('[cormi:ssr]', error); next(); }
             })();
           });
