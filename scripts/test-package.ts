@@ -33,6 +33,7 @@ import { writeGeneratorFixture } from './generator-fixture.js';
 import { writeStaticExportFixture, verifyStaticExport, verifyStaticExportPages } from './static-export-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
+import { writeConventionalLoaderFixture, verifyConventionalLoaderPage } from './conventional-loader-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -984,6 +985,26 @@ const bad:ToolSpec={bin:1};
       await execute('tools-lint-fail',toolsConsumer,toolsBin,['lint','--','--fail'],1,/TOOL_FAILED/);
       await execute('tools-format',toolsConsumer,toolsBin,['format','--json','--','--check']);
       report.stages.push({label:'installed-lint-format-wrapper-commands',bins:['fake-lint','fake-format'],previewRegenerated:false});
+    }
+
+    if (selected('conventional-loader')) {
+      const convConsumer=await create('conventional-loader','react');await writeConventionalLoaderFixture(convConsumer);
+      const convManifest=consumerManifest(kit,'react');
+      convManifest.dependencies['@cormijs/plugin-react']=convManifest.pnpm.overrides['@cormijs/plugin-react']!;
+      await writeFile(join(convConsumer,'package.json'),JSON.stringify(convManifest,null,2));
+      await install('conventional-loader-install',convConsumer);await auditLinks(convConsumer);
+      await command('conventional-loader-typecheck',convConsumer,'typecheck');
+      await writeFile(join(convConsumer,'types.mts'),`import {detectClientLoader,pageLoaders,CLIENT_LOADER_EXPORT} from '@cormijs/plugin-react';
+const found:string|undefined=detectClientLoader('export const clientLoader = async () => ({});');
+void [found,pageLoaders,CLIENT_LOADER_EXPORT];
+// @ts-expect-error source must be a string
+detectClientLoader(1);
+`);
+      await execute('conventional-loader-public-types',convConsumer,process.execPath,typeArguments);
+      await withServer(convConsumer,'dev',async url=>{await verifyConventionalLoaderPage(page,url);assert.deepEqual(errors,[]);});
+      await command('conventional-loader-build',convConsumer,'build');
+      await withServer(convConsumer,'preview',async url=>{await verifyConventionalLoaderPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'conventional-loader-preview.png')});});
+      report.stages.push({label:'installed-conventional-client-loader-dev-build-and-preview',detection:'ast',previewRegenerated:false});
     }
   } finally { await browser.close(); }
   report.passed = true;

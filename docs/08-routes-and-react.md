@@ -62,6 +62,8 @@ F5h 起，显式启用的 `analyticsPlugin` 在每次路由变化时发送 page-
 
 F5i 起，显式启用的 `toolPlugin` 提供 `cormi lint`/`cormi format`：运行项目自己安装的 eslint/prettier，参数写在 `--` 之后，失败带明确错误码。详见 [F5i 工程命令](91-f5i-tool-commands.md)。
 
+F5j 起，约定式页面只要导出 `clientLoader`（function/async function/const）就自动获得 loader：经零依赖词法扫描（忽略注释与字符串）后写入路由 IR，配置式路由仍用显式字段。详见 [F5j 约定式 loader](92-f5j-conventional-loader.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

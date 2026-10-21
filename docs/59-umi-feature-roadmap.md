@@ -42,7 +42,7 @@
 | U10 | getInitialState、@@initialState、refresh/setInitialState | 部分已有（F2b）：initialStatePlugin 登记 getInitialState，提供 useInitialState/loading/error/refresh/set；@@initialState 模型集成、首屏阻塞与 SSR 待后续 | initial-state 插件，依赖 model/应用 runtime | F2 |
 | U11 | request、运行时配置、拦截器、统一错误 | 部分已有（F2c）：requestPlugin 注册 app.tsx request 配置和每挂载 fetch 客户端；拦截器、统一错误协议、dataField 待后续 | request 契约/客户端实现适配 | F2 |
 | U12 | useRequest、手动/自动、分页/加载更多等 | 部分已有（F2c）：自动/手动、loading/error、refresh、cancel、竞态保护；重试/轮询/分页/加载更多待后续 | 请求 Hooks 插件，可复用成熟库 | F2 |
-| U13 | clientLoader/useClientLoaderData/routeProps | 部分已有（F5a/F5b）：配置式路由的 `clientLoader` 导出名映射到 React Router 静态 loader，页面用 `useClientLoaderData`/`useRouteLoaderDataFor`/`useClientLoaderError` 读取，loader 抛错由该路由的 `errorBoundary` 呈现；约定式路由识别、类型生成与预取待后续 | 路由数据插件 | F3 |
+| U13 | clientLoader/useClientLoaderData/routeProps | 部分已有（F5a/F5b/F5j）：配置式与约定式页面都可用 `clientLoader`（编译期词法扫描），映射到静态 route loader，loader 抛错由本路由 `errorBoundary` 呈现；数据类型生成、重导出与预取待后续 | 路由数据插件 | F3 |
 | U14 | access.ts/useAccess/Access、路由访问控制 | 基础已有（F3b/F3d/F3e/F4g）：accessPlugin 从 initialState 计算权限，useAccess/Access、路由 access 守卫、自定义 accessForbidden 与 `src/access.ts` 约定（配置优先于约定）可用；服务端授权边界与权限类型生成待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
 | U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e/F4i）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys、access 过滤、`meta.locale` 目录化标题与 `useMenuCollapse` 折叠状态；无 ProLayout/Antd adapter 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
 | U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a/F4h/F5f）：内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage、`src/locales` 目录，以及 `formatNumber`/`formatDate`/`tp`（Intl + `_one/_other` 复数）；ICU 语法、相对时间、富文本、locale key 类型与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
@@ -165,6 +165,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5h 状态（2026-10-20）：** U38 的 analytics 已交付：`analyticsPlugin` 在每次路由变化（含首屏）发送 page-view；配置 `measurementId` 时维护 GA4 `dataLayer`/`gtag` 队列并发送 `page_view`（`page_path` 含 base、referrer 为上一个实际路径），`dispatch: true` 时额外发出 `cormi:pageview`（detail 中的 `path` 不含 basename）。不注入第三方脚本、不做 Cookie 同意；其他官方插件仍未移植。用法、差异与验证见 [F5h pageview 分析](90-f5h-analytics.md)。
 
 **F5i 状态（2026-10-20）：** U28 的最小形态已交付：`toolPlugin` 注册 `cormi lint`/`cormi format`，从项目 `node_modules/.bin` 解析二进制（默认 eslint/prettier），位置参数透传、输出转发 stderr、`TOOL_MISSING`/`TOOL_FAILED`/`TOOL_CANCELLED` 语义明确，不安装依赖也不生成配置。文件发现、stylelint/utoo 模式与 precommit/deadcode 仍待后续。用法、差异与验证见 [F5i 工程命令](91-f5i-tool-commands.md)。
+
+**F5j 状态（2026-10-20）：** U13 的约定式识别已交付：`detectClientLoader` 在去除注释/字符串后的源码上识别页面导出的 `clientLoader`（function/async function/const），`pageLoaders` 读取页面源并在 `routesFromFiles` 装配进 IR；配置式路由继续用显式字段（F5a）。重导出、loader 数据类型生成与 SSR 侧 loader 仍待后续。用法、差异与验证见 [F5j 约定式 loader](92-f5j-conventional-loader.md)。
 
 ### F3：权限、布局、菜单和国际化
 

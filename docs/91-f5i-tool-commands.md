@@ -68,5 +68,5 @@ Umi 的 `lint` 命令（`packages/preset-umi/src/commands/lint.ts`）封装 esli
 ## 6. 下一步
 
 - U28 剩余：文件发现、与 `lint-staged`/`precommit` 的集成；
-- U32/U34/U35：SSR、MPA、生产 API 路由；U25 externals/runtimePublicPath；
+- F5j 已交付约定式 clientLoader 识别，见 [F5j 约定式 loader](92-f5j-conventional-loader.md)；U32/U34/U35：SSR、MPA、生产 API 路由；U25 externals/runtimePublicPath；
 - U13 约定式 loader 识别、U16 ICU 与 locale key 类型、U17 UI adapter。

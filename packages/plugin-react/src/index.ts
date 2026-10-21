@@ -15,6 +15,7 @@ import { layoutContributions, layoutFilesToWatch, resolveGlobalLayout, type Layo
 import { loadingContributions, loadingFilesToWatch, resolveGlobalLoading, type LoadingContribution } from './loading.js';
 import { resolveGlobalStyles, styleContributions, styleFilesToWatch, type StyleContribution } from './global-style.js';
 import { accessContributions, accessFilesToWatch, resolveAccessPlan, type AccessContribution } from './access.js';
+import { pageLoaders } from './page-loaders.js';
 import { localeCatalogSources, mergeLocaleCatalogs, readLocaleCatalogs, type LocaleCatalog, type LocaleCatalogSource } from './locale.js';
 import { modelContributions, modelFiles, modelWatchPaths, resolveModels, type ModelContribution, type ModelPlan } from './model.js';
 export { appRuntimePlugin, appConfigContributions, resolveAppRuntime, type AppRuntimeOptions, type AppConfigContribution, type AppRuntimePlan } from './app-runtime.js';
@@ -25,6 +26,7 @@ export { headPlugin, type HeadPluginOptions } from './head.js';
 export { routePrefetchPlugin, type RoutePrefetchOptions } from './prefetch.js';
 export { analyticsPlugin, type AnalyticsPluginOptions } from './analytics.js';
 export { toolPlugin, runTool, type ToolPluginOptions, type ToolSpec } from './tools.js';
+export { detectClientLoader, pageLoaders, CLIENT_LOADER_EXPORT } from './page-loaders.js';
 export { generatorPlugin, planGeneration, applyGeneration, type GeneratorPluginOptions, type GeneratePlan, type PlannedFile } from './generate-command.js';
 export { modelPlugin, modelContributions, resolveModels, type ModelPluginOptions, type ModelContribution, type ModelPlan } from './model.js';
 export { initialStatePlugin, type InitialStatePluginOptions } from './initial-state.js';
@@ -235,7 +237,7 @@ export const reactPlugin: Plugin.Object<void> = {
             phase = 'routes';
             const routeRevision = routes.revision, runtimeRevision = runtime.revision, layoutRevision = layouts.revision, loadingRevision = loading.revision, styleRevision = styles.revision, accessRevision = access.revision, localeRevision = locale.revision, modelRevision = models.revision;
             const routeOrder = routes.snapshot(), runtimeOrder = runtime.snapshot(), layoutOrder = layouts.snapshot(), loadingOrder = loading.snapshot(), styleOrder = styles.snapshot(), accessOrder = access.snapshot(), localeOrder = locale.snapshot(), modelOrder = models.snapshot();
-            const initialRoutes = input.routes !== undefined ? validateRoutes(input.routes) : routesFromFiles(observed.files, pages as string);
+            const initialRoutes = input.routes !== undefined ? validateRoutes(input.routes) : routesFromFiles(observed.files, pages as string, await pageLoaders(root, observed.files));
             const baseRoutes = validateRoutes(await routes.reduce(initialRoutes, (value): value is readonly RouteRecord[] => Array.isArray(value)));
             const layoutSources = layoutContributions(await layouts.collect(undefined));
             const globalLayout = await resolveGlobalLayout(root, layoutSources);

@@ -830,6 +830,23 @@ cormi format -- --check src
 
 二进制从 `node_modules/.bin` 解析，使用 `spawn` 而不是 shell；stdout/stderr 转发到 CLI 的 stderr，非零退出以 `TOOL_FAILED` 失败，未安装则为 `TOOL_MISSING`。默认参数可配置（默认 `eslint .` 与 `prettier --write .`），没有内置文件发现或配置生成。规则见 [F5i 工程命令](91-f5i-tool-commands.md)。
 
+### 4.31 约定式页面的 clientLoader
+
+约定路由（`src/pages/**`）不需要配置：页面导出 `clientLoader` 即自动生效：
+
+```tsx
+// src/pages/member/[id].tsx
+export default function Member() {
+  const data = useClientLoaderData<{ id: string }>();
+  return <p>{data.id}</p>;
+}
+export async function clientLoader({ params }: { params: Record<string, string | undefined> }) {
+  return { id: params.id ?? '-' };
+}
+```
+
+检测使用零依赖的词法扫描（忽略注释与字符串），只识别 `export function/async function/const clientLoader`；注释、字符串、`declare` 与类型导出不会误判，重导出（`export { clientLoader } from …`）不被识别。配置式路由仍用 `clientLoader` 字段显式声明。规则与边界见 [F5j 约定式 loader](92-f5j-conventional-loader.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

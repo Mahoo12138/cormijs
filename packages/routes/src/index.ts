@@ -354,7 +354,7 @@ export async function pageFiles(root: string, directory = 'src/pages'): Promise<
   }
   await visit(base, 0); return Object.freeze(files.sort(compare));
 }
-export function routesFromFiles(files: readonly string[], directory = 'src/pages'): readonly RouteRecord[] {
+export function routesFromFiles(files: readonly string[], directory = 'src/pages', loaders: Readonly<Record<string, string>> = {}): readonly RouteRecord[] {
   const prefix = directory.replace(/\/$/, '') + '/';
   const descriptors = [...files].sort(compare).map(file => {
     if (!file.startsWith(prefix) || file.includes('\\')) fail('ROUTE_PATH_INVALID', 'File outside the pages directory.', { file });
@@ -379,8 +379,10 @@ export function routesFromFiles(files: readonly string[], directory = 'src/pages
       at = at ? posix.dirname(at) : undefined; if (at === '.') at = '';
     }
     const remaining = item.segments.slice(parent?.segments.length ?? 0).join('/');
+    const loader = loaders[item.file];
     return { id: item.id, ...(parent ? { parentId: parent.id } : {}),
       ...(item.index && !remaining ? { index: true } : { path: remaining }),
+      ...(loader !== undefined ? { clientLoader: loader } : {}),
       module: { specifier: './' + item.file, exportName: 'default' }, source: { file: item.file } };
   }));
 }

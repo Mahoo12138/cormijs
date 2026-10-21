@@ -61,3 +61,5 @@ node --import tsx scripts/admin/migrate.ts \
 ```
 
 创建器不自行安装/启动，随后在新副本执行 pnpm install --ignore-scripts。整体移动时保留 .cormi-local 和安装后锁文件。本迁移用于框架验证，尚非公开发布的生产后台产品。
+
+> 2026-10-21：为避免磁盘耗尽，`.cache/admin-*` 历史验收快照已按用户确认清理；本文中的这些路径不再存在，历史结论以文字与 `artifacts/` 记录为准。

@@ -82,3 +82,5 @@ RouteRecord 新增 `errorBoundary: ModuleRef`，支持普通配置和原生 Cord
 ## 7. 后续入口
 
 下一步优先 AM10：把真实模板迁移到 `/admin/` 部署，逐一处理图片、SVG、CSS、字体、动态chunk、路由跳转与深链接刷新；随后用 Users/Products 的交互状态验证 Admin Fast Refresh。CF-01 的错误边界接口缺口已补，不将它视为整张模块台账关闭。没有推送、发布npm、部署或增加常驻服务。
+
+> 2026-10-21：为避免磁盘耗尽，`.cache/admin-*` 历史验收快照已按用户确认清理；本文中的这些路径不再存在，历史结论以文字与 `artifacts/` 记录为准。
