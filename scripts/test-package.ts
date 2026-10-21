@@ -556,11 +556,11 @@ const subscription:ModelSubscription=({dispatch})=>{void dispatch('start');retur
 const descriptor:ModelDescriptor={namespace:'counter',model:()=>({count:0})};
 const object:ObjectModel<{count:number}>=defineModel({state:{count:0},dependencies:['counter'],reducers:{increment(state){return {count:state.count+1};}}});
 const objectDescriptor:ModelDescriptor={namespace:'object',model:object};
-const value=useModel<{count:number}>('counter');
+const value=useModel<{count:number}>('counter');const selected=useModel('counter',(state:{count:number})=>state.count,(a,b)=>a===b);
 const dispatch=useModelDispatch('object');
 const globalDispatch=useGlobalModelDispatch();
 const order=modelInitializationOrder([descriptor,objectDescriptor]);
-void [modelPlugin,options,subscription,descriptor,objectDescriptor,value,dispatch,globalDispatch,order];
+void [modelPlugin,options,subscription,descriptor,objectDescriptor,value,selected,dispatch,globalDispatch,order];
 // @ts-expect-error model must be a function or object model
 const bad:ModelDescriptor={namespace:'x',model:1};
 `);

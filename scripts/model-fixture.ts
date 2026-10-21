@@ -30,6 +30,7 @@ export default defineModel({
   dependencies: ['prefs'],
   reducers: {
     add(state, action) { return { items: [...state.items, String(action.payload)], total: state.total + 1 }; },
+    addSilent(state, action) { return { items: [...state.items, String(action.payload)], total: state.total }; },
   },
   effects: {
     async addLater(action, { put, call }) {
@@ -60,12 +61,17 @@ export default defineModel({
   subscriptions: { boot({ dispatch }) { void dispatch({ type: 'mark' }); } },
 });`,    'src/pages/index.tsx': `import { useModel, useModelDispatch } from '@cormijs/runtime';
 import { Link } from '@cormijs/runtime';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 function CounterView(){const {count,increment}=useModel<{count:number;increment:()=>void}>('counter');return <section data-counter>{count}<button onClick={increment}>Increment</button></section>;}
 function CounterSelector(){const count=useModel('counter',(state:{count:number})=>state.count);return <output data-count>{count}</output>;}
 function UserView(){const {name,rename}=useModel<{name:string;rename:(value:string)=>void}>('user');return <section data-user>{name}<button onClick={()=>rename('Grace')}>Rename</button></section>;}
 function BoostView(){const {booted}=useModel<{booted:boolean}>('extra.boost');return <p data-boost>{String(booted)}</p>;}
 function AuditView(){const {order}=useModel<{order:string}>('audit');return <p data-order>{order}</p>;}
+function StableSelector(){
+  const renders=useRef(0); renders.current++;
+  const value=useModel('cart',(state:{total:number})=>({total:state.total}),(a,b)=>a.total===b.total);
+  return <p data-stable>{value.total}:{renders.current}</p>;
+}
 function CartView(){
   const cart=useModel<{items:string[];total:number}>('cart');
   const prefs=useModel<{touched:string}>('prefs');
@@ -74,11 +80,12 @@ function CartView(){
   return <section data-cart>{cart.total}:{prefs.touched}
     <button onClick={()=>void dispatch({type:'addLater',payload:'apple'})}>Add later</button>
     <button onClick={()=>void dispatch({type:'crossAdd',payload:'x'})}>Cross add</button>
+    <button onClick={()=>void dispatch({type:'addSilent',payload:'silent'})}>Silent add</button>
     <button onClick={()=>void dispatch({type:'missing'}).catch(value=>setError(value instanceof Error?value.message:String(value)))}>Bad action</button>
     <output data-cart-error>{error}</output>
   </section>;
 }
-export default function Home(){return <main><h1>Model home</h1><CounterView /><CounterSelector /><UserView /><BoostView /><AuditView /><CartView /><Link to="/other">Other page</Link></main>;}`,
+export default function Home(){return <main><h1>Model home</h1><CounterView /><CounterSelector /><UserView /><BoostView /><AuditView /><StableSelector /><CartView /><Link to="/other">Other page</Link></main>;}`,
     'src/pages/other.tsx': `import { Link, useModel } from '@cormijs/runtime';
 export default function Other(){const count=useModel('counter',(state:{count:number})=>state.count);const cart=useModel<{total:number}>('cart');return <main><h1>Model other</h1><output data-other-count>{count}</output><output data-other-cart>{cart.total}</output><Link to="/">Model home</Link></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -96,6 +103,10 @@ export async function verifyModelPage(page: Page, url: string) {
   assert.ok((await page.locator('[data-cart]').innerText()).startsWith('0:'));
   await page.waitForFunction(() => document.querySelector('[data-boost]')?.textContent === 'true');
   await page.waitForFunction(() => document.querySelector('[data-order]')?.textContent === 'prefs,cart');
+  const stableBefore = await page.locator('[data-stable]').innerText();
+  await page.getByRole('button', { name: 'Silent add', exact: true }).click();
+  await page.waitForTimeout(100);
+  assert.equal(await page.locator('[data-stable]').innerText(), stableBefore, 'equal selector result skips rerender');
   await page.getByRole('button', { name: 'Add later', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('[data-cart]')?.textContent?.startsWith('1:'));
   await page.getByRole('button', { name: 'Cross add', exact: true }).click();

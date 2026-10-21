@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 export type ModelAction = string | { readonly type: string; readonly payload?: unknown };
 export type ModelDispatch = (action: ModelAction) => Promise<unknown>;
@@ -181,12 +181,37 @@ export function ModelProvider({ models, children }: { readonly models: readonly 
 
 const noopSubscribe = () => () => {};
 
-export function useModel<State = unknown, Selected = State>(namespace: string, selector?: (state: State) => Selected): Selected {
+export function useModel<State = unknown, Selected = State>(namespace: string, selector?: (state: State) => Selected,
+  isEqual?: (previous: Selected, next: Selected) => boolean): Selected {
   const scope = useContext(ModelContext);
   if (!scope) throw new Error('MODEL_OUTSIDE_APPLICATION: useModel must be used inside a cormi mount');
   const store = scope.stores.get(namespace);
-  const state = useSyncExternalStore(store?.subscribe ?? noopSubscribe, store?.getState ?? (() => undefined), store?.getState ?? (() => undefined));
-  if (store) return selector ? selector(state as State) : state as unknown as Selected;
+  const selectorRef = useRef(selector), equalRef = useRef(isEqual), selected = useRef<unknown>(undefined), initialized = useRef(false);
+  selectorRef.current = selector; equalRef.current = isEqual;
+  const read = useCallback(() => {
+    const state = store ? store.getState() as State : undefined as State;
+    return selectorRef.current ? selectorRef.current(state) : state;
+  }, [store]);
+  if (store) {
+    const current = read();
+    const equal = initialized.current && (equalRef.current ? equalRef.current(selected.current as Selected, current as Selected) : Object.is(current, selected.current));
+    if (!equal) { selected.current = current; initialized.current = true; }
+  }
+  const subscribe = useCallback((listener: () => void) => {
+    if (!store) return () => {};
+    return store.subscribe(() => {
+      const current = read();
+      const equal = initialized.current && (equalRef.current ? equalRef.current(selected.current as Selected, current as Selected) : Object.is(current, selected.current));
+      if (equal) return;
+      selected.current = current; initialized.current = true; listener();
+    });
+  }, [store, read]);
+  const getSnapshot = useCallback(() => {
+    if (store && !initialized.current) { selected.current = read(); initialized.current = true; }
+    return selected.current;
+  }, [store, read]);
+  const snapshot = useSyncExternalStore(store ? subscribe : noopSubscribe, getSnapshot, getSnapshot);
+  if (store) return snapshot as Selected;
   if (!Object.hasOwn(scope.hooks, namespace)) throw new Error(`MODEL_NOT_FOUND: ${namespace}`);
   const hook = scope.hooks[namespace] as State;
   return selector ? selector(hook) : hook as unknown as Selected;

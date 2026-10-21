@@ -1,0 +1,108 @@
+{
+  "format": "cormi:u09-4-selector-equality-validation:1",
+  "verifiedAt": "2026-10-21T23:28:25.789Z",
+  "base": "84e818d3ed2ffa37e9cd947715451c56969fdfb6",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/129-u09-selector-equality.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/model.tsx",
+      "scripts/model-fixture.ts",
+      "scripts/test-package.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u09-4-selector-equality/check.log",
+      "sha256": "a30a7d64c559421bb03cc29b4ed18fe47bd7ce54c40b5bc0f10b5a9402d81e3c",
+      "seconds": 122,
+      "tests": 565,
+      "pass": 565,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u09-4-selector-equality/browser.log",
+      "sha256": "a4c4b4e31063789da1a716d7088c95de2d5b657e4f6da57558d3a9211c453e58",
+      "seconds": 565.3,
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u09-4-selector-equality/package.log",
+      "sha256": "10630095b87c70b8b5ed9b667a751165f45e4df380eb4a0ab5b52f569f2ed775",
+      "stages": 336,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/model.test.ts",
+      "log": ".cache/u09-4-selector-equality/targeted.log",
+      "sha256": "45228c2b1319a5e2e7adbad1d262320600e46daa1abadd56ce622e2d9ad0c2af",
+      "seconds": 11.2,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "equal selector object with custom isEqual skips rerender, total change rerenders, existing model/dependency/subscription cases"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "81bfcc4ef8fb61523df47d76501fbbdf1d1ecf51c0958d56d65cbe823cfffa42",
+    "docs/129-u09-selector-equality.md": "4995ba4d103c02209dc6c78ac5b8a42a07f536e137dd9705d88fe07ac8587e46",
+    "docs/49-application-guide.md": "1624cddc6a9a4ebdff6f6f9af54410eb7925b9c812d5b74bc0c44909e15ea280",
+    "docs/59-umi-feature-roadmap.md": "a7074c4da44a10aaa6a11de7a192326ce618be93c499f25cc56d942e4effbbf9",
+    "packages/runtime/src/model.tsx": "886d408db3d6bdf8a2e31348f99863336a4fe5d7052ca30ccebaeef8b70fc4c8",
+    "scripts/model-fixture.ts": "bf083f64669eb0d9b731e89bfd4e7f16a8f8f258048108b2e238eee0ca37d34c",
+    "scripts/test-package.ts": "9b40028f3bffb59cdc56dfefc6dd5a4bafd19ae95e8bcad5569f25d929297c26"
+  },
+  "sourceInputCount": 7,
+  "sourceInputsDigest": "30d5e3985948d8d372f40113110ffcb28ce1b192ae4a98ffe258809313ad71ef",
+  "documentationInputs": {
+    "docs/129-u09-selector-equality.md": "4995ba4d103c02209dc6c78ac5b8a42a07f536e137dd9705d88fe07ac8587e46",
+    "docs/59-umi-feature-roadmap.md": "a7074c4da44a10aaa6a11de7a192326ce618be93c499f25cc56d942e4effbbf9",
+    "docs/112-roadmap-audit-2026-10-21.md": "81bfcc4ef8fb61523df47d76501fbbdf1d1ecf51c0958d56d65cbe823cfffa42",
+    "docs/49-application-guide.md": "1624cddc6a9a4ebdff6f6f9af54410eb7925b9c812d5b74bc0c44909e15ea280"
+  },
+  "evidence": [
+    ".cache/u09-4-selector-equality/check.log",
+    ".cache/u09-4-selector-equality/browser.log",
+    ".cache/u09-4-selector-equality/package.log",
+    ".cache/u09-4-selector-equality/targeted.log",
+    "artifacts/u09-4-selector-equality-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "object-is-default-not-deep-equal",
+    "custom-isEqual-required-for-derived-objects",
+    "hook-models-not-optimized",
+    "no-hot-store-preservation",
+    "selector-runs-during-render-and-notifications",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}
