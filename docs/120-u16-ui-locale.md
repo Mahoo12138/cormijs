@@ -29,7 +29,7 @@ export function UiLocale({ children }) {
 }
 ```
 
-`UiLocale` 放在应用 `rootContainer` 或根布局中；语言切换由 `LocaleProvider` 触发，两个 `useLocaleResource` 自动更新。
+`UiLocale` 放在应用 `rootContainer` 或根布局中；语言切换由 `LocaleProvider` 触发，两个 `useLocaleResource` 自动更新。`useLocaleResource` 还返回 `direction`（见 [U16-2](124-u16-rtl.md)），可传给 `ConfigProvider` 的 `direction`。
 
 ## 2. 契约与语义
 

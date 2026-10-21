@@ -15,7 +15,7 @@ export { ModelProvider, useModel, useModelDispatch, useGlobalModelDispatch, defi
 export { InitialStateProvider, initialStateRuntime, useInitialState, type InitialState } from './initial-state.js';
 export { createRequestClient, RequestError, RequestProvider, requestRuntime, useRequest, usePagination, useRequestClient, type RequestClient, type RequestOptions, type RequestParams, type UseRequestOptions, type UseRequestResult, type UsePaginationOptions, type UsePaginationResult, type PaginationRequest, type PaginationResponse } from './request.js';
 export { applyLocaleCatalogs, FormattedMessage, LocaleProvider, localeRuntime, formatDateFor, formatNumberFor, formatRelativeTimeFor, richNodes, selectPluralKey, useIntl, useLocaleOptional, type IntlApi, type RichTag, type RichTags } from './locale.js';
-export { normalizeLocaleTag, localeCandidates, dayjsLocaleCandidates, resolveLocaleResource, useLocaleResource, type LocaleResourceMatch, type UiLocaleResource } from './ui-locale.js';
+export { normalizeLocaleTag, localeCandidates, dayjsLocaleCandidates, localeDirection, resolveLocaleResource, useLocaleResource, type LocaleResourceMatch, type UiLocaleResource } from './ui-locale.js';
 export { formatIcu, formatIcuParts, type RichPart } from './icu.js';
 export { Access, AccessProvider, accessRuntime, AccessRoute, applyAccessConvention, useAccess, useAccessOptional, type Access as AccessMap } from './access.js';
 export { MenuProvider, menuRuntime, useActiveMenuKeys, useBreadcrumb, useMenu, useMenuCollapse, type BreadcrumbItem, type MenuItem } from './menu.js';

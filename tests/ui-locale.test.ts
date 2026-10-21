@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { dayjsLocaleCandidates, localeCandidates, normalizeLocaleTag, resolveLocaleResource } from '@cormijs/runtime';
+import { dayjsLocaleCandidates, localeCandidates, localeDirection, normalizeLocaleTag, resolveLocaleResource } from '@cormijs/runtime';
 
 test('normalizeLocaleTag accepts separators, casing and encoding suffixes', () => {
   assert.equal(normalizeLocaleTag('en_us.UTF-8'), 'en-US');
@@ -19,6 +19,16 @@ test('localeCandidates walk full, language-script and language', () => {
   assert.deepEqual(localeCandidates('bad--tag'), []);
   assert.deepEqual(dayjsLocaleCandidates('zh-CN'), ['zh-cn', 'zh']);
   assert.deepEqual(dayjsLocaleCandidates('en-US'), ['en-us', 'en']);
+});
+
+test('localeDirection detects RTL languages and honours normalized overrides', () => {
+  for (const locale of ['ar', 'ar-EG', 'he-IL', 'fa', 'ur-PK', 'ckb']) assert.equal(localeDirection(locale), 'rtl', locale);
+  for (const locale of ['en', 'zh-Hant-TW', 'ja-JP', 'es-419']) assert.equal(localeDirection(locale), 'ltr', locale);
+  assert.equal(localeDirection('ar', { ar: 'ltr' }), 'ltr');
+  assert.equal(localeDirection('en_US', { 'en-US': 'rtl' }), 'rtl');
+  assert.equal(localeDirection('ar', { 'ar-EG': 'ltr' }), 'rtl');
+  assert.throws(() => localeDirection('en', { en: 'sideways' as never }), /LOCALE_DIRECTION_INVALID/);
+  assert.throws(() => localeDirection('en', [] as never), /LOCALE_DIRECTION_INVALID/);
 });
 
 test('resolveLocaleResource normalizes keys and falls back along the chain', () => {

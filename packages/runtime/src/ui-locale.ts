@@ -58,6 +58,27 @@ export interface UiLocaleResource<T> {
   readonly locale: string;
   readonly key?: string;
   readonly resource?: T;
+  readonly direction: 'ltr' | 'rtl';
+}
+
+const RTL_LANGUAGES = new Set(['ar', 'arc', 'ckb', 'dv', 'fa', 'he', 'khw', 'ks', 'ku', 'ps', 'sd', 'ur', 'yi']);
+
+/** Language-based RTL detection with optional normalized overrides; unknown tags default to ltr. */
+export function localeDirection(locale: string, overrides: Readonly<Record<string, 'ltr' | 'rtl'>> = {}): 'ltr' | 'rtl' {
+  if (!overrides || typeof overrides !== 'object' || Array.isArray(overrides)) throw new TypeError('LOCALE_DIRECTION_INVALID: overrides must be an object');
+  const normalized = new Map<string, 'ltr' | 'rtl'>();
+  for (const [key, value] of Object.entries(overrides)) {
+    const tag = normalizeLocaleTag(key);
+    if (!tag) continue;
+    if (value !== 'ltr' && value !== 'rtl') throw new TypeError(`LOCALE_DIRECTION_INVALID: ${key}`);
+    if (!normalized.has(tag)) normalized.set(tag, value);
+  }
+  const candidates = localeCandidates(locale);
+  for (const candidate of candidates) {
+    const override = normalized.get(candidate);
+    if (override) return override;
+  }
+  return RTL_LANGUAGES.has(candidates.at(-1) ?? '') ? 'rtl' : 'ltr';
 }
 
 /** Re-render the caller when the active locale changes and resolve the official UI resources. */
@@ -66,6 +87,6 @@ export function useLocaleResource<T>(resources: Readonly<Record<string, T>>, fal
   const locale = intl?.locale ?? fallback;
   return useMemo(() => {
     const match = resolveLocaleResource(locale, resources);
-    return Object.freeze({ locale, ...(match ? { key: match.locale, resource: match.value } : {}) });
+    return Object.freeze({ locale, direction: localeDirection(locale), ...(match ? { key: match.locale, resource: match.value } : {}) });
   }, [locale, resources]);
 }

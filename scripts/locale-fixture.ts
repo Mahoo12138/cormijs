@@ -56,6 +56,7 @@ export default function Home(){
     <h1 data-title>{t('title')}</h1>
     <p data-locale>{locale}</p>
     <p data-ui-locale>{ui.resource ?? 'missing'}</p>
+    <p data-direction>{ui.direction}</p>
     <p data-subscribe>{events.join(',')}</p>
     <p data-dom-events>{domEvents.join(',')}</p>
     <p data-greeting>{t('greeting',{name:'Ada'})}</p>
@@ -89,6 +90,7 @@ export async function verifyLocalePage(page: Page, url: string) {
   await page.getByRole('heading', { name: 'Locale demo', exact: true }).waitFor();
   assert.equal(await page.locator('[data-locale]').innerText(), 'en');
   assert.equal(await page.locator('[data-ui-locale]').innerText(), 'English UI');
+  assert.equal(await page.locator('[data-direction]').innerText(), 'ltr');
   assert.equal(await page.locator('[data-subscribe]').innerText(), '');
   assert.equal(await page.locator('[data-dom-events]').innerText(), '');
   assert.equal(await page.locator('[data-greeting]').innerText(), 'Hello Ada');
@@ -113,6 +115,7 @@ export async function verifyLocalePage(page: Page, url: string) {
   await page.getByRole('heading', { name: '语言演示', exact: true }).waitFor();
   assert.equal(await page.locator('[data-locale]').innerText(), 'zh');
   assert.equal(await page.locator('[data-ui-locale]').innerText(), 'Chinese UI');
+  assert.equal(await page.locator('[data-direction]').innerText(), 'ltr');
   assert.equal(await page.locator('[data-subscribe]').innerText(), 'zh');
   assert.equal(await page.locator('[data-dom-events]').innerText(), 'zh');
   assert.equal(await page.locator('[data-greeting]').innerText(), '你好 Ada');

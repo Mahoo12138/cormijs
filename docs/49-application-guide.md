@@ -403,7 +403,7 @@ setLocale(locale === 'zh' ? 'en' : 'zh');
 <FormattedMessage id="greeting" values={{ name: 'Grace' }} />
 ```
 
-当前消息来自内联配置或 `src/locales` 目录；支持 default/fallback、切换/持久化、ICU 复数/日期/数字、相对时间与富文本。UI 库语言资源用 `useLocaleResource` 选择：标签经 `normalizeLocaleTag` 归一化，`zh_CN` 与 `zh-CN` 等价，回退链覆盖语言；Antd locale 对象与 dayjs 加载函数由应用提供。SSR 与按请求 locale 仍待后续。完整语义见 [F3a locale](69-f3a-locale.md) 与 [U16-1](120-u16-ui-locale.md)。
+当前消息来自内联配置或 `src/locales` 目录；支持 default/fallback、切换/持久化、ICU 复数/日期/数字、相对时间与富文本。UI 库语言资源用 `useLocaleResource` 选择：标签经 `normalizeLocaleTag` 归一化，`zh_CN` 与 `zh-CN` 等价，回退链覆盖语言；Antd locale 对象与 dayjs 加载函数由应用提供。返回的 `direction` 由 `localeDirection` 计算（ar/he/fa/ur 等 RTL，可用归一化覆盖），可直接传给 ConfigProvider 或根节点 `dir`。SSR 与按请求 locale 仍待后续。完整语义见 [F3a locale](69-f3a-locale.md)、[U16-1](120-u16-ui-locale.md) 与 [U16-2](124-u16-rtl.md)。
 
 示例：`pnpm cormi dev --root examples/locale`，默认监听 `/locale/`。
 

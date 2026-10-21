@@ -1,0 +1,114 @@
+{
+  "format": "cormi:u16-2-rtl-validation:1",
+  "verifiedAt": "2026-10-21T21:48:05.538Z",
+  "base": "b1a9129b36320b8827d15ecca21c8c95999e71fc",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/120-u16-ui-locale.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/index.tsx",
+      "packages/runtime/src/ui-locale.ts",
+      "scripts/locale-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/ui-locale.test.ts",
+      "docs/124-u16-rtl.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u16-2-rtl/check.log",
+      "sha256": "3530a490b6712f1d5f522daa3c5ce65ce95ab71aff46f3f54b590eb438f4bb37",
+      "seconds": 121.2,
+      "tests": 565,
+      "pass": 565,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u16-2-rtl/browser.log",
+      "sha256": "c59d934cb986932537ff499bbabbdf5bf3a1edf519890d4c46d4d064f7b15e17",
+      "seconds": 555.9,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u16-2-rtl/package.log",
+      "sha256": "252a82a46abb902bc0be847fe265e44bc997e1025c8acffb57df801673b68b2f",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/ui-locale.test.ts",
+      "log": ".cache/u16-2-rtl/targeted.log",
+      "sha256": "9d829025aee1e0e7c0fa113f4694164260bbd1740de5f7b1a876aebc0c7910ce",
+      "seconds": 0.2,
+      "tests": 4,
+      "pass": 4,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "RTL language set, LTR defaults, normalized direction overrides, invalid overrides, locale resource chains"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "bae1376f5a971c6589d7626d95b7815d71f4aad2e614dd1ac0b669a400e538ed",
+    "docs/120-u16-ui-locale.md": "53357cfbf901501258285721451c6a35d180d390aa4110536491631ac12526f4",
+    "docs/49-application-guide.md": "56fd5a6779d5ea2d86d2bf04fdbf4f3b6df9e0874970a753f06249c11827ad09",
+    "docs/59-umi-feature-roadmap.md": "02c78490b3c13fe4c1bfc79515a6cf19ef21bffe6ac2384df4a85033e8754f72",
+    "packages/runtime/src/index.tsx": "280bf170d0cdaf10e026051be5a51dd482923c9744606c3e1d1a2a8b4056a4da",
+    "packages/runtime/src/ui-locale.ts": "a438e81248bd18a48723c8d0b07f406fc0f9c7ba2bde91630a667c3ae7835741",
+    "scripts/locale-fixture.ts": "8bd524669e5e011b77159da7f7407362bfe9ccc0f1dd08c24815e9703e358a5d",
+    "scripts/test-package.ts": "7f4c5580fc32ed70b71e15ddc412b99f9360d0a9867334418b79f7381299d09f",
+    "tests/ui-locale.test.ts": "370a4ff98133da822790e598dc0d94dff1c20a1af42cd77be6c7ca5b189338d1",
+    "docs/124-u16-rtl.md": "3bb606f0b2796e359aa9a16715c7a676e4be11273dc67742382a50b587d319c1"
+  },
+  "sourceInputCount": 10,
+  "sourceInputsDigest": "cc15799f5363a7b43c1f7ca2f1b2fcde6c8f8bd0dcf1bbad06b796e743ea895a",
+  "documentationInputs": {
+    "docs/124-u16-rtl.md": "3bb606f0b2796e359aa9a16715c7a676e4be11273dc67742382a50b587d319c1",
+    "docs/59-umi-feature-roadmap.md": "02c78490b3c13fe4c1bfc79515a6cf19ef21bffe6ac2384df4a85033e8754f72",
+    "docs/112-roadmap-audit-2026-10-21.md": "bae1376f5a971c6589d7626d95b7815d71f4aad2e614dd1ac0b669a400e538ed",
+    "docs/49-application-guide.md": "56fd5a6779d5ea2d86d2bf04fdbf4f3b6df9e0874970a753f06249c11827ad09"
+  },
+  "evidence": [
+    ".cache/u16-2-rtl/check.log",
+    ".cache/u16-2-rtl/browser.log",
+    ".cache/u16-2-rtl/package.log",
+    ".cache/u16-2-rtl/targeted.log",
+    "artifacts/u16-2-rtl-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "static-rtl-language-list",
+    "no-clrd-data",
+    "no-rtl-styles-or-component-wrappers",
+    "no-request-locale-negotiation",
+    "direction-is-explicit-not-dom-mutating",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}
