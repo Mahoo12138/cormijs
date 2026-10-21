@@ -893,6 +893,23 @@ formatRelativeTime(-1, 'day', { numeric: 'auto' });  // en: yesterday；zh: 昨�
 
 非 React 场景使用 `formatRelativeTimeFor(locale, value, unit, options?)`。`value` 必须有限，`unit` 限 `Intl.RelativeTimeFormatUnit` 的合法值；非法输入抛 `LOCALE_INVALID`。它只做格式化，不自动刷新、不读取当前时间。规则见 [F5m 相对时间](95-f5m-relative-time.md)。
 
+### 4.35 生产 API 路由
+
+需要开发期与预览期都能访问的 HTTP 接口时，显式启用 `apiRoutePlugin`：
+
+```ts
+plugins: [{ id: 'api', plugin: apiRoutePlugin }]
+```
+
+```ts
+// src/api/users/[id].ts
+import type { ApiHandlerContext } from '@cormijs/plugin-react-vite';
+export default (request: Request, { params }: ApiHandlerContext) =>
+  Response.json({ id: params.id });
+```
+
+`src/api/**` 的文件映射为 `/api/**`（`index.ts` 是目录本身，`[id].ts` 捕获一段）；处理器是标准 Fetch `Request`/`Response`，自行判断 method。`cormi dev` 直接运行源码，`cormi build` 把处理器打包进 `dist/.cormi/api`，`cormi preview` 从编译产物提供服务。请求/响应缓冲上限为 1 MiB/8 MiB，错误返回 JSON 码且不泄漏堆栈；新增/删除路由文件需重启开发服务。规则见 [F5n API 路由](96-f5n-api-routes.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

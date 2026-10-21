@@ -936,19 +936,24 @@ const bad:GeneratePlan=planGeneration(1);
     await writeFile(join(exportConsumer,'package.json'),JSON.stringify(exportManifest,null,2));
     await install('static-export-install',exportConsumer);await auditLinks(exportConsumer);
     await command('static-export-typecheck',exportConsumer,'typecheck');
-    await writeFile(join(exportConsumer,'types.mts'),`import {staticExportPlugin,staticPages,renderStaticPage,writeStaticPages,type StaticExportOptions,type StaticPage} from '@cormijs/plugin-react-vite';
+    await writeFile(join(exportConsumer,'types.mts'),`import {apiRoutePlugin,matchApiRoute,resolveApiRoutes,staticExportPlugin,staticPages,renderStaticPage,writeStaticPages,type ApiRoute,type ApiRoutePluginOptions,type StaticExportOptions,type StaticPage} from '@cormijs/plugin-react-vite';
 const options:StaticExportOptions={id:'app:export',titleTemplate:' · demo'};
 const pages:readonly StaticPage[]=staticPages([]);
-void [staticExportPlugin,options,pages,renderStaticPage('<html><head><title>x</title></head></html>',{path:'/',head:{title:'x'}}),writeStaticPages];
+const apiOptions:ApiRoutePluginOptions={id:'app:api',directory:'src/api',prefix:'/api'};
+const routes:readonly ApiRoute[]=resolveApiRoutes(['src/api/ping.ts']);
+const matched=matchApiRoute(routes,'/api/ping');
+void [apiRoutePlugin,apiOptions,routes,matched,staticExportPlugin,options,pages,renderStaticPage('<html><head><title>x</title></head></html>',{path:'/',head:{title:'x'}}),writeStaticPages];
 // @ts-expect-error titleTemplate must be a string
 const bad:StaticExportOptions={titleTemplate:1};
+// @ts-expect-error API prefixes are strings
+const badApi:ApiRoutePluginOptions={prefix:1};
 `);
     await execute('static-export-public-types',exportConsumer,process.execPath,typeArguments);
     await withServer(exportConsumer,'dev',async url=>{await page.goto(url);await page.getByRole('heading',{name:'Export home',exact:true}).waitFor();assert.deepEqual(errors,[]);});
     await command('static-export-build',exportConsumer,'build');
     await verifyStaticExport(exportConsumer);
     await withServer(exportConsumer,'preview',async url=>{await verifyStaticExportPages(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'static-export-preview.png')});});
-    report.stages.push({label:'installed-static-export-dev-build-and-static-preview',routes:['/','/guide'],previewRegenerated:false});
+    report.stages.push({label:'installed-static-export-dev-build-and-static-preview',routes:['/','/guide'],apiRoutes:['/api/ping'],previewRegenerated:false});
 
     }
     if (selected('analytics')) {

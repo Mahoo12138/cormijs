@@ -6,7 +6,7 @@ import type { Page } from 'playwright-core';
 export const staticExportConfiguration = `import { defineConfig } from 'cormijs';
 import preset from '@cormijs/preset-react-vite';
 import { headPlugin, routeConfigPlugin } from '@cormijs/plugin-react';
-import { staticExportPlugin } from '@cormijs/plugin-react-vite';
+import { apiRoutePlugin, staticExportPlugin } from '@cormijs/plugin-react-vite';
 const routes = [{
   id: 'shell', path: '/', component: './src/Shell.tsx', meta: { head: { title: 'Site', metas: [{ name: 'description', content: 'shell description' }] } }, routes: [
     { index: true, component: './src/Home.tsx' },
@@ -20,13 +20,14 @@ export default defineConfig({
     { id: 'routes', plugin: routeConfigPlugin, options: { id: 'application:routes', routes } },
     { id: 'export', plugin: staticExportPlugin, options: { id: 'application:export', titleTemplate: ' · demo' } },
     { id: 'head', plugin: headPlugin, options: { id: 'application:head', titleTemplate: ' · demo' } },
+    { id: 'api', plugin: apiRoutePlugin, options: { id: 'application:api' } },
   ],
   app: { base: '/static/', routes: [], server: { port: 0 } },
 });
 `;
 
 export async function writeStaticExportFixture(root: string) {
-  await mkdir(join(root, 'src'), { recursive: true });
+  await mkdir(join(root, 'src/api'), { recursive: true });
   const files: Record<string, string> = {
     'index.html': '<!doctype html><html><head><meta charset="utf-8" /><title>Base title</title><meta name="author" content="static author" /><link rel="icon" href="data:," /></head><body><div id="root"></div><script type="module" src="/.cormi/app.tsx"></script></body></html>',
     'cormi.config.ts': staticExportConfiguration,
@@ -35,6 +36,7 @@ export default function Shell(){return <section><header><h1>Static export demo</
     'src/Home.tsx': 'export default function Home(){return <main><h2>Export home</h2></main>;}',
     'src/Guide.tsx': 'export default function Guide(){return <main><h2>Export guide</h2></main>;}',
     'src/Detail.tsx': 'export default function Detail(){return <main><h2>Export detail</h2></main>;}',
+    'src/api/ping.ts': `export default () => Response.json({ pong: true });`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
       strict: true, noEmit: true, skipLibCheck: false, allowImportingTsExtensions: true, lib: ['ES2023', 'DOM', 'DOM.Iterable'], types: ['react', 'react-dom', 'node'] },
       include: ['cormi.config.ts', 'src', '.cormi/**/*'] }, null, 2),
@@ -56,6 +58,8 @@ export async function verifyStaticExport(root: string) {
 }
 
 export async function verifyStaticExportPages(page: Page, url: string) {
+  const api = await page.request.get(new URL('/api/ping', url).href);
+  assert.equal(api.status(), 200); assert.deepEqual(await api.json(), { pong: true });
   const response = await page.request.get(new URL('guide/', url).href);
   assert.equal(response.status(), 200);
   const html = await response.text();

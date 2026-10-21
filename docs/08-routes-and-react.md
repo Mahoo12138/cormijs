@@ -70,6 +70,8 @@ F5l 起，`t()`/`tp()`/`FormattedMessage` 在传入值时按 ICU 子集格式化
 
 F5m 起，`useIntl()` 新增 `formatRelativeTime`（平台 `Intl.RelativeTimeFormat`），纯函数 `formatRelativeTimeFor` 同步导出；时间差由调用方计算，支持 `numeric: 'auto'` 等 options，非法数字/单位抛 `LOCALE_INVALID`。详见 [F5m 相对时间](95-f5m-relative-time.md)。
 
+F5n 起，显式启用的 `apiRoutePlugin` 把 `src/api/**` 的 Fetch 处理器映射为 `/api/**`：dev 由 Vite 中间件运行，build 用 esbuild 编译，preview 从编译产物提供服务；`[param]`/index 映射、请求与响应上限、JSON 错误稳定。详见 [F5n API 路由](96-f5n-api-routes.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

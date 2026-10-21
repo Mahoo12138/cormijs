@@ -64,7 +64,7 @@
 | U32 | SSR、服务端 loader/渲染入口 | 待实现 | 独立 SSR renderer/profile，复用可共享契约 | F5 |
 | U33 | exportStatic/预渲染/静态导出 | 部分已有（F5e）：可选 staticExportPlugin 为每个字面路径路由生成带 `meta.head` 的 HTML 外壳；prerender、404.html、sitemap 与 SSR 组合待后续（外壳不等于预渲染） | 静态导出插件 | F5 |
 | U34 | MPA | 待实现多入口应用编排 | 独立 MPA profile | F5 |
-| U35 | apiRoute | 当前只开发 Mock，不是生产 API route | 独立服务端路由插件 | F5 |
+| U35 | apiRoute | 部分已有（F5n）：apiRoutePlugin 将 `src/api/**` 的 Fetch 处理器注册为路由，dev 由 Vite 中间件运行、build 用 esbuild 编译、preview 提供编译产物；独立生产服务、中间件链与流式响应待后续 | 独立服务端路由插件 | F5 |
 | U36 | qiankun、Module Federation | 待实现 | 可选主/子应用与 federation adapter | F6 |
 | U37 | dva、valtio、react-query | 待实现可选集成，不全塞入默认数据流 | 各状态库/服务端状态 adapter | F6 |
 | U38 | analytics、moment2dayjs、confetti 等官方插件 | 部分已有（F5h）：可选 analyticsPlugin 在路由变化时发送 GA4 `page_view` 与 `cormi:pageview`（不注入脚本、不做 consent）；moment2dayjs/confetti 等仍未移植 | 独立可选插件 | F6 |
@@ -104,7 +104,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5l | 803bf94 | ICU 消息子集 | docs/94 |
 | F5m | 8a91da3 | 相对时间格式化 | docs/95 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 525/525、`pnpm test:browser` 49/49、`pnpm test:package` 310 阶段通过；证据见 `artifacts/f4a…f5m-validation.json`。仍未覆盖的大项见 U32/U34/U35、U17 与 F6。
+最新冻结验证（2026-10-21）：`pnpm check` 529/529、`pnpm test:browser` 49/49、`pnpm test:package` 310 阶段通过；证据见 `artifacts/f4a…f5n-validation.json`。仍未覆盖的大项见 U32/U34、U17 与 F6。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -203,6 +203,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5l 状态（2026-10-21）：** U16 的 ICU 子集已交付：零依赖的 `formatIcu` 支持 `{name}`、`number/date/time`（`integer`/`percent` 与 `short`–`full` 样式）、`plural`/`selectordinal`/`select`（可嵌套、`offset:N`）、`#` 与单引号字面量；`=N` 匹配原始值，offset 只影响类别与 `#`（与 FormatJS 10.7.18 一致）。`t()` 在传值时使用该解析器，`tp()`/`FormattedMessage` 随之获得 ICU 能力；未传值时 `t` 仍原样返回目录文本，缺失简单参数保留 `{name}`，格式化/选择参数缺失或语法错误抛 `LOCALE_INVALID`。富文本标签、货币/骨架格式与编译期消息校验仍待后续（相对时间见 F5m）。用法、差异与验证见 [F5l ICU 子集](94-f5l-icu.md)。
 
 **F5m 状态（2026-10-21）：** U16 的相对时间已交付：`useIntl().formatRelativeTime` 与纯函数 `formatRelativeTimeFor` 基于平台 `Intl.RelativeTimeFormat`，跟随当前语言与切换，支持 `numeric: 'auto'` 等 options；`value` 必须有限，`unit` 限合法单位，非法输入抛 `LOCALE_INVALID`。时间差由调用方计算，格式化不读取当前时间、不自动刷新；富文本消息与 Antd/dayjs 语言联动仍待后续。用法、差异与验证见 [F5m 相对时间](95-f5m-relative-time.md)。
+
+**F5n 状态（2026-10-21）：** U35 的第一个完整形态已交付：`apiRoutePlugin`（`cormi:api`，`inject: ['vite']`）把 `src/api/**` 的默认导出 Fetch 处理器映射为 `[param]` 路由；开发期由 Vite 中间件经 `ssrLoadModule` 运行，构建期用 esbuild 打包到 `dist/.cormi/api` 并写 manifest，预览期从 manifest 动态导入；请求/响应各 1 MiB/8 MiB 上限，错误返回稳定的 JSON 码而不泄漏细节，`/.cormi/*` 被拒绝。新增/删除路由文件需重启、无中间件链/流式响应/独立生产服务。用法、差异与验证见 [F5n API 路由](96-f5n-api-routes.md)。
 
 ### F3：权限、布局、菜单和国际化
 
