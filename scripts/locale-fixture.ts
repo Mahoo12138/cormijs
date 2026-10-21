@@ -44,7 +44,7 @@ export default defineApp({
 });`,
     'src/pages/index.tsx': `import { FormattedMessage, useIntl } from '@cormijs/runtime';
 export default function Home(){
-  const {locale,setLocale,t,tp,formatNumber,formatDate}=useIntl();
+  const {locale,setLocale,t,tp,formatNumber,formatDate,formatRelativeTime}=useIntl();
   return <main>
     <h1 data-title>{t('title')}</h1>
     <p data-locale>{locale}</p>
@@ -59,6 +59,8 @@ export default function Home(){
     <p data-icu-number>{t('total',{amount:1234.5,fee:0.25})}</p>
     <p data-formatted-plural><FormattedMessage id="guests" values={{count:4}} /></p>
     <p data-number>{formatNumber(1234.5)}</p>
+    <p data-relative>{formatRelativeTime(-2,'day')}</p>
+    <p data-relative-auto>{formatRelativeTime(-1,'day',{numeric:'auto'})}</p>
     <p data-date>{formatDate(Date.UTC(2024, 0, 2), { timeZone: 'UTC', dateStyle: 'short' })}</p>
     <button data-switch onClick={()=>setLocale(locale === 'en' ? 'zh' : 'en')}>Switch</button>
   </main>;
@@ -85,6 +87,8 @@ export async function verifyLocalePage(page: Page, url: string) {
   assert.equal(await page.locator('[data-icu-number]').innerText(), 'Total 1,234.5 (25% fee)');
   assert.equal(await page.locator('[data-formatted-plural]').innerText(), 'you and 3 others');
   assert.equal(await page.locator('[data-number]').innerText(), '1,234.5');
+  assert.equal(await page.locator('[data-relative]').innerText(), '2 days ago');
+  assert.equal(await page.locator('[data-relative-auto]').innerText(), 'yesterday');
   assert.equal(await page.locator('[data-date]').innerText(), '1/2/24');
   await page.locator('[data-switch]').click();
   await page.getByRole('heading', { name: '语言演示', exact: true }).waitFor();
@@ -99,6 +103,8 @@ export async function verifyLocalePage(page: Page, url: string) {
   assert.equal(await page.locator('[data-icu-number]').innerText(), '总计 1,234.5（25% 手续费）');
   assert.equal(await page.locator('[data-formatted-plural]').innerText(), '你和 3 位其他客人');
   assert.equal(await page.locator('[data-number]').innerText(), '1,234.5');
+  assert.equal(await page.locator('[data-relative]').innerText(), '2天前');
+  assert.equal(await page.locator('[data-relative-auto]').innerText(), '昨天');
   assert.equal(await page.locator('[data-date]').innerText(), '2024/1/2');
   await page.reload(); await page.getByRole('heading', { name: '语言演示', exact: true }).waitFor();
   assert.equal(await page.locator('[data-locale]').innerText(), 'zh');

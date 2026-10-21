@@ -68,6 +68,8 @@ F5k 起，启用 `src/locales` 目录时会生成 `.cormi/locale.d.ts`，提供�
 
 F5l 起，`t()`/`tp()`/`FormattedMessage` 在传入值时按 ICU 子集格式化：`{name}`、`number/date/time`、`plural/selectordinal/select`（含 `offset` 与 `#`）、嵌套与单引号转义；零依赖、不引入 formatjs。未传值时 `t` 仍直接返回目录文本。详见 [F5l ICU 子集](94-f5l-icu.md)。
 
+F5m 起，`useIntl()` 新增 `formatRelativeTime`（平台 `Intl.RelativeTimeFormat`），纯函数 `formatRelativeTimeFor` 同步导出；时间差由调用方计算，支持 `numeric: 'auto'` 等 options，非法数字/单位抛 `LOCALE_INVALID`。详见 [F5m 相对时间](95-f5m-relative-time.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

@@ -611,15 +611,18 @@ const bad:RequestConfig={baseURL:42};
     await writeFile(join(localeConsumer,'package.json'),JSON.stringify(localeManifest,null,2));
     await install('locale-install',localeConsumer);await auditLinks(localeConsumer);
     await command('locale-typecheck',localeConsumer,'typecheck');
-    await writeFile(join(localeConsumer,'types.mts'),`import {localePlugin,type LocalePluginOptions} from '@cormijs/plugin-react';import {FormattedMessage,formatIcu,useIntl,type IntlApi,type LocaleConfig} from '@cormijs/runtime';
+    await writeFile(join(localeConsumer,'types.mts'),`import {localePlugin,type LocalePluginOptions} from '@cormijs/plugin-react';import {FormattedMessage,formatIcu,formatRelativeTimeFor,useIntl,type IntlApi,type LocaleConfig} from '@cormijs/runtime';
 const config:LocaleConfig={default:'en',messages:{en:{hello:'Hello'}}};
 const options:LocalePluginOptions={id:'consumer:locale'};
 const formatted:string=formatIcu('{count, plural, one {# item} other {# items}}',{count:1},'en');
-declare const intl:IntlApi;void [localePlugin,options,config,intl,useIntl,FormattedMessage,formatted];
+const relative:string=formatRelativeTimeFor('en',-2,'day');
+declare const intl:IntlApi;void [localePlugin,options,config,intl,useIntl,FormattedMessage,formatted,relative];
 // @ts-expect-error message values are strings
 const bad:LocaleConfig={messages:{en:{hello:1}}};
 // @ts-expect-error ICU values are strings or numbers
 formatIcu('{n, number}',{n:true},'en');
+// @ts-expect-error relative time units are constrained
+formatRelativeTimeFor('en',1,'fortnight');
 `);
     await execute('locale-public-types',localeConsumer,process.execPath,typeArguments);
     await withServer(localeConsumer,'dev',async url=>{await verifyLocalePage(page,url);assert.deepEqual(errors,[]);});

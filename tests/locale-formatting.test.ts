@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatDateFor, formatNumberFor, selectPluralKey } from '@cormijs/runtime';
+import { formatDateFor, formatNumberFor, formatRelativeTimeFor, selectPluralKey } from '@cormijs/runtime';
 
 const tables = {
   en: { 'items_one': '{count} item', 'items_other': '{count} items', 'legacy_other': 'legacy {count}' },
@@ -28,4 +28,13 @@ test('date formatting follows the locale and rejects invalid dates', () => {
   assert.equal(formatDateFor('en', day, { timeZone: 'UTC', dateStyle: 'short' }), '1/2/24');
   assert.equal(formatDateFor('de', day, { timeZone: 'UTC', dateStyle: 'short' }), '02.01.24');
   assert.throws(() => formatDateFor('en', 'not-a-date'), /LOCALE_INVALID/);
+});
+
+test('relative time follows the locale and rejects unsupported units', () => {
+  assert.equal(formatRelativeTimeFor('en', -2, 'day'), '2 days ago');
+  assert.equal(formatRelativeTimeFor('de', -2, 'day'), 'vor 2 Tagen');
+  assert.equal(formatRelativeTimeFor('zh', 3, 'hour'), '3小时后');
+  assert.equal(formatRelativeTimeFor('en', -1, 'day', { numeric: 'auto' }), 'yesterday');
+  assert.throws(() => formatRelativeTimeFor('en', Number.NaN, 'day'), /LOCALE_INVALID/);
+  assert.throws(() => formatRelativeTimeFor('en', 1, 'fortnight' as never), /LOCALE_INVALID/);
 });

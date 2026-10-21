@@ -879,7 +879,19 @@ t('total', { amount: 1234.5, fee: 0.25 });          // Total 1,234.5 (25% fee)
 t('guests', { count: 0 });                          // no guests
 ```
 
-支持 `{name}`、`{n, number|date|time[, integer|percent|short|medium|long|full]}`、`plural`/`selectordinal`/`select`（可嵌套、可带 `offset:N`）、`#` 计数占位与单引号字面量；`=N` 始终匹配原始值，`offset` 只影响复数类别与 `#`。未传值时 `t` 不解析消息、原样返回目录文本；传值后语法错误会抛 `LOCALE_INVALID`。也导出纯函数 `formatIcu(message, values, locale)`。富文本标签、货币/骨架格式、相对时间与编译期消息校验仍未提供。规则见 [F5l ICU 子集](94-f5l-icu.md)。
+支持 `{name}`、`{n, number|date|time[, integer|percent|short|medium|long|full]}`、`plural`/`selectordinal`/`select`（可嵌套、可带 `offset:N`）、`#` 计数占位与单引号字面量；`=N` 始终匹配原始值，`offset` 只影响复数类别与 `#`。未传值时 `t` 不解析消息、原样返回目录文本；传值后语法错误会抛 `LOCALE_INVALID`。也导出纯函数 `formatIcu(message, values, locale)`。富文本标签、货币/骨架格式与编译期消息校验仍未提供。规则见 [F5l ICU 子集](94-f5l-icu.md)。
+
+### 4.34 相对时间
+
+`useIntl().formatRelativeTime` 跟随当前语言输出相对时间，时间差由调用方计算：
+
+```tsx
+const { formatRelativeTime } = useIntl();
+formatRelativeTime(-2, 'day');                       // en: 2 days ago；zh: 2天前
+formatRelativeTime(-1, 'day', { numeric: 'auto' });  // en: yesterday；zh: 昨天
+```
+
+非 React 场景使用 `formatRelativeTimeFor(locale, value, unit, options?)`。`value` 必须有限，`unit` 限 `Intl.RelativeTimeFormatUnit` 的合法值；非法输入抛 `LOCALE_INVALID`。它只做格式化，不自动刷新、不读取当前时间。规则见 [F5m 相对时间](95-f5m-relative-time.md)。
 
 ## 5. 环境和 Mock 使用同一个部署前缀
 

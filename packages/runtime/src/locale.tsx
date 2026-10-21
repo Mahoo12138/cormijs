@@ -10,6 +10,8 @@ export interface IntlApi {
   peek(key: string): string | undefined;
   formatNumber(value: number, options?: Intl.NumberFormatOptions): string;
   formatDate(value: Date | number | string, options?: Intl.DateTimeFormatOptions): string;
+  /** Locale-aware relative time, e.g. `-2` + `day` → "2 days ago". */
+  formatRelativeTime(value: number, unit: Intl.RelativeTimeFormatUnit, options?: Intl.RelativeTimeFormatOptions): string;
   /** Plural-aware lookup: `${key}_${category}` → `${key}_other` → the plain key, with `{count}` interpolation. */
   tp(key: string, count: number, values?: Readonly<Record<string, string | number>>): string;
 }
@@ -34,6 +36,13 @@ export function formatDateFor(locale: string, value: Date | number | string, opt
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) throw new TypeError('LOCALE_INVALID: formatDate expects a valid date');
   return new Intl.DateTimeFormat(locale, options).format(date);
+}
+
+const relativeUnits = new Set<string>(['year', 'years', 'quarter', 'quarters', 'month', 'months', 'week', 'weeks', 'day', 'days', 'hour', 'hours', 'minute', 'minutes', 'second', 'seconds']);
+export function formatRelativeTimeFor(locale: string, value: number, unit: Intl.RelativeTimeFormatUnit, options?: Intl.RelativeTimeFormatOptions): string {
+  if (typeof value !== 'number' || !Number.isFinite(value)) throw new TypeError('LOCALE_INVALID: formatRelativeTime expects a finite number');
+  if (typeof unit !== 'string' || !relativeUnits.has(unit)) throw new TypeError('LOCALE_INVALID: formatRelativeTime expects a supported unit');
+  return new Intl.RelativeTimeFormat(locale, options).format(value, unit);
 }
 const LocaleContext = createContext<IntlApi | null>(null);
 const DEFAULT_STORAGE_KEY = 'cormi:locale';
@@ -94,6 +103,7 @@ export function LocaleProvider({ appConfig, children }: { readonly appConfig: Re
   }, [config, locale]);
   const formatNumber = useCallback((input: number, options?: Intl.NumberFormatOptions) => formatNumberFor(locale, input, options), [locale]);
   const formatDate = useCallback((input: Date | number | string, options?: Intl.DateTimeFormatOptions) => formatDateFor(locale, input, options), [locale]);
+  const formatRelativeTime = useCallback((input: number, unit: Intl.RelativeTimeFormatUnit, options?: Intl.RelativeTimeFormatOptions) => formatRelativeTimeFor(locale, input, unit, options), [locale]);
   const tp = useCallback((key: string, count: number, values?: Readonly<Record<string, string | number>>) => {
     if (typeof key !== 'string' || !key) return '';
     if (typeof count !== 'number' || !Number.isFinite(count)) throw new TypeError('LOCALE_INVALID: tp expects a finite count');
@@ -102,7 +112,7 @@ export function LocaleProvider({ appConfig, children }: { readonly appConfig: Re
       ?? config.messages[locale]?.[key] ?? (config.fallback ? config.messages[config.fallback]?.[key] : undefined) ?? key;
     return formatIcu(text, { count, ...(values ?? {}) }, locale);
   }, [config, locale]);
-  const value = useMemo<IntlApi>(() => ({ locale, setLocale, t, peek, formatNumber, formatDate, tp }), [locale, setLocale, t, peek, formatNumber, formatDate, tp]);
+  const value = useMemo<IntlApi>(() => ({ locale, setLocale, t, peek, formatNumber, formatDate, formatRelativeTime, tp }), [locale, setLocale, t, peek, formatNumber, formatDate, formatRelativeTime, tp]);
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 

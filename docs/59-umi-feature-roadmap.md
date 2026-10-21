@@ -45,7 +45,7 @@
 | U13 | clientLoader/useClientLoaderData/routeProps | 部分已有（F5a/F5b/F5j）：配置式与约定式页面都可用 `clientLoader`（编译期词法扫描），映射到静态 route loader，loader 抛错由本路由 `errorBoundary` 呈现；数据类型生成、重导出与预取待后续 | 路由数据插件 | F3 |
 | U14 | access.ts/useAccess/Access、路由访问控制 | 基础已有（F3b/F3d/F3e/F4g）：accessPlugin 从 initialState 计算权限，useAccess/Access、路由 access 守卫、自定义 accessForbidden 与 `src/access.ts` 约定（配置优先于约定）可用；服务端授权边界与权限类型生成待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
 | U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e/F4i）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys、access 过滤、`meta.locale` 目录化标题与 `useMenuCollapse` 折叠状态；无 ProLayout/Antd adapter 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
-| U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a/F4h/F5f/F5l）：内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage、`src/locales` 目录，`formatNumber`/`formatDate`/`tp`，生成的 `CormiLocale.Code`/`MessageKey` 类型，以及 ICU 子集（plural/selectordinal/select、offset、`#`、number/date/time、嵌套与引号转义）；相对时间、富文本与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
+| U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a/F4h/F5f/F5l/F5m）：内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage、`src/locales` 目录，`formatNumber`/`formatDate`/`tp`，生成的 `CormiLocale.Code`/`MessageKey` 类型，ICU 子集（plural/selectordinal/select、offset、`#`、number/date/time、嵌套与引号转义）与 `formatRelativeTime` 相对时间；富文本与 UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
 | U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；req/res 兼容与统一代理配置待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c/F4d）：aliasPlugin 支持项目内相对别名与可选内置 `@`→src，definePlugin 在 dev 与 build 替换 JSON 常量；`@@`、环境分层自动映射与 define 类型生成待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
@@ -103,7 +103,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5k | f82c2e3 | locale key 类型 | docs/93 |
 | F5l | 803bf94 | ICU 消息子集 | docs/94 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 524/524、`pnpm test:browser` 49/49、`pnpm test:package` 310 阶段通过；证据见 `artifacts/f4a…f5l-validation.json`。仍未覆盖的大项见 U32/U34/U35、U17 与 F6。
+最新冻结验证（2026-10-21）：`pnpm check` 525/525、`pnpm test:browser` 49/49、`pnpm test:package` 310 阶段通过；证据见 `artifacts/f4a…f5m-validation.json`。仍未覆盖的大项见 U32/U34/U35、U17 与 F6。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -199,7 +199,9 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 
 **F5k 状态（2026-10-20）：** U16 的类型部分已交付：启用 `src/locales` 目录时生成 `.cormi/locale.d.ts`，提供 `CormiLocale.Code` 与 `CormiLocale.MessageKey` 字面量联合（排序、去重、JSON 转义；无目录时为 `never`），并加入类型检查生成输入白名单；运行时 `t`/`tp` 仍收 `string`，内联消息不参与生成。ICU、相对时间、富文本与 UI 联动仍待后续。用法、差异与验证见 [F5k locale 类型](93-f5k-locale-types.md)。
 
-**F5l 状态（2026-10-21）：** U16 的 ICU 子集已交付：零依赖的 `formatIcu` 支持 `{name}`、`number/date/time`（`integer`/`percent` 与 `short`–`full` 样式）、`plural`/`selectordinal`/`select`（可嵌套、`offset:N`）、`#` 与单引号字面量；`=N` 匹配原始值，offset 只影响类别与 `#`（与 FormatJS 10.7.18 一致）。`t()` 在传值时使用该解析器，`tp()`/`FormattedMessage` 随之获得 ICU 能力；未传值时 `t` 仍原样返回目录文本，缺失简单参数保留 `{name}`，格式化/选择参数缺失或语法错误抛 `LOCALE_INVALID`。富文本标签、货币/骨架格式、相对时间与编译期消息校验仍待后续。用法、差异与验证见 [F5l ICU 子集](94-f5l-icu.md)。
+**F5l 状态（2026-10-21）：** U16 的 ICU 子集已交付：零依赖的 `formatIcu` 支持 `{name}`、`number/date/time`（`integer`/`percent` 与 `short`–`full` 样式）、`plural`/`selectordinal`/`select`（可嵌套、`offset:N`）、`#` 与单引号字面量；`=N` 匹配原始值，offset 只影响类别与 `#`（与 FormatJS 10.7.18 一致）。`t()` 在传值时使用该解析器，`tp()`/`FormattedMessage` 随之获得 ICU 能力；未传值时 `t` 仍原样返回目录文本，缺失简单参数保留 `{name}`，格式化/选择参数缺失或语法错误抛 `LOCALE_INVALID`。富文本标签、货币/骨架格式与编译期消息校验仍待后续（相对时间见 F5m）。用法、差异与验证见 [F5l ICU 子集](94-f5l-icu.md)。
+
+**F5m 状态（2026-10-21）：** U16 的相对时间已交付：`useIntl().formatRelativeTime` 与纯函数 `formatRelativeTimeFor` 基于平台 `Intl.RelativeTimeFormat`，跟随当前语言与切换，支持 `numeric: 'auto'` 等 options；`value` 必须有限，`unit` 限合法单位，非法输入抛 `LOCALE_INVALID`。时间差由调用方计算，格式化不读取当前时间、不自动刷新；富文本消息与 Antd/dayjs 语言联动仍待后续。用法、差异与验证见 [F5m 相对时间](95-f5m-relative-time.md)。
 
 ### F3：权限、布局、菜单和国际化
 
