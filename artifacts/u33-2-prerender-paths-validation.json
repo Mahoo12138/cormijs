@@ -1,0 +1,116 @@
+{
+  "format": "cormi:u33-2-prerender-paths-validation:1",
+  "verifiedAt": "2026-10-21T18:34:58.462Z",
+  "base": "66f4c3059f4b3c860222d0a2c106f0d0ca10753b",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/114-u33-prerender-sitemap.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/plugin-react-vite/src/index.ts",
+      "packages/plugin-react-vite/src/ssr.ts",
+      "scripts/ssr-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/browser/ssr.test.ts",
+      "tests/ssr.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u33-2-prerender-paths/check.log",
+      "sha256": "fd2e000f9b25a3f4c9565734df9aee4939ed0511cda6730e6448d555cdf83b98",
+      "seconds": 120.9,
+      "tests": 558,
+      "pass": 558,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u33-2-prerender-paths/browser.log",
+      "sha256": "e04bf37ee87a5a4d4717a90b262a6ed280e8e7a623f2420e97dd79462e649a56",
+      "seconds": 554.6,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u33-2-prerender-paths/package.log",
+      "sha256": "265eb45ca2e4fde274c3f5773040bb5a02474d77b69d1ac577a20d09e096138a",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/ssr.test.ts tests/static-export.test.ts",
+      "log": ".cache/u33-2-prerender-paths/targeted.log",
+      "sha256": "b8eb905babece772df09953c40348af903f85a113e1e31b5e4535031725c5d83",
+      "seconds": 0.7,
+      "tests": 8,
+      "pass": 8,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "extra path merge/dedupe/sort, dynamic serverLoader prerender, 404 skip, sitemap, shell isolation"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "b03d14340566661da702860b83bac5237df4247bec65531d44610156b8bebe46",
+    "docs/114-u33-prerender-sitemap.md": "8789f456fe37422faa309f904ec2b49ad36b8cd0e2e135c591a7704563a78cd1",
+    "docs/49-application-guide.md": "68681c2d84f29712c6be17bd9e90f28f9ec696b67c8a929106a5bfb7a300af32",
+    "docs/59-umi-feature-roadmap.md": "b68a9fb05b4f00caca0d5e1a0a462b8877437896caa9bc2f7b87cec89ad65f4e",
+    "packages/plugin-react-vite/src/index.ts": "a657ea47e89004575653a523cf8ca921725027c8b607d211d5cdaa0653be1335",
+    "packages/plugin-react-vite/src/ssr.ts": "2385c49a9ace042c217f0d65f5f963a5d605c84507a18cff4b800a3e2ab19f9c",
+    "scripts/ssr-fixture.ts": "b7ea2722808f6ba02ebdef6e132ee65b26551e2e8c75fd61237e093878699cea",
+    "scripts/test-package.ts": "8f33aa101db8a336cbcf889e774d7f2a1f21d6dfbf29292301e35a475658a45f",
+    "tests/browser/ssr.test.ts": "d1f4043b620612ccc5326e2e48ee965441ab798b19e533d1f0a1bb13026748ae",
+    "tests/ssr.test.ts": "7cfc1b648a7cf1a0db5fdcc3a216cf425137e2ba41cdafd91b100aa21a6f3e96"
+  },
+  "sourceInputCount": 10,
+  "sourceInputsDigest": "551bfdb9c081372387c17ac70194ae96f81c9e7dd39f7666c05147be79001bda",
+  "documentationInputs": {
+    "docs/114-u33-prerender-sitemap.md": "8789f456fe37422faa309f904ec2b49ad36b8cd0e2e135c591a7704563a78cd1",
+    "docs/59-umi-feature-roadmap.md": "b68a9fb05b4f00caca0d5e1a0a462b8877437896caa9bc2f7b87cec89ad65f4e",
+    "docs/112-roadmap-audit-2026-10-21.md": "b03d14340566661da702860b83bac5237df4247bec65531d44610156b8bebe46",
+    "docs/49-application-guide.md": "68681c2d84f29712c6be17bd9e90f28f9ec696b67c8a929106a5bfb7a300af32"
+  },
+  "evidence": [
+    ".cache/u33-2-prerender-paths/check.log",
+    ".cache/u33-2-prerender-paths/browser.log",
+    ".cache/u33-2-prerender-paths/package.log",
+    ".cache/u33-2-prerender-paths/targeted.log",
+    "artifacts/u33-2-prerender-paths-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "explicit-path-enumeration-only",
+    "no-automatic-path-discovery",
+    "no-incremental-prerender",
+    "skips-response-and-status-400-plus",
+    "sitemap-lists-written-pages-only",
+    "no-sitemap-index-robots-or-alternates",
+    "no-streaming",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

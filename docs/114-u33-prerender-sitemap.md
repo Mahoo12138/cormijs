@@ -9,6 +9,7 @@ plugins: [
   { id: 'ssr', plugin: ssrPlugin, options: {
     id: 'application:ssr',
     prerender: true,
+    prerenderPaths: ['/users/1', '/users/2'],
     sitemap: 'https://example.com',
   } },
 ],
@@ -22,17 +23,17 @@ cormi build
 产物：
 
 - `dist/index.html`：`/` 的预渲染页面；
-- `dist/<path>/index.html`：每个字面路径路由（含 `:id`、`*` 的路由跳过）；
+- `dist/<path>/index.html`：每个字面路径路由（含 `:id`、`*` 的路由跳过），以及 `prerenderPaths` 显式列出的动态路径；
 - `dist/sitemap.xml`：已写出页面的绝对 URL，包含 `app.base`；
 - `dist/.cormi/shell.html`：构建时的空挂载点外壳，供 `cormi preview` / `cormi serve` 继续 SSR 使用；
 - `dist/.cormi/ssr/ssr.mjs`：预渲染与运行时 SSR 共用的服务端 bundle。
 
 ## 2. 契约与语义
 
-- **触发**：`ssrPlugin` 的 `prerender: true`；`sitemap` 是可选绝对 http(s) 站点地址，且必须与 `prerender` 同时出现，否则 `SSR_INVALID`。
-- **路由集合**：复用 `staticPages`：只处理有页面模块、无 redirect、路径不含 `:param` 或 `*` 的路由；结果按路径排序。
+- **触发**：`ssrPlugin` 的 `prerender: true`；`sitemap` 是可选绝对 http(s) 站点地址，`prerenderPaths` 是可选内部应用路径数组（用于枚举 `:id` 等动态页）。两者都必须与 `prerender` 同时出现，否则 `SSR_INVALID`。
+- **路由集合**：复用 `staticPages`：只处理有页面模块、无 redirect、路径不含 `:param` 或 `*` 的路由；再合并 `prerenderPaths`（去重、排序，非法路径或 `..` 被拒绝）。
 - **渲染**：构建完成后导入 `dist/.cormi/ssr/ssr.mjs`，对每个路径构造包含 `app.base` 的 GET 请求，执行与运行时相同的 `renderServerApplication`。clientLoader 与 serverLoader 都会执行，数据进入 hydration；`meta.head` 与 `<Helmet>` 通过 `injectShell` 写入页面。
-- **重定向**：loader 返回 `Response` 的页面不会写成 HTML，构建日志列出跳过项；这些路径也不进入 sitemap。构建不会把重定向冻结成页面。
+- **重定向与错误**：loader 返回 `Response` 或 SSR 结果状态 `>= 400` 的页面不会写成 HTML，构建日志列出跳过项；这些路径也不进入 sitemap。构建不会把重定向或错误页冻结成正常页面。
 - **sitemap**：只包含成功写出的路径，URL 由 `sitemap` + `app.base` + 路由路径拼接；XML 特殊字符转义。未提供 `sitemap` 时不写文件。
 - **空壳隔离**：预渲染会填满 `dist/index.html`，因此构建同时保存 `dist/.cormi/shell.html`；`cormi preview` 与 `cormi serve` 优先读取该空壳再注入 SSR 标记，避免把已预渲染内容再次作为模板。
 - **失败**：SSR bundle 缺失或页面渲染抛错时构建以 `SSR_PRERENDER_FAILED` 失败，不留下“部分页面成功但构建绿”的结果；`CormiError` 原样上抛。
@@ -40,7 +41,7 @@ cormi build
 
 ## 3. 边界
 
-- 动态参数、catch-all、按数据枚举的路径不会预渲染；404 由 staticExportPlugin 的 `notFound` 单独处理。
+- 动态参数路径必须由 `prerenderPaths` 显式枚举（对应 Umi `exportStatic.extraRoutePaths`）；不会从数据源自动发现路径。
 - 没有增量预渲染、页面级开关、并发控制或渲染结果缓存；每个字面路由顺序渲染一次。
 - 与 `staticExportPlugin` 同时启用时，后执行的壳写入可能覆盖预渲染结果；需要预渲染时不要同时启用静态外壳导出（或确保 staticExport 先执行）。本切片不自动协调插件顺序。
 - sitemap 不包含 `lastmod`、优先级、多语言 alternates、robots.txt 或 sitemap index。
@@ -53,7 +54,7 @@ cormi build
 | 预渲染 | exportStatic 可生成 HTML | `ssrPlugin.prerender` 用同一 SSR bundle 渲染 |
 | sitemap | 插件生态 | 内置可选 `sitemap`，仅列出成功页面 |
 | serverLoader | SSR 时执行 | 预渲染时同样执行并写入 hydration |
-| 动态路由 | 依配置/枚举 | 跳过 |
+| 动态路由 | `extraRoutePaths` 枚举 | `prerenderPaths` 枚举 |
 | 增量 | 部分生态方案 | 未提供 |
 
 ## 5. 验证

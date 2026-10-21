@@ -1,6 +1,6 @@
 # cormi Umi 吸收路线完成度审计（2026-10-21）
 
-本文件按 [Umi 功能路线](59-umi-feature-roadmap.md) 与当前工作区、测试产物逐项核对，回答“路线目标是否已经完成”。结论是**未完成**：U32 已补齐 serverLoader、U33 已补齐字面路由预渲染与 sitemap；仍有流式 SSR、动态路由/增量预渲染，以及 U17 官方 UI 集成、U16 dayjs/Antd 映射、F6 等明确缺口。
+本文件按 [Umi 功能路线](59-umi-feature-roadmap.md) 与当前工作区、测试产物逐项核对，回答“路线目标是否已经完成”。结论是**未完成**：U32 已补齐 serverLoader、U33 已补齐字面路由与显式动态路径的预渲染和 sitemap；仍有流式 SSR、自动路径发现/增量预渲染，以及 U17 官方 UI 集成、U16 dayjs/Antd 映射、F6 等明确缺口。
 
 ## 1. 目标重述
 
@@ -32,7 +32,7 @@
 | 路线项 | 缺口 | 当前状态 |
 | --- | --- | --- |
 | U32 | `serverLoader` 已交付（仅服务端执行、hydration 对齐、客户端回退端点）；流式 SSR 未实现 | 部分完成 |
-| U33 | 字面路由预渲染、sitemap 与 SSR 组合已交付；动态路由枚举、增量预渲染、robots 未实现 | 部分完成 |
+| U33 | 字面路由与 `prerenderPaths` 动态路径预渲染、sitemap 与 SSR 组合已交付；自动路径发现、增量预渲染、robots 未实现 | 部分完成 |
 | U17 | 官方 Antd/ProLayout 集成包、主题/图标/图表与 locale 联动 | 仅结构适配器 |
 | U16 | dayjs/Antd 官方 locale 映射与适配包 | 仅订阅/事件机制 |
 | F6 | qiankun/Module Federation、dva/valtio/react-query 适配、多 builder、MFSU 等 | 未实现 |

@@ -52,8 +52,10 @@ test('SSR renders routes and loader data in preview and hydrates without errors'
   assert.match(await readFile(join(f.root, 'dist/index.html'), 'utf8'), /<title>Helmet home title · demo<\/title>/);
   assert.match(await readFile(join(f.root, 'dist/guide/index.html'), 'utf8'), /data-guide="true">loaded on server</);
   const sitemap = await readFile(join(f.root, 'dist/sitemap.xml'), 'utf8');
-  for (const url of ['https://example.com/ssr/', 'https://example.com/ssr/guide', 'https://example.com/ssr/status']) assert.ok(sitemap.includes(`<loc>${url}</loc>`), url);
-  assert.doesNotMatch(sitemap, /backend/);
+  for (const url of ['https://example.com/ssr/', 'https://example.com/ssr/guide', 'https://example.com/ssr/status', 'https://example.com/ssr/backend/7']) assert.ok(sitemap.includes(`<loc>${url}</loc>`), url);
+  const dynamicPage = await readFile(join(f.root, 'dist/backend/7/index.html'), 'utf8');
+  assert.match(dynamicPage, /server loader<!-- -->:<!-- -->7<!-- -->:<!-- -->\/ssr\/backend\/7/);
+  assert.match(dynamicPage, /__staticRouterHydrationData/);
   assert.match(await readFile(join(f.root, 'dist/.cormi/shell.html'), 'utf8'), /<div id="root"><\/div>/);
   const preview = cli(t, f.root, 'preview'), production = await preview.waitFor(event => event.type === 'ready');
   await verifySsrPage(page, production.url);

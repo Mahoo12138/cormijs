@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { ProjectRuntime } from '@cormijs/core';
 import { vitePlugin } from '@cormijs/plugin-vite';
 import { reactPlugin } from '@cormijs/plugin-react';
-import { prerenderStaticPages, sitemapXml, ssrPlugin } from '@cormijs/plugin-react-vite';
+import { prerenderPages, prerenderStaticPages, sitemapXml, ssrPlugin } from '@cormijs/plugin-react-vite';
 import { renderServerApplication, type ServerApplication } from '@cormijs/runtime/server';
 
 const hasCode = (code: string) => (error: any) => (error?.code ?? error?.cause?.code) === code;
@@ -45,7 +45,8 @@ test('ssr plugin registers its Vite bridge, validates options and withdraws', as
   assert.ok(!host.ctx.vite.ids().includes('cormi:ssr'));
   await host.dispose();
 
-  for (const options of [{ mountId: '9bad' }, { mountId: 1 }, { extra: true }, { prerender: 'yes' }, { sitemap: 'https://example.com' }, { prerender: true, sitemap: 'ftp://example.com' }]) {
+  for (const options of [{ mountId: '9bad' }, { mountId: 1 }, { extra: true }, { prerender: 'yes' }, { sitemap: 'https://example.com' }, { prerender: true, sitemap: 'ftp://example.com' },
+    { prerenderPaths: ['/x'] }, { prerender: true, prerenderPaths: ['relative'] }, { prerender: true, prerenderPaths: ['/a/../b'] }]) {
     const rejecting = new ProjectRuntime(3000, root);
     rejecting.mount('vite', vitePlugin);
     rejecting.mount('react', reactPlugin);
@@ -61,13 +62,16 @@ test('prerenderStaticPages writes literal routes, skips redirects and emits a si
   const shell = '<!doctype html><html><head><title>Base</title></head><body><div id="root"></div><script src="/app.js"></script></body></html>';
   const result = await prerenderStaticPages({
     output: root, shell, mountId: 'root', base: '/app/', sitemap: 'https://example.com',
-    pages: [{ path: '/', head: {} }, { path: '/guide', head: {} }, { path: '/moved', head: {} }],
-    render: async request => new URL(request.url).pathname === '/app/moved'
-      ? new Response(null, { status: 302, headers: { location: '/' } })
-      : { html: `<main>${new URL(request.url).pathname}</main>`, status: 200, head: { title: 'Page' } },
+    pages: [{ path: '/', head: {} }, { path: '/guide', head: {} }, { path: '/moved', head: {} }, { path: '/missing', head: {} }],
+    render: async request => {
+      const path = new URL(request.url).pathname;
+      if (path === '/app/moved') return new Response(null, { status: 302, headers: { location: '/' } });
+      if (path === '/app/missing') return { html: '<main>missing</main>', status: 404, head: {} };
+      return { html: `<main>${path}</main>`, status: 200, head: { title: 'Page' } };
+    },
   });
   assert.deepEqual(result.written, ['/', '/guide']);
-  assert.deepEqual(result.skipped, [{ path: '/moved', status: 302 }]);
+  assert.deepEqual(result.skipped, [{ path: '/moved', status: 302 }, { path: '/missing', status: 404 }]);
   const home = await readFile(join(root, 'index.html'), 'utf8');
   assert.match(home, /<main>\/app\/<\/main>/);
   assert.match(home, /<title>Page<\/title>/);
@@ -77,5 +81,13 @@ test('prerenderStaticPages writes literal routes, skips redirects and emits a si
   assert.ok(map.includes('<loc>https://example.com/app/</loc>'));
   assert.ok(map.includes('<loc>https://example.com/app/guide</loc>'));
   assert.ok(!map.includes('moved'));
+  assert.ok(!map.includes('missing'));
   assert.equal(sitemapXml(['https://x.test/a&b']), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://x.test/a&amp;b</loc></url>\n</urlset>\n');
+});
+
+test('prerenderPages merges explicit dynamic paths with literal routes', () => {
+  const pages = prerenderPages([{ id: 'home', path: '', module: { specifier: './src/pages/home.tsx', exportName: 'default' }, source: { file: 'src/pages/home.tsx' } }],
+    ['/users/2', '/users/1', '/users/2']);
+  assert.deepEqual(pages.map(page => page.path), ['/', '/users/1', '/users/2']);
+  assert.deepEqual(pages.find(page => page.path === '/users/1')?.head, {});
 });
