@@ -219,3 +219,98 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
 
 /** Runtime plugin object consumed by the generated entry when requestPlugin is mounted. */
 export const requestRuntime = { Provider: RequestProvider };
+
+export interface PaginationRequest {
+  readonly page: number;
+  readonly pageSize: number;
+  readonly signal: AbortSignal;
+}
+export interface PaginationResponse<T> {
+  readonly list: readonly T[];
+  readonly total?: number;
+  readonly hasMore?: boolean;
+}
+export interface UsePaginationOptions<T> {
+  readonly pageSize?: number;
+  readonly manual?: boolean;
+  /** Replace the default append; receives the accumulated and incoming pages. */
+  readonly merge?: (previous: readonly T[], next: readonly T[]) => readonly T[];
+  readonly onSuccess?: (data: readonly T[], page: number) => void;
+  readonly onError?: (error: unknown) => void;
+}
+export interface UsePaginationResult<T> {
+  readonly data: readonly T[];
+  readonly page: number;
+  readonly pageSize: number;
+  readonly loading: boolean;
+  readonly error: unknown;
+  readonly hasMore: boolean;
+  loadMore(): Promise<void>;
+  reload(): Promise<void>;
+  cancel(): void;
+}
+
+export function usePagination<T>(service: (client: RequestClient, request: PaginationRequest) => Promise<PaginationResponse<T>>,
+  options: UsePaginationOptions<T> = {}): UsePaginationResult<T> {
+  const client = useRequestClient();
+  const pageSize = options.pageSize ?? 20;
+  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 1000) throw new TypeError('REQUEST_INVALID: pageSize must be an integer from 1 to 1000');
+  if (options.manual !== undefined && typeof options.manual !== 'boolean') throw new TypeError('REQUEST_INVALID: manual must be boolean');
+  if (options.merge !== undefined && typeof options.merge !== 'function') throw new TypeError('REQUEST_INVALID: merge must be a function');
+  const [state, setState] = useState<{ data: readonly T[]; page: number; hasMore: boolean; loading: boolean; error: unknown }>({
+    data: Object.freeze([]), page: 0, hasMore: true, loading: options.manual !== true, error: undefined,
+  });
+  const serviceRef = useRef(service), optionsRef = useRef(options);
+  serviceRef.current = service; optionsRef.current = options;
+  const dataRef = useRef(state.data); dataRef.current = state.data;
+  const mounted = useRef(true), generation = useRef(0), controller = useRef<AbortController | undefined>(undefined), busy = useRef(false);
+  const run = useCallback(async (page: number, append: boolean): Promise<void> => {
+    if (busy.current) return;
+    busy.current = true;
+    const token = ++generation.current;
+    controller.current?.abort();
+    const current = controller.current = new AbortController();
+    setState(value => ({ ...value, loading: true, error: undefined }));
+    try {
+      const response = await serviceRef.current(client, { page, pageSize, signal: current.signal });
+      if (!response || !Array.isArray(response.list)) throw new TypeError('REQUEST_INVALID: pagination service must return { list }');
+      if (response.total !== undefined && (!Number.isInteger(response.total) || response.total < 0)) throw new TypeError('REQUEST_INVALID: pagination total must be a non-negative integer');
+      if (response.hasMore !== undefined && typeof response.hasMore !== 'boolean') throw new TypeError('REQUEST_INVALID: pagination hasMore must be boolean');
+      if (!mounted.current || token !== generation.current) return;
+      const next = [...response.list];
+      const data = append
+        ? Object.freeze(optionsRef.current.merge ? [...optionsRef.current.merge(dataRef.current, next)] : [...dataRef.current, ...next])
+        : Object.freeze(next);
+      const hasMore = response.hasMore ?? (response.total !== undefined ? page * pageSize < response.total : next.length >= pageSize);
+      setState({ data, page, hasMore, loading: false, error: undefined });
+      optionsRef.current.onSuccess?.(data, page);
+    } catch (error) {
+      const aborted = current.signal.aborted || (error instanceof DOMException && error.name === 'AbortError');
+      if (!mounted.current || token !== generation.current || aborted) {
+        if (mounted.current && token === generation.current) setState(value => ({ ...value, loading: false }));
+        return;
+      }
+      setState(value => ({ ...value, loading: false, error }));
+      optionsRef.current.onError?.(error);
+    } finally {
+      if (token === generation.current) busy.current = false;
+    }
+  }, [client, pageSize]);
+  const loadMore = useCallback(async () => {
+    if (busy.current || !state.hasMore) return;
+    await run(state.page + 1, true);
+  }, [run, state.hasMore, state.page]);
+  const reload = useCallback(async () => { await run(1, false); }, [run]);
+  const cancel = useCallback(() => {
+    generation.current++;
+    busy.current = false;
+    controller.current?.abort();
+    setState(value => ({ ...value, loading: false }));
+  }, []);
+  useEffect(() => {
+    mounted.current = true;
+    if (optionsRef.current.manual !== true) void run(1, false);
+    return () => { mounted.current = false; controller.current?.abort(); };
+  }, [run]);
+  return { ...state, pageSize, loadMore, reload, cancel };
+}

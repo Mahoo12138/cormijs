@@ -41,7 +41,7 @@
 | U09 | model/useModel、命名空间、selector、extraModels | 部分已有（F2a/U09-1/U09-2）：modelPlugin 发现 src/models、路径命名空间、Hook 模型共享与 selector；对象模型 `state/reducers/effects/subscriptions`、`useModelDispatch`/全局派发、跨模型 put、`extraModels` 追加文件已交付；模型依赖排序与选择器等值优化待后续 | model 插件 + React Provider | F2 |
 | U10 | getInitialState、@@initialState、refresh/setInitialState | 部分已有（F2b）：initialStatePlugin 登记 getInitialState，提供 useInitialState/loading/error/refresh/set；@@initialState 模型集成、首屏阻塞与 SSR 待后续 | initial-state 插件，依赖 model/应用 runtime | F2 |
 | U11 | request、运行时配置、拦截器、统一错误 | 部分已有（F2c）：requestPlugin 注册 app.tsx request 配置和每挂载 fetch 客户端；拦截器、统一错误协议、dataField 待后续 | request 契约/客户端实现适配 | F2 |
-| U12 | useRequest、手动/自动、分页/加载更多等 | 部分已有（F2c/U12-1）：自动/手动、loading/error、refresh、cancel、竞态保护；失败重试与 retryDelay、成功后轮询（可含隐藏页）、refreshDeps 已交付；分页/加载更多、缓存/去重、防抖节流待后续 | 请求 Hooks 插件，可复用成熟库 | F2 |
+| U12 | useRequest、手动/自动、分页/加载更多等 | 部分已有（F2c/U12-1/U12-2）：自动/手动、loading/error、refresh、cancel、竞态保护；失败重试与 retryDelay、成功后轮询（可含隐藏页）、refreshDeps、`usePagination` 分页/加载更多（追加、hasMore、reload、cancel）已交付；缓存/去重、防抖节流、游标分页待后续 | 请求 Hooks 插件，可复用成熟库 | F2 |
 | U13 | clientLoader/useClientLoaderData/routeProps | 部分已有（F5a/F5b/F5j/F5u）：配置式与约定式页面都可用 `clientLoader`（编译期词法扫描），映射到静态 route loader，loader 抛错由本路由 `errorBoundary` 呈现；生成 `.cormi/loaders.d.ts` 提供按路由 id 的 `CormiLoaderData.Data` 返回类型，约定扫描支持值形式的重导出；数据预取与 SSR loader 待后续 | 路由数据插件 | F3 |
 | U14 | access.ts/useAccess/Access、路由访问控制 | 基础已有（F3b/F3d/F3e/F4g）：accessPlugin 从 initialState 计算权限，useAccess/Access、路由 access 守卫、自定义 accessForbidden 与 `src/access.ts` 约定（配置优先于约定）可用；服务端授权边界与权限类型生成待后续 | access 插件，依赖初始状态与路由扩展 | F3 |
 | U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e/F4i）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys、access 过滤、`meta.locale` 目录化标题与 `useMenuCollapse` 折叠状态；无 ProLayout/Antd adapter 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
@@ -120,7 +120,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F4m | abbe5aa | CSS Modules/资源类型声明 | docs/110 |
 | U16-1 | ba6ea1f | locale 变更订阅 | docs/111 |
 
-最新冻结验证（2026-10-22）：`pnpm check` 559/559、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/u09-2-subscriptions-validation.json`、`artifacts/u12-request-retry-validation.json`、`artifacts/u09-object-models-validation.json`、`artifacts/u32-streaming-validation.json`、`artifacts/u33-2-prerender-paths-validation.json`、`artifacts/u33-prerender-validation.json`、`artifacts/u32-server-loader-validation.json` 及此前的 f4a…f5z、u16、u17、f4m、f5e 产物。仍未覆盖的大项见 U17、F6、U09 依赖排序、U12 分页/缓存、SSR 生产化与 U33 自动路径发现/增量；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交 ff102e2（模型 subscriptions 与 extraModels）。
+最新冻结验证（2026-10-22）：`pnpm check` 559/559、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/u12-2-pagination-validation.json`、`artifacts/u09-2-subscriptions-validation.json`、`artifacts/u12-request-retry-validation.json`、`artifacts/u09-object-models-validation.json`、`artifacts/u32-streaming-validation.json`、`artifacts/u33-2-prerender-paths-validation.json`、`artifacts/u33-prerender-validation.json`、`artifacts/u32-server-loader-validation.json` 及此前的 f4a…f5z、u16、u17、f4m、f5e 产物。仍未覆盖的大项见 U17、F6、U09 依赖排序、U12 缓存/去重、SSR 生产化与 U33 自动路径发现/增量；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交：U12-2 分页（见提交记录）。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -164,6 +164,7 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 
 **F2c 状态（2026-10-20）：** U11/U12 的请求基础已交付：`requestPlugin` 注册 request 配置和每挂载 fetch 客户端；`useRequest` 支持自动/手动、loading/error/data、refresh、cancel、HTTP 错误和 generation 竞态保护。拦截器、统一错误协议、重试/轮询/分页仍待后续。用法、差异与验证见 [F2c request 与 useRequest](68-f2c-request.md)。F2 基础链路（初始状态 → 共享模型 → 请求）已具备。
 **U12-1 状态（2026-10-22）：** `useRequest` 补齐 `retry`/`retryDelay`、成功后 `pollingInterval`（含 `pollingWhenHidden`）与 `refreshDeps`；重试/轮询在取消、卸载和竞态替换时停止，最终失败才写 error/onError，非法选项以 `REQUEST_INVALID` 失败。仍无分页/加载更多、缓存/去重与防抖节流。用法与边界见 [U12-1 请求自动化](117-u12-request-retry-polling.md)。
+**U12-2 状态（2026-10-22）：** `usePagination` 已交付：首屏加载、`loadMore` 追加、`hasMore`（显式/total/pageSize 推断）、`reload` 替换、`merge` 自定义合并、`cancel` 与卸载中止；同一时刻只允许一个分页请求，错误保留已有列表。仍无游标分页、缓存/去重、防抖节流与 SSR 注水。用法与边界见 [U12-2 分页](119-u12-pagination.md)。
 
 **F3a 状态（2026-10-20）：** U16 的 locale 基础已交付：`localePlugin` 登记 locale 配置与 runtime Provider，`useIntl`/`FormattedMessage` 支持内联消息、default/fallback、切换和 localStorage 持久化。消息目录、复数/日期/数字格式化、UI 库语言联动与 SSR 仍待后续。用法、差异与验证见 [F3a locale](69-f3a-locale.md)。
 

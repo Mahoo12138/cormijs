@@ -1,0 +1,111 @@
+{
+  "format": "cormi:u12-2-pagination-validation:1",
+  "verifiedAt": "2026-10-21T20:15:13.631Z",
+  "base": "59ccc1249076e2fa0feb24247c4b25e0becd8312",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/index.tsx",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts",
+      "docs/119-u12-pagination.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-2-pagination/check.log",
+      "sha256": "257995e40bcf85b098331eac01f585ef5ce59449c40d7969245a9365b0fa669d",
+      "seconds": 118.9,
+      "tests": 559,
+      "pass": 559,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-2-pagination/browser.log",
+      "sha256": "1d04e09a23e3396afc99654e2898ef1b979b2db9879abd623d1d6ec88febb18b",
+      "seconds": 552.3,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-2-pagination/package.log",
+      "sha256": "beb619e04f30429f223f8c1ac76a7c0995a09fd41e4b1d13eb26b8afa602ede8",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-2-pagination/targeted.log",
+      "sha256": "d3d2c2035f09a9d5e2e2b7f74d2ba6c4db64af28fc829dbfc836b1cb7f7c2cc2",
+      "seconds": 11.9,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "first page, two loadMore appends, hasMore false, duplicate loadMore no-op, reload reset, plus existing request automation"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "957bc3072b9b521b9cea80e84f7632ec4b25ca9c3dcab052d59437a550b68ef9",
+    "docs/49-application-guide.md": "38d564b616613c560d78034b83cf37f8fc7dc7b87d5eafbbcd991c444f55e5fc",
+    "docs/59-umi-feature-roadmap.md": "6405136f1ea7e1487ee8b2e7b0b242e82a1005824fbf6e2189c1a8db1c090f22",
+    "packages/runtime/src/index.tsx": "7ca3275be0716824b6b50408a566b930f390cfa6de1d3ae18416165d9622d251",
+    "packages/runtime/src/request.tsx": "8253f526eea4410f2a1613d4d23041b4a6b97777098cd170ec3152dc85807977",
+    "scripts/request-fixture.ts": "c0944a54198b8db6e8fe222299755b7d843822cbf75610642b053004e32a62a3",
+    "scripts/test-package.ts": "ece32073c42d46d78e5e314b1d9cb548d1af2df8f560375914b974d83cf06703",
+    "docs/119-u12-pagination.md": "7c8fea18e9316b5f12c6f3855f75f6c9bb576499a70e9399994b342f047c0c4c"
+  },
+  "sourceInputCount": 8,
+  "sourceInputsDigest": "36b5c75bcb0b3d1d6a74cedfbf0c2aa019bbf608546e9a0d96552a042df58ba7",
+  "documentationInputs": {
+    "docs/119-u12-pagination.md": "7c8fea18e9316b5f12c6f3855f75f6c9bb576499a70e9399994b342f047c0c4c",
+    "docs/59-umi-feature-roadmap.md": "6405136f1ea7e1487ee8b2e7b0b242e82a1005824fbf6e2189c1a8db1c090f22",
+    "docs/112-roadmap-audit-2026-10-21.md": "957bc3072b9b521b9cea80e84f7632ec4b25ca9c3dcab052d59437a550b68ef9",
+    "docs/49-application-guide.md": "38d564b616613c560d78034b83cf37f8fc7dc7b87d5eafbbcd991c444f55e5fc"
+  },
+  "evidence": [
+    ".cache/u12-2-pagination/check.log",
+    ".cache/u12-2-pagination/browser.log",
+    ".cache/u12-2-pagination/package.log",
+    ".cache/u12-2-pagination/targeted.log",
+    "artifacts/u12-2-pagination-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "page-number-pagination-only",
+    "no-cursor-pagination",
+    "no-cache-or-dedupe",
+    "single-in-flight-page-request",
+    "no-retry-polling-or-refresh-deps",
+    "no-ssr-hydration",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

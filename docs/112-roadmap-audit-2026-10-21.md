@@ -34,7 +34,7 @@
 | U32 | `serverLoader` 与流式 SSR 已交付；压缩/TLS/背压/代理缓冲与流中错误恢复未实现 | 部分完成 |
 | U33 | 字面路由与 `prerenderPaths` 动态路径预渲染、sitemap 与 SSR 组合已交付；自动路径发现、增量预渲染、robots 未实现 | 部分完成 |
 | U09 | Hook 与对象模型、reducers/effects/subscriptions、跨模型 put、extraModels 已交付；模型依赖排序与选择器等值优化未实现 | 部分完成 |
-| U12 | useRequest 重试、轮询、refreshDeps 已交付；分页、缓存/去重、防抖节流未实现 | 部分完成 |
+| U12 | useRequest 重试、轮询、refreshDeps 与 usePagination 分页已交付；缓存/去重、防抖节流、游标分页未实现 | 部分完成 |
 | U17 | 官方 Antd/ProLayout 集成包、主题/图标/图表与 locale 联动 | 仅结构适配器 |
 | U16 | dayjs/Antd 官方 locale 映射与适配包 | 仅订阅/事件机制 |
 | F6 | qiankun/Module Federation、dva/valtio/react-query 适配、多 builder、MFSU 等 | 未实现 |

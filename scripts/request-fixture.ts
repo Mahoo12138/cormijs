@@ -24,7 +24,7 @@ export async function writeRequestFixture(root: string) {
     'src/app.tsx': `import { defineApp } from '@cormijs/runtime';
 export default defineApp({ request: { baseURL: '/api', headers: { 'x-app': 'cormi' }, timeout: 2000 } });`,
     'src/pages/index.tsx': `import { useRef, useState } from 'react';
-import { Link, useRequest } from '@cormijs/runtime';
+import { Link, usePagination, useRequest } from '@cormijs/runtime';
 function Auto(){
   const {data,loading,error,refresh}=useRequest<{message:string}>((client,signal)=>client.get('/hello',{signal,params:{q:'one'}}));
   return <section data-auto-section><p data-auto>{data?.message ?? ''}</p><p data-loading>{String(loading)}</p><p data-error>{error ? 'error' : ''}</p><button onClick={()=>void refresh()}>Refresh</button></section>;
@@ -50,12 +50,18 @@ function Polling(){
   const {data}=useRequest<{message:string}>((client,signal)=>client.get('/poll',{signal}),{pollingInterval:150});
   return <p data-poll>{data?.message ?? ''}</p>;
 }
+function Paged(){
+  const {data,page,hasMore,loading,loadMore,reload}=usePagination<{id:number}>((client,{page,pageSize,signal})=>client.get<{list:{id:number}[];total:number}>('/page',{signal,params:{page,pageSize}}),{pageSize:2});
+  return <section><p data-page>{page}</p><p data-page-count>{data.length}</p><p data-page-more>{String(hasMore)}</p><p data-page-loading>{String(loading)}</p>
+    <ul data-page-list>{data.map(item=><li key={item.id}>{item.id}</li>)}</ul>
+    <button onClick={()=>void loadMore()}>More</button><button onClick={()=>void reload()}>Reload page</button></section>;
+}
 function Deps(){
   const [q,setQ]=useState('one');
   const {data}=useRequest<{message:string}>((client,signal)=>client.get('/deps',{signal,params:{q}}),{refreshDeps:[q]});
   return <section><p data-deps>{data?.message ?? ''}</p><button onClick={()=>setQ('two')}>Change dep</button></section>;
 }
-export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Deps /><Link to="/other">Other</Link></main>;}`,
+export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Deps /><Link to="/other">Other</Link></main>;}`,
     'src/pages/other.tsx': `import { Link } from '@cormijs/runtime';
 export default function Other(){return <main><h1>Request other</h1><Link to="/">Request home</Link></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -88,6 +94,10 @@ export async function verifyRequestPage(page: Page, url: string) {
     } else if (target.pathname === '/api/poll') {
       pollCount++;
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'poll:' + pollCount }) });
+    } else if (target.pathname === '/api/page') {
+      const page = Number(target.searchParams.get('page') ?? '1'), pageSize = Number(target.searchParams.get('pageSize') ?? '2');
+      const list = Array.from({ length: 5 }, (_, index) => ({ id: index + 1 })).slice((page - 1) * pageSize, page * pageSize);
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ list, total: 5 }) });
     } else if (target.pathname === '/api/deps') {
       depsCount++;
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'deps:' + (target.searchParams.get('q') ?? '') }) });
@@ -127,6 +137,20 @@ export async function verifyRequestPage(page: Page, url: string) {
   assert.equal(await page.locator('[data-retry-error]').innerText(), '');
   await page.waitForTimeout(500);
   assert.ok(pollCount >= 2, `polled ${pollCount} times`);
+  await page.waitForFunction(() => document.querySelector('[data-page-count]')?.textContent === '2');
+  assert.equal(await page.locator('[data-page]').innerText(), '1');
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-page-count]')?.textContent === '4');
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-page-count]')?.textContent === '5');
+  assert.equal(await page.locator('[data-page]').innerText(), '3');
+  assert.equal(await page.locator('[data-page-more]').innerText(), 'false');
+  await page.getByRole('button', { name: 'More', exact: true }).click();
+  assert.equal(await page.locator('[data-page-count]').innerText(), '5');
+  await page.getByRole('button', { name: 'Reload page', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-page-count]')?.textContent === '2');
+  assert.equal(await page.locator('[data-page]').innerText(), '1');
+  assert.equal(await page.locator('[data-page-more]').innerText(), 'true');
   await page.waitForFunction(() => document.querySelector('[data-deps]')?.textContent === 'deps:one');
   await page.getByRole('button', { name: 'Change dep', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('[data-deps]')?.textContent === 'deps:two');

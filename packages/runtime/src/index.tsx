@@ -13,7 +13,7 @@ export { collectHead, mergeHeads, normalizeHead, routeHeadRuntime, serializeJson
 export { HeadProvider, Helmet, headRuntime } from './helmet.js';
 export { ModelProvider, useModel, useModelDispatch, useGlobalModelDispatch, defineModel, type ModelDescriptor, type ObjectModel, type ModelAction, type ModelDispatch, type ModelEffect, type ModelEffectHelpers, type ModelReducer, type ModelSubscription, type ModelSubscriptionHelpers } from './model.js';
 export { InitialStateProvider, initialStateRuntime, useInitialState, type InitialState } from './initial-state.js';
-export { createRequestClient, RequestError, RequestProvider, requestRuntime, useRequest, useRequestClient, type RequestClient, type RequestOptions, type RequestParams, type UseRequestOptions, type UseRequestResult } from './request.js';
+export { createRequestClient, RequestError, RequestProvider, requestRuntime, useRequest, usePagination, useRequestClient, type RequestClient, type RequestOptions, type RequestParams, type UseRequestOptions, type UseRequestResult, type UsePaginationOptions, type UsePaginationResult, type PaginationRequest, type PaginationResponse } from './request.js';
 export { applyLocaleCatalogs, FormattedMessage, LocaleProvider, localeRuntime, formatDateFor, formatNumberFor, formatRelativeTimeFor, richNodes, selectPluralKey, useIntl, useLocaleOptional, type IntlApi, type RichTag, type RichTags } from './locale.js';
 export { formatIcu, formatIcuParts, type RichPart } from './icu.js';
 export { Access, AccessProvider, accessRuntime, AccessRoute, applyAccessConvention, useAccess, useAccessOptional, type Access as AccessMap } from './access.js';
