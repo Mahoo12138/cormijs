@@ -45,15 +45,17 @@ export default defineApp({
   },
 });`,
     'src/pages/index.tsx': `import { useEffect, useState } from 'react';
-import { FormattedMessage, useIntl } from '@cormijs/runtime';
+import { FormattedMessage, useIntl, useLocaleResource } from '@cormijs/runtime';
 export default function Home(){
   const {locale,setLocale,subscribe,t,tp,rich,formatNumber,formatDate,formatRelativeTime}=useIntl();
+  const ui=useLocaleResource({en:'English UI',zh:'Chinese UI'});
   const [events,setEvents]=useState<string[]>([]), [domEvents,setDomEvents]=useState<string[]>([]);
   useEffect(()=>subscribe(value=>setEvents(list=>[...list,value])),[subscribe]);
   useEffect(()=>{const handler=(event:Event)=>setDomEvents(list=>[...list,(event as CustomEvent<{locale:string}>).detail.locale]);window.addEventListener('cormi:localechange',handler);return()=>window.removeEventListener('cormi:localechange',handler);},[]);
   return <main>
     <h1 data-title>{t('title')}</h1>
     <p data-locale>{locale}</p>
+    <p data-ui-locale>{ui.resource ?? 'missing'}</p>
     <p data-subscribe>{events.join(',')}</p>
     <p data-dom-events>{domEvents.join(',')}</p>
     <p data-greeting>{t('greeting',{name:'Ada'})}</p>
@@ -86,6 +88,7 @@ export async function verifyLocalePage(page: Page, url: string) {
   await page.goto(url); await page.evaluate(() => localStorage.removeItem('demo:locale')); await page.reload();
   await page.getByRole('heading', { name: 'Locale demo', exact: true }).waitFor();
   assert.equal(await page.locator('[data-locale]').innerText(), 'en');
+  assert.equal(await page.locator('[data-ui-locale]').innerText(), 'English UI');
   assert.equal(await page.locator('[data-subscribe]').innerText(), '');
   assert.equal(await page.locator('[data-dom-events]').innerText(), '');
   assert.equal(await page.locator('[data-greeting]').innerText(), 'Hello Ada');
@@ -109,6 +112,7 @@ export async function verifyLocalePage(page: Page, url: string) {
   await page.locator('[data-switch]').click();
   await page.getByRole('heading', { name: '语言演示', exact: true }).waitFor();
   assert.equal(await page.locator('[data-locale]').innerText(), 'zh');
+  assert.equal(await page.locator('[data-ui-locale]').innerText(), 'Chinese UI');
   assert.equal(await page.locator('[data-subscribe]').innerText(), 'zh');
   assert.equal(await page.locator('[data-dom-events]').innerText(), 'zh');
   assert.equal(await page.locator('[data-greeting]').innerText(), '你好 Ada');
@@ -130,10 +134,12 @@ export async function verifyLocalePage(page: Page, url: string) {
   assert.equal(await page.locator('[data-date]').innerText(), '2024/1/2');
   await page.reload(); await page.getByRole('heading', { name: '语言演示', exact: true }).waitFor();
   assert.equal(await page.locator('[data-locale]').innerText(), 'zh');
+  assert.equal(await page.locator('[data-ui-locale]').innerText(), 'Chinese UI');
   assert.equal(await page.locator('[data-subscribe]').innerText(), '');
   assert.equal(await page.locator('[data-dom-events]').innerText(), '');
   await page.locator('[data-switch]').click(); await page.getByRole('heading', { name: 'Locale demo', exact: true }).waitFor();
   assert.equal(await page.locator('[data-locale]').innerText(), 'en');
+  assert.equal(await page.locator('[data-ui-locale]').innerText(), 'English UI');
   assert.equal(await page.locator('[data-subscribe]').innerText(), 'en');
   assert.equal(await page.locator('[data-dom-events]').innerText(), 'en');
   assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);

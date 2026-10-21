@@ -1,0 +1,112 @@
+{
+  "format": "cormi:u16-ui-locale-validation:1",
+  "verifiedAt": "2026-10-21T20:33:37.604Z",
+  "base": "e362c06c4d0b11e2076e0a0da26ed4747fc73c89",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/index.tsx",
+      "scripts/locale-fixture.ts",
+      "scripts/test-package.ts",
+      "docs/120-u16-ui-locale.md",
+      "packages/runtime/src/ui-locale.ts",
+      "tests/ui-locale.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u16-ui-locale/check.log",
+      "sha256": "251c9c547f1bd93c5f82ba9aae62588bdb30ef2e18d623398da41a9aa2a93a5a",
+      "seconds": 120.6,
+      "tests": 562,
+      "pass": 562,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u16-ui-locale/browser.log",
+      "sha256": "654ebe138b65884892625902be9763e1ed23a87f151b9724731060cbeea3e0e4",
+      "seconds": 556.2,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u16-ui-locale/package.log",
+      "sha256": "14d1148a9a07c2b5a83d9acec74521e613f86c50203fa5c90855a6d0944819eb",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/ui-locale.test.ts",
+      "log": ".cache/u16-ui-locale/targeted.log",
+      "sha256": "0cddf03aef7346cb213986036d06dd3dc6d299fffec4cf2520b8de368cc45f3c",
+      "seconds": 0.2,
+      "tests": 3,
+      "pass": 3,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "tag normalization, candidates, dayjs names, resource resolution, invalid resources"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "3f3ab7ab64fc1c1a4978c11678bb25d11ac09033a0532bb34e7d9c93aeecc52b",
+    "docs/49-application-guide.md": "ddad08d73844527e6b697cd4ef11fc6f7f57cbfd6e576938cb773d29f428d90a",
+    "docs/59-umi-feature-roadmap.md": "2d401eaa07ea6655d9846d46dac85935927c1af0823da8ec47a1f33651f58c22",
+    "packages/runtime/src/index.tsx": "a84bcc8148baae6d9e12bcc848e54b7684847c91ba1febea6813f0b05b0792bd",
+    "scripts/locale-fixture.ts": "d7f2ef3580222dd16dd0fb34085cc72dfa3369ff62f02a9c0eff1c3c3dc64f0d",
+    "scripts/test-package.ts": "514167a6d8db4d14960ce371bf9748e38059a743308e12ce8ddd2fc775f9c70d",
+    "docs/120-u16-ui-locale.md": "24432627bdf437297001cae5da71ca234654d6a3cc2d9fa39012113ca831abce",
+    "packages/runtime/src/ui-locale.ts": "427fd3beaa759188fe935802c9b53e77bef23ba7a7af3272920f90c07ccd340f",
+    "tests/ui-locale.test.ts": "3ffd7b78cab36e81844290555cd0594c064490b1ded7b024a1da1624c40834a2"
+  },
+  "sourceInputCount": 9,
+  "sourceInputsDigest": "e4e0eb8b5099caa93c17e19195cbe1b1dac842badde40e1cca6024504026e23f",
+  "documentationInputs": {
+    "docs/120-u16-ui-locale.md": "24432627bdf437297001cae5da71ca234654d6a3cc2d9fa39012113ca831abce",
+    "docs/59-umi-feature-roadmap.md": "2d401eaa07ea6655d9846d46dac85935927c1af0823da8ec47a1f33651f58c22",
+    "docs/112-roadmap-audit-2026-10-21.md": "3f3ab7ab64fc1c1a4978c11678bb25d11ac09033a0532bb34e7d9c93aeecc52b",
+    "docs/49-application-guide.md": "ddad08d73844527e6b697cd4ef11fc6f7f57cbfd6e576938cb773d29f428d90a"
+  },
+  "evidence": [
+    ".cache/u16-ui-locale/check.log",
+    ".cache/u16-ui-locale/browser.log",
+    ".cache/u16-ui-locale/package.log",
+    ".cache/u16-ui-locale/targeted.log",
+    "artifacts/u16-ui-locale-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "app-supplies-antd-and-dayjs-resources",
+    "no-script-to-region-alias-table",
+    "no-rtl-theme-or-request-locale",
+    "no-ui-component-wrappers",
+    "resources-compared-by-reference",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

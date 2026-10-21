@@ -36,7 +36,7 @@
 | U09 | Hook 与对象模型、reducers/effects/subscriptions、跨模型 put、extraModels 已交付；模型依赖排序与选择器等值优化未实现 | 部分完成 |
 | U12 | useRequest 重试、轮询、refreshDeps 与 usePagination 分页已交付；缓存/去重、防抖节流、游标分页未实现 | 部分完成 |
 | U17 | 官方 Antd/ProLayout 集成包、主题/图标/图表与 locale 联动 | 仅结构适配器 |
-| U16 | dayjs/Antd 官方 locale 映射与适配包 | 仅订阅/事件机制 |
+| U16 | UI locale 归一化/回退链/资源解析已交付；Script→Region 别名、RTL、按请求 locale 未实现 | 部分完成 |
 | F6 | qiankun/Module Federation、dva/valtio/react-query 适配、多 builder、MFSU 等 | 未实现 |
 | U25 | externals；runtimePublicPath 已确认 Vite chunk 导入无法等价实现 | 未交付 |
 | U23/U24/U29 | Tailwind/UnoCSS、icons、API 类型工作流 | 未实现 |
