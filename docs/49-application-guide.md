@@ -815,6 +815,21 @@ plugins: [{ id: 'analytics', plugin: analyticsPlugin, options: { id: 'app:analyt
 
 配置 `measurementId` 后，插件维护 GA4 的 `dataLayer`/`gtag` 队列并发送 `page_view`（`page_path` 含部署 base）；`dispatch: true` 还会发出 `cormi:pageview`，detail 为 `{ path, search, hash, title, referrer }`（`path` 不含 base）。GA 脚本仍由应用通过 `htmlPlugin` 的 `headScripts` 自行引入；首屏事件在 React 挂载前发出，宿主如需在 UI 中展示请在模块作用域监听。插件不处理 Cookie 同意。规则见 [F5h pageview 分析](90-f5h-analytics.md)。
 
+### 4.30 运行项目的 lint 与 format
+
+框架不内置 linter，用 `toolPlugin` 包装项目自己安装的二进制：
+
+```ts
+plugins: [{ id: 'tools', plugin: toolPlugin, options: { lint: { bin: 'eslint' }, format: { bin: 'prettier', args: ['--write'] } } }]
+```
+
+```sh
+cormi lint -- --max-warnings 0
+cormi format -- --check src
+```
+
+二进制从 `node_modules/.bin` 解析，使用 `spawn` 而不是 shell；stdout/stderr 转发到 CLI 的 stderr，非零退出以 `TOOL_FAILED` 失败，未安装则为 `TOOL_MISSING`。默认参数可配置（默认 `eslint .` 与 `prettier --write .`），没有内置文件发现或配置生成。规则见 [F5i 工程命令](91-f5i-tool-commands.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

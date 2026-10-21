@@ -32,6 +32,7 @@ import { writeOutputFixture, verifyOutputBuild, verifyOutputPage } from './outpu
 import { writeGeneratorFixture } from './generator-fixture.js';
 import { writeStaticExportFixture, verifyStaticExport, verifyStaticExportPages } from './static-export-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
+import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -961,6 +962,28 @@ const bad:AnalyticsPluginOptions={dispatch:'yes'};
     await withServer(analyticsConsumer,'preview',async url=>{await verifyAnalyticsPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'analytics-preview.png')});});
     report.stages.push({label:'installed-pageview-analytics-dev-build-and-static-preview',event:'page_view',previewRegenerated:false});
 
+
+    }
+
+    if (selected('tools')) {
+      const toolsConsumer=await create('tools','react');await writeToolsFixture(toolsConsumer);
+      const toolsManifest=consumerManifest(kit,'react');
+      toolsManifest.dependencies['@cormijs/plugin-react']=toolsManifest.pnpm.overrides['@cormijs/plugin-react']!;
+      await writeFile(join(toolsConsumer,'package.json'),JSON.stringify(toolsManifest,null,2));
+      await install('tools-install',toolsConsumer);await auditLinks(toolsConsumer);await writeFakeTools(toolsConsumer);
+      await command('tools-typecheck',toolsConsumer,'typecheck');
+      await writeFile(join(toolsConsumer,'types.mts'),`import {toolPlugin,runTool,type ToolPluginOptions,type ToolSpec} from '@cormijs/plugin-react';
+const options:ToolPluginOptions={id:'app:tools',lint:{bin:'eslint',args:['.']}};
+const spec:ToolSpec={bin:'prettier'};void [toolPlugin,options,spec,runTool];
+// @ts-expect-error bin must be a string
+const bad:ToolSpec={bin:1};
+`);
+      await execute('tools-public-types',toolsConsumer,process.execPath,typeArguments);
+      const toolsBin=join(toolsConsumer,'node_modules/.bin/cormi');
+      await execute('tools-lint',toolsConsumer,toolsBin,['lint','--json']);
+      await execute('tools-lint-fail',toolsConsumer,toolsBin,['lint','--','--fail'],1,/TOOL_FAILED/);
+      await execute('tools-format',toolsConsumer,toolsBin,['format','--json','--','--check']);
+      report.stages.push({label:'installed-lint-format-wrapper-commands',bins:['fake-lint','fake-format'],previewRegenerated:false});
     }
   } finally { await browser.close(); }
   report.passed = true;

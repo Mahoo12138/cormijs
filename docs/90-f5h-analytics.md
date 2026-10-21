@@ -70,5 +70,5 @@ Umi 的 analytics 插件（`packages/plugins/src/analytics.ts`）内置 GA 脚�
 ## 6. 下一步
 
 - U38 剩余：其他官方插件（moment2dayjs、confetti 等）逐项核对；
-- U32/U34/U35：SSR、MPA、生产 API 路由；F4 剩余：U28 工程命令、U25 externals/runtimePublicPath；
+- U32/U34/U35：SSR、MPA、生产 API 路由；F4 剩余：U25 externals/runtimePublicPath；U28 工程命令已由 [F5i](91-f5i-tool-commands.md) 交付最小形态；
 - U13 约定式 loader 识别、U16 ICU 与 locale key 类型、U17 UI adapter。

@@ -60,6 +60,8 @@ F5f 起，`useIntl()` 提供 `formatNumber`/`formatDate`（平台 Intl）与 `tp
 
 F5h 起，显式启用的 `analyticsPlugin` 在每次路由变化时发送 page-view：`measurementId` 走 GA4 的 `gtag`/`dataLayer`，`dispatch: true` 额外发出 `cormi:pageview`；插件不注入供应商脚本。详见 [F5h pageview 分析](90-f5h-analytics.md)。
 
+F5i 起，显式启用的 `toolPlugin` 提供 `cormi lint`/`cormi format`：运行项目自己安装的 eslint/prettier，参数写在 `--` 之后，失败带明确错误码。详见 [F5i 工程命令](91-f5i-tool-commands.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

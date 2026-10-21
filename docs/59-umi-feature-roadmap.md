@@ -57,7 +57,7 @@
 | U25 | publicPath/runtimePublicPath、CDN、hash、copy/externals | 部分已有（F4j）：base 表达部署前缀，可选 outputPlugin 在构建后复制文件并支持 `hash:false` 稳定文件名；externals、runtimePublicPath 与 CDN 运行时切换待后续 | 输出/资源策略插件，差异显式 | F4 |
 | U26 | targets、polyfill、legacy、ReactCompiler/SWC/transform | 可用既有 Vite 原生插件口；未交付对应官方配置面 | 可选转换 provider/bridge | F4/F6 |
 | U27 | page/component/mock/API 等微生成器 | 部分已有（F4k）：通用「命令+位置参数」协议 + 内置 `generate page/component/model`（含 --force/--dry-run）；mock/API 生成器、模板贡献与交互式提问待后续 | generators 插件与模板贡献 | F4 |
-| U28 | lint/format/test/precommit/deadcode 等工程命令 | 框架自身有测试；不是面向用户的完整工具集成 | 可选命令插件 | F4 |
+| U28 | lint/format/test/precommit/deadcode 等工程命令 | 部分已有（F5i）：可选 toolPlugin 包装项目已安装的 lint/format 二进制（参数透传、错误码、stderr 转发）；文件发现、subcommand 模式与 precommit/deadcode 待后续 | 可选命令插件 | F4 |
 | U29 | request/接口代码生成与类型工作流 | 待实现；API generator 入口已登记，具体协议/规范需读实现 | API generator 插件 | F4 |
 | U30 | TypeScript、prepare、导出类型、monorepo | 基础已有至 P16；仍需配合新功能生成类型与别名 | 既有 TS/prepare + monorepo adapter | 随功能 |
 | U31 | code splitting、routePrefetch、routePreloadOnLoad | 部分已有（F5d/F5g）：页面按路由懒加载，注册表支持手动、`mode:"idle"` 空闲全量与 `usePrefetchOnIntent()` 悬停/聚焦预取；视口触发、数据预取与 SSR 侧预取待后续 | 路由加载插件 + backend bridge | F5 |
@@ -163,6 +163,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5g 状态（2026-10-20）：** U31 的意图预取已交付：`usePrefetchOnIntent(id, { delayMs })` 提供 `onMouseEnter`/`onFocus` 延迟加载与 `onMouseLeave`/`onBlur` 取消（默认 50ms，0–5000 校验），复用既有注册表与在途 Promise；浏览器用例验证悬停即取模块且随后导航正常。视口触发、数据预取与 SSR 侧预取仍待后续。见 [F5d 路由预取](85-f5d-route-prefetch.md)。
 
 **F5h 状态（2026-10-20）：** U38 的 analytics 已交付：`analyticsPlugin` 在每次路由变化（含首屏）发送 page-view；配置 `measurementId` 时维护 GA4 `dataLayer`/`gtag` 队列并发送 `page_view`（`page_path` 含 base、referrer 为上一个实际路径），`dispatch: true` 时额外发出 `cormi:pageview`（detail 中的 `path` 不含 basename）。不注入第三方脚本、不做 Cookie 同意；其他官方插件仍未移植。用法、差异与验证见 [F5h pageview 分析](90-f5h-analytics.md)。
+
+**F5i 状态（2026-10-20）：** U28 的最小形态已交付：`toolPlugin` 注册 `cormi lint`/`cormi format`，从项目 `node_modules/.bin` 解析二进制（默认 eslint/prettier），位置参数透传、输出转发 stderr、`TOOL_MISSING`/`TOOL_FAILED`/`TOOL_CANCELLED` 语义明确，不安装依赖也不生成配置。文件发现、stylelint/utoo 模式与 precommit/deadcode 仍待后续。用法、差异与验证见 [F5i 工程命令](91-f5i-tool-commands.md)。
 
 ### F3：权限、布局、菜单和国际化
 
