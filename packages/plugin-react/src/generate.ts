@@ -68,6 +68,9 @@ export async function generateApplication(root: string, routes: readonly RouteRe
       // imports the page itself; only the component is lazy. This keeps the route's own boundary reachable.
       if (route.clientLoader !== undefined) {
         pageFields.push(`loader:async(args)=>{const page=await import(${specifier});return clientLoaderOf(page,${JSON.stringify(route.clientLoader)},${JSON.stringify(route.id)})(args)}`);
+      } else if (route.serverLoader !== undefined) {
+        // The browser never executes the page's serverLoader; navigation asks the SSR endpoint instead.
+        pageFields.push(`loader:serverLoaderOf(${JSON.stringify(route.id)},${JSON.stringify(base)})`);
       }
       pageFields.push(`lazy:async()=>({Component:await resolveRouteComponent(async()=>(await import(${specifier}))[${JSON.stringify(route.module.exportName)}])})`);
     }
@@ -84,6 +87,7 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   const modelEntries = models.map((model, index) => `{namespace:${JSON.stringify(model.namespace)},model:model${index}[${JSON.stringify(model.module.exportName)}]}`);
   const modelsOption = modelEntries.length ? ',models' : '';
   const hasClientLoader = routes.some(route => route.clientLoader !== undefined);
+  const hasServerLoader = routes.some(route => route.serverLoader !== undefined);
   const styleImports = styles.map(style => `import ${JSON.stringify(styleSpecifier(root, style.file))};`);
   const accessModule = access ? await clientSpecifier(root, access, forbidden) : undefined;
   let configExpression = appModule ? `resolveAppConfig(${appValue},${JSON.stringify(appRuntime?.keys ?? [])})` : '';
@@ -93,7 +97,7 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   return [
     ...styleImports,
     ...(accessModule ? [`import * as accessConvention from ${JSON.stringify(accessModule)};`] : []),
-    `import { ${hasRedirects ? 'RedirectRoute, ' : ''}${hasAccess ? 'AccessRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule || accessModule || localeCatalogs.length ? ', resolveAppConfig' : ''}${hasClientLoader ? ', clientLoaderOf' : ''}${accessModule ? ', applyAccessConvention' : ''}${localeCatalogs.length ? ', applyLocaleCatalogs' : ''} } from '@cormijs/runtime';`,
+    `import { ${hasRedirects ? 'RedirectRoute, ' : ''}${hasAccess ? 'AccessRoute, ' : ''}mountApplication, resolveRouteComponent, type RuntimeEntry${appModule || accessModule || localeCatalogs.length ? ', resolveAppConfig' : ''}${hasClientLoader ? ', clientLoaderOf' : ''}${hasServerLoader ? ', serverLoaderOf' : ''}${accessModule ? ', applyAccessConvention' : ''}${localeCatalogs.length ? ', applyLocaleCatalogs' : ''} } from '@cormijs/runtime';`,
     ...(appModule ? [`import * as applicationConfig from ${JSON.stringify(appModule)};`] : []),
     ...(loadingModule ? [`import * as applicationLoading from ${JSON.stringify(loadingModule)};`] : []),
     ...modelModules.map((path, i) => `import * as model${i} from ${JSON.stringify(path)};`),
@@ -110,6 +114,30 @@ export async function generateApplication(root: string, routes: readonly RouteRe
     `  if (!element) throw new Error('cormi mount element is missing');`,
     `  void Promise.resolve().then(()=>mountApplication({element,...cormiApplication,hydrate:element.childNodes.length>0})).catch(error=>{console.error(error);element.textContent='Application startup failed';});`,
     `}`,
+    '',
+  ].join('\n');
+}
+
+/**
+ * Server-only module imported exclusively by the SSR entry. It binds page serverLoader exports without
+ * making them a static application dependency; page modules stay browser dependencies for their components.
+ */
+export async function generateServerLoaders(root: string, routes: readonly RouteRecord[], serverOnlyFiles: readonly string[] = []): Promise<string> {
+  const entries = routes.filter(route => route.module && route.serverLoader !== undefined);
+  if (!entries.length) return 'export const serverLoaders = Object.freeze(Object.fromEntries([]));\n';
+  const forbidden = new Set(serverOnlyFiles), pages = new Map<string, string>();
+  const rows: string[] = [];
+  for (const route of entries) {
+    const specifier = await clientSpecifier(root, route.module!, forbidden);
+    if (!pages.has(specifier)) pages.set(specifier, `serverLoaderPage${pages.size}`);
+    rows.push(`  [${JSON.stringify(route.id)}, serverLoaderExport(${pages.get(specifier)}, ${JSON.stringify(route.serverLoader)}, ${JSON.stringify(route.id)})],`);
+  }
+  return [
+    `import { serverLoaderExport } from '@cormijs/runtime/server';`,
+    ...[...pages].map(([specifier, alias]) => `import * as ${alias} from ${JSON.stringify(specifier)};`),
+    `export const serverLoaders = Object.freeze(Object.fromEntries([`,
+    ...rows,
+    `]));`,
     '',
   ].join('\n');
 }

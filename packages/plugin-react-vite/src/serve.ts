@@ -3,7 +3,7 @@ import { createServer, type Server } from 'node:http';
 import { readFile, realpath, stat } from 'node:fs/promises';
 import { extname, isAbsolute, join, relative, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { injectShell, navigation, sendResult, toRequest, withinBase } from './ssr.js';
+import { injectShell, navigation, sendLoaderFailure, sendResult, serverLoaderRequest, toRequest, withinBase } from './ssr.js';
 
 export interface ServePluginOptions {
   readonly id?: string;
@@ -16,6 +16,7 @@ export interface ServePluginOptions {
   readonly base?: string;
 }
 type Render = (request: Request) => Promise<unknown>;
+type Load = (request: Request) => Promise<Response>;
 const mime: Record<string, string> = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.txt': 'text/plain; charset=utf-8',
@@ -60,9 +61,9 @@ export const servePlugin: Plugin.Object<ServePluginOptions> = {
       if (!info.isDirectory()) throw new CormiError('SERVE_BUILD_MISSING', 'Build output is not a directory.', { output });
       const module = await import(pathToFileURL(moduleFile).href).catch((cause) => {
         throw new CormiError('SERVE_BUILD_MISSING', 'SSR bundle is missing; build with app.ssr and ssrPlugin.', { module: moduleFile }, { cause });
-      }) as { render?: unknown };
-      if (typeof module.render !== 'function') throw new CormiError('SERVE_BUILD_INVALID', 'SSR bundle has no render export.');
-      const render = module.render as Render;
+      }) as { render?: unknown; load?: unknown };
+      if (typeof module.render !== 'function' || typeof module.load !== 'function') throw new CormiError('SERVE_BUILD_INVALID', 'SSR bundle has no render/load export.');
+      const render = module.render as Render, load = module.load as Load;
       const root = await realpath(output);
       const server: Server = createServer((req, res) => {
         void (async () => {
@@ -77,6 +78,11 @@ export const servePlugin: Plugin.Object<ServePluginOptions> = {
               return send(res, 404, 'Not Found');
             }
             const pathname = prefix ? (requestPath.slice(prefix.length) || '/') : requestPath;
+            const loader = serverLoaderRequest(req, base);
+            if (loader) {
+              try { return sendResult(await load(loader), res, head); }
+              catch (error) { return sendLoaderFailure(res, error); }
+            }
             if (navigation(req)) {
               try {
                 const result = await render(toRequest(req));

@@ -26,7 +26,7 @@ test('typecheck prepares generated roots even when tsconfig excludes .cormi, and
   const check = await command(t, f.root, 'typecheck');
   const result = check.events.find(event => event.type === 'result')!.data;
   assert.equal(result.compiler, 'typescript'); assert.equal(result.version, '5.9.3');
-  assert.deepEqual(result.generatedFiles, ['.cormi/app.tsx', '.cormi/routes.d.ts', '.cormi/locale.d.ts', '.cormi/loaders.d.ts', '.cormi/styles.d.ts']);
+  assert.deepEqual(result.generatedFiles, ['.cormi/app.tsx', '.cormi/routes.d.ts', '.cormi/locale.d.ts', '.cormi/loaders.d.ts', '.cormi/styles.d.ts', '.cormi/server-loaders.tsx']);
   assert.match(await readFile(join(f.root, '.cormi/routes.d.ts'), 'utf8'), /RouteParamsById/);
   assert.equal(existsSync(join(f.root, 'src/pages/index.js')), false);
   assert.equal(existsSync(join(f.root, '.cormi/app.js')), false);

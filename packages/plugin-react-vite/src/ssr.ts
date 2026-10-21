@@ -13,12 +13,37 @@ export interface SsrPluginOptions {
 }
 
 type Render = (request: Request) => Promise<unknown>;
+type Load = (request: Request) => Promise<Response>;
 const hydrationPattern = /<script>window\.__staticRouterHydrationData = [\s\S]*?<\/script>/;
 
-const entrySource = `import { renderServerApplication } from '@cormijs/runtime/server';
+const entrySource = `import { renderServerApplication, renderServerLoaderData } from '@cormijs/runtime/server';
 import { cormiApplication } from './app';
-export const render = (request) => renderServerApplication(cormiApplication, request);
+import { serverLoaders } from './server-loaders';
+const application = { ...cormiApplication, serverLoaders };
+export const render = (request) => renderServerApplication(application, request);
+export const load = (request) => renderServerLoaderData(application, request);
 `;
+
+export function serverLoaderPath(base: string): string {
+  return `${base === '/' ? '/' : base}.cormi/server-loader`;
+}
+
+/** Rebuilds the client-side fallback request from `?url=`; returns undefined when this is another request. */
+export function serverLoaderRequest(request: import('node:http').IncomingMessage, base: string): Request | undefined {
+  if (request.method !== 'GET') return undefined;
+  const endpoint = new URL(request.url ?? '/', 'http://localhost');
+  if (endpoint.pathname !== serverLoaderPath(base)) return undefined;
+  const target = endpoint.searchParams.get('url') ?? '/';
+  if (!target.startsWith('/') || target.startsWith('//') || target.length > 4096) return new Request('http://localhost/invalid', { method: 'GET' });
+  return new Request(new URL(target, `http://${typeof request.headers.host === 'string' ? request.headers.host : 'localhost'}`), { method: 'GET', headers: toRequest(request).headers });
+}
+
+export function sendLoaderFailure(response: import('node:http').ServerResponse, error: unknown): void {
+  console.error('[cormi:ssr:server-loader]', error);
+  response.statusCode = 500;
+  response.setHeader('content-type', 'application/json; charset=utf-8');
+  response.end(JSON.stringify({ error: 'SERVER_LOADER_FAILED' }));
+}
 
 export function sendResult(response: Response, res: import('node:http').ServerResponse, head: boolean): Promise<void> {
   return (async () => {
@@ -104,13 +129,18 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
       const serverOut = () => resolved ? join(resolved.build.outDir, '.cormi/ssr') : '';
       const entryFile = () => resolved ? join(resolved.root, '.cormi', 'ssr.tsx') : '';
 
-      const devRender = async (server: ViteDevServer, request: import('node:http').IncomingMessage): Promise<Response> => {
+      const devModule = async (server: ViteDevServer): Promise<{ render: Render; load: Load }> => {
         const entry = entryFile();
         await mkdir(join(server.config.root, '.cormi'), { recursive: true });
         await writeFile(entry, entrySource);
-        const module = await server.ssrLoadModule('/.cormi/ssr.tsx') as { render?: unknown };
-        if (typeof module.render !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR entry has no render export.');
-        const result = await (module.render as Render)(toRequest(request));
+        const module = await server.ssrLoadModule('/.cormi/ssr.tsx') as { render?: unknown; load?: unknown };
+        if (typeof module.render !== 'function' || typeof module.load !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR entry has no render/load export.');
+        return module as { render: Render; load: Load };
+      };
+
+      const devRender = async (server: ViteDevServer, request: import('node:http').IncomingMessage): Promise<Response> => {
+        const module = await devModule(server);
+        const result = await module.render(toRequest(request));
         if (result instanceof Response) return result;
         const shell = await server.transformIndexHtml(request.url ?? '/', await readFile(join(server.config.root, 'index.html'), 'utf8'));
         return injectShell(shell, result as { html?: unknown }, mountId);
@@ -141,6 +171,14 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
         },
         configureServer(server) {
           server.middlewares.use((request, response, next) => {
+            const loader = serverLoaderRequest(request, server.config.base);
+            if (loader) {
+              void (async () => {
+                try { return sendResult(await (await devModule(server)).load(loader), response, false); }
+                catch (error) { sendLoaderFailure(response, error); }
+              })();
+              return;
+            }
             if (!navigation(request) || !withinBase(request, server.config.base)) return next();
             void (async () => {
               try { return sendResult(await devRender(server, request), response, request.method === 'HEAD'); }
@@ -150,16 +188,24 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
         },
         configurePreviewServer(server: PreviewServer) {
           const shellFile = join(server.config.build.outDir, 'index.html'), moduleFile = join(serverOut(), 'ssr.mjs');
-          let handler: Promise<Render> | undefined;
+          let handler: Promise<{ render: Render; load: Load }> | undefined;
+          const loadModule = () => handler ??= import(pathToFileURL(moduleFile).href).then((module: { render?: unknown; load?: unknown }) => {
+            if (typeof module.render !== 'function' || typeof module.load !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR bundle has no render/load export.');
+            return module as { render: Render; load: Load };
+          });
           server.middlewares.use((request, response, next) => {
+            const loader = serverLoaderRequest(request, server.config.base);
+            if (loader) {
+              void (async () => {
+                try { return sendResult(await (await loadModule()).load(loader), response, false); }
+                catch (error) { sendLoaderFailure(response, error); }
+              })();
+              return;
+            }
             if (!navigation(request) || !withinBase(request, server.config.base)) return next();
             void (async () => {
               try {
-                handler ??= import(pathToFileURL(moduleFile).href).then((module: { render?: unknown }) => {
-                  if (typeof module.render !== 'function') throw new CormiError('SSR_BUILD_INVALID', 'SSR bundle has no render export.');
-                  return module.render as Render;
-                });
-                const result = await (await handler)(toRequest(request));
+                const result = await (await loadModule()).render(toRequest(request));
                 if (result instanceof Response) return sendResult(result, response, request.method === 'HEAD');
                 return sendResult(injectShell(await readFile(shellFile, 'utf8'), result as { html?: unknown }, mountId), response, request.method === 'HEAD');
               } catch (error) { console.error('[cormi:ssr]', error); next(); }

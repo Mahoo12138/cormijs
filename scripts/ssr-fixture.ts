@@ -10,6 +10,7 @@ import { servePlugin, ssrPlugin } from '@cormijs/plugin-react-vite';
 const routes = [
   { id: 'home', path: '/', component: './src/pages/index.tsx', meta: { head: { title: 'SSR home page', metas: [{ name: 'description', content: 'server description' }] } } },
   { id: 'guide', path: 'guide', component: './src/pages/guide.tsx', clientLoader: 'clientLoader', meta: { head: { title: 'SSR guide page', jsonLd: { '@type': 'Article', headline: 'Guide' } } } },
+  { id: 'backend', path: 'backend/:id', component: './src/pages/backend.tsx', serverLoader: 'serverLoader', meta: { head: { title: 'SSR backend page' } } },
 ];
 export default defineConfig({
   presets: [preset],
@@ -28,15 +29,24 @@ export async function writeSsrFixture(root: string) {
   const files: Record<string, string> = {
     'index.html': '<!doctype html><html><head><meta charset="utf-8" /><title>SSR demo</title><link rel="icon" href="data:," /></head><body><div id="root"></div><script type="module" src="/.cormi/app.tsx"></script></body></html>',
     'cormi.config.ts': ssrConfiguration,
-    'src/pages/index.tsx': `import { Helmet } from '@cormijs/runtime';
-export default function Home(){return <main><Helmet title="Helmet home title" metas={[{ name: 'helmet', content: 'yes' }]} /><h1>SSR home</h1></main>;}`,
-    'src/pages/guide.tsx': `import { useClientLoaderData } from '@cormijs/runtime';
+    'src/pages/index.tsx': `import { Helmet, Link } from '@cormijs/runtime';
+export default function Home(){return <main><Helmet title="Helmet home title" metas={[{ name: 'helmet', content: 'yes' }]} /><h1>SSR home</h1><nav><Link to="/backend/7">Backend</Link><Link to="/guide">Guide</Link></nav></main>;}`,
+    'src/pages/guide.tsx': `import { Link, useClientLoaderData } from '@cormijs/runtime';
 interface Data { message: string }
 export default function Guide(){
   const data = useClientLoaderData<Data>();
-  return <main><h1>SSR guide</h1><p data-guide>{data.message}</p></main>;
+  return <main><h1>SSR guide</h1><p data-guide>{data.message}</p><Link to="/">Home</Link></main>;
 }
 export async function clientLoader(): Promise<Data> { return { message: 'loaded on server' }; }`,
+    'src/pages/backend.tsx': `import { Link, useServerLoaderData } from '@cormijs/runtime';
+interface Data { message: string; id: string; path: string }
+export default function Backend(){
+  const data = useServerLoaderData<Data>();
+  return <main><h1>SSR backend</h1><p data-server-loader="true">{data.message}:{data.id}:{data.path}</p><Link to="/">Home</Link></main>;
+}
+export async function serverLoader({ request, params }: { request: Request; params: { id?: string } }): Promise<Data> {
+  return { message: 'server loader', id: params.id ?? 'none', path: new URL(request.url).pathname };
+}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
       strict: true, noEmit: true, skipLibCheck: false, allowImportingTsExtensions: true, lib: ['ES2023', 'DOM', 'DOM.Iterable'], types: ['react', 'react-dom', 'node'] },
       include: ['cormi.config.ts', 'src', '.cormi/**/*'] }, null, 2),
@@ -45,27 +55,54 @@ export async function clientLoader(): Promise<Data> { return { message: 'loaded 
 }
 
 export async function verifySsrPage(page: Page, url: string) {
-  const home = await page.request.get(url, { headers: { accept: 'text/html' } });
-  assert.equal(home.status(), 200);
-  const html = await home.text();
-  assert.match(html, /<div id="root"><main><h1>SSR home<\/h1><\/main>/);
-  assert.match(html, /<title>Helmet home title · demo<\/title>/);
-  assert.match(html, /<meta name="description" content="server description" data-cormi-head="" \/>/);
-  assert.match(html, /<meta name="helmet" content="yes" data-cormi-head="" \/>/);
-  assert.match(html, /__staticRouterHydrationData/);
-  await page.goto(url);
-  await page.getByRole('heading', { name: 'SSR home', exact: true }).waitFor();
+  await page.goto(url); await page.getByRole('heading', { name: 'SSR home', exact: true }).waitFor();
+  assert.equal(await page.title(), 'Helmet home title · demo');
+  assert.equal(await page.locator('meta[name="description"]').getAttribute('content'), 'server description');
+  assert.equal(await page.locator('meta[name="helmet"]').getAttribute('content'), 'yes');
   assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);
 
-  const guide = await page.request.get(new URL('guide', url).href, { headers: { accept: 'text/html' } });
-  assert.equal(guide.status(), 200);
-  const guideHtml = await guide.text();
-  assert.match(guideHtml, /<div id="root"><main><h1>SSR guide<\/h1><p data-guide="true">loaded on server<\/p><\/main>/);
-  assert.match(guideHtml, /<title>SSR guide page · demo<\/title>/);
-  assert.match(guideHtml, /<script type="application\/ld\+json" data-cormi-head="">\{"@type":"Article","headline":"Guide"\}<\/script>/);
+  const loaderRequests: string[] = [];
+  const track = (request: import('playwright-core').Request) => { if (request.url().includes('/.cormi/server-loader')) loaderRequests.push(request.url()); };
+  page.on('request', track);
+  const backend = await page.request.get(new URL('backend/7', url).href, { headers: { accept: 'text/html' } });
+  assert.equal(backend.status(), 200);
+  const backendHtml = await backend.text();
+  assert.match(backendHtml, /<div id="root"><main><h1>SSR backend<\/h1><p data-server-loader="true">server loader(?:<!-- -->)?:(?:<!-- -->)?7(?:<!-- -->)?:(?:<!-- -->)?\/ssr\/backend\/7<\/p>/);
+  assert.match(backendHtml, /<title>SSR backend page · demo<\/title>/);
+  assert.match(backendHtml, /__staticRouterHydrationData/);
+  await page.goto(new URL('backend/7', url).href);
+  await page.getByRole('heading', { name: 'SSR backend', exact: true }).waitFor();
+  assert.equal(await page.locator('[data-server-loader]').innerText(), 'server loader:7:/ssr/backend/7');
+  assert.equal(loaderRequests.length, 0, 'hydration consumes server data without calling the fallback endpoint');
+  const hydration = await page.evaluate(() => (window as any).__staticRouterHydrationData);
+  assert.deepEqual(hydration?.loaderData, { backend: { message: 'server loader', id: '7', path: '/ssr/backend/7' } });
+
+  await page.goto(url); await page.getByRole('heading', { name: 'SSR home', exact: true }).waitFor();
+  await page.getByRole('link', { name: 'Backend', exact: true }).click();
+  await page.getByRole('heading', { name: 'SSR backend', exact: true }).waitFor();
+  assert.equal(await page.locator('[data-server-loader]').innerText(), 'server loader:7:/ssr/backend/7');
+  assert.ok(loaderRequests.length >= 1, 'client navigation fetched the server loader endpoint');
+  assert.ok(new URL(loaderRequests.at(-1)!).searchParams.get('url')?.endsWith('/backend/7'));
+  page.off('request', track);
+
+  await page.getByRole('link', { name: 'Home', exact: true }).click();
+  await page.getByRole('heading', { name: 'SSR home', exact: true }).waitFor();
+  await page.getByRole('link', { name: 'Guide', exact: true }).click();
+  await page.getByRole('heading', { name: 'SSR guide', exact: true }).waitFor();
+  assert.equal(await page.title(), 'SSR guide page · demo');
+  assert.equal(await page.locator('[data-guide]').innerText(), 'loaded on server');
+  assert.equal(await page.locator('script[type="application/ld+json"]').innerText(), '{"@type":"Article","headline":"Guide"}');
+
+  await page.getByRole('link', { name: 'Home', exact: true }).click();
+  await page.getByRole('heading', { name: 'SSR home', exact: true }).waitFor();
+  assert.equal(await page.title(), 'Helmet home title · demo');
+
   await page.goto(new URL('guide', url).href);
   await page.getByRole('heading', { name: 'SSR guide', exact: true }).waitFor();
+  assert.equal(await page.title(), 'SSR guide page · demo');
+  await page.reload();
+  await page.getByRole('heading', { name: 'SSR guide', exact: true }).waitFor();
+  assert.equal(await page.title(), 'SSR guide page · demo');
   assert.equal(await page.locator('[data-guide]').innerText(), 'loaded on server');
-  const hydration = await page.evaluate(() => (window as any).__staticRouterHydrationData);
-  assert.deepEqual(hydration?.loaderData, { guide: { message: 'loaded on server' } });
+  assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);
 }

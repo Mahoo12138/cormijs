@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 export const CLIENT_LOADER_EXPORT = 'clientLoader';
+export const SERVER_LOADER_EXPORT = 'serverLoader';
 
 /**
  * Rewrites comments and string/template contents to spaces so the declaration scan cannot match them.
@@ -35,38 +36,63 @@ export function stripCommentsAndStrings(source: string): string {
   return out.join('');
 }
 
-const functionForm = /\bexport\s+(?:async\s+)?function\s+clientLoader\b/;
-const constForm = /\bexport\s+(?:const|let|var)\s+clientLoader\s*=/;
+const functionForm = (name: string) => new RegExp(`\\bexport\\s+(?:async\\s+)?function\\s+${name}\\b`);
+const constForm = (name: string) => new RegExp(`\\bexport\\s+(?:const|let|var)\\s+${name}\\s*=`);
 const exportList = /\bexport\s+(type\s+)?\{([^}]*)\}/g;
 const entryPattern = /^([A-Za-z_$][A-Za-z0-9_$]*)(?:\s+as\s+([A-Za-z_$][A-Za-z0-9_$]*))?$/;
 
-function exportsClientLoader(code: string): boolean {
+function exportsName(code: string, name: string): boolean {
   for (const match of code.matchAll(exportList)) {
     if (match[1]) continue;
     for (const raw of match[2]!.split(',')) {
       const entry = entryPattern.exec(raw.trim());
       if (!entry) continue;
       const exported = entry[2] ?? entry[1];
-      if (exported === CLIENT_LOADER_EXPORT) return true;
+      if (exported === name) return true;
     }
   }
   return false;
 }
 
+function detectExport(source: string, name: string): string | undefined {
+  const code = stripCommentsAndStrings(source);
+  return functionForm(name).test(code) || constForm(name).test(code) || exportsName(code, name) ? name : undefined;
+}
+
 /** Direct declarations and value re-exports count; `declare`, type aliases and type-only exports never match. */
 export function detectClientLoader(source: string): string | undefined {
-  const code = stripCommentsAndStrings(source);
-  return functionForm.test(code) || constForm.test(code) || exportsClientLoader(code) ? CLIENT_LOADER_EXPORT : undefined;
+  return detectExport(source, CLIENT_LOADER_EXPORT);
+}
+
+/** Detects the server-only loader export; the browser bundle never calls it. */
+export function detectServerLoader(source: string): string | undefined {
+  return detectExport(source, SERVER_LOADER_EXPORT);
+}
+
+export interface PageLoaderExports {
+  readonly clientLoaders: Readonly<Record<string, string>>;
+  readonly serverLoaders: Readonly<Record<string, string>>;
+}
+
+/** Reads page sources once and reports both loader conventions for files that declare them. */
+export async function pageLoaderExports(root: string, files: readonly string[]): Promise<PageLoaderExports> {
+  if (files.length > 512) throw new TypeError('ROUTE_CLIENT_LOADER_INVALID: too many page files to scan');
+  const clientLoaders: Record<string, string> = {}, serverLoaders: Record<string, string> = {};
+  for (const file of [...files].sort()) {
+    const source = await readFile(join(root, file), 'utf8');
+    if (source.length > 1024 * 1024) continue;
+    if (detectClientLoader(source)) clientLoaders[file] = CLIENT_LOADER_EXPORT;
+    if (detectServerLoader(source)) serverLoaders[file] = SERVER_LOADER_EXPORT;
+  }
+  return Object.freeze({ clientLoaders: Object.freeze(clientLoaders), serverLoaders: Object.freeze(serverLoaders) });
 }
 
 /** Reads conventional page sources and returns `file → exportName` for pages that export a client loader. */
 export async function pageLoaders(root: string, files: readonly string[]): Promise<Readonly<Record<string, string>>> {
-  if (files.length > 512) throw new TypeError('ROUTE_CLIENT_LOADER_INVALID: too many page files to scan');
-  const found: Record<string, string> = {};
-  for (const file of [...files].sort()) {
-    const source = await readFile(join(root, file), 'utf8');
-    if (source.length > 1024 * 1024) continue;
-    if (detectClientLoader(source)) found[file] = CLIENT_LOADER_EXPORT;
-  }
-  return Object.freeze(found);
+  return (await pageLoaderExports(root, files)).clientLoaders;
+}
+
+/** Reads conventional page sources and returns `file → exportName` for pages that export a server loader. */
+export async function pageServerLoaders(root: string, files: readonly string[]): Promise<Readonly<Record<string, string>>> {
+  return (await pageLoaderExports(root, files)).serverLoaders;
 }

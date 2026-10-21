@@ -61,7 +61,7 @@
 | U29 | request/接口代码生成与类型工作流 | 待实现；API generator 入口已登记，具体协议/规范需读实现 | API generator 插件 | F4 |
 | U30 | TypeScript、prepare、导出类型、monorepo | 基础已有至 P16；仍需配合新功能生成类型与别名 | 既有 TS/prepare + monorepo adapter | 随功能 |
 | U31 | code splitting、routePrefetch、routePreloadOnLoad | 部分已有（F5d/F5g/F5p）：页面按路由懒加载，注册表支持手动、`mode:"idle"` 空闲全量、`usePrefetchOnIntent()` 悬停/聚焦与 `usePrefetchOnVisible()` 视口触发预取；数据预取与 SSR 侧预取待后续 | 路由加载插件 + backend bridge | F5 |
-| U32 | SSR、服务端 loader/渲染入口 | 部分已有（F5y）：`app.ssr: true` + `ssrPlugin` 在 dev（Vite ssrLoadModule）与 preview（构建 bundle）执行 static handler/clientLoader、注入 hydration 并由客户端 hydrateRoot 接管；servePlugin 提供 `cormi serve`（静态 dist + SSR bundle、base 前缀），SSR 输出路由/Helmet head；serverLoader 与流式渲染待后续 | 独立 SSR renderer/profile，复用可共享契约 | F5 |
+| U32 | SSR、服务端 loader/渲染入口 | 部分已有（F5y/F5z/U32-1）：`app.ssr: true` + `ssrPlugin` 在 dev（Vite ssrLoadModule）与 preview（构建 bundle）执行 static handler/clientLoader、注入 hydration 并由客户端 hydrateRoot 接管；servePlugin 提供 `cormi serve`；SSR 输出路由/Helmet head；serverLoader 仅在服务端执行、hydration 对齐，客户端导航经 `<base>.cormi/server-loader` 回退取数；流式渲染待后续 | 独立 SSR renderer/profile，复用可共享契约 | F5 |
 | U33 | exportStatic/预渲染/静态导出 | 部分已有（F5e）：可选 staticExportPlugin 为每个字面路径路由生成带 `meta.head` 的 HTML 外壳；notFound 选项可用 catch-all head 生成 404.html；prerender、sitemap 与 SSR 组合待后续（外壳不等于预渲染） | 静态导出插件 | F5 |
 | U34 | MPA | 部分已有（F5q）：mpaPlugin 按 `src/pages` 顶层目录生成独立 HTML 与 React 入口，dev/build/preview 可用，与 SPA 共存；App/Provider 包装与热更新待后续（全局/页面级 layout 与自定义 HTML 模板已交付） | 独立 MPA profile | F5 |
 | U35 | apiRoute | 部分已有（F5n）：apiRoutePlugin 将 `src/api/**` 的 Fetch 处理器注册为路由，dev 由 Vite 中间件运行、build 用 esbuild 编译、preview 提供编译产物；独立生产服务、中间件链与流式响应待后续 | 独立服务端路由插件 | F5 |
@@ -120,7 +120,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F4m | abbe5aa | CSS Modules/资源类型声明 | docs/110 |
 | U16-1 | ba6ea1f | locale 变更订阅 | docs/111 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 549/549、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/f4a…f5z-validation.json`、`artifacts/u17-menu-adapters-validation.json`、`artifacts/f4m-style-types-validation.json`、`artifacts/u16-locale-subscription-validation.json`、`artifacts/f5e-404-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交 0db7289（404.html 导出）。
+最新冻结验证（2026-10-22）：`pnpm check` 556/556、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/u32-server-loader-validation.json` 及此前的 f4a…f5z、u16、u17、f4m、f5e 产物。仍未覆盖的大项见 U17、F6 与 U32 的流式渲染；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交：U32-1 serverLoader（见提交记录）。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -253,6 +253,7 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **U17 增量状态（2026-10-21）：** 新增无 UI 库依赖的菜单适配器：`toAntdMenuItems`（key=path、label=本地化标题、routeId、children）与 `toLayoutRoutes`（path/name/routes），供应用传给 Antd Menu/ProLayout；不引入 antd/ProLayout，主题、图标、图表与 dayjs/Antd locale 联动仍待后续。用法、差异与验证见 [U17 菜单适配器](109-ui-menu-adapters.md)。
 
 **F5z 状态（2026-10-21）：** U32 的独立服务已交付：`servePlugin`（`cormi:serve`）注册 `cormi serve`，从已完成构建的 `dist` 读取 SSR bundle 与静态资产，原生 Node HTTP 服务对 HTML 导航执行 SSR/hydration、对静态请求做输出目录白名单式提供，支持 app.base 前缀；不启动 Vite，不执行 API/Mock/proxy，无流式、压缩或 TLS。用法、差异与验证见 [F5z cormi serve](108-f5z-serve.md)。
+**U32-1 状态（2026-10-22）：** serverLoader 已交付：路由声明/约定导出 `serverLoader` 后，SSR 由 static handler 按匹配链执行并写入 hydration，客户端 hydration 不重复请求；客户端导航经 `<base>.cormi/server-loader` 端点回退取数，dev/preview/serve 均实现。serverLoader 与 clientLoader 互斥，需要 `app.ssr: true`；数据必须 JSON 可序列化，鉴权在 loader 内完成；不剥离页面源码，不提供流式。用法与边界见 [U32-1 serverLoader](113-u32-server-loader.md)。
 
 **F5y 状态（2026-10-21）：** U32 的首个 SSR 切片已交付：应用设置 `app.ssr: true` 并启用 `ssrPlugin` 后，dev 通过 Vite `ssrLoadModule` 对 HTML 导航执行服务端渲染，build 用 Vite SSR 产出 `dist/.cormi/ssr/ssr.mjs` 供 preview 使用；两者都以 `createStaticHandler` 执行 client loader、注入 hydration 数据并由客户端 `hydrateRoot` 接管；hydration 前只解析当前匹配链的 lazy 组件，其他路由保持拆包；`app.base` 前缀由服务端剥离并以 basename 对齐。无 serverLoader、流式或独立 server 命令。用法、差异与验证见 [F5y SSR](107-f5y-ssr.md)。
 

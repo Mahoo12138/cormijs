@@ -877,11 +877,15 @@ const bad:HeadPluginOptions={titleTemplate:1};
     await install('ssr-install',ssrConsumer);await auditLinks(ssrConsumer);
     await command('ssr-typecheck',ssrConsumer,'typecheck');
     await writeFile(join(ssrConsumer,'types.mts'),`import {ssrPlugin,type SsrPluginOptions} from '@cormijs/plugin-react-vite';
-import {renderServerApplication,type ServerApplication,type ServerRenderResult} from '@cormijs/runtime/server';
+import {renderServerApplication,renderServerLoaderData,serverLoaderExport,type ServerApplication,type ServerRenderResult,type ServerLoaderFunction} from '@cormijs/runtime/server';
+import {serverLoaderOf,useServerLoaderData} from '@cormijs/runtime';
 const options:SsrPluginOptions={id:'app:ssr',mountId:'root'};
 declare const app:ServerApplication;
-const render:(request:Request)=>Promise<ServerRenderResult|Response>=request=>renderServerApplication(app,request);
-void [ssrPlugin,options,render];
+const loader:ServerLoaderFunction=({params})=>params;
+const bound:ServerLoaderFunction=serverLoaderExport({},'serverLoader','route');
+const render:(request:Request)=>Promise<ServerRenderResult|Response>=request=>renderServerApplication({...app,serverLoaders:{route:loader}},request);
+const load:(request:Request)=>Promise<Response>=request=>renderServerLoaderData(app,request);
+void [ssrPlugin,options,render,load,loader,bound,serverLoaderOf,useServerLoaderData];
 // @ts-expect-error mountId is a string
 const bad:SsrPluginOptions={mountId:1};
 `);

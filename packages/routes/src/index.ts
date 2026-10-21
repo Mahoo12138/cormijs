@@ -30,6 +30,8 @@ export interface RouteRecord {
   readonly access?: string;
   /** Export name of the page module's browser data loader, called before the page renders. */
   readonly clientLoader?: string;
+  /** Export name of the page module's server-only loader, executed during SSR and fetched on client navigation. */
+  readonly serverLoader?: string;
   /** Public browser metadata, never server credentials or executable callbacks. */
   readonly meta?: RouteMeta;
   readonly source: { readonly file?: string; readonly pluginId?: string };
@@ -49,6 +51,8 @@ export interface ConfigRoute {
   readonly keepQuery?: boolean;
   /** Export name in the page module that loads data before the component renders. */
   readonly clientLoader?: string;
+  /** Export name in the page module that loads data on the server only; requires SSR. */
+  readonly serverLoader?: string;
   /** Outer-to-inner layout components; each must render an Outlet for the route below it. */
   readonly wrappers?: readonly string[];
   /** Opt a top-level route and its descendants out of the optional global layout. */
@@ -101,8 +105,8 @@ function redirectParams(target: string, params: ReadonlySet<string>): void {
   }
 }
 const exportPattern = /^[A-Za-z_$][A-Za-z0-9_$]{0,63}$/;
-function exportName(value: unknown, field: string): string {
-  if (typeof value !== 'string' || !exportPattern.test(value)) fail('ROUTE_CLIENT_LOADER_INVALID', `${field} must be a JavaScript export name.`, { [field]: value });
+function exportName(value: unknown, field: string, code = 'ROUTE_CLIENT_LOADER_INVALID'): string {
+  if (typeof value !== 'string' || !exportPattern.test(value)) fail(code, `${field} must be a JavaScript export name.`, { [field]: value });
   return value;
 }
 
@@ -122,7 +126,7 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
   const routes = input.map((item: unknown): RouteRecord => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) fail('ROUTE_INVALID', 'Expected a route object.');
     const value = item as Record<string, unknown>;
-    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'errorBoundary', 'redirect', 'keepQuery', 'layout', 'access', 'source', 'meta', 'clientLoader'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
+    for (const key of Object.keys(value)) if (!['id', 'parentId', 'path', 'index', 'module', 'errorBoundary', 'redirect', 'keepQuery', 'layout', 'access', 'source', 'meta', 'clientLoader', 'serverLoader'].includes(key)) fail('ROUTE_INVALID', `Unknown route field: ${key}`);
     if (typeof value.id !== 'string' || !value.id || value.id.startsWith('cormi:') || byId.has(value.id)) fail('ROUTE_ID_CONFLICT', `Invalid, reserved or duplicate route id: ${value.id}`);
     if (value.parentId !== undefined && (typeof value.parentId !== 'string' || !value.parentId)) fail('ROUTE_INVALID', 'Invalid parent id.', { id: value.id });
     if (value.index !== undefined && typeof value.index !== 'boolean') fail('ROUTE_INVALID', 'index must be boolean.', { id: value.id });
@@ -140,7 +144,10 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
     const redirect = value.redirect === undefined ? undefined : redirectTarget(value.redirect);
     const keepQuery = redirectKeepQuery(redirect, value.keepQuery);
     const clientLoader = value.clientLoader === undefined ? undefined : exportName(value.clientLoader, 'clientLoader');
+    const serverLoader = value.serverLoader === undefined ? undefined : exportName(value.serverLoader, 'serverLoader', 'ROUTE_SERVER_LOADER_INVALID');
+    if (clientLoader !== undefined && serverLoader !== undefined) fail('ROUTE_SERVER_LOADER_INVALID', 'A route cannot define both clientLoader and serverLoader.', { id: value.id });
     if (clientLoader !== undefined && value.module === undefined) fail('ROUTE_CLIENT_LOADER_INVALID', 'A clientLoader route needs a page module.', { id: value.id });
+    if (serverLoader !== undefined && value.module === undefined) fail('ROUTE_SERVER_LOADER_INVALID', 'A serverLoader route needs a page module.', { id: value.id });
     if (redirect !== undefined && (value.module !== undefined || value.errorBoundary !== undefined)) {
       fail('ROUTE_REDIRECT_INVALID', 'A redirect route cannot also define a module or error boundary.', { id: value.id });
     }
@@ -157,6 +164,7 @@ export function validateRoutes(input: unknown): readonly RouteRecord[] {
       ...(value.errorBoundary !== undefined ? { errorBoundary: moduleRef(value.errorBoundary) } : {}),
       ...(redirect !== undefined ? { redirect, ...(keepQuery ? { keepQuery: true } : {}) } : {}),
       ...(clientLoader !== undefined ? { clientLoader } : {}),
+      ...(serverLoader !== undefined ? { serverLoader } : {}),
       ...(value.layout === false ? { layout: false as const } : {}),
       ...(value.access !== undefined ? { access: value.access as string } : {}),
       ...(value.meta !== undefined ? { meta: routeMeta(value.meta) } : {}), source: Object.freeze({ ...source }) });
@@ -210,7 +218,7 @@ export function applyGlobalLayout(routes: readonly RouteRecord[], layout: { read
   return validateRoutes([record, ...children]);
 }
 
-const configFields = new Set(['id', 'path', 'index', 'component', 'errorBoundary', 'redirect', 'keepQuery', 'wrappers', 'layout', 'access', 'meta', 'clientLoader', 'routes']);
+const configFields = new Set(['id', 'path', 'index', 'component', 'errorBoundary', 'redirect', 'keepQuery', 'wrappers', 'layout', 'access', 'meta', 'clientLoader', 'serverLoader', 'routes']);
 function configId(value: unknown): string | undefined {
   if (value === undefined) return undefined;
   if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(value)) fail('ROUTE_CONFIG_INVALID', 'Invalid configured route id.', { id: value });
@@ -262,8 +270,12 @@ export function expandRouteConfig(input: unknown, options: { readonly pluginId?:
       }
       const access = row.access as string | undefined;
       const clientLoader = row.clientLoader === undefined ? undefined : exportName(row.clientLoader, 'clientLoader');
+      const serverLoader = row.serverLoader === undefined ? undefined : exportName(row.serverLoader, 'serverLoader', 'ROUTE_SERVER_LOADER_INVALID');
+      if (clientLoader !== undefined && serverLoader !== undefined) fail('ROUTE_SERVER_LOADER_INVALID', 'A configured route cannot define both clientLoader and serverLoader.', { id: explicitId });
       if (clientLoader !== undefined && !component) fail('ROUTE_CLIENT_LOADER_INVALID', 'A clientLoader route needs a component.', { id: explicitId });
+      if (serverLoader !== undefined && !component) fail('ROUTE_SERVER_LOADER_INVALID', 'A serverLoader route needs a component.', { id: explicitId });
       if (clientLoader !== undefined && redirect !== undefined) fail('ROUTE_CLIENT_LOADER_INVALID', 'A redirect route cannot define a clientLoader.', { id: explicitId });
+      if (serverLoader !== undefined && redirect !== undefined) fail('ROUTE_SERVER_LOADER_INVALID', 'A redirect route cannot define a serverLoader.', { id: explicitId });
       let path = row.path as string | undefined;
       if (path !== undefined) {
         if (/[\0\r\n?#%\\]/.test(path) || path.length > 512) fail('ROUTE_PATH_INVALID', 'Invalid configured route path.', { id: explicitId, path });
@@ -314,6 +326,7 @@ export function expandRouteConfig(input: unknown, options: { readonly pluginId?:
         ...(component ? { module: component } : {}), ...(errorBoundary ? { errorBoundary } : {}),
         ...(redirect !== undefined ? { redirect, ...(keepQuery ? { keepQuery: true } : {}) } : {}),
       ...(clientLoader !== undefined ? { clientLoader } : {}),
+        ...(serverLoader !== undefined ? { serverLoader } : {}),
         ...(noGlobalLayout ? { layout: false as const } : {}),
         ...(access !== undefined && !wrappers.length ? { access } : {}),
         ...(row.meta !== undefined ? { meta: row.meta as RouteMeta } : {}), source }));
@@ -354,7 +367,8 @@ export async function pageFiles(root: string, directory = 'src/pages'): Promise<
   }
   await visit(base, 0); return Object.freeze(files.sort(compare));
 }
-export function routesFromFiles(files: readonly string[], directory = 'src/pages', loaders: Readonly<Record<string, string>> = {}): readonly RouteRecord[] {
+export function routesFromFiles(files: readonly string[], directory = 'src/pages', loaders: Readonly<Record<string, string>> = {},
+  serverLoaders: Readonly<Record<string, string>> = {}): readonly RouteRecord[] {
   const prefix = directory.replace(/\/$/, '') + '/';
   const descriptors = [...files].sort(compare).map(file => {
     if (!file.startsWith(prefix) || file.includes('\\')) fail('ROUTE_PATH_INVALID', 'File outside the pages directory.', { file });
@@ -379,10 +393,11 @@ export function routesFromFiles(files: readonly string[], directory = 'src/pages
       at = at ? posix.dirname(at) : undefined; if (at === '.') at = '';
     }
     const remaining = item.segments.slice(parent?.segments.length ?? 0).join('/');
-    const loader = loaders[item.file];
+    const loader = loaders[item.file], serverLoader = serverLoaders[item.file];
     return { id: item.id, ...(parent ? { parentId: parent.id } : {}),
       ...(item.index && !remaining ? { index: true } : { path: remaining }),
       ...(loader !== undefined ? { clientLoader: loader } : {}),
+      ...(serverLoader !== undefined ? { serverLoader } : {}),
       module: { specifier: './' + item.file, exportName: 'default' }, source: { file: item.file } };
   }));
 }

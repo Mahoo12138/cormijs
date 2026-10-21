@@ -1,6 +1,6 @@
 # cormi Umi 吸收路线完成度审计（2026-10-21）
 
-本文件按 [Umi 功能路线](59-umi-feature-roadmap.md) 与当前工作区、测试产物逐项核对，回答“路线目标是否已经完成”。结论是**未完成**：仍有 U32 的 serverLoader/流式渲染、U17 官方 UI 集成、U16 dayjs/Antd 映射、F6 等明确缺口。
+本文件按 [Umi 功能路线](59-umi-feature-roadmap.md) 与当前工作区、测试产物逐项核对，回答“路线目标是否已经完成”。结论是**未完成**：U32 已补齐 serverLoader，仍有流式渲染；U17 官方 UI 集成、U16 dayjs/Antd 映射、F6 等明确缺口。
 
 ## 1. 目标重述
 
@@ -31,7 +31,7 @@
 
 | 路线项 | 缺口 | 当前状态 |
 | --- | --- | --- |
-| U32 | `serverLoader`、流式 SSR；当前仅 clientLoader + static handler + 缓冲/字符串注入 | 未实现 |
+| U32 | `serverLoader` 已交付（仅服务端执行、hydration 对齐、客户端回退端点）；流式 SSR 未实现 | 部分完成 |
 | U17 | 官方 Antd/ProLayout 集成包、主题/图标/图表与 locale 联动 | 仅结构适配器 |
 | U16 | dayjs/Antd 官方 locale 映射与适配包 | 仅订阅/事件机制 |
 | F6 | qiankun/Module Federation、dva/valtio/react-query 适配、多 builder、MFSU 等 | 未实现 |
@@ -46,7 +46,7 @@
 路线目标要求的是 Umi 应用能力清单的持续吸收，而不是“当前测试全绿”。当前仍有上表的多项应用能力与生态集成缺失，因此：
 
 - **不得**将本目标标记为 complete；
-- 下一优先级建议：U32 `serverLoader`（先定义服务端数据契约与 hydration 对齐），随后流式 SSR；之后 F6 Module Federation/qiankun 或 U17 可选 Antd 集成包；
+- 下一优先级建议：U32 流式 SSR；随后 F6 Module Federation/qiankun 或 U17 可选 Antd 集成包；
 - 任何新切片仍需完整的 `pnpm check`、`pnpm test:browser`、`pnpm test:package` 与证据文件后才能提交。
 
 ## 6. 审计方法

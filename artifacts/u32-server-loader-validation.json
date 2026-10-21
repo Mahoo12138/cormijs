@@ -1,0 +1,138 @@
+{
+  "format": "cormi:u32-server-loader-validation:1",
+  "verifiedAt": "2026-10-21T17:56:13.917Z",
+  "base": "0af4ba4190c5f6eef4684b51786c0475b9f9c1b4",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/plugin-react-vite/src/serve.ts",
+      "packages/plugin-react-vite/src/ssr.ts",
+      "packages/plugin-react/src/generate.ts",
+      "packages/plugin-react/src/index.ts",
+      "packages/plugin-react/src/page-loaders.ts",
+      "packages/plugin-typescript/src/check.ts",
+      "packages/plugin-web/src/generation.ts",
+      "packages/routes/src/index.ts",
+      "packages/runtime/src/index.tsx",
+      "packages/runtime/src/server.tsx",
+      "scripts/ssr-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/app-tools.test.ts",
+      "tests/browser/ssr.test.ts",
+      "tests/page-loaders.test.ts",
+      "docs/113-u32-server-loader.md",
+      "packages/runtime/src/server-loader.tsx",
+      "tests/server-loader.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u32-server-loader/check.log",
+      "sha256": "187a4b4f969d066f6b8173e669f1f2baf042b2361c787e79dbc01049fae1f6e4",
+      "seconds": 119.9,
+      "tests": 556,
+      "pass": 556,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u32-server-loader/browser.log",
+      "sha256": "57f74315437763e93089970331d736dcf81b3d70bac45aac03025ee9c68a6875",
+      "seconds": 554.5,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u32-server-loader/package.log",
+      "sha256": "b46782114bd0fb080cd6972d09b0d21d426b52007ad6732af50e42680fd623ea",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/server-loader.test.ts tests/page-loaders.test.ts",
+      "log": ".cache/u32-server-loader/targeted.log",
+      "sha256": "f48ec62955e425ceac0c6fc019ffd6b05d323220a1f441dad65d143cfc008551",
+      "seconds": 0.3,
+      "tests": 9,
+      "pass": 9,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "route IR, export detection, match order, base, serialization failure, Response passthrough, hydration data"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "5cb57a2299bce9383e72d4f1a922b6c53cd2e3da54b1d21376d623448088fd60",
+    "docs/49-application-guide.md": "b7e005c878f5eaba432349592269e0707f3508f8e1ad269c06532eee44557075",
+    "docs/59-umi-feature-roadmap.md": "4e53027ad9ba2c790203042843f02c762b5fe1427953c8e1fba637040d9477f6",
+    "packages/plugin-react-vite/src/serve.ts": "ebe29f8b176c5ea9880600eb5897c986e3b055a5e8ce060b9b14c271bbccb0e7",
+    "packages/plugin-react-vite/src/ssr.ts": "0774c6599aa6ea93dffda3d466d065876418adf6818a286d18100127d967f57f",
+    "packages/plugin-react/src/generate.ts": "88166f76b0c57f20d4f5f62d1eb4bbd81e0c119f7f744fe83794baca8453db4e",
+    "packages/plugin-react/src/index.ts": "900911a3054581c42b593b945d956d6613039de64db74800cca26a0810b89205",
+    "packages/plugin-react/src/page-loaders.ts": "0fb01d86ee0c925884f00e07c6b92499123797a1c77949e65308e4d67b539a08",
+    "packages/plugin-typescript/src/check.ts": "8b11808e468b3653e0f63707f4b72d259dcd81c3bdef73f4d97011e6ecfc455c",
+    "packages/plugin-web/src/generation.ts": "3e93e0bad684d706669c4d5ca5f42ad195a95f685ce9acf8f2b6eef1ed7f3c5f",
+    "packages/routes/src/index.ts": "0740e9919eaa3e0618053d062bc214298b7aacb11de1d48d7ae4f865ef4f187f",
+    "packages/runtime/src/index.tsx": "adce6f50c273a057198bc88614ff5687b4308d519c8e12449a114342802d52a9",
+    "packages/runtime/src/server.tsx": "e619ea36bcd3bf699c28fd27d1a55bf2ba37321cd2257e6dda75fb47e9766956",
+    "scripts/ssr-fixture.ts": "c5269921778ca3cea7eaeb9e119c7c258223580fd788fc3ecd09097272c0629e",
+    "scripts/test-package.ts": "7450b70c92b23600e5d65ec2ac315b7a79ab36c63165a3485918c959bd7c8a91",
+    "tests/app-tools.test.ts": "d312c31336bb5c3d9f1b4fa5aafa39518df0519b625ca5d46167f001164e2cb4",
+    "tests/browser/ssr.test.ts": "c6e1274cd717006b7bdf95599acbbcdc968208ec0f38ff260515c57aed84d749",
+    "tests/page-loaders.test.ts": "118bdcc03b8a6a9ecd1426ccdccce94d80d04d73483e8186b72f1e21862f4aa4",
+    "docs/113-u32-server-loader.md": "d4603f0fad94f7ebbe944295d0c4caaa93928e547bcc90f903a32b3333cf117c",
+    "packages/runtime/src/server-loader.tsx": "829d314da49019fab62bca1d6e7a72924109048635c699993e2a3caf20aeffe5",
+    "tests/server-loader.test.ts": "9b41d52ab27a04aaf6070fac15df4e88eebe657452021f3d33cb827e7c8fdf7c"
+  },
+  "sourceInputCount": 21,
+  "sourceInputsDigest": "dc86a15778f8e4b83f1c164ad340021e42edd9cd031442c98d0505898d8c3a13",
+  "documentationInputs": {
+    "docs/113-u32-server-loader.md": "d4603f0fad94f7ebbe944295d0c4caaa93928e547bcc90f903a32b3333cf117c",
+    "docs/59-umi-feature-roadmap.md": "4e53027ad9ba2c790203042843f02c762b5fe1427953c8e1fba637040d9477f6",
+    "docs/112-roadmap-audit-2026-10-21.md": "5cb57a2299bce9383e72d4f1a922b6c53cd2e3da54b1d21376d623448088fd60",
+    "docs/49-application-guide.md": "b7e005c878f5eaba432349592269e0707f3508f8e1ad269c06532eee44557075"
+  },
+  "evidence": [
+    ".cache/u32-server-loader/check.log",
+    ".cache/u32-server-loader/browser.log",
+    ".cache/u32-server-loader/package.log",
+    ".cache/u32-server-loader/targeted.log",
+    "artifacts/u32-server-loader-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "server-loader-executes-on-server-without-source-stripping",
+    "requires-app-ssr-and-ssr-plugin",
+    "client-loader-and-server-loader-are-mutually-exclusive",
+    "server-loader-data-must-be-json-serializable",
+    "server-loader-endpoint-shares-the-ssr-authorization-surface",
+    "no-streaming",
+    "fallback-endpoint-has-no-cache",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

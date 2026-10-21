@@ -21,8 +21,14 @@ test('SSR renders routes and loader data in preview and hydrates without errors'
   const dev = cli(t, f.root, 'dev', ['--startup-timeout', '30000']), ready = await dev.waitFor(event => event.type === 'ready', 0, 30000);
   const devHome = await page.request.get(ready.url, { headers: { accept: 'text/html' } });
   assert.equal(devHome.status(), 200);
-  assert.match(await devHome.text(), /<div id="root"><main><h1>SSR home<\/h1><\/main><\/div>/);
+  assert.match(await devHome.text(), /<div id="root"><main><h1>SSR home<\/h1>/);
+  const devBackend = await page.request.get(new URL('backend/7', ready.url).href, { headers: { accept: 'text/html' } });
+  assert.equal(devBackend.status(), 200);
+  assert.match(await devBackend.text(), /server loader(?:<!-- -->)?:(?:<!-- -->)?7(?:<!-- -->)?:(?:<!-- -->)?\/ssr\/backend\/7/);
   await page.goto(ready.url); await page.getByRole('heading', { name: 'SSR home', exact: true }).waitFor();
+  await page.getByRole('link', { name: 'Backend', exact: true }).click();
+  await page.getByRole('heading', { name: 'SSR backend', exact: true }).waitFor();
+  assert.equal(await page.locator('[data-server-loader]').innerText(), 'server loader:7:/ssr/backend/7');
   assert.deepEqual(errors, []);
   await page.goto('about:blank'); assert.equal(await dev.stop(), 0, JSON.stringify(dev.events) + dev.stderr); await assertPortFree(Number(new URL(ready.url).port));
   const types = cli(t, f.root, 'typecheck', ['--startup-timeout', '30000']); assert.equal(await types.finish(30000), 0, JSON.stringify(types.events) + types.stderr);
@@ -30,6 +36,13 @@ test('SSR renders routes and loader data in preview and hydrates without errors'
   assert.ok(existsSync(join(f.root, 'dist/.cormi/ssr/ssr.mjs')));
   assert.ok((await readdir(join(f.root, 'dist/assets'))).filter(name => name.endsWith('.js')).length >= 2, 'pages stay in separate chunks');
   assert.match(await readFile(join(f.root, '.cormi/app.tsx'), 'utf8'), /lazy:async\(\)=>/);
+  assert.match(await readFile(join(f.root, '.cormi/app.tsx'), 'utf8'), /loader:serverLoaderOf\("backend","\/ssr\/"\)/);
+  const serverEntry = await readFile(join(f.root, '.cormi/server-loaders.tsx'), 'utf8');
+  assert.match(serverEntry, /src\/pages\/backend\.tsx/);
+  assert.match(await readFile(join(f.root, 'dist/.cormi/ssr/ssr.mjs'), 'utf8'), /server loader/);
+  const clientSources = await Promise.all((await readdir(join(f.root, 'dist/assets'))).filter(name => name.endsWith('.js'))
+    .map(name => readFile(join(f.root, 'dist/assets', name), 'utf8')));
+  assert.ok(clientSources.some(source => source.includes('.cormi/server-loader')), 'client navigation uses the fallback endpoint');
   const preview = cli(t, f.root, 'preview'), production = await preview.waitFor(event => event.type === 'ready');
   await verifySsrPage(page, production.url);
   assert.deepEqual(errors, []);
