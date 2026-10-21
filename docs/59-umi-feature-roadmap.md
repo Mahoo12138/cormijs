@@ -47,7 +47,7 @@
 | U15 | layout、菜单、面包屑、403/404、插槽 | 部分已有（F3c/F3e/F4i）：布局容器/meta、useMenu/useBreadcrumb、useActiveMenuKeys、access 过滤、`meta.locale` 目录化标题与 `useMenuCollapse` 折叠状态；无 ProLayout/Antd adapter 与路由级 layout 插槽 | layout/menu 插件，UI adapter 可选 | F3 |
 | U16 | locale、消息文件、切换/持久化、useIntl/FormattedMessage | 部分已有（F3a/F4h/F5f/F5l/F5m）：内联消息、default/fallback、切换/持久化、useIntl/FormattedMessage、`src/locales` 目录，`formatNumber`/`formatDate`/`tp`，生成的 `CormiLocale.Code`/`MessageKey` 类型，ICU 子集（plural/selectordinal/select、offset、`#`、number/date/time、嵌套与引号转义）、`formatRelativeTime` 相对时间与 ICU 富文本标签；Antd/dayjs UI 联动待后续 | locale 插件 + 客户端 i18n provider | F3 |
 | U17 | Antd/ProLayout、图表集成、主题与 locale 联动 | 待实现官方集成；应用可自行依赖 UI/图表库 | 可选 UI adapter/集成指南，不绑定 core | F3 |
-| U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；req/res 兼容与统一代理配置待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
+| U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b/F5s）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；proxyPlugin 把路径前缀代理到 http(s) 上游，dev 与 preview 一致；req/res 兼容与统一配置入口待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c/F4d）：aliasPlugin 支持项目内相对别名与可选内置 `@`→src，definePlugin 在 dev 与 build 替换 JSON 常量；`@@`、环境分层自动映射与 define 类型生成待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
 | U20 | HTML title/metas/links/headScripts/scripts/favicon | 部分已有（F4a/F4e）：可选 htmlPlugin 注入 title/lang/meta/link/favicon，并按 Umi 位置约定注入 headScripts/scripts（封闭属性集合、转义与逃逸消解）；每路由 head 与任意 raw head HTML 待后续 | HTML/head 插件 | F4 |
 | U21 | helmet、页面标题/SEO 元数据 | 部分已有（F5c）：可选 headPlugin 按 `meta.head` 在导航后同步标题/meta/link（根→深合并、受管节点可替换、卸载恢复）；`<Helmet>` 组件 API、JSON-LD 与 SSR 头部收集待后续 | head 客户端插件 | F3/F4 |
@@ -109,7 +109,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5q | 74d0b3a | 目录约定 MPA | docs/99 |
 | F5r | 61cf848 | API/Mock 生成器 | docs/100 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 535/535、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5r-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
+最新冻结验证（2026-10-21）：`pnpm check` 538/538、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5s-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -218,6 +218,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5q 状态（2026-10-21）：** U34 的目录约定 MPA 已交付：`mpaPlugin` 把 `src/pages` 顶层目录（含可选 `config.json` 的 title/mountElementId）生成为独立 `<name>.html` 与 React 入口；dev 通过内部重写提供，build 以 Vite 多 HTML 输入构建并把页面移到 `dist/<name>.html`，preview 直接静态提供；`index` 保留给 SPA，页面不继承 SPA 路由/Provider，自定义模板、布局/App 包装、页面级 Provider 与热更新待后续。用法、差异与验证见 [F5q MPA](99-f5q-mpa.md)。
 
 **F5r 状态（2026-10-21）：** U27 的 API/Mock 模板已交付：沿用 `generatorPlugin` 与「命令+位置参数」协议，`generate api <name>` 写 `src/api/<name>.ts`（Fetch 骨架），`generate mock <name>` 写 `mock/<name>.ts`（`GET /api/<name>` 示例）；覆盖/试运行/路径限制沿用既有规则，生成器不注册路由或 Mock，文件由 `apiRoutePlugin`/`mockPlugin` 按约定发现。模板贡献与交互式提问仍待后续。用法、差异与验证见 [F5r API/Mock 生成器](100-f5r-generators.md)。
+
+**F5s 状态（2026-10-21）：** U18 的代理已交付：`proxyPlugin`（`cormi:proxy`，`inject: ['vite']`）接受 1–32 个路径前缀到 http(s) 上游的映射，校验前缀/目标/布尔选项，合并进 Vite 的 `server.proxy` 与 `preview.proxy`；开发与预览一致，构建产物不含代理，生产仍需网关。rewrite 函数、headers 与凭据被拒绝/未提供。用法、差异与验证见 [F5s 代理](101-f5s-proxy.md)。
 
 ### F3：权限、布局、菜单和国际化
 

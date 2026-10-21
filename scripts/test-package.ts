@@ -958,6 +958,12 @@ void [apiRoutePlugin,apiOptions,routes,matched,staticExportPlugin,options,pages,
 const bad:StaticExportOptions={titleTemplate:1};
 // @ts-expect-error API prefixes are strings
 const badApi:ApiRoutePluginOptions={prefix:1};
+import {proxyPlugin,normalizeProxy,type ProxyPluginOptions,type NormalizedProxyTarget} from '@cormijs/plugin-react-vite';
+const proxyOptions:ProxyPluginOptions={proxy:{'/api':{target:'http://127.0.0.1:8080',changeOrigin:true}}};
+const proxyTargets:Readonly<Record<string,NormalizedProxyTarget>>=normalizeProxy(proxyOptions.proxy);
+void [proxyPlugin,proxyTargets];
+// @ts-expect-error proxy targets must be strings or bounded options
+const badProxy:ProxyPluginOptions={proxy:{'/api':1}};
 `);
     await execute('static-export-public-types',exportConsumer,process.execPath,typeArguments);
     await withServer(exportConsumer,'dev',async url=>{await page.goto(url);await page.getByRole('heading',{name:'Export home',exact:true}).waitFor();assert.deepEqual(errors,[]);});

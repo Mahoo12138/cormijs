@@ -80,6 +80,8 @@ F5q 起，显式启用的 `mpaPlugin` 把 `src/pages` 顶层目录生成为独�
 
 F5r 起，`cormi generate api <name>` 与 `generate mock <name>` 分别生成 `src/api/<name>.ts` Fetch 骨架与 `mock/<name>.ts` 的 `GET /api/<name>` 示例；沿用覆盖/试运行规则，由 API 路由与 Mock 插件按约定发现。详见 [F5r API/Mock 生成器](100-f5r-generators.md)。
 
+F5s 起，显式启用的 `proxyPlugin` 把路径前缀代理到 http(s) 上游，合并进 Vite 的 dev 与 preview 代理；只接受可序列化子集，生产部署仍需网关。详见 [F5s 代理](101-f5s-proxy.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

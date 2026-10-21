@@ -956,6 +956,16 @@ cormi generate mock health
 
 第一条写 `src/api/health.ts`（Fetch 处理器骨架），由 [F5n API 路由](96-f5n-api-routes.md) 发现；第二条写 `mock/health.ts`（`GET /api/health` 示例），由 [F4b Mock](75-f4b-mock.md) 发现。生成器不注册路由或 Mock、不安装依赖；`--force` 覆盖、`--dry-run` 只预览。规则见 [F5r API/Mock 生成器](100-f5r-generators.md)。
 
+### 4.40 开发与预览代理
+
+把路径前缀转发到真实后端：
+
+```ts
+plugins: [{ id: 'proxy', plugin: proxyPlugin, options: { proxy: { '/api': { target: 'http://127.0.0.1:8080', changeOrigin: true } } } }]
+```
+
+1–32 个前缀；目标必须是 http(s) URL 且不能内嵌凭据；支持 `changeOrigin`/`secure`/`ws`。开发与预览都生效，构建产物不含代理，生产部署需网关。不支持 rewrite 函数与自定义 headers。规则见 [F5s 代理](101-f5s-proxy.md)。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：
