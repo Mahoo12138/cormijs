@@ -113,6 +113,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5u | 1a2dbb8 | loader 返回类型 | docs/103 |
 | F5v | 65120e9 | 重导出 clientLoader 识别 | docs/104 |
 | F5w | bb1a8c5 | 自定义生成模板 | docs/105 |
+| F5x | f97adb0 | `<Helmet>` 组件级 head | docs/106 |
 
 最新冻结验证（2026-10-21）：`pnpm check` 542/542、`pnpm test:browser` 51/51、`pnpm test:package` 320 阶段通过；证据见 `artifacts/f4a…f5x-validation.json`。仍未覆盖的大项见 U32、U17 与 F6。
 
