@@ -120,7 +120,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F4m | abbe5aa | CSS Modules/资源类型声明 | docs/110 |
 | U16-1 | ba6ea1f | locale 变更订阅 | docs/111 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 549/549、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/f4a…f5z-validation.json`、`artifacts/u17-menu-adapters-validation.json`、`artifacts/f4m-style-types-validation.json`、`artifacts/u16-locale-subscription-validation.json`、`artifacts/f5e-404-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。
+最新冻结验证（2026-10-21）：`pnpm check` 549/549、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/f4a…f5z-validation.json`、`artifacts/u17-menu-adapters-validation.json`、`artifacts/f4m-style-types-validation.json`、`artifacts/u16-locale-subscription-validation.json`、`artifacts/f5e-404-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交 0db7289（404.html 导出）。
 
 ## 4. 实施顺序与可审阅交付
 

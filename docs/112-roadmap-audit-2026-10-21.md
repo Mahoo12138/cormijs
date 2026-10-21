@@ -21,11 +21,11 @@
 
 ## 3. 最近冻结验证
 
-- `pnpm check`：**548/548**
+- `pnpm check`：**549/549**
 - `pnpm test:browser`：**52/52**
 - `pnpm test:package`：**328 阶段**
-- 最新证据：[F4m 样式类型](../artifacts/f4m-style-types-validation.json)、[U16 locale 订阅](../artifacts/u16-locale-subscription-validation.json)、[U17 菜单适配器](../artifacts/u17-menu-adapters-validation.json)、[SSR head](../artifacts/f5y-ssr-head-validation.json)、[SSR 拆包](../artifacts/f5y-ssr-splitting-validation.json)、[MPA 模板](../artifacts/f5q-mpa-template-validation.json)。
-- 工作区：上述验证后在 `main` 上以特性提交 + 文档索引提交交付；本审计前工作树干净，未推送。
+- 最新证据：[404.html 导出](../artifacts/f5e-404-validation.json)、[F4m 样式类型](../artifacts/f4m-style-types-validation.json)、[U16 locale 订阅](../artifacts/u16-locale-subscription-validation.json)、[U17 菜单适配器](../artifacts/u17-menu-adapters-validation.json)、[SSR head](../artifacts/f5y-ssr-head-validation.json)、[SSR 拆包](../artifacts/f5y-ssr-splitting-validation.json)、[MPA 模板](../artifacts/f5q-mpa-template-validation.json)。
+- 工作区：上述验证后在 `main` 上以特性提交 + 文档索引提交交付；最新特性提交为 0db7289（404.html 导出），工作树干净，未推送。
 
 ## 4. 未完成要求（阻断完成判定）
 
@@ -37,7 +37,7 @@
 | F6 | qiankun/Module Federation、dva/valtio/react-query 适配、多 builder、MFSU 等 | 未实现 |
 | U25 | externals；runtimePublicPath 已确认 Vite chunk 导入无法等价实现 | 未交付 |
 | U23/U24/U29 | Tailwind/UnoCSS、icons、API 类型工作流 | 未实现 |
-| U33 | 预渲染、404.html、sitemap、与 SSR 组合 | 仅静态外壳 |
+| U33 | 预渲染、404.html、sitemap、与 SSR 组合 | 静态外壳 + 可选 404.html；预渲染/sitemap/SSR 组合未实现 |
 
 此外：SSR 的 hydration 需等待当前匹配 chunk；`cormi serve` 无压缩/缓存/TLS/流式；MPA 无 App/Provider 包装与热更新；U22 类名类型仍为字符串索引。这些均在对应文档的“限制”中记录，不能视为已完成。
 
