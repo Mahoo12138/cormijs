@@ -784,7 +784,7 @@ plugins: [
 ]
 ```
 
-构建后 `dist/index.html`、`dist/guide/index.html` 等各自带有该路由（含祖先）的 `meta.head`；动态段、catch-all 与 redirect 路由不会生成文件。它只是 HTML 外壳：页面内容仍需浏览器挂载，不是预渲染。`index.html` 必须声明 `<meta charset>`，否则非 ASCII 标题可能按错误编码返回。与 `headPlugin` 搭配可在客户端导航后继续同步标题。规则见 [F5e 静态导出](88-f5e-static-export.md)。
+开启 `notFound: true` 时用 catch-all 路由 head 生成 `dist/404.html`。构建后 `dist/index.html`、`dist/guide/index.html` 等各自带有该路由（含祖先）的 `meta.head`；动态段、catch-all 与 redirect 路由不会生成页面文件。它只是 HTML 外壳：页面内容仍需浏览器挂载，不是预渲染。`index.html` 必须声明 `<meta charset>`，否则非 ASCII 标题可能按错误编码返回。与 `headPlugin` 搭配可在客户端导航后继续同步标题。规则见 [F5e 静态导出](88-f5e-static-export.md)。
 
 示例：`pnpm cormi build --root examples/static-export`，再 `pnpm cormi preview --root examples/static-export`。
 

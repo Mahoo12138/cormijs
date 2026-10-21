@@ -7,7 +7,7 @@ export { htmlPlugin, applyHtmlHead, normalizeScript, type HtmlPluginOptions, typ
 export { aliasPlugin, resolveAliases, aliasEntries, type AliasPluginOptions, type ViteAlias } from './alias.js';
 export { definePlugin, resolveDefines, applyDefines, mergeDefines, type DefinePluginOptions, type DefineEntry } from './define.js';
 export { outputPlugin, resolveOutputCopy, stableOutputNames, type OutputPluginOptions, type OutputCopy } from './output.js';
-export { staticExportPlugin, staticPages, renderStaticPage, writeStaticPages, type StaticExportOptions, type StaticPage } from './static-export.js';
+export { staticExportPlugin, staticPages, notFoundPage, renderStaticPage, writeStaticPages, type StaticExportOptions, type StaticPage } from './static-export.js';
 export { apiRoutePlugin, resolveApiRoutes, matchApiRoute, runApiHandler, type ApiRoutePluginOptions, type ApiRoute, type ApiHandler, type ApiHandlerContext } from './api.js';
 export { mpaPlugin, resolveMpaEntries, mpaEntrySource, mpaHtml, type MpaPluginOptions, type MpaCandidate, type MpaEntry } from './mpa.js';
 export { proxyPlugin, normalizeProxy, type ProxyPluginOptions, type ProxyTarget, type ProxyTargetOptions, type NormalizedProxyTarget } from './proxy.js';

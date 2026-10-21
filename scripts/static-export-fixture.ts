@@ -12,13 +12,14 @@ const routes = [{
     { index: true, component: './src/Home.tsx' },
     { path: 'guide', component: './src/Guide.tsx', meta: { head: { title: 'Guide', links: [{ rel: 'canonical', href: '/static/guide' }], jsonLd: { '@context': 'https://schema.org', '@type': 'Article', headline: 'Guide' } } } },
     { path: 'detail/:id', component: './src/Detail.tsx' },
+    { path: '*', component: './src/NotFound.tsx', meta: { head: { title: 'Not found' } } },
   ],
 }];
 export default defineConfig({
   presets: [preset],
   plugins: [
     { id: 'routes', plugin: routeConfigPlugin, options: { id: 'application:routes', routes } },
-    { id: 'export', plugin: staticExportPlugin, options: { id: 'application:export', titleTemplate: ' · demo' } },
+    { id: 'export', plugin: staticExportPlugin, options: { id: 'application:export', titleTemplate: ' · demo', notFound: true } },
     { id: 'head', plugin: headPlugin, options: { id: 'application:head', titleTemplate: ' · demo' } },
     { id: 'api', plugin: apiRoutePlugin, options: { id: 'application:api' } },
   ],
@@ -36,6 +37,7 @@ export default function Shell(){return <section><header><h1>Static export demo</
     'src/Home.tsx': 'export default function Home(){return <main><h2>Export home</h2></main>;}',
     'src/Guide.tsx': 'export default function Guide(){return <main><h2>Export guide</h2></main>;}',
     'src/Detail.tsx': 'export default function Detail(){return <main><h2>Export detail</h2></main>;}',
+    'src/NotFound.tsx': 'export default function NotFound(){return <main><h2>Export 404</h2></main>;}',
     'src/api/ping.ts': `export default () => Response.json({ pong: true });`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
       strict: true, noEmit: true, skipLibCheck: false, allowImportingTsExtensions: true, lib: ['ES2023', 'DOM', 'DOM.Iterable'], types: ['react', 'react-dom', 'node'] },
@@ -58,11 +60,16 @@ export async function verifyStaticExport(root: string) {
   assert.deepEqual(JSON.parse(jsonLd ?? ''), { '@context': 'https://schema.org', '@type': 'Article', headline: 'Guide' });
   assert.doesNotMatch(await readFile(join(root, 'dist/index.html'), 'utf8'), /application\/ld\+json/);
   await assert.rejects(readFile(join(root, 'dist/detail/index.html')), /ENOENT/, 'dynamic routes are not exported');
+  const fallback = await readFile(join(root, 'dist/404.html'), 'utf8');
+  assert.match(fallback, /<title>Not found · demo<\/title>/);
 }
 
 export async function verifyStaticExportPages(page: Page, url: string) {
   const api = await page.request.get(new URL('/api/ping', url).href);
   assert.equal(api.status(), 200); assert.deepEqual(await api.json(), { pong: true });
+  const missing = await page.request.get(new URL('missing-page', url).href);
+  assert.equal(missing.status(), 200, 'preview serves the SPA shell for unknown URLs');
+  assert.match(await page.request.get(new URL('404.html', url).href).then(response => response.text()), /<title>Not found · demo<\/title>/);
   const response = await page.request.get(new URL('guide/', url).href);
   assert.equal(response.status(), 200);
   const html = await response.text();

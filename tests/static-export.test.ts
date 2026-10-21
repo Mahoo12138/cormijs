@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { RouteRecord } from '@cormijs/routes';
-import { renderStaticPage, staticPages, writeStaticPages } from '@cormijs/plugin-react-vite';
+import { notFoundPage, renderStaticPage, staticPages, writeStaticPages } from '@cormijs/plugin-react-vite';
 
 const module = (specifier: string) => ({ specifier, exportName: 'default' });
 const routes: readonly RouteRecord[] = [
@@ -13,7 +13,7 @@ const routes: readonly RouteRecord[] = [
   { id: 'guide', parentId: 'shell', path: 'guide', module: module('./src/Guide.tsx'), source: {} },
   { id: 'detail', parentId: 'shell', path: 'guide/:id', module: module('./src/Detail.tsx'), source: {} },
   { id: 'redirect', parentId: 'shell', path: 'old', redirect: '/guide', source: {} },
-  { id: 'missing', parentId: 'shell', path: '*', module: module('./src/Missing.tsx'), source: {} },
+  { id: 'missing', parentId: 'shell', path: '*', module: module('./src/Missing.tsx'), meta: { head: { title: 'Missing' } }, source: {} },
 ];
 
 test('staticPages keeps literal module routes and skips dynamic, catch-all and redirect routes', () => {
@@ -21,6 +21,12 @@ test('staticPages keeps literal module routes and skips dynamic, catch-all and r
   assert.deepEqual(staticPages(routes).find(page => page.path === '/')?.head, { title: 'Root' });
   // The layout title is inherited by pages that do not declare their own head.
   assert.deepEqual(staticPages(routes).find(page => page.path === '/guide')?.head, { title: 'Root' });
+});
+
+test('notFoundPage extracts the catch-all route head without exporting it as a page', () => {
+  assert.equal(notFoundPage(routes)?.head.title, 'Missing');
+  assert.equal(notFoundPage(routes.filter(route => route.path !== '*')), undefined);
+  assert.equal(staticPages(routes).some(page => page.path === '/404'), false);
 });
 
 test('renderStaticPage applies title template, metas and links without escaping regressions', () => {

@@ -10,6 +10,8 @@ export interface StaticExportOptions {
   readonly id?: string;
   /** Appended to `meta.head.title` in every exported page, mirroring the runtime head plugin. */
   readonly titleTemplate?: string;
+  /** Writes `404.html` from the catch-all route's head when present. */
+  readonly notFound?: boolean;
 }
 export interface StaticPage {
   /** Absolute application path, always starting with `/`. */
@@ -137,11 +139,31 @@ export async function writeStaticPages(output: string, pages: readonly StaticPag
   return Object.freeze(written);
 }
 
+/** Head for the catch-all route, used for 404.html without adding it to the routable page list. */
+export function notFoundPage(routes: readonly RouteRecord[]): StaticPage | undefined {
+  const route = routes.find(entry => entry.path === '*' && entry.module);
+  if (!route) return undefined;
+  const byId = new Map(routes.map(entry => [entry.id, entry]));
+  let title: string | undefined, jsonLd: unknown;
+  const metas = new Map<string, HtmlMeta>(), links = new Map<string, HtmlLink>();
+  const chain: RouteRecord[] = [];
+  let current: RouteRecord | undefined = route;
+  for (let depth = 0; current && depth < 128; depth++) { chain.unshift(current); current = current.parentId === undefined ? undefined : byId.get(current.parentId); }
+  for (const entry of chain) {
+    const head = headOf(entry);
+    if (head.title !== undefined) title = head.title;
+    if (head.jsonLd !== undefined) jsonLd = head.jsonLd;
+    for (const meta of head.metas ?? []) metas.set(meta.name !== undefined ? `name:${meta.name}` : `property:${meta.property}`, meta);
+    for (const link of head.links ?? []) links.set(`${link.rel} ${link.href}`, link);
+  }
+  return Object.freeze({ path: '/404', head: Object.freeze({ ...(title !== undefined ? { title } : {}), ...(metas.size ? { metas: Object.freeze([...metas.values()]) } : {}), ...(links.size ? { links: Object.freeze([...links.values()]) } : {}), ...(jsonLd !== undefined ? { jsonLd } : {}) }) });
+}
+
 /** Opt-in build bridge: emits per-route HTML shells after bundling; it does not pre-render page content. */
 export const staticExportPlugin: Plugin.Object<StaticExportOptions> = {
   name: 'cormi:static-export', inject: ['vite', 'react'],
   apply(ctx, options = {}) {
-    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'titleTemplate'].includes(key))) {
+    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'titleTemplate', 'notFound'].includes(key))) {
       throw new CormiError('STATIC_EXPORT_INVALID', 'Invalid static export plugin options.');
     }
     const id = options.id ?? 'cormi:static-export';
@@ -149,6 +171,7 @@ export const staticExportPlugin: Plugin.Object<StaticExportOptions> = {
     if (options.titleTemplate !== undefined && (typeof options.titleTemplate !== 'string' || options.titleTemplate.length > 512 || /[\0\r\n]/.test(options.titleTemplate))) {
       throw new CormiError('STATIC_EXPORT_INVALID', 'titleTemplate must be bounded text.');
     }
+    if (options.notFound !== undefined && typeof options.notFound !== 'boolean') throw new CormiError('STATIC_EXPORT_INVALID', 'notFound must be boolean.');
     let output = '';
     ctx.effect(() => ctx.vite.add(id, () => ({
       name: id, apply: 'build',
@@ -160,6 +183,13 @@ export const staticExportPlugin: Plugin.Object<StaticExportOptions> = {
         const pages = staticPages(routes);
         if (!pages.length) return;
         await writeStaticPages(output, pages, options.titleTemplate ?? '');
+        if (options.notFound) {
+          const fallback = notFoundPage(routes);
+          if (fallback) {
+            const shell = await readFile(join(output, 'index.html'), 'utf8');
+            await writeFile(join(output, '404.html'), renderStaticPage(shell, fallback, options.titleTemplate ?? ''));
+          }
+        }
       },
     })));
   },

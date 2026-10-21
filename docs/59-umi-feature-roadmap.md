@@ -62,7 +62,7 @@
 | U30 | TypeScript、prepare、导出类型、monorepo | 基础已有至 P16；仍需配合新功能生成类型与别名 | 既有 TS/prepare + monorepo adapter | 随功能 |
 | U31 | code splitting、routePrefetch、routePreloadOnLoad | 部分已有（F5d/F5g/F5p）：页面按路由懒加载，注册表支持手动、`mode:"idle"` 空闲全量、`usePrefetchOnIntent()` 悬停/聚焦与 `usePrefetchOnVisible()` 视口触发预取；数据预取与 SSR 侧预取待后续 | 路由加载插件 + backend bridge | F5 |
 | U32 | SSR、服务端 loader/渲染入口 | 部分已有（F5y）：`app.ssr: true` + `ssrPlugin` 在 dev（Vite ssrLoadModule）与 preview（构建 bundle）执行 static handler/clientLoader、注入 hydration 并由客户端 hydrateRoot 接管；servePlugin 提供 `cormi serve`（静态 dist + SSR bundle、base 前缀），SSR 输出路由/Helmet head；serverLoader 与流式渲染待后续 | 独立 SSR renderer/profile，复用可共享契约 | F5 |
-| U33 | exportStatic/预渲染/静态导出 | 部分已有（F5e）：可选 staticExportPlugin 为每个字面路径路由生成带 `meta.head` 的 HTML 外壳；prerender、404.html、sitemap 与 SSR 组合待后续（外壳不等于预渲染） | 静态导出插件 | F5 |
+| U33 | exportStatic/预渲染/静态导出 | 部分已有（F5e）：可选 staticExportPlugin 为每个字面路径路由生成带 `meta.head` 的 HTML 外壳；notFound 选项可用 catch-all head 生成 404.html；prerender、sitemap 与 SSR 组合待后续（外壳不等于预渲染） | 静态导出插件 | F5 |
 | U34 | MPA | 部分已有（F5q）：mpaPlugin 按 `src/pages` 顶层目录生成独立 HTML 与 React 入口，dev/build/preview 可用，与 SPA 共存；App/Provider 包装与热更新待后续（全局/页面级 layout 与自定义 HTML 模板已交付） | 独立 MPA profile | F5 |
 | U35 | apiRoute | 部分已有（F5n）：apiRoutePlugin 将 `src/api/**` 的 Fetch 处理器注册为路由，dev 由 Vite 中间件运行、build 用 esbuild 编译、preview 提供编译产物；独立生产服务、中间件链与流式响应待后续 | 独立服务端路由插件 | F5 |
 | U36 | qiankun、Module Federation | 待实现 | 可选主/子应用与 federation adapter | F6 |
@@ -120,7 +120,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F4m | abbe5aa | CSS Modules/资源类型声明 | docs/110 |
 | U16-1 | ba6ea1f | locale 变更订阅 | docs/111 |
 
-最新冻结验证（2026-10-21）：`pnpm check` 548/548、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/f4a…f5z-validation.json`、`artifacts/u17-menu-adapters-validation.json`、`artifacts/f4m-style-types-validation.json`、`artifacts/u16-locale-subscription-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。
+最新冻结验证（2026-10-21）：`pnpm check` 549/549、`pnpm test:browser` 52/52、`pnpm test:package` 328 阶段通过；证据见 `artifacts/f4a…f5z-validation.json`、`artifacts/u17-menu-adapters-validation.json`、`artifacts/f4m-style-types-validation.json`、`artifacts/u16-locale-subscription-validation.json`、`artifacts/f5e-404-validation.json`。仍未覆盖的大项见 U17、F6 与 U32 的剩余形态；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。
 
 ## 4. 实施顺序与可审阅交付
 
