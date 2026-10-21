@@ -6,6 +6,10 @@ export interface RequestOptions extends Omit<RequestInit, 'body' | 'headers'> {
   readonly headers?: Readonly<Record<string, string>>;
   readonly params?: RequestParams;
   readonly body?: unknown;
+  /** Cache and deduplicate this GET for the given milliseconds; 0 disables caching. */
+  readonly cacheTime?: number;
+  /** Skip an existing cache entry and do not store this response. */
+  readonly cacheBust?: boolean;
 }
 export interface RequestClient {
   request<T = unknown>(path: string, options?: RequestOptions): Promise<T>;
@@ -44,8 +48,12 @@ const bodyLike = (body: unknown) => typeof body === 'string'
 export function createRequestClient(input: RequestConfig = {}): RequestClient {
   validate(input);
   const config = Object.freeze({ ...input, ...(input.headers ? { headers: Object.freeze({ ...input.headers }) } : {}) });
+  const cache = new Map<string, { readonly expires: number; readonly value: unknown }>();
+  const inflight = new Map<string, Promise<unknown>>();
   const request = async <T,>(path: string, options: RequestOptions = {}): Promise<T> => {
     if (typeof path !== 'string' || !path) throw new TypeError('REQUEST_INVALID: path must be a non-empty string');
+    if (options.cacheTime !== undefined && (!Number.isFinite(options.cacheTime) || options.cacheTime < 0 || options.cacheTime > 3_600_000)) throw new TypeError('REQUEST_INVALID: cacheTime must be 0–3600000ms');
+    if (options.cacheBust !== undefined && typeof options.cacheBust !== 'boolean') throw new TypeError('REQUEST_INVALID: cacheBust must be boolean');
     let url = resolveURL(path, config.baseURL);
     const search = new URLSearchParams();
     for (const [key, value] of Object.entries(options.params ?? {})) {
@@ -60,15 +68,35 @@ export function createRequestClient(input: RequestConfig = {}): RequestClient {
       body = JSON.stringify(body);
       if (!headers.has('content-type')) headers.set('content-type', 'application/json');
     }
+    const method = (options.method ?? 'GET').toUpperCase();
+    const cacheTime = options.cacheTime ?? 0;
+    const key = cacheTime > 0 && method === 'GET' && options.cacheBust !== true
+      ? `${method} ${url}\n${[...headers.entries()].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([name, value]) => `${name}:${value}`).join('\n')}`
+      : undefined;
+    if (key) {
+      const hit = cache.get(key);
+      if (hit && hit.expires > Date.now()) return hit.value as T;
+      if (hit) cache.delete(key);
+      const pending = inflight.get(key);
+      if (pending) return pending as Promise<T>;
+    }
     const signals = [options.signal, config.timeout === undefined ? undefined : AbortSignal.timeout(config.timeout)]
       .filter((signal): signal is AbortSignal => signal !== undefined);
     const signal = signals.length === 0 ? undefined : signals.length === 1 ? signals[0] : AbortSignal.any(signals);
-    const { params: _params, headers: _headers, body: _body, ...init } = options;
-    const response = await fetch(url, { ...init, headers, body: body as BodyInit | null | undefined, signal });
-    const text = response.status === 204 ? '' : await response.text();
-    const data = text && (response.headers.get('content-type') ?? '').includes('json') ? JSON.parse(text) : text;
-    if (!response.ok) throw new RequestError(`Request failed with status ${response.status}`, response.status, data);
-    return data as T;
+    const { params: _params, headers: _headers, body: _body, cacheTime: _cacheTime, cacheBust: _cacheBust, ...init } = options;
+    const task = (async (): Promise<T> => {
+      const response = await fetch(url, { ...init, headers, body: body as BodyInit | null | undefined, signal });
+      const text = response.status === 204 ? '' : await response.text();
+      const data = text && (response.headers.get('content-type') ?? '').includes('json') ? JSON.parse(text) : text;
+      if (!response.ok) throw new RequestError(`Request failed with status ${response.status}`, response.status, data);
+      if (key) cache.set(key, { expires: Date.now() + cacheTime, value: data });
+      return data as T;
+    })();
+    if (key) {
+      inflight.set(key, task);
+      void task.finally(() => { inflight.delete(key); }).catch(() => {});
+    }
+    return task;
   };
   return Object.freeze({
     request,

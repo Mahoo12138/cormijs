@@ -1,0 +1,109 @@
+{
+  "format": "cormi:u12-3-cache-validation:1",
+  "verifiedAt": "2026-10-21T20:51:54.143Z",
+  "base": "cf0a7161c41181054f173451f4cb9022118caa53",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts",
+      "docs/121-u12-request-cache.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-3-cache/check.log",
+      "sha256": "9a332271e3b05b437fd557711b0946a84f7582b1bcda606ac872bc57eb51ff85",
+      "seconds": 120.1,
+      "tests": 562,
+      "pass": 562,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-3-cache/browser.log",
+      "sha256": "1b127b871a853103ea069c1769a0b899d13f559d4282e129ad7ba7ceab65781e",
+      "seconds": 556.4,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-3-cache/package.log",
+      "sha256": "d98054dbc18823e6cb9bbd814f438067927f3ead26e98ae00b26894dcbe6115b",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-3-cache/targeted.log",
+      "sha256": "5ade26c03c4e96ea95875ebb1d552c111d3af398f43f599feae100e667895495",
+      "seconds": 11.4,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "concurrent GET dedupe, cache hit, cacheBust refetch, plus existing retry/polling/pagination/cancel cases"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "eac596aa4a2aa16e52261fa449f5816239fbb0e24af9c29199f18648b9052857",
+    "docs/49-application-guide.md": "1e938cd7ef39644ddd97c0640f5ad8ea279b9f28cad2c48698f14e3f85bd0e0a",
+    "docs/59-umi-feature-roadmap.md": "acd3aa693c1b4c36f7405ce0c06f13abcfb9891ccb89b97c34cb8a8fd159072b",
+    "packages/runtime/src/request.tsx": "42b19a84c199e9ece7dd278737ee65da3fe81bb6d85650b782cb00e2de3fcbc3",
+    "scripts/request-fixture.ts": "9f08a76e3d2241a28e1f9d6bfb4f1ebc111a861ae9075976eb34b4ea33df17c7",
+    "scripts/test-package.ts": "14f01e59905ade6141394895127f35c091e4ba12aaefc329bd03413cf569ec66",
+    "docs/121-u12-request-cache.md": "7cbec72ad2a3282b5eb80b60212fbd35aa066e435cde31bff55646f39b377685"
+  },
+  "sourceInputCount": 7,
+  "sourceInputsDigest": "cad46e892b6b7ea0cf9e913b35f758066fa13d8d974b6b0bcc593406ccbfe472",
+  "documentationInputs": {
+    "docs/121-u12-request-cache.md": "7cbec72ad2a3282b5eb80b60212fbd35aa066e435cde31bff55646f39b377685",
+    "docs/59-umi-feature-roadmap.md": "acd3aa693c1b4c36f7405ce0c06f13abcfb9891ccb89b97c34cb8a8fd159072b",
+    "docs/112-roadmap-audit-2026-10-21.md": "eac596aa4a2aa16e52261fa449f5816239fbb0e24af9c29199f18648b9052857",
+    "docs/49-application-guide.md": "1e938cd7ef39644ddd97c0640f5ad8ea279b9f28cad2c48698f14e3f85bd0e0a"
+  },
+  "evidence": [
+    ".cache/u12-3-cache/check.log",
+    ".cache/u12-3-cache/browser.log",
+    ".cache/u12-3-cache/package.log",
+    ".cache/u12-3-cache/targeted.log",
+    "artifacts/u12-3-cache-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "GET-only-cache",
+    "per-client-instance-memory-cache",
+    "no-capacity-or-lru",
+    "no-tag-invalidation-or-swr",
+    "cache-key-includes-headers",
+    "no-pagination-integration",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

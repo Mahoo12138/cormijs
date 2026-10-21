@@ -24,7 +24,7 @@ export async function writeRequestFixture(root: string) {
     'src/app.tsx': `import { defineApp } from '@cormijs/runtime';
 export default defineApp({ request: { baseURL: '/api', headers: { 'x-app': 'cormi' }, timeout: 2000 } });`,
     'src/pages/index.tsx': `import { useRef, useState } from 'react';
-import { Link, usePagination, useRequest } from '@cormijs/runtime';
+import { Link, usePagination, useRequest, useRequestClient } from '@cormijs/runtime';
 function Auto(){
   const {data,loading,error,refresh}=useRequest<{message:string}>((client,signal)=>client.get('/hello',{signal,params:{q:'one'}}));
   return <section data-auto-section><p data-auto>{data?.message ?? ''}</p><p data-loading>{String(loading)}</p><p data-error>{error ? 'error' : ''}</p><button onClick={()=>void refresh()}>Refresh</button></section>;
@@ -56,12 +56,23 @@ function Paged(){
     <ul data-page-list>{data.map(item=><li key={item.id}>{item.id}</li>)}</ul>
     <button onClick={()=>void loadMore()}>More</button><button onClick={()=>void reload()}>Reload page</button></section>;
 }
+function Cached(){
+  const client=useRequestClient();
+  const [messages,setMessages]=useState<string[]>([]);
+  const load=()=>void Promise.all([
+    client.get<{message:string}>('/cached',{cacheTime:5000}),
+    client.get<{message:string}>('/cached',{cacheTime:5000}),
+  ]).then(list=>setMessages(list.map(item=>item.message)));
+  return <section><p data-cached>{messages.join(',')}</p>
+    <button onClick={load}>Run cached</button>
+    <button onClick={()=>void client.get<{message:string}>('/cached',{cacheTime:5000,cacheBust:true}).then(item=>setMessages(value=>[...value,item.message]))}>Bust cache</button></section>;
+}
 function Deps(){
   const [q,setQ]=useState('one');
   const {data}=useRequest<{message:string}>((client,signal)=>client.get('/deps',{signal,params:{q}}),{refreshDeps:[q]});
   return <section><p data-deps>{data?.message ?? ''}</p><button onClick={()=>setQ('two')}>Change dep</button></section>;
 }
-export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Deps /><Link to="/other">Other</Link></main>;}`,
+export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Cached /><Deps /><Link to="/other">Other</Link></main>;}`,
     'src/pages/other.tsx': `import { Link } from '@cormijs/runtime';
 export default function Other(){return <main><h1>Request other</h1><Link to="/">Request home</Link></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -72,7 +83,7 @@ export default function Other(){return <main><h1>Request other</h1><Link to="/">
 }
 
 export async function verifyRequestPage(page: Page, url: string) {
-  let helloCount = 0, seenHeader = '', slowCount = 0, flakyCount = 0, pollCount = 0, depsCount = 0;
+  let helloCount = 0, seenHeader = '', slowCount = 0, flakyCount = 0, pollCount = 0, depsCount = 0, cachedCount = 0;
   await page.route('**/api/**', async route => {
     const request = route.request(), target = new URL(request.url());
     seenHeader = request.headers()['x-app'] ?? '';
@@ -94,6 +105,9 @@ export async function verifyRequestPage(page: Page, url: string) {
     } else if (target.pathname === '/api/poll') {
       pollCount++;
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'poll:' + pollCount }) });
+    } else if (target.pathname === '/api/cached') {
+      cachedCount++;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'cached:' + cachedCount }) });
     } else if (target.pathname === '/api/page') {
       const page = Number(target.searchParams.get('page') ?? '1'), pageSize = Number(target.searchParams.get('pageSize') ?? '2');
       const list = Array.from({ length: 5 }, (_, index) => ({ id: index + 1 })).slice((page - 1) * pageSize, page * pageSize);
@@ -151,6 +165,15 @@ export async function verifyRequestPage(page: Page, url: string) {
   await page.waitForFunction(() => document.querySelector('[data-page-count]')?.textContent === '2');
   assert.equal(await page.locator('[data-page]').innerText(), '1');
   assert.equal(await page.locator('[data-page-more]').innerText(), 'true');
+  await page.getByRole('button', { name: 'Run cached', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-cached]')?.textContent === 'cached:1,cached:1');
+  assert.equal(cachedCount, 1, 'concurrent GETs share one request');
+  await page.getByRole('button', { name: 'Run cached', exact: true }).click();
+  await page.waitForTimeout(100);
+  assert.equal(cachedCount, 1, 'cached GET does not refetch');
+  await page.getByRole('button', { name: 'Bust cache', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-cached]')?.textContent?.endsWith('cached:2'));
+  assert.equal(cachedCount, 2);
   await page.waitForFunction(() => document.querySelector('[data-deps]')?.textContent === 'deps:one');
   await page.getByRole('button', { name: 'Change dep', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('[data-deps]')?.textContent === 'deps:two');
