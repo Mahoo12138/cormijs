@@ -105,6 +105,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5m | 8a91da3 | 相对时间格式化 | docs/95 |
 | F5n | 13e8270 | 生产 API 路由 | docs/96 |
 | F5o | 875f2be | ICU 富文本消息 | docs/97 |
+| F5p | 125e037 | 视口可见预取 | docs/98 |
 
 最新冻结验证（2026-10-21）：`pnpm check` 532/532、`pnpm test:browser` 50/50、`pnpm test:package` 310 阶段通过；证据见 `artifacts/f4a…f5p-validation.json`。仍未覆盖的大项见 U32/U34、U17 与 F6。
 
