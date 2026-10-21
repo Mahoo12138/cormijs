@@ -102,6 +102,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F5j | 78d518f | 约定式 clientLoader 识别 | docs/92 |
 | F5k | f82c2e3 | locale key 类型 | docs/93 |
 | F5l | 803bf94 | ICU 消息子集 | docs/94 |
+| F5m | 8a91da3 | 相对时间格式化 | docs/95 |
 
 最新冻结验证（2026-10-21）：`pnpm check` 525/525、`pnpm test:browser` 49/49、`pnpm test:package` 310 阶段通过；证据见 `artifacts/f4a…f5m-validation.json`。仍未覆盖的大项见 U32/U34/U35、U17 与 F6。
 
