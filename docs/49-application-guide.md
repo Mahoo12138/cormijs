@@ -696,6 +696,25 @@ export async function clientLoader({ params }: { params: Record<string, string |
 
 `clientLoader` 是页面模块里的导出名；生成入口把同一模块同时用作组件与 loader 来源，声明交给 React Router 的数据路由执行，因此深链接、刷新和前进后退都会取数。约定式路由暂不识别该声明，loader 失败的边界呈现契约仍未交付，服务端 loader/SSR 注水与预取也不在本能力内。规则与限制见 [F5a 路由 client loader](83-f5a-client-loader.md)。
 
+### 4.23 路由级页面头部
+
+需要按页面切换标题与 SEO 元数据时，显式启用 `headPlugin`，并在路由 `meta.head` 里声明：
+
+```ts
+plugins: [
+  { id: 'routes', plugin: routeConfigPlugin, options: { id: 'app:routes', routes } },
+  { id: 'head', plugin: headPlugin, options: { id: 'app:head', titleTemplate: ' · cormi' } },
+]
+```
+
+```ts
+{ path: 'guide', component: './src/Guide.tsx', meta: { head: { title: '指南', metas: [{ name: 'description', content: '指南页' }], links: [{ rel: 'canonical', href: '/guide' }] } } }
+```
+
+标题取匹配链上最深的路由，`metas` 按 `name`/`property` 由深覆盖浅，`links` 按 `rel + href` 去重；受管标签带 `data-cormi-head`，每次导航替换而不会累积，作者写在 index.html 的标签不受影响，卸载时恢复进入前的标题。这是客户端同步，不改变构建产物的初始头部；SSR 头部属 U32。规则见 [F5c 路由级页面头部](84-f5c-route-head.md)。
+
+示例：`pnpm cormi dev --root examples/route-head`，默认监听 `/route-head/`。
+
 ## 5. 环境和 Mock 使用同一个部署前缀
 
 创建 `.env.staging`：

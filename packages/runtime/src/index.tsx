@@ -6,6 +6,7 @@ import { copyClientRoutes, runAppRender, type HistoryType, type RuntimeConfig, t
 import { ModelProvider, type ModelDescriptor } from './model.js';
 export { useRouteMatches, type CormiRouteMatch } from './route-matches.js';
 export { clientLoaderOf, useClientLoaderData, useClientLoaderError, useRouteLoaderDataFor, type ClientLoaderArgs, type ClientLoaderFunction } from './client-loader.js';
+export { collectHead, normalizeHead, routeHeadRuntime, HEAD_ATTRIBUTE, type HeadMeta, type HeadLink, type RouteHead, type HeadOptions, type RouteHeadRuntimeOptions } from './head.js';
 export { ModelProvider, useModel, type ModelDescriptor } from './model.js';
 export { InitialStateProvider, initialStateRuntime, useInitialState, type InitialState } from './initial-state.js';
 export { createRequestClient, RequestError, RequestProvider, requestRuntime, useRequest, useRequestClient, type RequestClient, type RequestOptions, type RequestParams, type UseRequestOptions, type UseRequestResult } from './request.js';
@@ -19,7 +20,7 @@ export interface RuntimePlugin {
   Provider?: ComponentType<PropsWithChildren<{ options: unknown; appConfig: Readonly<RuntimeConfig>; routes: readonly RouteObject[]; basename: string }>>;
   setup?(context: { signal: AbortSignal; options: unknown; appConfig: Readonly<RuntimeConfig> }): void | RuntimeCleanup | Promise<void | RuntimeCleanup>;
   /** The first argument keeps the original location-only contract. */
-  onRouteChange?(location: Readonly<Location>, event: RouteChangeEvent): void;
+  onRouteChange?(location: Readonly<Location>, event: RouteChangeEvent, context?: { readonly options: unknown; readonly signal: AbortSignal }): void;
 }
 export interface RuntimeEntry { id: string; plugin: RuntimePlugin; options?: unknown }
 export interface ApplicationHandle { dispose(): Promise<void> }
@@ -107,7 +108,7 @@ export async function mountApplication(options: {
         const location = Object.freeze({ ...state.location });
         const event: RouteChangeEvent = Object.freeze({ location, action: state.historyAction, history, basename, isFirst, routes: sourceRoutes, clientRoutes });
         for (const entry of entries) {
-          try { void Promise.resolve(entry.plugin.onRouteChange?.(location, event)).catch(error => log(entry.id, error)); }
+          try { void Promise.resolve(entry.plugin.onRouteChange?.(location, event, { options: entry.options ?? {}, signal: lifetime.signal })).catch(error => log(entry.id, error)); }
           catch (error) { log(entry.id, error); }
         }
         try { void Promise.resolve(appConfig.onRouteChange?.(event)).catch(error => log('application', error)); }

@@ -79,5 +79,5 @@ Umi 的 `clientLoader` 由 `packages/preset-umi/src/features/clientLoader` 生�
 ## 6. 下一步
 
 - U13 剩余：约定式路由的 loader 识别、loader 数据类型生成、渲染错误的边界归属验证（本切片只验证了 loader 抛错）；
-- U31：路由预取与拆包策略；U32/U33/U34：SSR、静态导出、MPA；U35：生产 API 路由；
+- F5c 已交付路由级 `meta.head` 同步，见 [F5c 路由级页面头部](84-f5c-route-head.md)；后续为 U31 预取、U32/U33/U34（SSR、静态导出、MPA）、U35 生产 API 路由；
 - F4 剩余：U25 输出与资源策略、U27 微生成器（需先扩展 CLI 多参数命令）、U28 工程命令。

@@ -26,6 +26,7 @@ import { writeGlobalStyleFixture, verifyGlobalStylePage } from './global-style-f
 import { writeAccessConventionFixture, verifyAccessConventionPage } from './access-convention-fixture.js';
 import { writeLocaleCatalogFixture, verifyLocaleCatalogPage } from './locale-catalog-fixture.js';
 import { writeClientLoaderFixture, verifyClientLoaderPage } from './client-loader-fixture.js';
+import { writeHeadFixture, verifyHeadPage } from './head-fixture.js';
 import { packWorkspace, createReactConsumer, consumerManifest, consumerNpmrc, run, sha256, type LocalKit } from './packaging.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -778,6 +779,27 @@ const bad:ClientLoaderFunction=1;
     await command('client-loader-build',loaderConsumer,'build');
     await withServer(loaderConsumer,'preview',async url=>{await verifyClientLoaderPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'client-loader-preview.png')});});
     report.stages.push({label:'installed-route-client-loader-dev-build-and-static-preview',routes:['member/:id'],previewRegenerated:false});
+
+    const headConsumer=await create('route-head','react');await writeHeadFixture(headConsumer);
+    const headManifest=consumerManifest(kit,'react');
+    headManifest.dependencies['@cormijs/plugin-react']=headManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(headConsumer,'package.json'),JSON.stringify(headManifest,null,2));
+    await install('route-head-install',headConsumer);await auditLinks(headConsumer);
+    await command('route-head-typecheck',headConsumer,'typecheck');
+    await writeFile(join(headConsumer,'types.mts'),`import {headPlugin,type HeadPluginOptions} from '@cormijs/plugin-react';
+import {collectHead,normalizeHead,HEAD_ATTRIBUTE,type RouteHead} from '@cormijs/runtime';
+const options:HeadPluginOptions={id:'app:head',titleTemplate:' · demo'};
+const head:RouteHead=normalizeHead({title:'T',metas:[{name:'description',content:'D'}]});
+const collected:RouteHead=collectHead([]," / ");
+void [headPlugin,options,head,collected,HEAD_ATTRIBUTE];
+// @ts-expect-error titleTemplate must be a string
+const bad:HeadPluginOptions={titleTemplate:1};
+`);
+    await execute('route-head-public-types',headConsumer,process.execPath,typeArguments);
+    await withServer(headConsumer,'dev',async url=>{await verifyHeadPage(page,url);assert.deepEqual(errors,[]);});
+    await command('route-head-build',headConsumer,'build');
+    await withServer(headConsumer,'preview',async url=>{await verifyHeadPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'route-head-preview.png')});});
+    report.stages.push({label:'installed-route-head-dev-build-and-static-preview',meta:'meta.head',titleTemplate:' · demo',previewRegenerated:false});
 
   } finally { await browser.close(); }
   report.passed = true;

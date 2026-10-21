@@ -46,6 +46,8 @@ F4i 起，`menuPlugin` 支持 `collapse` 选项与 `useMenuCollapse()`（可选 
 
 F5a/F5b 起，配置式路由可声明 `clientLoader` 导出名：loader 是路由的静态属性并按需导入页面模块，组件仍走 `lazy`；页面用 `useClientLoaderData()` 取数，loader 抛错由该路由的 `errorBoundary` 呈现（`useClientLoaderError` 读取原始错误）。详见 [F5a 路由 client loader](83-f5a-client-loader.md)。
 
+F5c 起，显式启用的 `headPlugin` 在每次导航后把 `meta.head` 同步到 document（标题取最深、meta 覆盖、link 去重，受管节点带 `data-cormi-head`，卸载恢复原标题）；仅客户端，SSR 头部仍待 U32。详见 [F5c 路由级页面头部](84-f5c-route-head.md)。
+
 ```sh
 pnpm build
 pnpm cormi prepare --root examples/basic

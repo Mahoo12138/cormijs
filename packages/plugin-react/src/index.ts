@@ -21,6 +21,7 @@ export { appRuntimePlugin, appConfigContributions, resolveAppRuntime, type AppRu
 export { layoutPlugin, layoutContributions, resolveGlobalLayout, type LayoutPluginOptions, type LayoutContribution } from './layout.js';
 export { loadingPlugin, loadingContributions, resolveGlobalLoading, type LoadingPluginOptions, type LoadingContribution } from './loading.js';
 export { globalStylePlugin, styleContributions, resolveGlobalStyles, DEFAULT_STYLE_FILES, type GlobalStylePluginOptions, type StyleContribution, type GlobalStylePlan } from './global-style.js';
+export { headPlugin, type HeadPluginOptions } from './head.js';
 export { modelPlugin, modelContributions, resolveModels, type ModelPluginOptions, type ModelContribution, type ModelPlan } from './model.js';
 export { initialStatePlugin, type InitialStatePluginOptions } from './initial-state.js';
 export { requestPlugin, type RequestPluginOptions } from './request.js';

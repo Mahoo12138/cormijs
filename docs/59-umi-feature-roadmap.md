@@ -50,7 +50,7 @@
 | U18 | Mock 约定发现、目录、方法/路径、代理配置 | 部分已有（F4b）：mockPlugin 发现 mock/**、映射 METHOD/路径并开发期重载；req/res 兼容与统一代理配置待后续 | 复用 DevApiService，新增约定/后端 bridge | F4 |
 | U19 | .umirc/config、环境分层/覆盖、alias/@/@@、define | 部分已有（F4c/F4d）：aliasPlugin 支持项目内相对别名与可选内置 `@`→src，definePlugin 在 dev 与 build 替换 JSON 常量；`@@`、环境分层自动映射与 define 类型生成待后续 | 配置/约定插件 + 后端专属桥接 | F1/F4 |
 | U20 | HTML title/metas/links/headScripts/scripts/favicon | 部分已有（F4a/F4e）：可选 htmlPlugin 注入 title/lang/meta/link/favicon，并按 Umi 位置约定注入 headScripts/scripts（封闭属性集合、转义与逃逸消解）；每路由 head 与任意 raw head HTML 待后续 | HTML/head 插件 | F4 |
-| U21 | helmet、页面标题/SEO 元数据 | 待实现官方能力；手改 document.title 不算 | head 客户端插件 | F3/F4 |
+| U21 | helmet、页面标题/SEO 元数据 | 部分已有（F5c）：可选 headPlugin 按 `meta.head` 在导航后同步标题/meta/link（根→深合并、受管节点可替换、卸载恢复）；`<Helmet>` 组件 API、JSON-LD 与 SSR 头部收集待后续 | head 客户端插件 | F3/F4 |
 | U22 | global 样式、CSS Modules、Less/Sass/PostCSS/SVGR | 部分已有（F4f）：globalStylePlugin 发现 src/global.{css,scss,sass,less} 并由生成入口按 hook 顺序副作用导入，dev 新建/删除可触发生成；CSS Modules 类型声明、PostCSS/Tailwind/SVGR 与预处理集成仍待后续 | 样式/资源插件 + backend adapter | F4 |
 | U23 | Tailwind、UnoCSS、styled-components | 待实现可选集成 | 各生态 adapter | F4 |
 | U24 | icons | 待实现公共图标方案 | 图标资源/代码生成插件 | F4 |
@@ -147,6 +147,8 @@ request 对应 `packages/plugins/src/request.ts` 和 [请求文档](https://umij
 **F5a 状态（2026-10-20）：** U13 的核心已交付：`ConfigRoute.clientLoader` 与扁平 IR 校验导出名，`generateApplication` 让该路由一次性解析页面模块并用 `clientLoaderOf` 把同名导出交给 React Router loader，深链接/重载/前进后退都会取数；`@cormijs/runtime` 新增 `useClientLoaderData`、`useRouteLoaderDataFor`、`useClientLoaderError`。约定式路由识别、loader 失败的边界呈现契约（该呈现实测未挂载，原因尚未定位，故回退相关改动）、SSR 数据注水与预取（U31）仍待后续。用法、差异与验证见 [F5a 路由 client loader](83-f5a-client-loader.md)。
 
 **F5b 状态（2026-10-20）：** U13 的错误呈现缺口已闭环：loader 从 `lazy()` 返回值改为路由的静态属性，修复了“loader 抛错后 lazy 未合并、匹配被截断到根路由而整页空白”的行为；错误现在落到该路由自己的 `errorBoundary`（导航与深链接一致），`useClientLoaderError` 可读取原始错误对象。代价是页面模块被 loader 与 lazy 各导入一次（浏览器模块缓存复用），约定式路由识别、类型生成与预取仍待后续。见 [F5a 路由 client loader](83-f5a-client-loader.md)。
+
+**F5c 状态（2026-10-20）：** U21 的配置侧能力已交付：`headPlugin` 注册 `routeHeadRuntime`，每次导航合并根→深的 `meta.head`（标题取最深、meta 按 name/property 覆盖、link 按 rel+href 去重），写入带 `data-cormi-head` 标记的受管节点，卸载时移除并恢复挂载时标题；运行时 `onRouteChange` 新增可选 `{options, signal}` 第三参数（向后兼容）。`<Helmet>` 式组件、JSON-LD、多语言标题与 SSR 头部收集仍待后续。用法、差异与验证见 [F5c 路由级页面头部](84-f5c-route-head.md)。
 
 ### F3：权限、布局、菜单和国际化
 
