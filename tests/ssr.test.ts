@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { ProjectRuntime } from '@cormijs/core';
 import { vitePlugin } from '@cormijs/plugin-vite';
 import { reactPlugin } from '@cormijs/plugin-react';
-import { prerenderPages, prerenderStaticPages, sitemapXml, ssrPlugin } from '@cormijs/plugin-react-vite';
+import { prerenderPages, prerenderStaticPages, resolvePrerenderPaths, sitemapXml, ssrPlugin } from '@cormijs/plugin-react-vite';
 import { renderServerApplication, renderServerApplicationStream, type ServerApplication } from '@cormijs/runtime/server';
 
 const hasCode = (code: string) => (error: any) => (error?.code ?? error?.cause?.code) === code;
@@ -78,7 +78,8 @@ test('ssr plugin registers its Vite bridge, validates options and withdraws', as
   await host.dispose();
 
   for (const options of [{ mountId: '9bad' }, { mountId: 1 }, { extra: true }, { prerender: 'yes' }, { sitemap: 'https://example.com' }, { prerender: true, sitemap: 'ftp://example.com' },
-    { prerenderPaths: ['/x'] }, { prerender: true, prerenderPaths: ['relative'] }, { prerender: true, prerenderPaths: ['/a/../b'] }]) {
+    { prerenderPaths: ['/x'] }, { prerender: true, prerenderPaths: ['relative'] }, { prerender: true, prerenderPaths: ['/a/../b'] },
+    { prerender: true, prerenderIgnoreErrors: 'yes' }, { prerender: true, prerenderPaths: 1 }]) {
     const rejecting = new ProjectRuntime(3000, root);
     rejecting.mount('vite', vitePlugin);
     rejecting.mount('react', reactPlugin);
@@ -115,6 +116,27 @@ test('prerenderStaticPages writes literal routes, skips redirects and emits a si
   assert.ok(!map.includes('moved'));
   assert.ok(!map.includes('missing'));
   assert.equal(sitemapXml(['https://x.test/a&b']), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://x.test/a&amp;b</loc></url>\n</urlset>\n');
+});
+
+test('resolvePrerenderPaths accepts arrays and async producers, and prerender can skip page errors', async () => {
+  assert.deepEqual(await resolvePrerenderPaths(['/users/2', '/users/1', '/users/2']), ['/users/1', '/users/2']);
+  assert.deepEqual(await resolvePrerenderPaths(async () => ['/guide']), ['/guide']);
+  await assert.rejects(resolvePrerenderPaths(async () => ['relative']), hasCode('SSR_INVALID'));
+  await assert.rejects(resolvePrerenderPaths(1 as never), hasCode('SSR_INVALID'));
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'cormi-prerender-errors 中文-')));
+  try {
+    const shell = '<!doctype html><html><head></head><body><div id="root"></div></body></html>';
+    const pages = [{ path: '/ok', head: {} }, { path: '/broken', head: {} }];
+    const render = async (request: Request) => {
+      if (new URL(request.url).pathname === '/broken') throw new Error('boom');
+      return { html: '<main>ok</main>', status: 200, head: {} };
+    };
+    await assert.rejects(prerenderStaticPages({ output: root, shell, mountId: 'root', base: '/', pages, render }), /boom/);
+    const result = await prerenderStaticPages({ output: root, shell, mountId: 'root', base: '/', pages, render, ignoreErrors: true, sitemap: 'https://example.com' });
+    assert.deepEqual(result.written, ['/ok']);
+    assert.deepEqual(result.skipped, [{ path: '/broken', status: 0, error: 'boom' }]);
+    assert.ok(!(await readFile(join(root, 'sitemap.xml'), 'utf8')).includes('broken'));
+  } finally { await rm(root, { recursive: true, force: true }); }
 });
 
 test('prerenderPages merges explicit dynamic paths with literal routes', () => {

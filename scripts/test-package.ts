@@ -889,10 +889,11 @@ const bad:HeadPluginOptions={titleTemplate:1};
     await writeFile(join(ssrConsumer,'package.json'),JSON.stringify(ssrManifest,null,2));
     await install('ssr-install',ssrConsumer);await auditLinks(ssrConsumer);
     await command('ssr-typecheck',ssrConsumer,'typecheck');
-    await writeFile(join(ssrConsumer,'types.mts'),`import {ssrPlugin,servePlugin,prerenderPages,prerenderStaticPages,sitemapXml,type SsrPluginOptions,type ServePluginOptions} from '@cormijs/plugin-react-vite';
+    await writeFile(join(ssrConsumer,'types.mts'),`import {ssrPlugin,servePlugin,prerenderPages,prerenderStaticPages,resolvePrerenderPaths,sitemapXml,type SsrPluginOptions,type ServePluginOptions} from '@cormijs/plugin-react-vite';
 import {renderServerApplication,renderServerApplicationStream,renderServerLoaderData,serverLoaderExport,type ServerApplication,type ServerRenderResult,type ServerStreamResult,type ServerLoaderFunction} from '@cormijs/runtime/server';
 import {serverLoaderOf,useServerLoaderData} from '@cormijs/runtime';
-const options:SsrPluginOptions={id:'app:ssr',mountId:'root',prerender:true,prerenderPaths:['/users/1'],sitemap:'https://example.com',streaming:true};
+const options:SsrPluginOptions={id:'app:ssr',mountId:'root',prerender:true,prerenderPaths:async()=>['/users/1'],prerenderIgnoreErrors:true,sitemap:'https://example.com',streaming:true};
+const resolvedPaths:Promise<readonly string[]>=resolvePrerenderPaths(options.prerenderPaths);
 const serve:ServePluginOptions={id:'app:serve',base:'/app/',streaming:true};
 declare const app:ServerApplication;
 const loader:ServerLoaderFunction=({params})=>params;
@@ -900,7 +901,7 @@ const bound:ServerLoaderFunction=serverLoaderExport({},'serverLoader','route');
 const render:(request:Request)=>Promise<ServerRenderResult|Response>=request=>renderServerApplication({...app,serverLoaders:{route:loader}},request);
 const stream:(request:Request)=>Promise<ServerStreamResult|Response>=request=>renderServerApplicationStream(app,request);
 const load:(request:Request)=>Promise<Response>=request=>renderServerLoaderData(app,request);
-void [ssrPlugin,servePlugin,options,serve,render,stream,load,loader,bound,serverLoaderOf,useServerLoaderData,prerenderPages,prerenderStaticPages,sitemapXml];
+void [ssrPlugin,servePlugin,options,resolvedPaths,serve,render,stream,load,loader,bound,serverLoaderOf,useServerLoaderData,prerenderPages,prerenderStaticPages,sitemapXml];
 // @ts-expect-error mountId is a string
 const bad:SsrPluginOptions={mountId:1};
 // @ts-expect-error sitemap must be a string

@@ -9,7 +9,8 @@ plugins: [
   { id: 'ssr', plugin: ssrPlugin, options: {
     id: 'application:ssr',
     prerender: true,
-    prerenderPaths: ['/users/1', '/users/2'],
+    prerenderPaths: async () => ['/users/1', '/users/2'],
+    prerenderIgnoreErrors: false,
     sitemap: 'https://example.com',
   } },
 ],
@@ -30,10 +31,10 @@ cormi build
 
 ## 2. 契约与语义
 
-- **触发**：`ssrPlugin` 的 `prerender: true`；`sitemap` 是可选绝对 http(s) 站点地址，`prerenderPaths` 是可选内部应用路径数组（用于枚举 `:id` 等动态页）。两者都必须与 `prerender` 同时出现，否则 `SSR_INVALID`。
+- **触发**：`ssrPlugin` 的 `prerender: true`；`sitemap` 是可选绝对 http(s) 站点地址，`prerenderPaths` 是可选内部应用路径数组或异步函数（构建时调用，用于枚举 `:id` 等动态页），`prerenderIgnoreErrors` 允许单页异常跳过。三者都必须与 `prerender` 同时出现，否则 `SSR_INVALID`。
 - **路由集合**：复用 `staticPages`：只处理有页面模块、无 redirect、路径不含 `:param` 或 `*` 的路由；再合并 `prerenderPaths`（去重、排序，非法路径或 `..` 被拒绝）。
 - **渲染**：构建完成后导入 `dist/.cormi/ssr/ssr.mjs`，对每个路径构造包含 `app.base` 的 GET 请求，执行与运行时相同的 `renderServerApplication`。clientLoader 与 serverLoader 都会执行，数据进入 hydration；`meta.head` 与 `<Helmet>` 通过 `injectShell` 写入页面。
-- **重定向与错误**：loader 返回 `Response` 或 SSR 结果状态 `>= 400` 的页面不会写成 HTML，构建日志列出跳过项；这些路径也不进入 sitemap。构建不会把重定向或错误页冻结成正常页面。
+- **重定向与错误**：loader 返回 `Response` 或 SSR 结果状态 `>= 400` 的页面不会写成 HTML；`prerenderIgnoreErrors: true` 时单页渲染异常也记录并跳过，默认抛错使构建失败。跳过项不进入 sitemap。
 - **sitemap**：只包含成功写出的路径，URL 由 `sitemap` + `app.base` + 路由路径拼接；XML 特殊字符转义。未提供 `sitemap` 时不写文件。
 - **空壳隔离**：预渲染会填满 `dist/index.html`，因此构建同时保存 `dist/.cormi/shell.html`；`cormi preview` 与 `cormi serve` 优先读取该空壳再注入 SSR 标记，避免把已预渲染内容再次作为模板。
 - **失败**：SSR bundle 缺失或页面渲染抛错时构建以 `SSR_PRERENDER_FAILED` 失败，不留下“部分页面成功但构建绿”的结果；`CormiError` 原样上抛。

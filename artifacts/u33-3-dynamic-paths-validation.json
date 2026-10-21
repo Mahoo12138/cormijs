@@ -1,0 +1,112 @@
+{
+  "format": "cormi:u33-3-dynamic-paths-validation:1",
+  "verifiedAt": "2026-10-21T21:30:02.982Z",
+  "base": "cf0fc2da8334204b561de52d1c7e26dab7568579",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/114-u33-prerender-sitemap.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/plugin-react-vite/src/index.ts",
+      "packages/plugin-react-vite/src/ssr.ts",
+      "scripts/ssr-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/ssr.test.ts",
+      "docs/123-u33-dynamic-paths.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u33-3-dynamic-paths/check.log",
+      "sha256": "33bdd0de2161bf24fbb72aac23f2d8d0484a82c46e4c363c9dab55b4af67bd41",
+      "seconds": 121.5,
+      "tests": 564,
+      "pass": 564,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u33-3-dynamic-paths/browser.log",
+      "sha256": "d59abb79b756698174bf27353dca224ad55f64a238290e2a4aca499bdebcc823",
+      "seconds": 555.5,
+      "tests": 52,
+      "pass": 52,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u33-3-dynamic-paths/package.log",
+      "sha256": "c27fb2e6eac95a98ff96db2dc3b686e30c3ad748f35e0f45bd600b1819100b34",
+      "stages": 328,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/ssr.test.ts",
+      "log": ".cache/u33-3-dynamic-paths/targeted.log",
+      "sha256": "8bd0dc115403c657649961f875227bda2b809010d37ff63b52331a0200927622",
+      "seconds": 0.5,
+      "tests": 6,
+      "pass": 6,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "array/async path resolution, validation, default render failure, ignoreErrors skip and sitemap exclusion, async fixture paths"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "7401719bfb7a8bc30ef5ae56e244d3e544cebdf0ef0b0ab57620777b76d799f2",
+    "docs/114-u33-prerender-sitemap.md": "8b5a25b6e07f2be4564e62b0eb587563699d14b02e2eebc0eed63e0ffc660643",
+    "docs/59-umi-feature-roadmap.md": "46bba48f84ad34765b82ddb249d7a819477e9ba99ceaefe08aebf639ccf841a0",
+    "packages/plugin-react-vite/src/index.ts": "90baa7365b7328d4da366375bc7841f0b53c5683b6a80cea5af493ffb2cd8965",
+    "packages/plugin-react-vite/src/ssr.ts": "55fd97e6eab79f4b7e37c1f9f1ab84ad6f09f4ff643b2e8703ecbd586fd51a12",
+    "scripts/ssr-fixture.ts": "9272ba376ed5301dd1a736225ffdc9ebc1f595c001f8e5c3743996108eb5e49c",
+    "scripts/test-package.ts": "f879718b0d1a359679261322e92ea7a7922b5a94327f3e8a6afc832616d55fd2",
+    "tests/ssr.test.ts": "19e26e8147cccf4fb652c23689a552e4d32fa0a619105c0acc4e991b66bb4ee0",
+    "docs/123-u33-dynamic-paths.md": "f9fc6884836542bfadcf7b78843d3b0930b937b07f658759af9e50bd5c5e17f1"
+  },
+  "sourceInputCount": 9,
+  "sourceInputsDigest": "39c9c872e48633ac006d027f7af64f61a28ae49edd6cc261d09986a8096ba4ab",
+  "documentationInputs": {
+    "docs/123-u33-dynamic-paths.md": "f9fc6884836542bfadcf7b78843d3b0930b937b07f658759af9e50bd5c5e17f1",
+    "docs/59-umi-feature-roadmap.md": "46bba48f84ad34765b82ddb249d7a819477e9ba99ceaefe08aebf639ccf841a0",
+    "docs/112-roadmap-audit-2026-10-21.md": "7401719bfb7a8bc30ef5ae56e244d3e544cebdf0ef0b0ab57620777b76d799f2",
+    "docs/114-u33-prerender-sitemap.md": "8b5a25b6e07f2be4564e62b0eb587563699d14b02e2eebc0eed63e0ffc660643"
+  },
+  "evidence": [
+    ".cache/u33-3-dynamic-paths/check.log",
+    ".cache/u33-3-dynamic-paths/browser.log",
+    ".cache/u33-3-dynamic-paths/package.log",
+    ".cache/u33-3-dynamic-paths/targeted.log",
+    "artifacts/u33-3-dynamic-paths-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "path-producer-runs-once-per-build",
+    "no-per-page-disable-entry",
+    "no-concurrent-rendering",
+    "no-incremental-prerender",
+    "ignore-errors-skips-single-page-exceptions-only",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}
