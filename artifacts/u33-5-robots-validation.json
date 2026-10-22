@@ -1,0 +1,108 @@
+{
+  "format": "cormi:u33-5-robots-validation:1",
+  "verifiedAt": "2026-10-22T00:06:03.503Z",
+  "base": "228d4883244f6d6433f26694bc762fcc1884c6f2",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/131-u33-robots.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/plugin-react-vite/src/ssr.ts",
+      "scripts/ssr-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/browser/ssr.test.ts",
+      "tests/ssr.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u33-5-robots/check.log",
+      "sha256": "ad4f3f50161358f8a9d9ac8bcd596bb39a9d121fc4642ad1c3a2838b9491d7f6",
+      "seconds": 119.5,
+      "tests": 565,
+      "pass": 565,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u33-5-robots/browser.log",
+      "sha256": "e58fc1178c807f879ca39c8caa30995e6b8badd3cd2a84250bb35b1f4f5e0971",
+      "seconds": 564.5,
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u33-5-robots/package.log",
+      "sha256": "de214d215e2a7569bec0dc8a15163ae024911d2dfcaf4bc562cad7dc590262dd",
+      "stages": 336,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/ssr.test.ts",
+      "log": ".cache/u33-5-robots/targeted.log",
+      "sha256": "d4219a22960b63ff7465744a471a0dab24989f8c197662ed9b7191753c5b2412",
+      "seconds": 0.5,
+      "tests": 6,
+      "pass": 6,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "robots option validation, placeholder dependency, build output replacement with app.base"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "da62a593fc49f3ae7f31abd9538dc401e1dd44f48fd2d63bd204a52ed08a2143",
+    "docs/131-u33-robots.md": "5c9cae26f178fd039cf29f348170da41a0491677197afd5b726aefbbc0b54cf2",
+    "docs/59-umi-feature-roadmap.md": "61e6b327a993c9275c479b291fd3db29440b06414cbadb705a2888775f82cd66",
+    "packages/plugin-react-vite/src/ssr.ts": "37f6635d260c5058efcd6fb8e7336edc266c184aa103f3eca2d90251f78ac24c",
+    "scripts/ssr-fixture.ts": "dfb1700d22a251f7e8634682288bbdc70a4922587e607389b5c032b9267024d0",
+    "scripts/test-package.ts": "a519fa5b52d98eaa15f2005554f4960f81c1809c65339f16c818f45af46bd8d0",
+    "tests/browser/ssr.test.ts": "ee2b749a8963720599b35d9bcaeeb0e7a6dfb5d0f03d834c972247357a5ef02c",
+    "tests/ssr.test.ts": "1864eb8b9510cb243fe70e456be48125babafd4ba26c29d5e4340ad766e22e3a"
+  },
+  "sourceInputCount": 8,
+  "sourceInputsDigest": "048e060499e8161c803ffb047877a4c48aff64efd08191d1cc1b70c1bb26b947",
+  "documentationInputs": {
+    "docs/131-u33-robots.md": "5c9cae26f178fd039cf29f348170da41a0491677197afd5b726aefbbc0b54cf2",
+    "docs/59-umi-feature-roadmap.md": "61e6b327a993c9275c479b291fd3db29440b06414cbadb705a2888775f82cd66",
+    "docs/112-roadmap-audit-2026-10-21.md": "da62a593fc49f3ae7f31abd9538dc401e1dd44f48fd2d63bd204a52ed08a2143"
+  },
+  "evidence": [
+    ".cache/u33-5-robots/check.log",
+    ".cache/u33-5-robots/browser.log",
+    ".cache/u33-5-robots/package.log",
+    ".cache/u33-5-robots/targeted.log",
+    "artifacts/u33-5-robots-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "single-static-robots-file",
+    "no-robots-syntax-validation",
+    "no-sitemap-index-or-alternates",
+    "no-cdn-or-cache-invalidation",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

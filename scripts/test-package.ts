@@ -914,7 +914,7 @@ const bad:HeadPluginOptions={titleTemplate:1};
     await writeFile(join(ssrConsumer,'types.mts'),`import {ssrPlugin,servePlugin,prerenderPages,prerenderStaticPages,resolvePrerenderPaths,sitemapXml,type SsrPluginOptions,type ServePluginOptions} from '@cormijs/plugin-react-vite';
 import {renderServerApplication,renderServerApplicationStream,renderServerLoaderData,serverLoaderExport,type ServerApplication,type ServerRenderResult,type ServerStreamResult,type ServerLoaderFunction} from '@cormijs/runtime/server';
 import {serverLoaderOf,useServerLoaderData} from '@cormijs/runtime';
-const options:SsrPluginOptions={id:'app:ssr',mountId:'root',prerender:true,prerenderPaths:async()=>['/users/1',{path:'/users/2',prerender:false}],prerenderIgnoreErrors:true,prerenderIncremental:true,sitemap:'https://example.com',streaming:true};
+const options:SsrPluginOptions={id:'app:ssr',mountId:'root',prerender:true,prerenderPaths:async()=>['/users/1',{path:'/users/2',prerender:false}],prerenderIgnoreErrors:true,prerenderIncremental:true,robots:'Sitemap: {{sitemap}}',sitemap:'https://example.com',streaming:true};
 const resolvedPaths:Promise<readonly string[]>=resolvePrerenderPaths(options.prerenderPaths);
 const serve:ServePluginOptions={id:'app:serve',base:'/app/',streaming:true};
 declare const app:ServerApplication;

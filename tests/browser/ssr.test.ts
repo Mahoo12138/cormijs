@@ -59,6 +59,7 @@ test('SSR renders routes and loader data in preview and hydrates without errors'
   assert.equal(existsSync(join(f.root, 'dist/backend/8/index.html')), false, 'per-page prerender:false is honored');
   assert.doesNotMatch(sitemap, /backend\/8/);
   assert.match(await readFile(join(f.root, 'dist/.cormi/shell.html'), 'utf8'), /<div id="root"><\/div>/);
+  assert.equal(await readFile(join(f.root, 'dist/robots.txt'), 'utf8'), 'Sitemap: https://example.com/ssr/sitemap.xml');
   const preview = cli(t, f.root, 'preview'), production = await preview.waitFor(event => event.type === 'ready');
   await verifySsrPage(page, production.url);
   assert.deepEqual(errors, []);

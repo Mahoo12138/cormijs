@@ -28,6 +28,8 @@ export interface SsrPluginOptions {
   readonly prerenderIgnoreErrors?: boolean;
   /** Keep existing HTML files when their rendered content is unchanged. */
   readonly prerenderIncremental?: boolean;
+  /** Raw robots.txt written after prerender; `{{sitemap}}` expands to the absolute sitemap URL. */
+  readonly robots?: string;
   /** Absolute site origin used to write sitemap.xml for prerendered routes. Requires prerender. */
   readonly sitemap?: string;
   /** Stream HTML through React's streaming renderer instead of buffering the whole page. */
@@ -304,7 +306,7 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
 export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
   name: 'cormi:ssr', inject: ['vite', 'react'],
   apply(ctx, options = {}) {
-    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'prerenderIgnoreErrors', 'prerenderIncremental', 'sitemap', 'streaming'].includes(key))) {
+    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'prerenderIgnoreErrors', 'prerenderIncremental', 'robots', 'sitemap', 'streaming'].includes(key))) {
       throw new CormiError('SSR_INVALID', 'Invalid SSR plugin options.');
     }
     if (options.prerender !== undefined && typeof options.prerender !== 'boolean') throw new CormiError('SSR_INVALID', 'prerender must be boolean.');
@@ -316,8 +318,13 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
     if (options.prerenderIgnoreErrors !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderIgnoreErrors requires prerender: true.');
     if (options.prerenderIncremental !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderIncremental requires prerender: true.');
     if (Array.isArray(options.prerenderPaths)) extraPrerenderPaths(options.prerenderPaths);
+    if (options.robots !== undefined && (typeof options.robots !== 'string' || !options.robots || options.robots.length > 65536 || options.robots.includes('\0'))) {
+      throw new CormiError('SSR_INVALID', 'robots must be bounded text.');
+    }
+    if (options.robots !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'robots requires prerender: true.');
     const sitemap = options.sitemap === undefined ? undefined : sitemapSite(options.sitemap);
     if (sitemap !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'sitemap requires prerender: true.');
+    if (options.robots?.includes('{{sitemap}}') && sitemap === undefined) throw new CormiError('SSR_INVALID', 'robots {{sitemap}} requires sitemap.');
     const id = options.id ?? 'cormi:ssr';
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('SSR_INVALID', 'Invalid SSR plugin id.');
     const mountId = options.mountId ?? 'root';
@@ -387,6 +394,10 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
               const result = await prerenderStaticPages({ output: resolved.build.outDir, shell, mountId, base: resolved.base,
                 pages: prerenderPages(routes, extraPaths), render: module.render as Render, ignoreErrors: options.prerenderIgnoreErrors === true,
                 incremental: options.prerenderIncremental === true, ...(sitemap !== undefined ? { sitemap } : {}) });
+              if (options.robots !== undefined) {
+                const content = options.robots.replaceAll('{{sitemap}}', sitemap === undefined ? '' : publicUrl(sitemap, resolved.base, '/sitemap.xml'));
+                await writeFile(join(resolved.build.outDir, 'robots.txt'), content);
+              }
               if (result.skipped.length) console.warn('[cormi:ssr:prerender] skipped routes', JSON.stringify(result.skipped));
             } catch (cause) {
               if (cause instanceof CormiError) throw cause;

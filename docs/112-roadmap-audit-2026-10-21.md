@@ -32,7 +32,7 @@
 | 路线项 | 缺口 | 当前状态 |
 | --- | --- | --- |
 | U32 | `serverLoader` 与流式 SSR 已交付；压缩/TLS/背压/代理缓冲与流中错误恢复未实现 | 部分完成 |
-| U33 | 字面路由与 `prerenderPaths` 预渲染、sitemap、单页容错/关闭、增量写入已交付；并发渲染、robots/sitemap index 未实现 | 部分完成 |
+| U33 | 字面路由与 `prerenderPaths` 预渲染、sitemap、单页容错/关闭、增量写入、robots.txt 已交付；并发渲染、sitemap index 未实现 | 部分完成 |
 | U09 | Hook/对象模型、reducers/effects/subscriptions、extraModels、依赖排序、选择器 isEqual 已交付；热替换保留 store 未实现 | 部分完成 |
 | U12 | useRequest 重试/轮询/refreshDeps/防抖/前沿节流、usePagination、GET 缓存/去重/LRU/标签失效已交付；尾调用节流、游标分页、持久化未实现 | 部分完成 |
 | U17 | 可选 `@cormijs/plugin-antd`（locale/direction/theme）已交付；ProLayout、图标/图表、主题编辑器、自定义 locale 未实现 | 部分完成 |
