@@ -24,7 +24,7 @@ export async function writeRequestFixture(root: string) {
     'src/app.tsx': `import { defineApp } from '@cormijs/runtime';
 export default defineApp({ request: { baseURL: '/api', headers: { 'x-app': 'cormi' }, timeout: 2000, cacheLimit: 1 } });`,
     'src/pages/index.tsx': `import { useRef, useState } from 'react';
-import { Link, usePagination, useRequest, useRequestClient } from '@cormijs/runtime';
+import { Link, useCursorPagination, usePagination, useRequest, useRequestClient } from '@cormijs/runtime';
 function Auto(){
   const {data,loading,error,refresh}=useRequest<{message:string}>((client,signal)=>client.get('/hello',{signal,params:{q:'one'}}));
   return <section data-auto-section><p data-auto>{data?.message ?? ''}</p><p data-loading>{String(loading)}</p><p data-error>{error ? 'error' : ''}</p><button onClick={()=>void refresh()}>Refresh</button></section>;
@@ -88,12 +88,18 @@ function Throttled(){
   return <section><p data-throttled>{data?.message ?? ''}</p>
     <button onClick={()=>{void run();void run();}}>Run throttled</button></section>;
 }
+function CursorPaged(){
+  const {data,nextCursor,hasMore,loading,loadMore,reload}=useCursorPagination<{id:number}>((client,{cursor,signal})=>client.get<{list:{id:number}[];nextCursor:string|null}>('/cursor',{signal,params:cursor?{cursor}:{}}));
+  return <section><p data-cursor-next>{nextCursor ?? 'null'}</p><p data-cursor-count>{data.length}</p><p data-cursor-more>{String(hasMore)}</p><p data-cursor-loading>{String(loading)}</p>
+    <ul data-cursor-list>{data.map(item=><li key={item.id}>{item.id}</li>)}</ul>
+    <button onClick={()=>void loadMore()}>More cursor</button><button onClick={()=>void reload()}>Reload cursor</button></section>;
+}
 function Deps(){
   const [q,setQ]=useState('one');
   const {data}=useRequest<{message:string}>((client,signal)=>client.get('/deps',{signal,params:{q}}),{refreshDeps:[q]});
   return <section><p data-deps>{data?.message ?? ''}</p><button onClick={()=>setQ('two')}>Change dep</button></section>;
 }
-export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Cached /><Tagged /><Debounced /><Throttled /><Deps /><Link to="/other">Other</Link></main>;}`,
+export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Cached /><Tagged /><Debounced /><Throttled /><CursorPaged /><Deps /><Link to="/other">Other</Link></main>;}`,
     'src/pages/other.tsx': `import { Link } from '@cormijs/runtime';
 export default function Other(){return <main><h1>Request other</h1><Link to="/">Request home</Link></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -141,6 +147,10 @@ export async function verifyRequestPage(page: Page, url: string) {
     } else if (target.pathname === '/api/cached') {
       cachedCount++;
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'cached:' + cachedCount }) });
+    } else if (target.pathname === '/api/cursor') {
+      const offset = Number(target.searchParams.get('cursor') ?? '0'), end = Math.min(offset + 2, 5);
+      const list = Array.from({ length: 5 }, (_, index) => ({ id: index + 1 })).slice(offset, end);
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ list, nextCursor: end < 5 ? String(end) : null }) });
     } else if (target.pathname === '/api/page') {
       const page = Number(target.searchParams.get('page') ?? '1'), pageSize = Number(target.searchParams.get('pageSize') ?? '2');
       const list = Array.from({ length: 5 }, (_, index) => ({ id: index + 1 })).slice((page - 1) * pageSize, page * pageSize);
@@ -184,6 +194,17 @@ export async function verifyRequestPage(page: Page, url: string) {
   assert.equal(await page.locator('[data-retry-error]').innerText(), '');
   await page.waitForTimeout(500);
   assert.ok(pollCount >= 2, `polled ${pollCount} times`);
+  await page.waitForFunction(() => document.querySelector('[data-cursor-count]')?.textContent === '2');
+  await page.getByRole('button', { name: 'More cursor', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-cursor-count]')?.textContent === '4');
+  await page.getByRole('button', { name: 'More cursor', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-cursor-count]')?.textContent === '5');
+  assert.equal(await page.locator('[data-cursor-more]').innerText(), 'false');
+  await page.getByRole('button', { name: 'More cursor', exact: true }).click();
+  assert.equal(await page.locator('[data-cursor-count]').innerText(), '5');
+  await page.getByRole('button', { name: 'Reload cursor', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-cursor-count]')?.textContent === '2');
+  assert.equal(await page.locator('[data-cursor-next]').innerText(), '2');
   await page.waitForFunction(() => document.querySelector('[data-page-count]')?.textContent === '2');
   assert.equal(await page.locator('[data-page]').innerText(), '1');
   await page.getByRole('button', { name: 'More', exact: true }).click();
@@ -195,6 +216,17 @@ export async function verifyRequestPage(page: Page, url: string) {
   await page.getByRole('button', { name: 'More', exact: true }).click();
   assert.equal(await page.locator('[data-page-count]').innerText(), '5');
   await page.getByRole('button', { name: 'Reload page', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-cursor-count]')?.textContent === '2');
+  await page.getByRole('button', { name: 'More cursor', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-cursor-count]')?.textContent === '4');
+  await page.getByRole('button', { name: 'More cursor', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-cursor-count]')?.textContent === '5');
+  assert.equal(await page.locator('[data-cursor-more]').innerText(), 'false');
+  await page.getByRole('button', { name: 'More cursor', exact: true }).click();
+  assert.equal(await page.locator('[data-cursor-count]').innerText(), '5');
+  await page.getByRole('button', { name: 'Reload cursor', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-cursor-count]')?.textContent === '2');
+  assert.equal(await page.locator('[data-cursor-next]').innerText(), '2');
   await page.waitForFunction(() => document.querySelector('[data-page-count]')?.textContent === '2');
   assert.equal(await page.locator('[data-page]').innerText(), '1');
   assert.equal(await page.locator('[data-page-more]').innerText(), 'true');

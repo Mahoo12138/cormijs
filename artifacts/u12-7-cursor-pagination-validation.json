@@ -1,0 +1,110 @@
+{
+  "format": "cormi:u12-7-cursor-pagination-validation:1",
+  "verifiedAt": "2026-10-22T02:16:10.197Z",
+  "base": "44646f7ea50dcf51f9bc81bf0dfa1fa75b23b67d",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/133-u12-cursor-pagination.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/index.tsx",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-7-cursor-pagination/check.log",
+      "sha256": "be5ec90907ac8139c0c910ca383dd355d7a51f14fe077a9a144334ec40e6f660",
+      "seconds": 122.7,
+      "tests": 566,
+      "pass": 566,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-7-cursor-pagination/browser.log",
+      "sha256": "6e6b226fcba70d71f9acdcb8de6ac10bd346c48b96f0fb932fbdfa51a34dc314",
+      "seconds": 572,
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-7-cursor-pagination/package.log",
+      "sha256": "db650298f8c42ddea1a7ad0d21dca31ced52fdce6a8bdd1fa5673a5c67b554e9",
+      "stages": 336,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-7-cursor-pagination/targeted.log",
+      "sha256": "d2492815fb2f5f7880f03ba60dd030de42c41170c4e6b1dea3d223c68b7ab71c",
+      "seconds": 13.9,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "cursor append 2→4→5, hasMore false, duplicate loadMore no-op, reload resets cursor"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "0dfa2f8d1d7b60f43fb4a75a0340028e418520cf38fa07e62b524d8167e84164",
+    "docs/133-u12-cursor-pagination.md": "d7abc56ba827f8965f18cbf476e80b7e0c8b4a77ebf0e1fdd64d30baf06e4f89",
+    "docs/49-application-guide.md": "8229beb07ef2e57b4f026579d61b9cc8f0316aac4abb0fffcc8a23cdc67bb3f9",
+    "docs/59-umi-feature-roadmap.md": "c9b26017c83fb917b2f0e23afd48dafce5fd29975318722e34f3f8b1d82b4f40",
+    "packages/runtime/src/index.tsx": "cea3b54ed88777bb806a681eebdf44295513bc378dcd453b6b34a8bed175f20b",
+    "packages/runtime/src/request.tsx": "4fcb61455cab9b6d518b87300a06c693230181d4f722ed429f7ef4eccda9fdae",
+    "scripts/request-fixture.ts": "854ec4a8da73a12c3211ffc1407d8d3f08cac6f539de03389af31e70e82e3fd6",
+    "scripts/test-package.ts": "2f66fb795874dff94799c54071030ab24aafe49a5c15b3bddfb51d9765e7e2ad"
+  },
+  "sourceInputCount": 8,
+  "sourceInputsDigest": "052b821e0ac90455c48c384f9a3a1439bab2d0c1c32cd0cb26929436f4d3e34f",
+  "documentationInputs": {
+    "docs/133-u12-cursor-pagination.md": "d7abc56ba827f8965f18cbf476e80b7e0c8b4a77ebf0e1fdd64d30baf06e4f89",
+    "docs/59-umi-feature-roadmap.md": "c9b26017c83fb917b2f0e23afd48dafce5fd29975318722e34f3f8b1d82b4f40",
+    "docs/112-roadmap-audit-2026-10-21.md": "0dfa2f8d1d7b60f43fb4a75a0340028e418520cf38fa07e62b524d8167e84164",
+    "docs/49-application-guide.md": "8229beb07ef2e57b4f026579d61b9cc8f0316aac4abb0fffcc8a23cdc67bb3f9"
+  },
+  "evidence": [
+    ".cache/u12-7-cursor-pagination/check.log",
+    ".cache/u12-7-cursor-pagination/browser.log",
+    ".cache/u12-7-cursor-pagination/package.log",
+    ".cache/u12-7-cursor-pagination/targeted.log",
+    "artifacts/u12-7-cursor-pagination-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "single-direction-cursor",
+    "no-cursor-encoding",
+    "single-in-flight-request",
+    "no-cache-or-ssr-hydration",
+    "no-auto-dedupe",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

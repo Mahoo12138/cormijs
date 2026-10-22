@@ -313,6 +313,67 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
   return { ...state, run, refresh: run, cancel };
 }
 
+export function useCursorPagination<T>(service: (client: RequestClient, request: CursorPaginationRequest) => Promise<CursorPaginationResponse<T>>,
+  options: UseCursorPaginationOptions<T> = {}): UseCursorPaginationResult<T> {
+  const client = useRequestClient();
+  if (options.manual !== undefined && typeof options.manual !== 'boolean') throw new TypeError('REQUEST_INVALID: manual must be boolean');
+  if (options.merge !== undefined && typeof options.merge !== 'function') throw new TypeError('REQUEST_INVALID: merge must be a function');
+  const [state, setState] = useState<{ data: readonly T[]; nextCursor?: string | null; loading: boolean; error: unknown; hasMore: boolean }>({
+    data: Object.freeze([]), nextCursor: undefined, loading: options.manual !== true, error: undefined, hasMore: true,
+  });
+  const serviceRef = useRef(service), optionsRef = useRef(options), dataRef = useRef(state.data);
+  serviceRef.current = service; optionsRef.current = options; dataRef.current = state.data;
+  const mounted = useRef(true), generation = useRef(0), controller = useRef<AbortController | undefined>(undefined), busy = useRef(false);
+  const run = useCallback(async (cursor: string | undefined, append: boolean): Promise<void> => {
+    if (busy.current) return;
+    busy.current = true;
+    const token = ++generation.current;
+    controller.current?.abort();
+    const current = controller.current = new AbortController();
+    setState(value => ({ ...value, loading: true, error: undefined }));
+    try {
+      const response = await serviceRef.current(client, { ...(cursor === undefined ? {} : { cursor }), signal: current.signal });
+      if (!response || !Array.isArray(response.list)) throw new TypeError('REQUEST_INVALID: cursor service must return { list }');
+      if (response.nextCursor !== undefined && response.nextCursor !== null && typeof response.nextCursor !== 'string') throw new TypeError('REQUEST_INVALID: nextCursor must be a string or null');
+      if (response.hasMore !== undefined && typeof response.hasMore !== 'boolean') throw new TypeError('REQUEST_INVALID: cursor hasMore must be boolean');
+      if (!mounted.current || token !== generation.current) return;
+      const next = [...response.list];
+      const data = append
+        ? Object.freeze(optionsRef.current.merge ? [...optionsRef.current.merge(dataRef.current, next)] : [...dataRef.current, ...next])
+        : Object.freeze(next);
+      const nextCursor = response.nextCursor;
+      const hasMore = response.hasMore ?? (nextCursor !== undefined && nextCursor !== null);
+      setState({ data, nextCursor, hasMore, loading: false, error: undefined });
+      optionsRef.current.onSuccess?.(data, nextCursor);
+    } catch (error) {
+      const aborted = current.signal.aborted || (error instanceof DOMException && error.name === 'AbortError');
+      if (!mounted.current || token !== generation.current || aborted) {
+        if (mounted.current && token === generation.current) setState(value => ({ ...value, loading: false }));
+        return;
+      }
+      setState(value => ({ ...value, loading: false, error }));
+      optionsRef.current.onError?.(error);
+    } finally {
+      if (token === generation.current) busy.current = false;
+    }
+  }, [client]);
+  const loadMore = useCallback(async () => {
+    if (busy.current || !state.hasMore) return;
+    await run(state.nextCursor ?? undefined, true);
+  }, [run, state.hasMore, state.nextCursor]);
+  const reload = useCallback(async () => { await run(undefined, false); }, [run]);
+  const cancel = useCallback(() => {
+    generation.current++; busy.current = false; controller.current?.abort();
+    setState(value => ({ ...value, loading: false }));
+  }, []);
+  useEffect(() => {
+    mounted.current = true;
+    if (optionsRef.current.manual !== true) void run(undefined, false);
+    return () => { mounted.current = false; controller.current?.abort(); };
+  }, [run]);
+  return { ...state, loadMore, reload, cancel };
+}
+
 /** Runtime plugin object consumed by the generated entry when requestPlugin is mounted. */
 export const requestRuntime = { Provider: RequestProvider };
 
@@ -338,6 +399,32 @@ export interface UsePaginationResult<T> {
   readonly data: readonly T[];
   readonly page: number;
   readonly pageSize: number;
+  readonly loading: boolean;
+  readonly error: unknown;
+  readonly hasMore: boolean;
+  loadMore(): Promise<void>;
+  reload(): Promise<void>;
+  cancel(): void;
+}
+
+export interface CursorPaginationRequest {
+  readonly cursor?: string;
+  readonly signal: AbortSignal;
+}
+export interface CursorPaginationResponse<T> {
+  readonly list: readonly T[];
+  readonly nextCursor?: string | null;
+  readonly hasMore?: boolean;
+}
+export interface UseCursorPaginationOptions<T> {
+  readonly manual?: boolean;
+  readonly merge?: (previous: readonly T[], next: readonly T[]) => readonly T[];
+  readonly onSuccess?: (data: readonly T[], nextCursor?: string | null) => void;
+  readonly onError?: (error: unknown) => void;
+}
+export interface UseCursorPaginationResult<T> {
+  readonly data: readonly T[];
+  readonly nextCursor?: string | null;
   readonly loading: boolean;
   readonly error: unknown;
   readonly hasMore: boolean;
