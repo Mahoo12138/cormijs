@@ -1,0 +1,109 @@
+{
+  "format": "cormi:u33-6-prerender-concurrency-validation:1",
+  "verifiedAt": "2026-10-22T01:48:54.368Z",
+  "base": "8398bd01dc50c90e0c1c0ae2113c63c8260c5645",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/132-u33-prerender-concurrency.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/plugin-react-vite/src/ssr.ts",
+      "scripts/ssr-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/browser/ssr.test.ts",
+      "tests/ssr.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u33-6-prerender-concurrency/check.log",
+      "sha256": "d3fad581c7cf9378c0ef1c5368fce90594a0e0e2fe82667c01a6c8557563b234",
+      "seconds": 137.9,
+      "tests": 566,
+      "pass": 566,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u33-6-prerender-concurrency/browser.log",
+      "sha256": "ec963926d50c1baf8aa3a6f0954b96b5c87f47d2863b450badb1caaa1ec39c21",
+      "seconds": 572.9,
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u33-6-prerender-concurrency/package.log",
+      "sha256": "820a3d152a817f4f6e6138911800f8a3072a58e33f9dd2b9da46f59336dbae07",
+      "stages": 336,
+      "passed": true
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/ssr.test.ts",
+      "log": ".cache/u33-6-prerender-concurrency/targeted.log",
+      "sha256": "fcfd0b019ce469f3abd3e70d56674e0d2eeafd1ff7b6b03818b4b02f27854d20",
+      "seconds": 0.6,
+      "tests": 7,
+      "pass": 7,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "bounded render concurrency (peak 2–3), deterministic result order, option validation"
+    }
+  },
+  "sourceInputs": {
+    "docs/112-roadmap-audit-2026-10-21.md": "743748ab33d556e9fc8d5bc63c86b271525d9a18430e3238ee2ce2bbd0caba76",
+    "docs/132-u33-prerender-concurrency.md": "9322e4a58dcc4bcaa2fccea1958cfa3711e31330c8c779f58b8a83c97fd987b3",
+    "docs/59-umi-feature-roadmap.md": "03995f3b5fb33e1f566488e21e7e4bb83696ba0268104bde88f12c00de9f8b32",
+    "packages/plugin-react-vite/src/ssr.ts": "fe1cc9568fbf0f311094debe68b1ade6fe86f616c9ee2f229e134d4de4353869",
+    "scripts/ssr-fixture.ts": "e6e9c134c47c30cd1da7354a0b4e71ebf7aa006c2feed944c6c70fcc42648b3d",
+    "scripts/test-package.ts": "172c8d5e3bf771b6b8c89536711a87ce4c390cc48ae10281a77f34e73a029cc3",
+    "tests/browser/ssr.test.ts": "ee2b749a8963720599b35d9bcaeeb0e7a6dfb5d0f03d834c972247357a5ef02c",
+    "tests/ssr.test.ts": "4b0f0e789a515e74a2734c5062b35384a95eac8d27f4081be4db3feb5bf79b2b"
+  },
+  "sourceInputCount": 8,
+  "sourceInputsDigest": "10492d4f7e103b5cb31873a2ae563068718ebd54dcfd0a67ec4b8a3219022bbd",
+  "documentationInputs": {
+    "docs/132-u33-prerender-concurrency.md": "9322e4a58dcc4bcaa2fccea1958cfa3711e31330c8c779f58b8a83c97fd987b3",
+    "docs/59-umi-feature-roadmap.md": "03995f3b5fb33e1f566488e21e7e4bb83696ba0268104bde88f12c00de9f8b32",
+    "docs/112-roadmap-audit-2026-10-21.md": "743748ab33d556e9fc8d5bc63c86b271525d9a18430e3238ee2ce2bbd0caba76"
+  },
+  "evidence": [
+    ".cache/u33-6-prerender-concurrency/check.log",
+    ".cache/u33-6-prerender-concurrency/browser.log",
+    ".cache/u33-6-prerender-concurrency/package.log",
+    ".cache/u33-6-prerender-concurrency/targeted.log",
+    "artifacts/u33-6-prerender-concurrency-validation.json"
+  ],
+  "limits": [
+    "macOS-arm64-only",
+    "uncommitted-worktree",
+    "no-per-page-timeout-or-cancellation",
+    "no-thread-isolation",
+    "write-completion-order-not-guaranteed",
+    "path-producer-remains-single-call",
+    "no-rate-limiting",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

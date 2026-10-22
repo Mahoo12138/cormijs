@@ -28,6 +28,8 @@ export interface SsrPluginOptions {
   readonly prerenderIgnoreErrors?: boolean;
   /** Keep existing HTML files when their rendered content is unchanged. */
   readonly prerenderIncremental?: boolean;
+  /** Parallel prerender page renders, 1–16; default 1. */
+  readonly prerenderConcurrency?: number;
   /** Raw robots.txt written after prerender; `{{sitemap}}` expands to the absolute sitemap URL. */
   readonly robots?: string;
   /** Absolute site origin used to write sitemap.xml for prerendered routes. Requires prerender. */
@@ -252,6 +254,8 @@ export interface PrerenderOptions {
   readonly sitemap?: string;
   readonly ignoreErrors?: boolean;
   readonly incremental?: boolean;
+  /** Parallel page renders, 1–16; default 1. Results keep page order. */
+  readonly concurrency?: number;
 }
 export interface PrerenderResult {
   readonly written: readonly string[];
@@ -265,33 +269,53 @@ export interface PrerenderResult {
  * (redirects cannot be frozen into HTML); their paths are excluded from the sitemap.
  */
 export async function prerenderStaticPages(options: PrerenderOptions): Promise<PrerenderResult> {
-  const written: string[] = [], unchanged: string[] = [], skipped: { path: string; status: number; error?: string }[] = [], urls: string[] = [];
-  for (const page of options.pages) {
+  const concurrency = options.concurrency ?? 1;
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 16) throw new CormiError('SSR_PRERENDER_FAILED', 'Prerender concurrency must be an integer from 1 to 16.');
+  type Outcome = { readonly kind: 'written' | 'unchanged'; readonly path: string; readonly url?: string }
+    | { readonly kind: 'skipped'; readonly path: string; readonly status: number; readonly error?: string };
+  const renderPage = async (page: StaticPage): Promise<Outcome> => {
     const target = page.path === '/' ? join(options.output, 'index.html') : join(options.output, ...page.path.split('/').filter(Boolean), 'index.html');
     const local = relative(options.output, target);
     if (!local || isAbsolute(local) || local === '..' || local.startsWith('..' + sep)) throw new CormiError('SSR_PRERENDER_FAILED', 'Prerendered pages must stay inside the output.', { path: page.path });
     const url = new URL(`${options.base}${page.path === '/' ? '' : page.path.slice(1)}`, 'http://localhost');
     try {
       const rendered = await options.render(new Request(url));
-      if (rendered instanceof Response) { skipped.push({ path: page.path, status: rendered.status }); continue; }
+      if (rendered instanceof Response) return { kind: 'skipped', path: page.path, status: rendered.status };
       const status = (rendered as { status?: unknown }).status;
-      if (typeof status === 'number' && status >= 400) { skipped.push({ path: page.path, status }); continue; }
+      if (typeof status === 'number' && status >= 400) return { kind: 'skipped', path: page.path, status };
       const html = await injectShell(options.shell, rendered as { html?: unknown }, options.mountId).text();
+      const outputUrl = options.sitemap ? publicUrl(options.sitemap, options.base, page.path) : undefined;
       if (options.incremental) {
         const existing = await readFile(target, 'utf8').catch((error: NodeJS.ErrnoException) => error.code === 'ENOENT' ? undefined : Promise.reject(error));
-        if (existing === html) {
-          unchanged.push(page.path);
-          if (options.sitemap) urls.push(publicUrl(options.sitemap, options.base, page.path));
-          continue;
-        }
+        if (existing === html) return { kind: 'unchanged', path: page.path, ...(outputUrl ? { url: outputUrl } : {}) };
       }
       if (page.path !== '/') await mkdir(dirname(target), { recursive: true });
       await writeFile(target, html);
-      written.push(page.path);
-      if (options.sitemap) urls.push(publicUrl(options.sitemap, options.base, page.path));
+      return { kind: 'written', path: page.path, ...(outputUrl ? { url: outputUrl } : {}) };
     } catch (error) {
       if (!options.ignoreErrors) throw error;
-      skipped.push({ path: page.path, status: 0, error: error instanceof Error ? error.message : String(error) });
+      return { kind: 'skipped', path: page.path, status: 0, error: error instanceof Error ? error.message : String(error) };
+    }
+  };
+  const outcomes: Array<Outcome | undefined> = new Array(options.pages.length);
+  let cursor = 0, failure: unknown;
+  const worker = async (): Promise<void> => {
+    while (failure === undefined) {
+      const index = cursor++;
+      if (index >= options.pages.length) return;
+      try { outcomes[index] = await renderPage(options.pages[index]!); }
+      catch (error) { failure = error; return; }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, options.pages.length) }, () => worker()));
+  if (failure !== undefined) throw failure;
+  const written: string[] = [], unchanged: string[] = [], skipped: PrerenderResult['skipped'][number][] = [], urls: string[] = [];
+  for (const outcome of outcomes) {
+    if (!outcome) continue;
+    if (outcome.kind === 'skipped') skipped.push({ path: outcome.path, status: outcome.status, ...(outcome.error !== undefined ? { error: outcome.error } : {}) });
+    else {
+      (outcome.kind === 'written' ? written : unchanged).push(outcome.path);
+      if (outcome.url) urls.push(outcome.url);
     }
   }
   let sitemap: string | undefined;
@@ -306,17 +330,19 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
 export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
   name: 'cormi:ssr', inject: ['vite', 'react'],
   apply(ctx, options = {}) {
-    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'prerenderIgnoreErrors', 'prerenderIncremental', 'robots', 'sitemap', 'streaming'].includes(key))) {
+    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'prerenderIgnoreErrors', 'prerenderIncremental', 'prerenderConcurrency', 'robots', 'sitemap', 'streaming'].includes(key))) {
       throw new CormiError('SSR_INVALID', 'Invalid SSR plugin options.');
     }
     if (options.prerender !== undefined && typeof options.prerender !== 'boolean') throw new CormiError('SSR_INVALID', 'prerender must be boolean.');
     if (options.streaming !== undefined && typeof options.streaming !== 'boolean') throw new CormiError('SSR_INVALID', 'streaming must be boolean.');
     if (options.prerenderIgnoreErrors !== undefined && typeof options.prerenderIgnoreErrors !== 'boolean') throw new CormiError('SSR_INVALID', 'prerenderIgnoreErrors must be boolean.');
     if (options.prerenderIncremental !== undefined && typeof options.prerenderIncremental !== 'boolean') throw new CormiError('SSR_INVALID', 'prerenderIncremental must be boolean.');
+    if (options.prerenderConcurrency !== undefined && (!Number.isInteger(options.prerenderConcurrency) || options.prerenderConcurrency < 1 || options.prerenderConcurrency > 16)) throw new CormiError('SSR_INVALID', 'prerenderConcurrency must be an integer from 1 to 16.');
     if (options.prerenderPaths !== undefined && typeof options.prerenderPaths !== 'function' && !Array.isArray(options.prerenderPaths)) throw new CormiError('SSR_INVALID', 'prerenderPaths must be an array or an async function.');
     if (options.prerenderPaths !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderPaths requires prerender: true.');
     if (options.prerenderIgnoreErrors !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderIgnoreErrors requires prerender: true.');
     if (options.prerenderIncremental !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderIncremental requires prerender: true.');
+    if (options.prerenderConcurrency !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderConcurrency requires prerender: true.');
     if (Array.isArray(options.prerenderPaths)) extraPrerenderPaths(options.prerenderPaths);
     if (options.robots !== undefined && (typeof options.robots !== 'string' || !options.robots || options.robots.length > 65536 || options.robots.includes('\0'))) {
       throw new CormiError('SSR_INVALID', 'robots must be bounded text.');
@@ -393,7 +419,7 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
               const extraPaths = await resolvePrerenderPaths(options.prerenderPaths);
               const result = await prerenderStaticPages({ output: resolved.build.outDir, shell, mountId, base: resolved.base,
                 pages: prerenderPages(routes, extraPaths), render: module.render as Render, ignoreErrors: options.prerenderIgnoreErrors === true,
-                incremental: options.prerenderIncremental === true, ...(sitemap !== undefined ? { sitemap } : {}) });
+                incremental: options.prerenderIncremental === true, concurrency: options.prerenderConcurrency ?? 1, ...(sitemap !== undefined ? { sitemap } : {}) });
               if (options.robots !== undefined) {
                 const content = options.robots.replaceAll('{{sitemap}}', sitemap === undefined ? '' : publicUrl(sitemap, resolved.base, '/sitemap.xml'));
                 await writeFile(join(resolved.build.outDir, 'robots.txt'), content);

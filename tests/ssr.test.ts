@@ -81,7 +81,8 @@ test('ssr plugin registers its Vite bridge, validates options and withdraws', as
     { prerenderPaths: ['/x'] }, { prerender: true, prerenderPaths: ['relative'] }, { prerender: true, prerenderPaths: ['/a/../b'] },
     { prerender: true, prerenderIgnoreErrors: 'yes' }, { prerender: true, prerenderPaths: 1 },
     { prerender: true, prerenderIncremental: 'yes' }, { prerender: true, prerenderPaths: [{ path: '/x', prerender: 'yes' }] }, { prerender: true, prerenderPaths: [{ path: '/x', extra: true }] },
-    { prerender: true, robots: 1 }, { prerender: true, robots: '{{sitemap}}' }, { robots: 'x' }, { prerender: true, robots: '' }]) {
+    { prerender: true, robots: 1 }, { prerender: true, robots: '{{sitemap}}' }, { robots: 'x' }, { prerender: true, robots: '' },
+    { prerender: true, prerenderConcurrency: 0 }, { prerender: true, prerenderConcurrency: '2' }]) {
     const rejecting = new ProjectRuntime(3000, root);
     rejecting.mount('vite', vitePlugin);
     rejecting.mount('react', reactPlugin);
@@ -143,6 +144,19 @@ test('resolvePrerenderPaths accepts arrays and async producers, and prerender ca
     assert.deepEqual(second.written, []);
     assert.deepEqual(second.unchanged, ['/ok']);
     assert.ok((await readFile(join(root, 'sitemap.xml'), 'utf8')).includes('https://example.com/ok'));
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('prerenderStaticPages bounds concurrent renders and keeps page order', async () => {
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'cormi-prerender-concurrency 中文-')));
+  try {
+    const shell = '<!doctype html><html><head></head><body><div id="root"></div></body></html>';
+    let active = 0, peak = 0;
+    const result = await prerenderStaticPages({ output: root, shell, mountId: 'root', base: '/', concurrency: 3,
+      pages: ['/a', '/b', '/c', '/d'].map(path => ({ path, head: {} })),
+      render: async () => { active++; peak = Math.max(peak, active); await new Promise(resolve => setTimeout(resolve, 20)); active--; return { html: '<main>ok</main>', status: 200, head: {} }; } });
+    assert.deepEqual(result.written, ['/a', '/b', '/c', '/d']);
+    assert.ok(peak > 1 && peak <= 3, `peak ${peak}`);
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
