@@ -82,7 +82,7 @@ F5q 起，显式启用的 `mpaPlugin` 把 `src/pages` 顶层目录生成为独�
 
 U16 增量起，`useIntl().subscribe` 与 `cormi:localechange` 在成功切换语言后通知外部 UI 库；初始挂载不回调。
 
-U17 增量提供 `toAntdMenuItems`/`toLayoutRoutes`，把菜单树转成 Antd Menu/ProLayout 的结构；可选 `ProLayoutShell` 在全局 layout 中组合菜单、导航与折叠持久化。框架不依赖 UI 库，主题/图表/locale 联动待后续。详见 [U17 菜单适配器](109-ui-menu-adapters.md) 与 [U17-2 ProLayout](134-u17-pro-layout.md)。
+U17 增量提供 `toAntdMenuItems`/`toLayoutRoutes`，把菜单树转成 Antd Menu/ProLayout 的结构；可选 `ProLayoutShell` 在全局 layout 中组合菜单、导航与折叠持久化，菜单图标可用 `meta.icon` + `icons` 注册表接入任意图标库。框架不依赖 UI 库，主题/图表/locale 联动待后续。详见 [U17 菜单适配器](109-ui-menu-adapters.md)、[U17-2 ProLayout](134-u17-pro-layout.md) 与 [U17-3 菜单图标](135-u17-menu-icons.md)。
 
 F5r 起，`cormi generate api <name>` 与 `generate mock <name>` 分别生成 `src/api/<name>.ts` Fetch 骨架与 `mock/<name>.ts` 的 `GET /api/<name>` 示例；沿用覆盖/试运行规则，由 API 路由与 Mock 插件按约定发现。详见 [F5r API/Mock 生成器](100-f5r-generators.md)。
 

@@ -601,6 +601,7 @@ const bad:AntdPluginOptions={theme:{dark:'yes'}};
     proLayoutManifest.dependencies['@cormijs/routes']=proLayoutManifest.pnpm.overrides['@cormijs/routes']!;
     proLayoutManifest.dependencies.antd='6.6.7';
     proLayoutManifest.dependencies['@ant-design/pro-layout']='7.22.7';
+    proLayoutManifest.dependencies['@ant-design/icons']='6.3.4';
     await writeFile(join(proLayoutConsumer,'package.json'),JSON.stringify(proLayoutManifest,null,2));
     // ProLayout 7.22.7 still declares antd 4/5; strict peer validation cannot express the verified antd 6 pairing.
     await writeFile(join(proLayoutConsumer,'.npmrc'),consumerNpmrc.replace('strict-peer-dependencies=true','strict-peer-dependencies=false'));

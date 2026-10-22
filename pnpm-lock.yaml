@@ -13,6 +13,9 @@ importers:
 
   .:
     devDependencies:
+      '@ant-design/icons':
+        specifier: 6.3.4
+        version: 6.3.4(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@ant-design/pro-layout':
         specifier: 7.22.7
         version: 7.22.7(antd@6.6.7(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)

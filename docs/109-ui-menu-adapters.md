@@ -25,7 +25,7 @@ const route = { path: '/', routes: toLayoutRoutes(useMenu()) };
 ## 2. 契约与语义
 
 - `toAntdMenuItems(items)`：输出 `{ key, label, routeId, children? }`；`key` 为可导航的 `path`，`label` 为菜单运行时已解析的本地化标题，`routeId` 保留路由 id；
-- `toLayoutRoutes(items)`：输出 `{ path, name, routes? }`，空 children 时省略 `routes`；
+- `toLayoutRoutes(items, icons?)`：输出 `{ path, name, icon?, routes? }`，`icon` 按 `meta.icon`（未设置时回退路由 id）从注册表解析，空 children 时省略 `routes`；
 - 纯函数：不访问 React、DOM、Router 或 UI 库；输入顺序（menu 的 order/title 排序）保持不变；
 - 输入已是 `useMenu()` 的结果：`meta.hideInMenu`、access 过滤、`meta.locale` 标题已在菜单运行时处理；
 - 返回对象全部冻结；不对输入做修改；

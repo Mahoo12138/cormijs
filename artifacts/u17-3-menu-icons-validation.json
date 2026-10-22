@@ -1,0 +1,141 @@
+{
+  "format": "cormi:u17-3-menu-icons-validation:1",
+  "verifiedAt": "2026-10-22T04:13:31.841Z",
+  "base": "7500e9312fc4e51328381844e5cc898dd2526f70",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "EADME.md",
+      "docs/08-routes-and-react.md",
+      "docs/109-ui-menu-adapters.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/134-u17-pro-layout.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "package.json",
+      "packages/plugin-antd/src/pro-layout.tsx",
+      "packages/runtime/src/menu-adapters.ts",
+      "pnpm-lock.yaml",
+      "scripts/pro-layout-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/menu-adapters.test.ts",
+      "docs/135-u17-menu-icons.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62",
+    "antd": "6.6.7",
+    "@ant-design/pro-layout": "7.22.7",
+    "@ant-design/icons": "6.3.4"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u17-3-menu-icons/check.log",
+      "sha256": "3b0fdeada0f7f95a68f434b284572a44bf39839920ef2955203c1fced4ef2983",
+      "seconds": 123.890013709,
+      "tests": 569,
+      "pass": 569,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests including menu icon adapter cases"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u17-3-menu-icons/browser.log",
+      "sha256": "f4b5f0008202d49be047958701b387daf2853c6db24b357fc75d59bd0cc2b1b8",
+      "seconds": 580.578705083,
+      "tests": 54,
+      "pass": 54,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes ProLayout icons in dev/build/preview and locale switching"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u17-3-menu-icons/package.log",
+      "sha256": "5fe5fe75a7a7fcde479d628e2d4ae68c26b363318d8c9bf54a528494417ac8c8",
+      "stages": 344,
+      "passed": true,
+      "note": "installed pro-layout consumer includes @ant-design/icons and icon assertions"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/pro-layout.test.ts",
+      "log": ".cache/u17-3-menu-icons/targeted.log",
+      "sha256": "c049cdaac65e8805b589694b55ac944b7f22c82ae9ccfc1ac894046b5a9f5faa",
+      "seconds": 11.563349667,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    },
+    "adapterUnit": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/menu-adapters.test.ts",
+      "log": ".cache/u17-3-menu-icons/adapters.log",
+      "sha256": "afecfe591d081ae95acb58c15b44de07c7687f199be25d2644e20d96fe310849",
+      "seconds": 0.215439625,
+      "tests": 3,
+      "pass": 3,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "README.md": "36433b7d80152ac98918e6d272fe9459c3a11f44ce4c89ee81bf6d11e5fc7070",
+    "docs/08-routes-and-react.md": "daacccb006afb3eb15ff7e688822b853ed4c6a4aebadd13b795244799eca060e",
+    "docs/109-ui-menu-adapters.md": "fe393a5dc06c74aaf383cb9616de54f2d1c63f0e543577fe3c5fa10f9f6d5c47",
+    "docs/112-roadmap-audit-2026-10-21.md": "d6510363de5be454aafbbfab9c0eb8a8c82d0692ff7b205ba3441e783c2c71ea",
+    "docs/134-u17-pro-layout.md": "54e9742201bc3dbea464cc4e7cdc17092c78f04967a64e10f2947607ff2f48bc",
+    "docs/135-u17-menu-icons.md": "063feda55011aa1c421ee5975567ee770bfe77872f8f4453843a63c601d65572",
+    "docs/49-application-guide.md": "57a3030ee6814ef5d8b0c3f4a3156ca28abf4ef94b2491bfd30b323781e455c5",
+    "docs/59-umi-feature-roadmap.md": "16d60dc19efff64bfab9df9d0debe6795422c404333a748975114c2bea1648d1",
+    "package.json": "87ca307e900f4b17f4f1f1648e0613009f9c306ebf202b609fdfddb09c9e43d8",
+    "pnpm-lock.yaml": "7109daa52dfc553cd311453e9d276c3446647f3e13be45b82a1b23172e0b916a",
+    "packages/plugin-antd/src/pro-layout.tsx": "527d0b8cf721041574d1049af8266016eb1d7d47c75a61cef3ab353f3c0c3dd4",
+    "packages/runtime/src/menu-adapters.ts": "8cb229462bb5f3d31451f9ac1760769a3bdbd81972ba7655cadff890150555e4",
+    "scripts/pro-layout-fixture.ts": "9bb79574284f67ad6aa9539e6db7a1713df3c945a4dc10d017a14eff62bc15e6",
+    "scripts/test-package.ts": "b2dc5ffa4cf5d27a5e3119c65067bc563a2b072f3e7e420485ded72557a735a7",
+    "tests/browser/pro-layout.test.ts": "9e081955eedf4db6ae4b22790ccd5b2eedca1f966d54e551ea8acd30d6cf0449",
+    "tests/menu-adapters.test.ts": "c166a1613e9e2629e88492c2e36e2c10e9868aebe89ce51866daa43b33c62736"
+  },
+  "sourceInputCount": 16,
+  "sourceInputsDigest": "c405340bf4538f25a9a32a29e4ed2a662bba698aaf831dbc053ea3f875ad4d98",
+  "documentationInputs": {
+    "docs/08-routes-and-react.md": "daacccb006afb3eb15ff7e688822b853ed4c6a4aebadd13b795244799eca060e",
+    "docs/109-ui-menu-adapters.md": "fe393a5dc06c74aaf383cb9616de54f2d1c63f0e543577fe3c5fa10f9f6d5c47",
+    "docs/112-roadmap-audit-2026-10-21.md": "d6510363de5be454aafbbfab9c0eb8a8c82d0692ff7b205ba3441e783c2c71ea",
+    "docs/134-u17-pro-layout.md": "54e9742201bc3dbea464cc4e7cdc17092c78f04967a64e10f2947607ff2f48bc",
+    "docs/135-u17-menu-icons.md": "063feda55011aa1c421ee5975567ee770bfe77872f8f4453843a63c601d65572",
+    "docs/49-application-guide.md": "57a3030ee6814ef5d8b0c3f4a3156ca28abf4ef94b2491bfd30b323781e455c5",
+    "docs/59-umi-feature-roadmap.md": "16d60dc19efff64bfab9df9d0debe6795422c404333a748975114c2bea1648d1"
+  },
+  "evidence": [
+    ".cache/u17-3-menu-icons/check.log",
+    ".cache/u17-3-menu-icons/browser.log",
+    ".cache/u17-3-menu-icons/package.log",
+    ".cache/u17-3-menu-icons/targeted.log",
+    ".cache/u17-3-menu-icons/adapters.log",
+    "artifacts/u17-3-menu-icons-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "antd-6.6.7-only",
+    "ant-design-icons-6.3.4-only",
+    "no-icon-auto-discovery-or-codegen",
+    "no-svg-asset-pipeline",
+    "no-prolayout-charts-or-theme-editor",
+    "no-prolayout-ssr-verification",
+    "strict-peer-validation-disabled-for-optional-consumer",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

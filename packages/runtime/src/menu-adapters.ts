@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { MenuItem } from './menu.js';
 
 /** Structural Ant Design Menu item; the application still owns the antd dependency and rendering. */
@@ -12,6 +13,8 @@ export interface AntdMenuItem {
 export interface LayoutRoute {
   readonly path: string;
   readonly name: string;
+  /** Resolved from `meta.icon` (or the route id) through the caller's icon registry. */
+  readonly icon?: ReactNode;
   readonly routes?: readonly LayoutRoute[];
 }
 
@@ -24,9 +27,18 @@ export function toAntdMenuItems(items: readonly MenuItem[]): readonly AntdMenuIt
 }
 
 /** Converts a menu tree to ProLayout-style routes without importing ProLayout. */
-export function toLayoutRoutes(items: readonly MenuItem[]): readonly LayoutRoute[] {
-  return Object.freeze(items.map(item => Object.freeze({
-    path: item.path, name: item.title,
-    ...(item.children.length ? { routes: toLayoutRoutes(item.children) } : {}),
-  })));
+export function toLayoutRoutes(items: readonly MenuItem[], icons?: Readonly<Record<string, ReactNode>>): readonly LayoutRoute[] {
+  const iconOf = (item: MenuItem): ReactNode => {
+    if (!icons) return undefined;
+    const key = typeof item.meta.icon === 'string' && item.meta.icon ? item.meta.icon : item.id;
+    return Object.prototype.hasOwnProperty.call(icons, key) ? icons[key] : undefined;
+  };
+  return Object.freeze(items.map(item => {
+    const icon = iconOf(item);
+    return Object.freeze({
+      path: item.path, name: item.title,
+      ...(icon !== undefined ? { icon } : {}),
+      ...(item.children.length ? { routes: toLayoutRoutes(item.children, icons) } : {}),
+    });
+  }));
 }

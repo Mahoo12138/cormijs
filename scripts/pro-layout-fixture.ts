@@ -8,8 +8,8 @@ import preset from '@cormijs/preset-react-vite';
 import { antdPlugin, proLayoutPlugin } from '@cormijs/plugin-antd';
 import { appRuntimePlugin, layoutPlugin, localePlugin, menuPlugin, routeConfigPlugin } from '@cormijs/plugin-react';
 const routes = [
-  { id: 'home', path: '/', component: './src/Home.tsx', meta: { title: 'Home', locale: 'menu.home', order: 1 } },
-  { id: 'users', path: '/users', component: './src/Users.tsx', meta: { title: 'Users', locale: 'menu.users', order: 2 } },
+  { id: 'home', path: '/', component: './src/Home.tsx', meta: { title: 'Home', locale: 'menu.home', order: 1, icon: 'home' } },
+  { id: 'users', path: '/users', component: './src/Users.tsx', meta: { title: 'Users', locale: 'menu.users', order: 2, icon: 'users' } },
 ];
 export default defineConfig({
   presets: [preset],
@@ -37,11 +37,13 @@ export default defineApp({ locale: { default: 'en', fallback: 'en', storageKey: 
   zh: { 'app.title': 'ProLayout 演示', 'menu.home': '首页', 'menu.users': '用户', 'page.home': '首页', 'page.users': '用户页' },
 } } });`,
     'src/layouts/index.tsx': `import { Outlet } from 'react-router';
+import { HomeOutlined, TeamOutlined } from '@ant-design/icons';
 import { ProLayoutShell } from '@cormijs/plugin-antd/pro-layout';
 import { useIntl } from '@cormijs/runtime';
+const icons = { home: <HomeOutlined />, users: <TeamOutlined /> };
 export default function Layout(){
   const { t } = useIntl();
-  return <ProLayoutShell title={t('app.title')}><Outlet /></ProLayoutShell>;
+  return <ProLayoutShell title={t('app.title')} icons={icons}><Outlet /></ProLayoutShell>;
 }`,
     'src/Home.tsx': `import { useIntl } from '@cormijs/runtime';
 export default function Home(){
@@ -68,6 +70,8 @@ export async function verifyProLayoutPage(page: Page, url: string) {
   assert.equal((await sider.locator('.ant-pro-sider-logo').textContent())?.trim(), 'ProLayout demo');
   const menuText = async () => (await page.locator('.ant-menu-item').allInnerTexts()).map(text => text.trim());
   assert.deepEqual(await menuText(), ['Home', 'Users']);
+  assert.equal(await sider.locator('.anticon-home').count(), 1);
+  assert.equal(await sider.locator('.anticon-team').count(), 1);
 
   await page.getByRole('menuitem', { name: 'Users' }).click();
   await page.getByRole('heading', { name: 'Users page', exact: true }).waitFor();
@@ -81,6 +85,8 @@ export async function verifyProLayoutPage(page: Page, url: string) {
   await page.getByRole('heading', { name: '首页', exact: true }).waitFor();
   await page.waitForFunction(() => document.querySelector('.ant-pro-sider-logo')?.textContent === 'ProLayout 演示');
   assert.deepEqual(await menuText(), ['首页', '用户']);
+  assert.equal(await sider.locator('.anticon-home').count(), 1);
+  assert.equal(await sider.locator('.anticon-team').count(), 1);
   assert.equal(await page.evaluate(() => localStorage.getItem('demo:pro-layout-locale')), 'zh');
 
   await page.locator('.ant-pro-sider-collapsed-button').click();

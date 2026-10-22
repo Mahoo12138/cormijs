@@ -11,6 +11,8 @@ export interface ProLayoutShellProps {
   readonly siderWidth?: number;
   /** Disabled by default: antd Sider otherwise forces expansion at desktop widths and drops the persisted state. */
   readonly breakpoint?: false | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  /** Icons keyed by `meta.icon`, falling back to the route id. */
+  readonly icons?: Readonly<Record<string, ReactNode>>;
   readonly children?: ReactNode;
 }
 
@@ -18,11 +20,11 @@ export interface ProLayoutShellProps {
  * ProLayout chrome for the application's global layout (`src/layouts/index.*`).
  * Mount menuPlugin and antdPlugin first; this component owns no plugin resources.
  */
-export function ProLayoutShell({ title, logo, layout = 'side', fixedHeader = true, siderWidth = 208, breakpoint = false, children }: ProLayoutShellProps) {
+export function ProLayoutShell({ title, logo, layout = 'side', fixedHeader = true, siderWidth = 208, breakpoint = false, icons, children }: ProLayoutShellProps) {
   const menu = useMenu();
   const { pathname } = useLocation();
   const { collapsed, setCollapsed } = useMenuCollapse();
-  const route = useMemo(() => ({ path: '/', routes: toLayoutRoutes(menu) as unknown as MenuDataItem[] }), [menu]);
+  const route = useMemo(() => ({ path: '/', routes: toLayoutRoutes(menu, icons) as unknown as MenuDataItem[] }), [menu, icons]);
   return (
     <ProLayout
       title={title}
