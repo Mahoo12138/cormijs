@@ -25,7 +25,7 @@
 - `pnpm test:browser`：**54/54**
 - `pnpm test:package`：**344 阶段**
 - 最新证据：[U17-3 菜单图标](../artifacts/u17-3-menu-icons-validation.json)、[U17-2 ProLayout](../artifacts/u17-2-pro-layout-validation.json)、[U12-7 游标分页](../artifacts/u12-7-cursor-pagination-validation.json)、[U33-6 并发预渲染](../artifacts/u33-6-prerender-concurrency-validation.json)、[U33-5 robots](../artifacts/u33-5-robots-validation.json)、[U12-6 节流](../artifacts/u12-6-throttle-validation.json)、[U09-4 选择器等值](../artifacts/u09-4-selector-equality-validation.json)、[U17-1 Antd](../artifacts/u17-antd-validation.json)、[U32-2 流式 SSR](../artifacts/u32-streaming-validation.json)、[U33-4 预渲染控制](../artifacts/u33-4-prerender-control-validation.json)、[U16-2 RTL](../artifacts/u16-2-rtl-validation.json)。
-- 工作区：本轮验证完成后以特性提交 + 文档索引提交交付；最新特性提交为 9acec53（可选 ProLayout 外壳），工作树干净，未推送。
+- 工作区：本轮验证完成后以特性提交 + 文档索引提交交付；最新特性提交为 3d469c7（菜单图标注册表），工作树干净，未推送。
 
 ## 4. 未完成要求（阻断完成判定）
 
