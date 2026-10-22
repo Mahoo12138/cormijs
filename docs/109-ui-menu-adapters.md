@@ -66,6 +66,6 @@ Umi 的 layout 插件面向 ProLayout/antd 提供开箱集成；cormi 只提供�
 
 ## 6. 下一步
 
-- U17 后续：可选 Antd/ProLayout 集成包、主题/图标/图表与 locale 联动；
+- U17 后续：可选 Antd/ProLayout 集成包、主题/图标/图表与 locale 联动（Antd 与 ProLayout 已由 [U17-1](126-u17-antd.md)、[U17-2](134-u17-pro-layout.md) 提供；图标/图表仍待后续）；
 - U32：serverLoader、流式渲染；U16 dayjs 联动；
 - F6 多 builder/微前端。

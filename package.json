@@ -31,6 +31,7 @@
     }
   },
   "devDependencies": {
+    "@ant-design/pro-layout": "7.22.7",
     "@cormijs/builder": "workspace:*",
     "@cormijs/core": "workspace:*",
     "@cormijs/create": "workspace:*",

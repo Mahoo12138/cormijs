@@ -1,0 +1,137 @@
+{
+  "format": "cormi:u17-2-pro-layout-validation:1",
+  "verifiedAt": "2026-10-22T03:51:37.119Z",
+  "base": "2a6862b0ee523d5f67c78310c5b33a2754efa770",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "EADME.md",
+      "docs/08-routes-and-react.md",
+      "docs/109-ui-menu-adapters.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/126-u17-antd.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "package.json",
+      "packages/plugin-antd/package.json",
+      "packages/plugin-antd/src/index.ts",
+      "packages/plugin-react/src/modules.ts",
+      "pnpm-lock.yaml",
+      "scripts/test-package.ts",
+      "artifacts/u17-2-pro-layout-validation.json",
+      "docs/134-u17-pro-layout.md",
+      "packages/plugin-antd/src/pro-layout.tsx",
+      "scripts/pro-layout-fixture.ts",
+      "tests/browser/pro-layout.test.ts",
+      "tests/pro-layout.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62",
+    "antd": "6.6.7",
+    "@ant-design/pro-layout": "7.22.7"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u17-2-pro-layout/check.log",
+      "sha256": "816234f1c3b58f8a260496b2834195b854f5973572e54a8ca1b2fb3a5836ff77",
+      "tests": 568,
+      "pass": 568,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests including ProLayout plugin/subpath tests",
+      "seconds": 124.69564541700001
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u17-2-pro-layout/browser.log",
+      "sha256": "3f3b168c8cc55c32335080132e54f11a1f94f7a2d6f9ac6b616749692bf32cb5",
+      "tests": 54,
+      "pass": 54,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes ProLayout dev/build/preview menu, locale and collapse",
+      "seconds": 576.028528084
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u17-2-pro-layout/package.log",
+      "sha256": "cd3f2983662e743446deed35c8c28c24818bc9a448b1610e39d0bdf24e7c6fad",
+      "stages": 344,
+      "passed": true,
+      "note": "includes installed pro-layout consumer (offline install, typecheck, public types, dev/build/preview)"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/pro-layout.test.ts",
+      "log": ".cache/u17-2-pro-layout/targeted.log",
+      "sha256": "fec97fe5179b731f2bcf94c032f89dce12f155c565f15db2311371c15f9ada3b",
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "seconds": 11.324276458
+    }
+  },
+  "sourceInputs": {
+    "README.md": "2b860b278db0e40ee0b8c4f2b53e8b81c71f1e1086e48de056acabaa37c4d785",
+    "docs/08-routes-and-react.md": "3574e087572494e89fef9d9c92e4cbc3029d2c308cad09b9d141f31fb59079bd",
+    "docs/109-ui-menu-adapters.md": "ffc45c243fb0f5dd653df3747758d2d57f2d018f982a89e1cb0fc9765a597711",
+    "docs/112-roadmap-audit-2026-10-21.md": "daecd1dc7ff6d486df2d9457850d601f6b9eef0e7e01fd9fe5f57f9af9527432",
+    "docs/126-u17-antd.md": "092f0eba1be9b67f57d926fce7c425ebc368e759ad05764b0f7905b3c42982df",
+    "docs/134-u17-pro-layout.md": "b8b66b518d96caa8bfb3a2bb73b8da354f063dd2882db082cd7696e3b4ab30df",
+    "docs/49-application-guide.md": "e79a21b2bd550483b4b57e3105b4c4342dc9dd02f7f60e6e62f1c3f09862c59f",
+    "docs/59-umi-feature-roadmap.md": "44da3c4693550366cd611b6f2c28f1e804a32ce49c0e69a3873c2b64a5f5c35e",
+    "package.json": "ca1fe73c0a8aea5a38d15f17f8fded3e5c589aa2f2ed19cbe614c98549ef6dd1",
+    "pnpm-lock.yaml": "97884a49f98834ef33cdddd3ad0d88c74c3aa64338a8594403d46187abd36bc3",
+    "packages/plugin-antd/package.json": "d0976a1f211e9037d97488e5a7129f08d8b240d7e7b4150e3ec60c96852d8349",
+    "packages/plugin-antd/src/index.ts": "965e754aeb973e400fb0cc0707973e2b3b9fbb7f6f38346c8572bc335dd56005",
+    "packages/plugin-antd/src/pro-layout.tsx": "cb87af919cfa8051b1cc9860bc8d9eade8012a74f78cf52fc5f748ef02f393fc",
+    "packages/plugin-react/src/modules.ts": "421ef37c293f05dea27d2e11ef8288d970cd988e603c755f024d0c97d8c6a1d4",
+    "scripts/pro-layout-fixture.ts": "22b8fc38db78ab7e20bcb68f62db2808946dac2b8fb59cdeb4ba4921920ab0e5",
+    "scripts/test-package.ts": "3baa16d15dd09a5a140ae407871433536b2ef26b6156ed5cc547b360f46d5b09",
+    "tests/browser/pro-layout.test.ts": "9e081955eedf4db6ae4b22790ccd5b2eedca1f966d54e551ea8acd30d6cf0449",
+    "tests/pro-layout.test.ts": "8604c245bc3a537ac4aed7b9329dec06f0213803105fb0c87bb19e01a2954679"
+  },
+  "sourceInputCount": 18,
+  "sourceInputsDigest": "ea4aac2c00b321d75c5c81e4f27357e900e6abeed616325540e852d6b815b111",
+  "documentationInputs": {
+    "docs/08-routes-and-react.md": "3574e087572494e89fef9d9c92e4cbc3029d2c308cad09b9d141f31fb59079bd",
+    "docs/109-ui-menu-adapters.md": "ffc45c243fb0f5dd653df3747758d2d57f2d018f982a89e1cb0fc9765a597711",
+    "docs/112-roadmap-audit-2026-10-21.md": "daecd1dc7ff6d486df2d9457850d601f6b9eef0e7e01fd9fe5f57f9af9527432",
+    "docs/126-u17-antd.md": "092f0eba1be9b67f57d926fce7c425ebc368e759ad05764b0f7905b3c42982df",
+    "docs/134-u17-pro-layout.md": "b8b66b518d96caa8bfb3a2bb73b8da354f063dd2882db082cd7696e3b4ab30df",
+    "docs/49-application-guide.md": "e79a21b2bd550483b4b57e3105b4c4342dc9dd02f7f60e6e62f1c3f09862c59f",
+    "docs/59-umi-feature-roadmap.md": "44da3c4693550366cd611b6f2c28f1e804a32ce49c0e69a3873c2b64a5f5c35e"
+  },
+  "evidence": [
+    ".cache/u17-2-pro-layout/check.log",
+    ".cache/u17-2-pro-layout/browser.log",
+    ".cache/u17-2-pro-layout/package.log",
+    ".cache/u17-2-pro-layout/targeted.log",
+    "artifacts/u17-2-pro-layout-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "antd-6.6.7-only",
+    "pro-layout-7.22.7-stale-antd-peer",
+    "strict-peer-validation-disabled-for-optional-consumer",
+    "no-prolayout-icons-charts-or-theme-editor",
+    "no-prolayout-internal-locale-mapping",
+    "no-prolayout-ssr-verification",
+    "breakpoint-disabled-by-default",
+    "skipLibCheck-required-by-upstream-types",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

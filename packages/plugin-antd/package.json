@@ -11,6 +11,10 @@
     "./runtime": {
       "types": "./dist/runtime.d.ts",
       "import": "./dist/runtime.js"
+    },
+    "./pro-layout": {
+      "types": "./dist/pro-layout.d.ts",
+      "import": "./dist/pro-layout.js"
     }
   },
   "files": [
@@ -23,21 +27,31 @@
   "dependencies": {
     "@cormijs/core": "workspace:*",
     "@cormijs/plugin-react": "workspace:*",
+    "@cormijs/plugin-vite": "workspace:*",
     "@cormijs/runtime": "workspace:*"
   },
   "peerDependencies": {
+    "@ant-design/pro-layout": ">=7.22.0",
     "antd": ">=5.0.0",
-    "react": ">=18"
+    "react": ">=18",
+    "react-router": ">=7.0.0"
   },
   "devDependencies": {
     "antd": "6.6.7",
-    "@types/react": "19.2.0"
+    "@types/react": "19.2.0",
+    "@ant-design/pro-layout": "7.22.7"
   },
   "peerDependenciesMeta": {
+    "@ant-design/pro-layout": {
+      "optional": true
+    },
     "antd": {
       "optional": true
     },
     "react": {
+      "optional": true
+    },
+    "react-router": {
       "optional": true
     }
   }

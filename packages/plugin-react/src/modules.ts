@@ -4,7 +4,7 @@ import { realpath, stat } from 'node:fs/promises';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const isServerModule = (name: string): boolean => /^@cormijs\/plugin-[^/]+\/runtime$/.test(name) ? false
+export const isServerModule = (name: string): boolean => /^@cormijs\/plugin-[^/]+\/(?:runtime|pro-layout)$/.test(name) ? false
   : name === 'cormijs' || name.startsWith('cormijs/')
   || name === 'cordis' || name.startsWith('cordis/') || name.startsWith('@cordisjs/')
   || /^@cormijs\/(?:core|builder|routes|plugin-[^/]+|preset-[^/]+)(?:\/|$)/.test(name) || name.startsWith('node:');

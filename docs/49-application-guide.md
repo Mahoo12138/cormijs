@@ -1075,7 +1075,9 @@ plugins: [
 ],
 ```
 
-安装 `antd` 后，`@cormijs/plugin-antd` 通过 runtime 贡献包裹 `ConfigProvider`：locale 由 cormi 的 UI locale 回退链选择包内 11 个官方 locale（含 `en`/`zh` 语言别名），direction 来自 `localeDirection`，主题 token 与 dark 算法由插件校验后传 JSON。localePlugin 必须先挂载。不提供 ProLayout、图标/图表、自定义 locale 对象或 Antd SSR 样式抽取；Antd 6 的上游声明可能需要 `skipLibCheck`。规则见 [U17-1 Antd](126-u17-antd.md)。
+安装 `antd` 后，`@cormijs/plugin-antd` 通过 runtime 贡献包裹 `ConfigProvider`：locale 由 cormi 的 UI locale 回退链选择包内 11 个官方 locale（含 `en`/`zh` 语言别名），direction 来自 `localeDirection`，主题 token 与 dark 算法由插件校验后传 JSON。localePlugin 必须先挂载。规则见 [U17-1 Antd](126-u17-antd.md)。
+
+需要 ProLayout 外壳时，安装 `@ant-design/pro-layout`，挂载 `proLayoutPlugin`（Vite 预打包声明），并在 `src/layouts/index.tsx` 用 `ProLayoutShell` 包裹 `<Outlet/>`；菜单、折叠持久化与 SPA 导航来自 menuPlugin。ProLayout 7.22.7 仍声明 antd 4/5 peer，antd 6.6.7 组合已验证但严格 peer 安装需对该可选集成关闭校验；图标/图表/主题编辑器仍未提供。规则见 [U17-2 ProLayout](134-u17-pro-layout.md)。
 
 ## 5. 环境和 Mock 使用同一个部署前缀
 

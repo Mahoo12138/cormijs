@@ -34,6 +34,7 @@ import { writeGeneratorFixture } from './generator-fixture.js';
 import { writeStaticExportFixture, verifyStaticExport, verifyStaticExportPages } from './static-export-fixture.js';
 import { writeMpaFixture, verifyMpaPages, verifyMpaOutput } from './mpa-fixture.js';
 import { writeAntdFixture, verifyAntdPage } from './antd-fixture.js';
+import { writeProLayoutFixture, verifyProLayoutPage } from './pro-layout-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
 import { writeConventionalLoaderFixture, verifyConventionalLoaderPage } from './conventional-loader-fixture.js';
@@ -590,6 +591,31 @@ const bad:AntdPluginOptions={theme:{dark:'yes'}};
     await command('antd-build',antdConsumer,'build');
     await withServer(antdConsumer,'preview',async url=>{await verifyAntdPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'antd-preview.png')});});
     report.stages.push({label:'installed-antd-provider-locale-theme-dev-build-preview',adapter:'@cormijs/plugin-antd',previewRegenerated:false});
+
+    }
+    if (selected('pro-layout')) {
+    const proLayoutConsumer=await create('pro-layout','react');await writeProLayoutFixture(proLayoutConsumer);
+    const proLayoutManifest=consumerManifest(kit,'react');
+    proLayoutManifest.dependencies['@cormijs/plugin-antd']=proLayoutManifest.pnpm.overrides['@cormijs/plugin-antd']!;
+    proLayoutManifest.dependencies['@cormijs/plugin-react']=proLayoutManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    proLayoutManifest.dependencies['@cormijs/routes']=proLayoutManifest.pnpm.overrides['@cormijs/routes']!;
+    proLayoutManifest.dependencies.antd='6.6.7';
+    proLayoutManifest.dependencies['@ant-design/pro-layout']='7.22.7';
+    await writeFile(join(proLayoutConsumer,'package.json'),JSON.stringify(proLayoutManifest,null,2));
+    // ProLayout 7.22.7 still declares antd 4/5; strict peer validation cannot express the verified antd 6 pairing.
+    await writeFile(join(proLayoutConsumer,'.npmrc'),consumerNpmrc.replace('strict-peer-dependencies=true','strict-peer-dependencies=false'));
+    await install('pro-layout-install',proLayoutConsumer);await auditLinks(proLayoutConsumer);
+    await command('pro-layout-typecheck',proLayoutConsumer,'typecheck');
+    await writeFile(join(proLayoutConsumer,'types.mts'),`import {antdPlugin,proLayoutPlugin,type ProLayoutPluginOptions} from '@cormijs/plugin-antd';
+const options:ProLayoutPluginOptions={id:'consumer:pro-layout'};void [antdPlugin,proLayoutPlugin,options];
+// @ts-expect-error the plugin id is a string
+const bad:ProLayoutPluginOptions={id:42};
+`);
+    await execute('pro-layout-public-types',proLayoutConsumer,process.execPath,typeArguments);
+    await withServer(proLayoutConsumer,'dev',async url=>{await verifyProLayoutPage(page,url);assert.deepEqual(errors,[]);});
+    await command('pro-layout-build',proLayoutConsumer,'build');
+    await withServer(proLayoutConsumer,'preview',async url=>{await verifyProLayoutPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'pro-layout-preview.png')});});
+    report.stages.push({label:'installed-pro-layout-menu-locale-collapse-dev-build-preview',adapter:'@cormijs/plugin-antd/pro-layout',previewRegenerated:false});
 
     }
     if (selected('initial-state')) {
