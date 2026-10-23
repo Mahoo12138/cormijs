@@ -9,7 +9,8 @@ import { writeRequestFixture, verifyRequestPage } from '../../scripts/request-fi
 async function browser(t: TestContext) {
   const executablePath = process.env.CORMI_BROWSER_EXECUTABLE ?? '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge'; assert.ok(existsSync(executablePath));
   const instance = await chromium.launch({ executablePath, headless: true }); t.after(() => instance.close());
-  const page = await instance.newPage({ viewport: { width: 1280, height: 800 } }); page.setDefaultTimeout(12000); return page;
+  const context = await instance.newContext({ viewport: { width: 1280, height: 800 } }); t.after(() => context.close());
+  const page = await context.newPage(); page.setDefaultTimeout(12000); return page;
 }
 
 test('request client and useRequest cover loading, refresh, errors, cancellation and races in dev and preview', { timeout: 120000 }, async t => {

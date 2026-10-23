@@ -1,0 +1,118 @@
+{
+  "format": "cormi:u12-12-cross-tab-cache-validation:1",
+  "verifiedAt": "2026-10-23T10:00:48.723Z",
+  "base": "b9887cc4b938d3bb8168acb5c7b4647324171a0c",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "ocs/112-roadmap-audit-2026-10-21.md",
+      "docs/121-u12-request-cache.md",
+      "docs/138-u12-cache-persistence.md",
+      "docs/140-u12-debounce-edges.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/browser/request.test.ts",
+      "docs/141-u12-cross-tab-cache.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-12-cross-tab-cache/check.log",
+      "sha256": "2e53b09c86c2d67f89bedfec1330c95c73e577e04d0b8831e815fed63ae9f75d",
+      "seconds": 128.948717041,
+      "tests": 570,
+      "pass": 570,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-12-cross-tab-cache/browser.log",
+      "sha256": "4e92d55541052716e55937263aa56302e020f53d0f7e9ad4b8c820fc0ee8a8d9",
+      "seconds": 597.657608,
+      "tests": 54,
+      "pass": 54,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes two-tab localStorage cache invalidation in dev/build/preview"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-12-cross-tab-cache/package.log",
+      "sha256": "9dccb0cfa4e9acb22c8853cb2286309e7f77627db43acd231f7c444315f887e7",
+      "stages": 344,
+      "passed": true,
+      "note": "request consumer public types include activate/dispose and the two-tab fixture passes"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-12-cross-tab-cache/targeted.log",
+      "sha256": "858fd1e69bee60cfc5621789988024c9756b2f88e1d852d5181c39807eddba80",
+      "seconds": 33.98334075,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "docs/49-application-guide.md": "20f13c2909800cbb97c48863ad1c3add21f4b1422da93c7b563abe167ed42e33",
+    "docs/59-umi-feature-roadmap.md": "f2c04e6e62b4b360215ede7fcd701cecd2dc0bf416f53b4114c7bd6f0dc2fb70",
+    "docs/112-roadmap-audit-2026-10-21.md": "71d3b64ece94fde6c5b80e222c74c2dd382ec94a80f2a26676aa1e33ca098606",
+    "docs/121-u12-request-cache.md": "d095a1b405fd5ddf7b5aebf0871bc5a3c6fcc9f4c78a9e81e961c1a18637e18b",
+    "docs/138-u12-cache-persistence.md": "df49c9fe027cba6f852b4cdb0afc84f0d71d5260a8df04aa3595efca46a9a007",
+    "docs/140-u12-debounce-edges.md": "270ca19098cbeee283bd874d11828ed3cb55eaf934c032e899d760fc7a316283",
+    "docs/141-u12-cross-tab-cache.md": "32d8245a578939d327350630df94ed35e386de7fe83ea1d2f023bdafc1b8b069",
+    "packages/runtime/src/request.tsx": "4f9478b44dae0fc124bcb884e6f4f8886b413399d5f9351f53beaff1ed832fe2",
+    "scripts/request-fixture.ts": "e4093c20670dd47b20f277f11cdd46e23cba8e781af1af6a51c823366904ed1d",
+    "scripts/test-package.ts": "c18f5ec203456e9a75052b8a8f1154b9da9bc5e9de4bbbb73423b05edcf5db76",
+    "tests/browser/request.test.ts": "fc5a1b3aef407ebe166d2300438dce5a3a38d0c5460b5addec0d3fa6caf2c853"
+  },
+  "sourceInputCount": 11,
+  "sourceInputsDigest": "8766a487e8ba195f478ad169806f6a830d29c40f819ad40235e399f5c299e8fa",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "20f13c2909800cbb97c48863ad1c3add21f4b1422da93c7b563abe167ed42e33",
+    "docs/59-umi-feature-roadmap.md": "f2c04e6e62b4b360215ede7fcd701cecd2dc0bf416f53b4114c7bd6f0dc2fb70",
+    "docs/112-roadmap-audit-2026-10-21.md": "71d3b64ece94fde6c5b80e222c74c2dd382ec94a80f2a26676aa1e33ca098606",
+    "docs/121-u12-request-cache.md": "d095a1b405fd5ddf7b5aebf0871bc5a3c6fcc9f4c78a9e81e961c1a18637e18b",
+    "docs/138-u12-cache-persistence.md": "df49c9fe027cba6f852b4cdb0afc84f0d71d5260a8df04aa3595efca46a9a007",
+    "docs/140-u12-debounce-edges.md": "270ca19098cbeee283bd874d11828ed3cb55eaf934c032e899d760fc7a316283",
+    "docs/141-u12-cross-tab-cache.md": "32d8245a578939d327350630df94ed35e386de7fe83ea1d2f023bdafc1b8b069"
+  },
+  "evidence": [
+    ".cache/u12-12-cross-tab-cache/check.log",
+    ".cache/u12-12-cross-tab-cache/browser.log",
+    ".cache/u12-12-cross-tab-cache/package.log",
+    ".cache/u12-12-cross-tab-cache/targeted.log",
+    "artifacts/u12-12-cross-tab-cache-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "local-storage-cross-tab-only",
+    "conservative-clear-all",
+    "no-tag-level-cross-tab-filtering",
+    "only-actual-removals-broadcast",
+    "no-data-sync",
+    "storage-event-delay-not-tested",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

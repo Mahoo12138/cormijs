@@ -21,6 +21,10 @@ export interface RequestClient {
   delete<T = unknown>(path: string, options?: Omit<RequestOptions, 'method' | 'body'>): Promise<T>;
   /** Drop cached GETs by tag, or every cached GET when no tag is given. Returns the removed count. */
   invalidateCache(tags?: readonly string[]): number;
+  /** (Re)attach the cross-tab storage listener when persistence is enabled. */
+  activate(): void;
+  /** Release the cross-tab storage listener; the client can still serve memory cache. */
+  dispose(): void;
 }
 export class RequestError extends Error {
   constructor(message: string, readonly status: number, readonly data: unknown) {
@@ -62,6 +66,7 @@ export function createRequestClient(input: RequestConfig = {}): RequestClient {
   const cache = new Map<string, CacheEntry>();
   const inflight = new Map<string, Promise<unknown>>();
   const cacheLimit = config.cacheLimit ?? 100, cachePersistKey = config.cachePersistKey ?? 'cormi:request-cache';
+  const cacheEpoch = { value: 0 };
   const storage = (): Storage | undefined => {
     if (!config.cachePersist || typeof window === 'undefined') return undefined;
     try { return config.cachePersist === 'local' ? window.localStorage : window.sessionStorage; } catch { return undefined; }
@@ -70,14 +75,15 @@ export function createRequestClient(input: RequestConfig = {}): RequestClient {
     const store = storage();
     if (!store) return;
     try {
-      store.setItem(cachePersistKey, JSON.stringify({ version: 1, entries: [...cache].map(([key, entry]) => ({ key, expires: entry.expires, value: entry.value, tags: entry.tags })) }));
+      store.setItem(cachePersistKey, JSON.stringify({ version: 1, epoch: cacheEpoch.value, entries: [...cache].map(([key, entry]) => ({ key, expires: entry.expires, value: entry.value, tags: entry.tags })) }));
     } catch { /* storage can be unavailable, full or blocked by policy */ }
   };
   if (config.cachePersist) {
     try {
       const raw = storage()?.getItem(cachePersistKey);
-      const payload = raw && raw.length <= 5_000_000 ? JSON.parse(raw) as { version?: unknown; entries?: unknown } : undefined;
+      const payload = raw && raw.length <= 5_000_000 ? JSON.parse(raw) as { version?: unknown; epoch?: unknown; entries?: unknown } : undefined;
       if (payload?.version === 1 && Array.isArray(payload.entries)) {
+        cacheEpoch.value = typeof payload.epoch === 'number' && Number.isFinite(payload.epoch) && payload.epoch >= 0 ? payload.epoch : 0;
         for (const item of payload.entries) {
           if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
           const entry = item as Record<string, unknown>, key = entry.key;
@@ -94,6 +100,26 @@ export function createRequestClient(input: RequestConfig = {}): RequestClient {
       }
     } catch { /* corrupt or unavailable storage is ignored */ }
   }
+  let disconnectStorage: (() => void) | undefined;
+  const activate = () => {
+    if (disconnectStorage || !config.cachePersist || typeof window === 'undefined') return;
+    try {
+      const onStorage = (event: StorageEvent) => {
+        if (event.key !== null && event.key !== cachePersistKey) return;
+        if (event.key === null || !event.newValue) { cache.clear(); cacheEpoch.value = 0; return; }
+        let epoch = 0;
+        try {
+          const payload = JSON.parse(event.newValue) as { version?: unknown; epoch?: unknown };
+          if (payload?.version !== 1) { cache.clear(); cacheEpoch.value = 0; return; }
+          if (typeof payload.epoch === 'number' && Number.isFinite(payload.epoch) && payload.epoch >= 0) epoch = payload.epoch;
+        } catch { cache.clear(); cacheEpoch.value = 0; return; }
+        if (epoch !== cacheEpoch.value) { cache.clear(); cacheEpoch.value = epoch; }
+      };
+      window.addEventListener('storage', onStorage);
+      disconnectStorage = () => window.removeEventListener('storage', onStorage);
+    } catch { /* storage events are unavailable in this context */ }
+  };
+  activate();
   const request = async <T,>(path: string, options: RequestOptions = {}): Promise<T> => {
     if (typeof path !== 'string' || !path) throw new TypeError('REQUEST_INVALID: path must be a non-empty string');
     if (options.cacheTime !== undefined && (!Number.isFinite(options.cacheTime) || options.cacheTime < 0 || options.cacheTime > 3_600_000)) throw new TypeError('REQUEST_INVALID: cacheTime must be 0–3600000ms');
@@ -163,13 +189,15 @@ export function createRequestClient(input: RequestConfig = {}): RequestClient {
     post: <T = unknown>(path: string, body?: unknown, options?: Omit<RequestOptions, 'method' | 'body'>) => request<T>(path, { ...options, method: 'POST', body }),
     put: <T = unknown>(path: string, body?: unknown, options?: Omit<RequestOptions, 'method' | 'body'>) => request<T>(path, { ...options, method: 'PUT', body }),
     delete: <T = unknown>(path: string, options?: Omit<RequestOptions, 'method' | 'body'>) => request<T>(path, { ...options, method: 'DELETE' }),
+    activate,
+    dispose() { disconnectStorage?.(); disconnectStorage = undefined; },
     invalidateCache(tags?: readonly string[]) {
       if (tags !== undefined && (!Array.isArray(tags) || tags.some(tag => typeof tag !== 'string' || !tag))) throw new TypeError('REQUEST_INVALID: invalidateCache tags must be non-empty strings');
       let removed = 0;
       for (const [key, entry] of cache) {
         if (tags === undefined || tags.length === 0 || entry.tags.some(tag => tags.includes(tag))) { cache.delete(key); removed++; }
       }
-      if (removed) persist();
+      if (removed) { cacheEpoch.value++; persist(); }
       return removed;
     },
   }) satisfies RequestClient;
@@ -180,6 +208,10 @@ const RequestContext = createContext<RequestClient | null>(null);
 export function RequestProvider({ appConfig, children }: { readonly appConfig: Readonly<RuntimeConfig>; readonly children?: ReactNode }) {
   const config = appConfig.request ?? {};
   const client = useMemo(() => createRequestClient(config), [config]);
+  useEffect(() => {
+    client.activate();
+    return () => client.dispose();
+  }, [client]);
   return <RequestContext.Provider value={client}>{children}</RequestContext.Provider>;
 }
 export function useRequestClient(): RequestClient {

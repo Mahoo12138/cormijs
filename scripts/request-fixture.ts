@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import assert from 'node:assert/strict';
-import type { Page } from 'playwright-core';
+import type { Page, Route } from 'playwright-core';
 
 export const requestConfiguration = `import { defineConfig } from 'cormijs';
 import preset from '@cormijs/preset-react-vite';
@@ -26,6 +26,7 @@ export default defineApp({ request: { baseURL: '/api', headers: { 'x-app': 'corm
     'src/pages/index.tsx': `import { useRef, useState } from 'react';
 import { Link, createRequestClient, useCursorPagination, usePagination, useRequest, useRequestClient } from '@cormijs/runtime';
 const persistedClient=createRequestClient({baseURL:'/api',cachePersist:'session',cachePersistKey:'demo:request-cache',cacheLimit:4});
+const sharedClient=createRequestClient({baseURL:'/api',cachePersist:'local',cachePersistKey:'demo:shared-cache',cacheLimit:4});
 function Auto(){
   const {data,loading,error,refresh}=useRequest<{message:string}>((client,signal)=>client.get('/hello',{signal,params:{q:'one'}}));
   return <section data-auto-section><p data-auto>{data?.message ?? ''}</p><p data-loading>{String(loading)}</p><p data-error>{error ? 'error' : ''}</p><button onClick={()=>void refresh()}>Refresh</button></section>;
@@ -73,6 +74,12 @@ function Persisted(){
   return <section><p data-persisted>{message}</p>
     <button onClick={()=>void persistedClient.get<{message:string}>('/persisted',{cacheTime:60000}).then(item=>setMessage(item.message))}>Load persisted</button>
     <button onClick={()=>{persistedClient.invalidateCache();}}>Invalidate persisted</button></section>;
+}
+function Shared(){
+  const [message,setMessage]=useState('');
+  return <section><p data-shared>{message}</p>
+    <button onClick={()=>void sharedClient.get<{message:string}>('/shared',{cacheTime:60000}).then(item=>setMessage(item.message))}>Load shared</button>
+    <button onClick={()=>{sharedClient.invalidateCache();}}>Invalidate shared</button></section>;
 }
 function Tagged(){
   const client=useRequestClient();
@@ -131,7 +138,7 @@ function Deps(){
   const {data}=useRequest<{message:string}>((client,signal)=>client.get('/deps',{signal,params:{q}}),{refreshDeps:[q]});
   return <section><p data-deps>{data?.message ?? ''}</p><button onClick={()=>setQ('two')}>Change dep</button></section>;
 }
-export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Cached /><Tagged /><Debounced /><DebouncedMax /><DebouncedEdges /><DebouncedLeadingOnly /><Throttled /><TrailingThrottled /><TrailingOnly /><Persisted /><CursorPaged /><Deps /><Link to="/other">Other</Link></main>;}`,
+export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Cached /><Tagged /><Debounced /><DebouncedMax /><DebouncedEdges /><DebouncedLeadingOnly /><Throttled /><TrailingThrottled /><TrailingOnly /><Persisted /><Shared /><CursorPaged /><Deps /><Link to="/other">Other</Link></main>;}`,
     'src/pages/other.tsx': `import { Link } from '@cormijs/runtime';
 export default function Other(){return <main><h1>Request other</h1><Link to="/">Request home</Link></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -144,8 +151,9 @@ export default function Other(){return <main><h1>Request other</h1><Link to="/">
 export async function verifyRequestPage(page: Page, url: string) {
   let helloCount = 0, seenHeader = '', slowCount = 0, flakyCount = 0, pollCount = 0, depsCount = 0, cachedCount = 0;
   const taggedCounts: Record<string, number> = {};
+  let sharedCount = 0;
   let debouncedCount = 0, debouncedMaxCount = 0, debouncedEdgesCount = 0, debouncedLeadingOnlyCount = 0, throttledCount = 0, trailingCount = 0, trailingOnlyCount = 0, persistedCount = 0;
-  await page.route('**/api/**', async route => {
+  const apiHandler = async (route: Route) => {
     const request = route.request(), target = new URL(request.url());
     seenHeader = request.headers()['x-app'] ?? '';
     if (target.pathname === '/api/hello') {
@@ -191,6 +199,9 @@ export async function verifyRequestPage(page: Page, url: string) {
       const n = target.searchParams.get('n') ?? '0';
       taggedCounts[n] = (taggedCounts[n] ?? 0) + 1;
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'tagged:' + taggedCounts[n] }) });
+    } else if (target.pathname === '/api/shared') {
+      sharedCount++;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'shared:' + sharedCount }) });
     } else if (target.pathname === '/api/persisted') {
       persistedCount++;
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'persisted:' + persistedCount }) });
@@ -211,7 +222,8 @@ export async function verifyRequestPage(page: Page, url: string) {
     } else {
       await route.fulfill({ status: 404, body: 'missing' });
     }
-  });
+  };
+  await page.route('**/api/**', apiHandler);
   await page.goto(url); await page.getByRole('heading', { name: 'Request home', exact: true }).waitFor();
   await page.waitForFunction(() => document.querySelector('[data-auto]')?.textContent === 'hello:one');
   assert.equal(seenHeader, 'cormi');
@@ -361,5 +373,26 @@ export async function verifyRequestPage(page: Page, url: string) {
   await page.waitForTimeout(400);
   assert.equal(pollCount, stoppedAt, 'polling stops after unmount');
   assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);
+  await page.evaluate(() => { localStorage.removeItem('demo:shared-cache'); sessionStorage.removeItem('demo:request-cache'); });
+  await page.goto(url);
+  await page.getByRole('heading', { name: 'Request home', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Load shared', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-shared]')?.textContent === 'shared:1');
+  assert.equal(sharedCount, 1);
+  const second = await page.context().newPage();
+  second.setDefaultTimeout(12000);
+  await second.route('**/api/**', apiHandler);
+  await second.goto(url);
+  await second.getByRole('heading', { name: 'Request home', exact: true }).waitFor();
+  await second.getByRole('button', { name: 'Load shared', exact: true }).click();
+  await second.waitForFunction(() => document.querySelector('[data-shared]')?.textContent === 'shared:1');
+  assert.equal(sharedCount, 1, 'the second tab reads the shared localStorage entry');
+  await second.getByRole('button', { name: 'Invalidate shared', exact: true }).click();
+  await page.waitForTimeout(300);
+  await page.getByRole('button', { name: 'Load shared', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-shared]')?.textContent === 'shared:2');
+  assert.equal(sharedCount, 2, 'a storage invalidation clears the first tab cache');
+  await second.close();
+  await page.evaluate(() => localStorage.removeItem('demo:shared-cache'));
   await page.unroute('**/api/**');
 }

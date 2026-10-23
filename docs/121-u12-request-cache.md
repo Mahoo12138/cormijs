@@ -42,7 +42,7 @@ const fresh = await client.get<User>('/api/me', { cacheTime: 5000, cacheBust: tr
 | 并发去重 | 插件/生态 | 内置 |
 | 失效 | 生态方案 | 仅 cacheBust/过期 |
 | 容量控制 | 生态方案 | 未提供 |
-| 持久化 | 生态方案 | 可选 session/local Web Storage（U12-9） |
+| 持久化 | 生态方案 | 可选 session/local Web Storage（U12-9）；local 支持跨标签页失效（U12-12） |
 
 ## 5. 验证
 

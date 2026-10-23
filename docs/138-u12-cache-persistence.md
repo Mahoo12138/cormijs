@@ -36,7 +36,7 @@ client.invalidateCache(['config']); // 同时清理 sessionStorage 中的条目
 
 ## 3. 边界
 
-- 不加密、不签名、不做跨标签页同步；Web Storage 可被同源脚本读取，**不要持久化敏感响应**。
+- 不加密、不签名；Web Storage 可被同源脚本读取，**不要持久化敏感响应**。跨标签页失效见 [U12-12](141-u12-cross-tab-cache.md)，不复制数据。
 - 不持久化非 GET、`cacheBust`、失败响应或在途请求；也不持久化去重任务本身。
 - 没有容量估算/压缩；单个存储载荷超过 5 MB 时加载直接忽略，写入仅依赖浏览器配额。
 - 切换 `cachePersistKey` 或关闭持久化不会删除旧键；需要应用自行清理。
@@ -58,5 +58,5 @@ client.invalidateCache(['config']); // 同时清理 sessionStorage 中的条目
 
 ## 5. 下一步
 
-- U12 剩余：maxWait/自定义节流键、跨标签页失效；
+- U12 剩余：自定义节流键/跨组件共享（扩展项）；
 - U17 图表/主题编辑器、F6、U09 热替换、U16 请求 locale、SSR 生产化、U33 sitemap lastmod/压缩。

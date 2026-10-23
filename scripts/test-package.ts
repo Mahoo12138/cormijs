@@ -282,7 +282,7 @@ checker.check('.',[]);`);
   const { chromium } = await import('playwright-core');
   const browser = await chromium.launch({ executablePath, headless: true });
   try {
-    const page = await browser.newPage(); page.setDefaultTimeout(12000); const errors: string[] = [];
+    const context = await browser.newContext(); const page = await context.newPage(); page.setDefaultTimeout(12000); const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
     await withServer(app, 'dev', async url => {
       await page.goto(url); assert.match(await page.title(), /cormi/);
@@ -654,7 +654,7 @@ const hookOptions:UseRequestOptions<string>={retry:2,retryDelay:attempt=>attempt
 const cacheOptions:RequestOptions={cacheTime:5000,cacheBust:true,cacheTags:['group']};
 declare const pagination:UsePaginationResult<{id:number}>;
 declare const pageResponse:PaginationResponse<{id:number}>;declare const cursorResponse:CursorPaginationResponse<{id:number}>;declare const cursorPage:UseCursorPaginationResult<{id:number}>;
-declare const client:RequestClient;declare const result:UseRequestResult<string>;const removed:number=client.invalidateCache(['group']);
+declare const client:RequestClient;declare const result:UseRequestResult<string>;const removed:number=client.invalidateCache(['group']);client.dispose();client.activate();
 void [requestPlugin,options,hookOptions,cacheOptions,config,client,result,useRequest,usePagination,useCursorPagination,pagination,pageResponse,cursorResponse,cursorPage,removed,RequestError];
 // @ts-expect-error retry is a number
 const badHook:UseRequestOptions<string>={retry:'2'};
