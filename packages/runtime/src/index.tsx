@@ -20,6 +20,7 @@ export { formatIcu, formatIcuParts, type RichPart } from './icu.js';
 export { Access, AccessProvider, accessRuntime, AccessRoute, applyAccessConvention, useAccess, useAccessOptional, type Access as AccessMap } from './access.js';
 export { MenuProvider, menuRuntime, useActiveMenuKeys, useBreadcrumb, useMenu, useMenuCollapse, type BreadcrumbItem, type MenuItem } from './menu.js';
 export { toAntdMenuItems, toLayoutRoutes, type AntdMenuItem, type LayoutRoute } from './menu-adapters.js';
+export { ClientOnly, type ClientOnlyProps } from './client-only.js';
 export { defineApp, resolveAppConfig, type HistoryType, type RequestConfig, type LocaleConfig, type AccessConfig, type RuntimeConfig, type AppRuntimeContext, type AppRoutesContext, type RootContainerContext, type RouteChangeEvent } from './app-config.js';
 export { Link, NavLink, Navigate, Outlet, createSearchParams, useHref, useLocation, useMatch, useNavigate, useNavigation, useParams, useSearchParams } from 'react-router';
 

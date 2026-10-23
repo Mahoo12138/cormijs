@@ -625,6 +625,7 @@ const bad:ProLayoutPluginOptions={id:42};
     const chartsConsumer=await create('charts','react');await writeChartsFixture(chartsConsumer);
     const chartsManifest=consumerManifest(kit,'react');
     chartsManifest.dependencies['@cormijs/plugin-react']=chartsManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    chartsManifest.dependencies['@cormijs/plugin-react-vite']=chartsManifest.pnpm.overrides['@cormijs/plugin-react-vite']!;
     chartsManifest.dependencies['@ant-design/plots']='2.6.8';
     // @antv/component imports tslib without declaring it; isolated consumers need it at the root.
     chartsManifest.dependencies.tslib='2.8.1';

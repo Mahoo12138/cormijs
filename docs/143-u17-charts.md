@@ -38,8 +38,8 @@ export default function Page() {
 
 ## 3. SSR 与边界
 
-- 本切片只验证 SPA 的 dev/build/preview；没有验证图表 SSR/hydration。图表库通常依赖 DOM/Canvas，SSR 应用需要自行使用客户端渲染边界（例如 `lazy` + `Suspense` 或 `useEffect` 挂载）。
-- 不提供 `ClientOnly`/图表包装组件，也不在服务端预取图表数据。
+- 图表库依赖 DOM/Canvas；SSR 场景使用 U17-6 的 `ClientOnly` + `lazy` + `Suspense`，服务端只输出 fallback，hydration 后绘制。服务端图表内容仍未实现。
+- 不提供图表包装组件或服务端图表数据预取；通用 `ClientOnly` 见 [U17-6](145-u17-chart-ssr.md)。
 - 不包含图表类型选择器、主题编辑器联动、图表组件库或可视化 schema；这些属于应用/生态。
 - 图表库体积、tree-shaking 与按需加载由应用和所选库决定；cormi 不做专门拆包。
 - 未验证其他图表库；本切片只以 `@ant-design/plots` 2.6.8 作为可替换示例。
@@ -61,5 +61,5 @@ export default function Page() {
 
 ## 5. 下一步
 
-- U17 剩余：ProLayout 内置文案 locale、自定义 locale 对象、图表 SSR 边界；
+- U17 剩余：服务端图表内容、ProLayout 内置文案 locale、自定义 locale 对象；
 - F6 微前端/状态库适配、U09 热替换、U16 请求 locale、SSR 生产化、U33 sitemap lastmod/压缩。

@@ -1,0 +1,126 @@
+{
+  "format": "cormi:u17-6-chart-ssr-validation:1",
+  "verifiedAt": "2026-10-23T18:42:30.715Z",
+  "base": "ca9a29e1a825734c2f56da76ccaae186d70c808d",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "EADME.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/143-u17-charts.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/index.tsx",
+      "scripts/charts-fixture.ts",
+      "scripts/test-package.ts",
+      "docs/145-u17-chart-ssr.md",
+      "packages/runtime/src/client-only.tsx",
+      "tests/client-only.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62",
+    "@ant-design/plots": "2.6.8"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u17-6-chart-ssr/check.log",
+      "sha256": "0763e1c7b875d64923b6215979c7cabbfa3c29c1ade818f39c5804f751029125",
+      "seconds": 148.540677333,
+      "tests": 572,
+      "pass": 572,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests including ClientOnly SSR rendering"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u17-6-chart-ssr/browser.log",
+      "sha256": "b5c8c9fdd71695df243567bf24259221ae3096f8221fe859ac24516812609d57",
+      "seconds": 614.457927541,
+      "tests": 56,
+      "pass": 56,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes SSR fallback then hydrated chart canvas in dev/build/preview"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u17-6-chart-ssr/package.log",
+      "sha256": "b8d65e49d9fd516e60ad5f4fb0d43f615d7f51c759ee85c2f78cffee9faf4ce6",
+      "stages": 359,
+      "passed": true,
+      "note": "installed charts consumer verifies SSR fallback and client chart"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/charts.test.ts",
+      "log": ".cache/u17-6-chart-ssr/targeted.log",
+      "sha256": "eb29d5defde8991412903c8014f266f95e59657631a4e238acbbb8ec484d1e25",
+      "seconds": 12.809492459,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    },
+    "unitRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/client-only.test.ts",
+      "log": ".cache/u17-6-chart-ssr/unit.log",
+      "sha256": "4345fc37487dc53358c5ef01f16903ae43a714e7445aa216ebed3ae95ce26a62",
+      "seconds": 0.19542725,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "docs/49-application-guide.md": "97160f0d2b57f89d001de97ed4487f7a1c7137d1d80ec2995dedc6d834fe3794",
+    "docs/59-umi-feature-roadmap.md": "2a3db0adff23c64b7bdaec4138d36f84e459c71a41cc02efe00b51ae494f8c53",
+    "docs/112-roadmap-audit-2026-10-21.md": "d4f91fc53ad8b6b4fead76640cde2bc9f454ee61d6681e1804c6117739cad734",
+    "docs/143-u17-charts.md": "c38ae167fa6977a05ffa7665ba6046a5f7705c736c64bc72fbde27e780fe7b3f",
+    "docs/145-u17-chart-ssr.md": "6107c2a4125cd9a804dc8f0338d675a6e07243e8ff75d098637b78499d4c68cf",
+    "packages/runtime/src/client-only.tsx": "c50ef4347e210fc7b7471d69af120be39fdfadad9220d29953fde43a82859b50",
+    "packages/runtime/src/index.tsx": "abefe8ee6bd31e5e5fa35819084305899cbafc04f81221cf551f34192636e125",
+    "scripts/charts-fixture.ts": "61876f382b6bcee52e45fdedd0c007aa1589b9bb9be6ace8b6ffc3995fe41535",
+    "scripts/test-package.ts": "f06211dd18b3af7ed04eaa98ee62268517e32443e2fd93fcead9dcee4a3250ee",
+    "tests/client-only.test.ts": "7b5ed507e3b0bd070abfe056b78506f447cbe5b564698ac60106eb7261727969",
+    "tests/browser/charts.test.ts": "f2bf80ee4137425fea3685e4053f1bae419587d17aff9e1dcab8d6ba14bbf523"
+  },
+  "sourceInputCount": 11,
+  "sourceInputsDigest": "55a34110b7674fdec36be2d145cd6029c151665ab1a3cfe9817b9e6346ed8f03",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "97160f0d2b57f89d001de97ed4487f7a1c7137d1d80ec2995dedc6d834fe3794",
+    "docs/59-umi-feature-roadmap.md": "2a3db0adff23c64b7bdaec4138d36f84e459c71a41cc02efe00b51ae494f8c53",
+    "docs/112-roadmap-audit-2026-10-21.md": "d4f91fc53ad8b6b4fead76640cde2bc9f454ee61d6681e1804c6117739cad734",
+    "docs/143-u17-charts.md": "c38ae167fa6977a05ffa7665ba6046a5f7705c736c64bc72fbde27e780fe7b3f",
+    "docs/145-u17-chart-ssr.md": "6107c2a4125cd9a804dc8f0338d675a6e07243e8ff75d098637b78499d4c68cf"
+  },
+  "evidence": [
+    ".cache/u17-6-chart-ssr/check.log",
+    ".cache/u17-6-chart-ssr/browser.log",
+    ".cache/u17-6-chart-ssr/package.log",
+    ".cache/u17-6-chart-ssr/targeted.log",
+    ".cache/u17-6-chart-ssr/unit.log",
+    "artifacts/u17-6-chart-ssr-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "client-only-fallback-not-server-chart",
+    "no-chart-data-ssr",
+    "no-seo-chart-content",
+    "fallback-must-be-stable",
+    "ant-design-plots-only",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}
