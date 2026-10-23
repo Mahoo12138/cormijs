@@ -32,5 +32,5 @@ const { run } = useRequest(service, { manual: true, throttleWait: 500 });
 
 ## 5. 下一步
 
-- U12 剩余：trailing throttle、游标分页、缓存持久化；
+- U12 剩余：缓存持久化、maxWait/自定义节流键；尾调用已由 [U12-8](136-u12-trailing-throttle.md) 交付；
 - U17 ProLayout/图表、F6、U16 请求 locale、U33 并发/robots、SSR 生产化。

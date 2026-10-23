@@ -1,0 +1,109 @@
+{
+  "format": "cormi:u12-8-trailing-throttle-validation:1",
+  "verifiedAt": "2026-10-23T01:14:05.979Z",
+  "base": "ebe8d2b6a29889f99dc8e24dd6b59134e7433687",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "ocs/112-roadmap-audit-2026-10-21.md",
+      "docs/130-u12-throttle.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts",
+      "docs/136-u12-trailing-throttle.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-8-trailing-throttle/check.log",
+      "sha256": "34b72e6d1be5c256ade846a05b598b622e7a86a0a19c24bb6a17f4c08b50eafe",
+      "seconds": 142.272743334,
+      "tests": 569,
+      "pass": 569,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-8-trailing-throttle/browser.log",
+      "sha256": "6b9cd8f7042745747e18557307870a4f1ad3355462e5cf16ff9361cb1948ab54",
+      "seconds": 587.880302916,
+      "tests": 54,
+      "pass": 54,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes leading, trailing and trailing-only throttle assertions in dev/build/preview"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-8-trailing-throttle/package.log",
+      "sha256": "dff9756234819c5317c6addefcdbaba2f21d219749fb2025ac062323d956a4ea",
+      "stages": 344,
+      "passed": true,
+      "note": "request consumer public types include throttleLeading/throttleTrailing"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-8-trailing-throttle/targeted.log",
+      "sha256": "0d3be768968db0a13eef66be402b93e96a9ce4caeddbf71b4e4ebc8d0dc43729",
+      "seconds": 15.692839959,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "docs/49-application-guide.md": "7041af75893a9a371ad99ebd730302aad6a25fdd66e07354904b294c17522329",
+    "docs/59-umi-feature-roadmap.md": "a5c7123b4be1282fd6c7c5beaa6c9bb844fbf737aad9ae1f05310b3eaebfeaf1",
+    "docs/112-roadmap-audit-2026-10-21.md": "4ce910cbab22c9768c3b82d43c676adb266f97ce26eefd0843bd811ec45d2b1f",
+    "docs/130-u12-throttle.md": "c1380056c19491cf98beb144cffc9f99bbb424a197f985ffbf29bdee6970b8bd",
+    "docs/136-u12-trailing-throttle.md": "2412139783cd9bfc0e77b9c28326d2b0a3f2d4f61ee3f11f3102e74f5f98379c",
+    "packages/runtime/src/request.tsx": "50444deb18d4274a648d71b4d0877ef15ed32425b6e9503781f2e39a666cccae",
+    "scripts/request-fixture.ts": "1984d7ceaa234bd9759228eedea9236a45046a33ba130a9745033b55306df424",
+    "scripts/test-package.ts": "44a5ca9628a9bc654158f8bbe2f6b68312be568c8891f168c6e34126b7155780"
+  },
+  "sourceInputCount": 8,
+  "sourceInputsDigest": "a6fce9a9a32bf920a5ae73093cdf5f453402ebf954480a6d0407fbcb4ba3548a",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "7041af75893a9a371ad99ebd730302aad6a25fdd66e07354904b294c17522329",
+    "docs/59-umi-feature-roadmap.md": "a5c7123b4be1282fd6c7c5beaa6c9bb844fbf737aad9ae1f05310b3eaebfeaf1",
+    "docs/112-roadmap-audit-2026-10-21.md": "4ce910cbab22c9768c3b82d43c676adb266f97ce26eefd0843bd811ec45d2b1f",
+    "docs/130-u12-throttle.md": "c1380056c19491cf98beb144cffc9f99bbb424a197f985ffbf29bdee6970b8bd",
+    "docs/136-u12-trailing-throttle.md": "2412139783cd9bfc0e77b9c28326d2b0a3f2d4f61ee3f11f3102e74f5f98379c"
+  },
+  "evidence": [
+    ".cache/u12-8-trailing-throttle/check.log",
+    ".cache/u12-8-trailing-throttle/browser.log",
+    ".cache/u12-8-trailing-throttle/package.log",
+    ".cache/u12-8-trailing-throttle/targeted.log",
+    "artifacts/u12-8-trailing-throttle-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "no-max-wait",
+    "no-per-key-throttle",
+    "no-cache-persistence",
+    "trailing-coalesces-calls",
+    "new-execution-aborts-in-flight-request",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

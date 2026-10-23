@@ -164,8 +164,12 @@ export interface UseRequestOptions<T> {
   readonly refreshDeps?: readonly unknown[];
   /** Coalesce run/refresh calls within this window (0–60000ms); polling bypasses it. */
   readonly debounceWait?: number;
-  /** Drop run/refresh calls within this window after a leading call (0–60000ms); polling bypasses it. */
+  /** Throttle run/refresh calls within this window (0–60000ms); polling bypasses it. */
   readonly throttleWait?: number;
+  /** Execute the first call in a throttle window; default true. */
+  readonly throttleLeading?: boolean;
+  /** Execute one coalesced trailing call after a window with dropped calls; default false. */
+  readonly throttleTrailing?: boolean;
 }
 export interface UseRequestResult<T> {
   readonly data: T | undefined;
@@ -195,7 +199,11 @@ function validateUseRequest<T>(options: UseRequestOptions<T>): void {
   if (options.refreshDeps !== undefined && (!Array.isArray(options.refreshDeps) || options.refreshDeps.length > 16)) throw new TypeError('REQUEST_INVALID: refreshDeps must be an array of at most 16 values');
   if (options.debounceWait !== undefined && (!Number.isInteger(options.debounceWait) || options.debounceWait < 0 || options.debounceWait > 60_000)) throw new TypeError('REQUEST_INVALID: debounceWait must be an integer from 0 to 60000');
   if (options.throttleWait !== undefined && (!Number.isInteger(options.throttleWait) || options.throttleWait < 0 || options.throttleWait > 60_000)) throw new TypeError('REQUEST_INVALID: throttleWait must be an integer from 0 to 60000');
+  if (options.throttleLeading !== undefined && typeof options.throttleLeading !== 'boolean') throw new TypeError('REQUEST_INVALID: throttleLeading must be boolean');
+  if (options.throttleTrailing !== undefined && typeof options.throttleTrailing !== 'boolean') throw new TypeError('REQUEST_INVALID: throttleTrailing must be boolean');
   if ((options.debounceWait ?? 0) > 0 && (options.throttleWait ?? 0) > 0) throw new TypeError('REQUEST_INVALID: debounceWait and throttleWait are mutually exclusive');
+  if ((options.throttleLeading === false || options.throttleTrailing === true) && !(options.throttleWait ?? 0)) throw new TypeError('REQUEST_INVALID: throttleLeading/throttleTrailing require throttleWait');
+  if ((options.throttleWait ?? 0) > 0 && options.throttleLeading === false && options.throttleTrailing !== true) throw new TypeError('REQUEST_INVALID: throttleLeading=false requires throttleTrailing');
 }
 
 export function useRequest<T>(service: (client: RequestClient, signal: AbortSignal) => Promise<T>, options: UseRequestOptions<T> = {}): UseRequestResult<T> {
@@ -210,6 +218,7 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
   const polling = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), poll = useRef<() => void>(() => {});
   const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), debounceResolve = useRef<((value: T | undefined) => void) | undefined>(undefined);
   const lastThrottle = useRef(0);
+  const throttleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), throttlePending = useRef<Array<(value: T | undefined) => void>>([]);
   const stopPolling = () => { if (polling.current) { clearTimeout(polling.current); polling.current = undefined; } };
   const stopDebounce = () => {
     if (debounce.current) clearTimeout(debounce.current);
@@ -258,6 +267,24 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
     }
   }, [client]);
   const executeRef = useRef(execute); executeRef.current = execute;
+  const stopThrottle = () => {
+    if (throttleTimer.current) clearTimeout(throttleTimer.current);
+    throttleTimer.current = undefined;
+    for (const resolve of throttlePending.current) resolve(undefined);
+    throttlePending.current = [];
+  };
+  const scheduleThrottle = (wait: number) => {
+    throttleTimer.current = setTimeout(() => {
+      throttleTimer.current = undefined;
+      lastThrottle.current = Date.now();
+      const pending = throttlePending.current;
+      throttlePending.current = [];
+      void executeRef.current().then(
+        value => { for (const resolve of pending) resolve(value); },
+        () => { for (const resolve of pending) resolve(undefined); },
+      );
+    }, wait);
+  };
   const run = useCallback((): Promise<T | undefined> => {
     const wait = optionsRef.current.debounceWait ?? 0;
     if (wait) {
@@ -273,9 +300,24 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
     }
     const throttle = optionsRef.current.throttleWait ?? 0;
     if (throttle) {
-      const now = Date.now();
-      if (now - lastThrottle.current < throttle) return Promise.resolve(undefined);
-      lastThrottle.current = now;
+      const now = Date.now(), leading = optionsRef.current.throttleLeading !== false, trailing = optionsRef.current.throttleTrailing === true;
+      if (now - lastThrottle.current >= throttle) {
+        lastThrottle.current = now;
+        stopThrottle();
+        if (leading) return executeRef.current();
+        if (trailing) {
+          return new Promise<T | undefined>(resolve => {
+            throttlePending.current.push(resolve);
+            scheduleThrottle(throttle);
+          });
+        }
+        return Promise.resolve(undefined);
+      }
+      if (!trailing) return Promise.resolve(undefined);
+      return new Promise<T | undefined>(resolve => {
+        throttlePending.current.push(resolve);
+        if (!throttleTimer.current) scheduleThrottle(throttle - (now - lastThrottle.current));
+      });
     }
     return executeRef.current();
   }, []);
@@ -295,6 +337,7 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
     controller.current?.abort();
     stopPolling();
     stopDebounce();
+    stopThrottle();
     lastThrottle.current = 0;
     setState(value => ({ ...value, loading: false }));
   }, []);
@@ -308,6 +351,7 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
       controller.current?.abort();
       stopPolling();
       stopDebounce();
+      stopThrottle();
     };
   }, [manual, run, deps]);
   return { ...state, run, refresh: run, cancel };

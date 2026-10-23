@@ -88,6 +88,16 @@ function Throttled(){
   return <section><p data-throttled>{data?.message ?? ''}</p>
     <button onClick={()=>{void run();void run();}}>Run throttled</button></section>;
 }
+function TrailingThrottled(){
+  const {data,run}=useRequest<{message:string}>((client,signal)=>client.get('/throttled-trailing',{signal}),{manual:true,throttleWait:200,throttleTrailing:true});
+  return <section><p data-trailing>{data?.message ?? ''}</p>
+    <button onClick={()=>{void run();setTimeout(()=>{void run();},50);}}>Run trailing</button></section>;
+}
+function TrailingOnly(){
+  const {data,run}=useRequest<{message:string}>((client,signal)=>client.get('/throttled-trailing-only',{signal}),{manual:true,throttleWait:200,throttleLeading:false,throttleTrailing:true});
+  return <section><p data-trailing-only>{data?.message ?? ''}</p>
+    <button onClick={()=>{void run();void run();}}>Run trailing only</button></section>;
+}
 function CursorPaged(){
   const {data,nextCursor,hasMore,loading,loadMore,reload}=useCursorPagination<{id:number}>((client,{cursor,signal})=>client.get<{list:{id:number}[];nextCursor:string|null}>('/cursor',{signal,params:cursor?{cursor}:{}}));
   return <section><p data-cursor-next>{nextCursor ?? 'null'}</p><p data-cursor-count>{data.length}</p><p data-cursor-more>{String(hasMore)}</p><p data-cursor-loading>{String(loading)}</p>
@@ -99,7 +109,7 @@ function Deps(){
   const {data}=useRequest<{message:string}>((client,signal)=>client.get('/deps',{signal,params:{q}}),{refreshDeps:[q]});
   return <section><p data-deps>{data?.message ?? ''}</p><button onClick={()=>setQ('two')}>Change dep</button></section>;
 }
-export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Cached /><Tagged /><Debounced /><Throttled /><CursorPaged /><Deps /><Link to="/other">Other</Link></main>;}`,
+export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Cached /><Tagged /><Debounced /><Throttled /><TrailingThrottled /><TrailingOnly /><CursorPaged /><Deps /><Link to="/other">Other</Link></main>;}`,
     'src/pages/other.tsx': `import { Link } from '@cormijs/runtime';
 export default function Other(){return <main><h1>Request other</h1><Link to="/">Request home</Link></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -112,7 +122,7 @@ export default function Other(){return <main><h1>Request other</h1><Link to="/">
 export async function verifyRequestPage(page: Page, url: string) {
   let helloCount = 0, seenHeader = '', slowCount = 0, flakyCount = 0, pollCount = 0, depsCount = 0, cachedCount = 0;
   const taggedCounts: Record<string, number> = {};
-  let debouncedCount = 0, throttledCount = 0;
+  let debouncedCount = 0, throttledCount = 0, trailingCount = 0, trailingOnlyCount = 0;
   await page.route('**/api/**', async route => {
     const request = route.request(), target = new URL(request.url());
     seenHeader = request.headers()['x-app'] ?? '';
@@ -140,6 +150,12 @@ export async function verifyRequestPage(page: Page, url: string) {
     } else if (target.pathname === '/api/debounced') {
       debouncedCount++;
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'debounced:' + debouncedCount }) });
+    } else if (target.pathname === '/api/throttled-trailing') {
+      trailingCount++;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'throttled-trailing:' + trailingCount }) });
+    } else if (target.pathname === '/api/throttled-trailing-only') {
+      trailingOnlyCount++;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'throttled-trailing-only:' + trailingOnlyCount }) });
     } else if (target.pathname === '/api/tagged') {
       const n = target.searchParams.get('n') ?? '0';
       taggedCounts[n] = (taggedCounts[n] ?? 0) + 1;
@@ -265,6 +281,14 @@ export async function verifyRequestPage(page: Page, url: string) {
   await page.getByRole('button', { name: 'Run throttled', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('[data-throttled]')?.textContent === 'throttled:2');
   assert.equal(throttledCount, 2);
+  await page.getByRole('button', { name: 'Run trailing', exact: true }).click();
+  assert.equal(trailingCount, 1, 'leading call runs immediately');
+  await page.waitForFunction(() => document.querySelector('[data-trailing]')?.textContent === 'throttled-trailing:2');
+  assert.equal(trailingCount, 2, 'the dropped call runs once at the window end');
+  await page.getByRole('button', { name: 'Run trailing only', exact: true }).click();
+  assert.equal(trailingOnlyCount, 0, 'leading can be disabled');
+  await page.waitForFunction(() => document.querySelector('[data-trailing-only]')?.textContent === 'throttled-trailing-only:1');
+  assert.equal(trailingOnlyCount, 1, 'coalesced trailing calls execute once');
   await page.waitForFunction(() => document.querySelector('[data-deps]')?.textContent === 'deps:one');
   await page.getByRole('button', { name: 'Change dep', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('[data-deps]')?.textContent === 'deps:two');

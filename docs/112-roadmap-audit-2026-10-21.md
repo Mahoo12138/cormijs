@@ -24,7 +24,7 @@
 - `pnpm check`：**569/569**
 - `pnpm test:browser`：**54/54**
 - `pnpm test:package`：**344 阶段**
-- 最新证据：[U17-3 菜单图标](../artifacts/u17-3-menu-icons-validation.json)、[U17-2 ProLayout](../artifacts/u17-2-pro-layout-validation.json)、[U12-7 游标分页](../artifacts/u12-7-cursor-pagination-validation.json)、[U33-6 并发预渲染](../artifacts/u33-6-prerender-concurrency-validation.json)、[U33-5 robots](../artifacts/u33-5-robots-validation.json)、[U12-6 节流](../artifacts/u12-6-throttle-validation.json)、[U09-4 选择器等值](../artifacts/u09-4-selector-equality-validation.json)、[U17-1 Antd](../artifacts/u17-antd-validation.json)、[U32-2 流式 SSR](../artifacts/u32-streaming-validation.json)、[U33-4 预渲染控制](../artifacts/u33-4-prerender-control-validation.json)、[U16-2 RTL](../artifacts/u16-2-rtl-validation.json)。
+- 最新证据：[U12-8 尾调用节流](../artifacts/u12-8-trailing-throttle-validation.json)、[U17-3 菜单图标](../artifacts/u17-3-menu-icons-validation.json)、[U17-2 ProLayout](../artifacts/u17-2-pro-layout-validation.json)、[U12-7 游标分页](../artifacts/u12-7-cursor-pagination-validation.json)、[U33-6 并发预渲染](../artifacts/u33-6-prerender-concurrency-validation.json)、[U33-5 robots](../artifacts/u33-5-robots-validation.json)、[U12-6 节流](../artifacts/u12-6-throttle-validation.json)、[U09-4 选择器等值](../artifacts/u09-4-selector-equality-validation.json)、[U17-1 Antd](../artifacts/u17-antd-validation.json)、[U32-2 流式 SSR](../artifacts/u32-streaming-validation.json)、[U33-4 预渲染控制](../artifacts/u33-4-prerender-control-validation.json)、[U16-2 RTL](../artifacts/u16-2-rtl-validation.json)。
 - 工作区：本轮验证完成后以特性提交 + 文档索引提交交付；最新特性提交为 3d469c7（菜单图标注册表），工作树干净，未推送。
 
 ## 4. 未完成要求（阻断完成判定）
@@ -34,7 +34,7 @@
 | U32 | `serverLoader` 与流式 SSR 已交付；压缩/TLS/背压/代理缓冲与流中错误恢复未实现 | 部分完成 |
 | U33 | 字面路由与 `prerenderPaths` 预渲染、sitemap、单页容错/关闭、增量写入、robots.txt、并发预渲染已交付；sitemap index 未实现 | 部分完成 |
 | U09 | Hook/对象模型、reducers/effects/subscriptions、extraModels、依赖排序、选择器 isEqual 已交付；热替换保留 store 未实现 | 部分完成 |
-| U12 | useRequest 重试/轮询/refreshDeps/防抖/前沿节流、usePagination/useCursorPagination、GET 缓存/去重/LRU/标签失效已交付；尾调用节流、缓存持久化未实现 | 部分完成 |
+| U12 | useRequest 重试/轮询/refreshDeps/防抖/前沿与尾调用节流、usePagination/useCursorPagination、GET 缓存/去重/LRU/标签失效已交付；缓存持久化、maxWait 未实现 | 部分完成 |
 | U17 | 可选 `@cormijs/plugin-antd`（locale/direction/theme）、`ProLayoutShell`（菜单/导航/折叠持久化）与菜单图标注册表已交付；图表、主题编辑器、ProLayout 内置文案 locale、自定义 locale 与 SSR 未实现 | 部分完成 |
 | U16 | UI locale 归一化/回退链/资源解析与 RTL direction 已交付；按请求 locale、RTL 样式/组件封装未实现 | 部分完成 |
 | F6 | qiankun/Module Federation、dva/valtio/react-query 适配、多 builder、MFSU 等 | 未实现 |
@@ -48,7 +48,7 @@
 路线目标要求的是 Umi 应用能力清单的持续吸收，而不是“当前测试全绿”。当前仍有上表的多项应用能力与生态集成缺失，因此：
 
 - **不得**将本目标标记为 complete；
-- 下一优先级建议：U17 图表集成说明与主题编辑器，或 F6 微前端/状态库适配；其后补 U12 缓存持久化、U33 sitemap index、U16 请求 locale 与 SSR 生产化；
+- 下一优先级建议：U17 图表集成说明与主题编辑器，或 F6 微前端/状态库适配；其后补 U12 缓存持久化/maxWait、U33 sitemap index、U16 请求 locale 与 SSR 生产化；
 - 任何新切片仍需完整的 `pnpm check`、`pnpm test:browser`、`pnpm test:package` 与证据文件后才能提交。
 
 ## 6. 审计方法
