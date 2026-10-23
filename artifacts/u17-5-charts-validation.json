@@ -1,0 +1,120 @@
+{
+  "format": "cormi:u17-5-charts:1",
+  "verifiedAt": "2026-10-23T10:54:38.242Z",
+  "base": "15b5162c08a5bbacd896f934239a6e5b2d33c647",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "EADME.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/134-u17-pro-layout.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "package.json",
+      "packages/plugin-antd/src/pro-layout.tsx",
+      "pnpm-lock.yaml",
+      "scripts/pro-layout-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/browser/pro-layout.test.ts",
+      "docs/142-u17-theme-editor.md",
+      "docs/143-u17-charts.md",
+      "scripts/charts-fixture.ts",
+      "tests/browser/charts.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62",
+    "antd": "6.6.7",
+    "@ant-design/pro-layout": "7.22.7",
+    "@ant-design/plots": "2.6.8"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u17-5-charts/check.log",
+      "sha256": "cae26b48362ced7402fdcf684287ebaed939b124c3c08c55e01969446cd2409a",
+      "seconds": 125.33990637500001,
+      "tests": 570,
+      "pass": 570,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u17-5-charts/browser.log",
+      "sha256": "5308c94c9984b760876fc5eede8960caccc47063c47790ca0f711cdcad3c582e",
+      "seconds": 613.5168869170001,
+      "tests": 55,
+      "pass": 55,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes application-side @ant-design/plots canvas in dev/build/preview"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u17-5-charts/package.log",
+      "sha256": "3595ccc4114e2260fca845219d23503c28d28d7aca2aaf322b7e99bcdca94129",
+      "stages": 351,
+      "passed": true,
+      "note": "installed charts consumer installs @ant-design/plots + tslib and verifies a rendered canvas"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/charts.test.ts",
+      "log": ".cache/u17-5-charts/targeted.log",
+      "sha256": "f7e3d47b491053944d712ea038a731286a8b0194c436e9717f6d5f5aab1787ba",
+      "seconds": 11.068785583,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "package.json": "521c33b33348719b348cbb3ed74ff34e40ac56b5c5dcd59eb05e141d467937c8",
+    "pnpm-lock.yaml": "5cc47a8c94d8f201ae80164c766f18a354d6cbe959fafa108a5b84645f83daf1",
+    "docs/49-application-guide.md": "17f1e3ab5481945f372171d5ed99e942debbd25f995c9bb53d4641395c011e46",
+    "docs/59-umi-feature-roadmap.md": "1f4c8ec5f85e024bc57ea648da85d461ea5aafe49b1391674af1da140a2bccc1",
+    "docs/112-roadmap-audit-2026-10-21.md": "3585fe1a3c7300f6d72b8d660145174c27248067d0a64a7e7a319f94b2bfa3d0",
+    "docs/134-u17-pro-layout.md": "1a5668eb40048662ad6516a470bc36e8bb6d7f57c095e45b6de0601eb8bbc50b",
+    "docs/143-u17-charts.md": "cf86b50dc88ab4c0dcebb035b3327dd0dfbef3378509fce384de16d60fc90f74",
+    "scripts/charts-fixture.ts": "92836236098f91db2f83004e52cb504ff9180aaa787352fcef9860d004471cdf",
+    "scripts/test-package.ts": "3dfa12cc27c52fa2b28f4ca468eec7a8c116e0e7734998a85170ba08dba000ea",
+    "tests/browser/charts.test.ts": "f2bf80ee4137425fea3685e4053f1bae419587d17aff9e1dcab8d6ba14bbf523"
+  },
+  "sourceInputCount": 10,
+  "sourceInputsDigest": "58518c2eaea6d7fea8278e7dd7dae437114c7bcad14ceaca98de553aca7ef02c",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "17f1e3ab5481945f372171d5ed99e942debbd25f995c9bb53d4641395c011e46",
+    "docs/59-umi-feature-roadmap.md": "1f4c8ec5f85e024bc57ea648da85d461ea5aafe49b1391674af1da140a2bccc1",
+    "docs/112-roadmap-audit-2026-10-21.md": "3585fe1a3c7300f6d72b8d660145174c27248067d0a64a7e7a319f94b2bfa3d0",
+    "docs/134-u17-pro-layout.md": "1a5668eb40048662ad6516a470bc36e8bb6d7f57c095e45b6de0601eb8bbc50b",
+    "docs/143-u17-charts.md": "cf86b50dc88ab4c0dcebb035b3327dd0dfbef3378509fce384de16d60fc90f74"
+  },
+  "evidence": [
+    ".cache/u17-5-charts/check.log",
+    ".cache/u17-5-charts/browser.log",
+    ".cache/u17-5-charts/package.log",
+    ".cache/u17-5-charts/targeted.log",
+    "artifacts/u17-5-charts-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "ant-design-plots-only",
+    "spa-only-no-chart-ssr",
+    "no-chart-plugin-or-wrapper",
+    "no-chart-theme-auto-mapping",
+    "isolated-install-needs-explicit-tslib",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

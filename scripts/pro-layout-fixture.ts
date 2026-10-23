@@ -43,12 +43,18 @@ import { useIntl } from '@cormijs/runtime';
 const icons = { home: <HomeOutlined />, users: <TeamOutlined /> };
 export default function Layout(){
   const { t } = useIntl();
-  return <ProLayoutShell title={t('app.title')} icons={icons}><Outlet /></ProLayoutShell>;
+  return <ProLayoutShell title={t('app.title')} icons={icons} settingDrawer settingsStorageKey="demo:pro-layout-settings"><Outlet /></ProLayoutShell>;
 }`,
-    'src/Home.tsx': `import { useIntl } from '@cormijs/runtime';
+    'src/Home.tsx': `import { Button } from 'antd';
+import { useIntl } from '@cormijs/runtime';
+import { useProLayoutSettings } from '@cormijs/plugin-antd/pro-layout';
 export default function Home(){
   const { locale, setLocale, t } = useIntl();
-  return <main><h2>{t('page.home')}</h2><button data-switch onClick={()=>setLocale(locale === 'en' ? 'zh' : 'en')}>Switch locale</button></main>;
+  const { settings, update } = useProLayoutSettings();
+  const dark = settings.navTheme === 'realDark';
+  return <main><h2>{t('page.home')}</h2><Button data-themed type="primary">Themed</Button>
+    <button data-theme onClick={()=>update(dark ? { navTheme: 'light', colorPrimary: '#1677ff' } : { navTheme: 'realDark', colorPrimary: '#722ed1' })}>Toggle theme</button>
+    <button data-switch onClick={()=>setLocale(locale === 'en' ? 'zh' : 'en')}>Switch locale</button></main>;
 }`,
     'src/Users.tsx': `import { useIntl } from '@cormijs/runtime';
 export default function Users(){ const { t } = useIntl(); return <main><h2>{t('page.users')}</h2></main>; }`,
@@ -72,6 +78,14 @@ export async function verifyProLayoutPage(page: Page, url: string) {
   assert.deepEqual(await menuText(), ['Home', 'Users']);
   assert.equal(await sider.locator('.anticon-home').count(), 1);
   assert.equal(await sider.locator('.anticon-team').count(), 1);
+  const themed = page.locator('[data-themed]');
+  assert.match((await sider.getAttribute('class')) ?? '', /ant-pro-sider-light/);
+  assert.equal(await themed.evaluate(node => getComputedStyle(node).backgroundColor), 'rgb(22, 119, 255)');
+  assert.equal(await page.locator('.ant-pro-setting-drawer-handle').count(), 1);
+  await page.locator('[data-theme]').click();
+  await page.waitForFunction(() => !document.querySelector('.ant-pro-sider')?.classList.contains('ant-pro-sider-light'));
+  await page.waitForFunction(() => getComputedStyle(document.querySelector('[data-themed]')!).backgroundColor !== 'rgb(22, 119, 255)');
+  assert.match((await page.evaluate(() => localStorage.getItem('demo:pro-layout-settings'))) ?? '', /"realDark"/);
 
   await page.getByRole('menuitem', { name: 'Users' }).click();
   await page.getByRole('heading', { name: 'Users page', exact: true }).waitFor();
@@ -95,7 +109,13 @@ export async function verifyProLayoutPage(page: Page, url: string) {
   await page.reload();
   await page.getByRole('heading', { name: '首页', exact: true }).waitFor();
   await page.waitForFunction(() => document.querySelector('.ant-pro-sider')?.classList.contains('ant-pro-sider-collapsed'));
+  await page.waitForFunction(() => !document.querySelector('.ant-pro-sider')?.classList.contains('ant-pro-sider-light'));
+  assert.notEqual(await page.locator('[data-themed]').evaluate(node => getComputedStyle(node).backgroundColor), 'rgb(22, 119, 255)');
   await page.locator('.ant-pro-sider-collapsed-button').click();
   await page.waitForFunction(() => !document.querySelector('.ant-pro-sider')?.classList.contains('ant-pro-sider-collapsed'));
   assert.equal(await page.evaluate(() => localStorage.getItem('demo:pro-layout-collapse')), 'false');
+  await page.locator('.ant-pro-setting-drawer-handle').click();
+  await page.locator('.ant-pro-setting-drawer-drawer-content').waitFor({ state: 'visible' });
+  await page.keyboard.press('Escape');
+  await page.locator('.ant-pro-setting-drawer-drawer-content').waitFor({ state: 'hidden' });
 }

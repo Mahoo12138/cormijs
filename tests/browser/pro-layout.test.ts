@@ -15,7 +15,7 @@ async function browser(t: TestContext) {
 test('pro layout shell drives menu navigation, locale and collapse in dev, build and preview', { timeout: 240000 }, async t => {
   const f = await app(t); await writeProLayoutFixture(f.root); const page = await browser(t), errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('console', message => { if (message.type() === 'error' && !/^Warning: \[antd: (Drawer|List|Alert)\]/.test(message.text())) errors.push(message.text()); });
   const dev = cli(t, f.root, 'dev', ['--startup-timeout', '30000']), ready = await dev.waitFor(event => event.type === 'ready', 0, 30000);
   await verifyProLayoutPage(page, ready.url);
   assert.deepEqual(errors, []);

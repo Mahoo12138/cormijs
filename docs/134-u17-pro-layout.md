@@ -54,7 +54,7 @@ export default function Layout() {
 ## 3. 边界
 
 - ProLayout 7.22.7 的 peer 声明仍是 `antd ^4.24.15 || ^5.11.2`；本切片在 antd 6.6.7 上通过真实 dev/build/preview 与安装包消费验证，但 pnpm 严格 peer 校验会拒绝该组合，安装包消费者需对该可选集成关闭 `strict-peer-dependencies`。上游放宽范围前不能宣称官方兼容。
-- 未提供图表、主题编辑器或 ProLayout `SettingDrawer`；菜单图标已由 [U17-3](135-u17-menu-icons.md) 的 `meta.icon`/`icons` 注册表提供，`actionsRender`、头像等由应用自行传入或等待后续切片。
+- 图表由应用侧库提供并已由 [U17-5](143-u17-charts.md) 验证；主题编辑器由 [U17-4](142-u17-theme-editor.md) 提供；菜单图标由 [U17-3](135-u17-menu-icons.md) 提供；`actionsRender`、头像等由应用自行传入或等待后续切片。
 - 未映射 ProLayout 自身的内置文案 locale；菜单/页面标题由 cormi locale 提供，Antd 组件文案由 U17-1 的 locale 表提供。
 - 未验证 SSR/SSR 样式抽取；ProLayout 运行时是 CommonJS 包，SSR 组合需单独验证。
 - `breakpoint` 默认关闭，移动端不会自动折叠；ProLayout 的 `menu`、`breadcrumbRender`、`token` 等高级配置尚未暴露为外壳选项，应用可等待后续扩展或自行封装。
@@ -88,5 +88,5 @@ export default function Layout() {
 
 ## 6. 下一步
 
-- U17 剩余：图表、主题编辑器、ProLayout 高级配置与更多 locale 联动；
+- U17 剩余：图表 SSR、ProLayout 高级配置与更多 locale 联动；
 - 之后推进 F6 微前端/状态库适配，或 U09 热替换、U12 缓存持久化、U33 sitemap index、SSR 生产化。

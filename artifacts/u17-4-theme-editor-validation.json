@@ -1,0 +1,119 @@
+{
+  "format": "cormi:u17-4-theme-editor:1",
+  "verifiedAt": "2026-10-23T10:54:38.224Z",
+  "base": "15b5162c08a5bbacd896f934239a6e5b2d33c647",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "EADME.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/134-u17-pro-layout.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "package.json",
+      "packages/plugin-antd/src/pro-layout.tsx",
+      "pnpm-lock.yaml",
+      "scripts/pro-layout-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/browser/pro-layout.test.ts",
+      "docs/142-u17-theme-editor.md",
+      "docs/143-u17-charts.md",
+      "scripts/charts-fixture.ts",
+      "tests/browser/charts.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62",
+    "antd": "6.6.7",
+    "@ant-design/pro-layout": "7.22.7",
+    "@ant-design/plots": "2.6.8"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u17-5-charts/check.log",
+      "sha256": "cae26b48362ced7402fdcf684287ebaed939b124c3c08c55e01969446cd2409a",
+      "seconds": 125.33990637500001,
+      "tests": 570,
+      "pass": 570,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u17-5-charts/browser.log",
+      "sha256": "5308c94c9984b760876fc5eede8960caccc47063c47790ca0f711cdcad3c582e",
+      "seconds": 613.5168869170001,
+      "tests": 55,
+      "pass": 55,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes theme toggle, persistence and setting drawer in dev/build/preview"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u17-5-charts/package.log",
+      "sha256": "3595ccc4114e2260fca845219d23503c28d28d7aca2aaf322b7e99bcdca94129",
+      "stages": 351,
+      "passed": true,
+      "note": "installed pro-layout consumer covers setting drawer, settings hook and reload persistence"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/pro-layout.test.ts",
+      "log": ".cache/u17-4-theme-editor/targeted.log",
+      "sha256": "d65aa3e7028341112aa42ecd84d679432c361e9c3beaf3abf31a5124ada8353c",
+      "seconds": 12.38488625,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "docs/49-application-guide.md": "17f1e3ab5481945f372171d5ed99e942debbd25f995c9bb53d4641395c011e46",
+    "docs/59-umi-feature-roadmap.md": "1f4c8ec5f85e024bc57ea648da85d461ea5aafe49b1391674af1da140a2bccc1",
+    "docs/112-roadmap-audit-2026-10-21.md": "3585fe1a3c7300f6d72b8d660145174c27248067d0a64a7e7a319f94b2bfa3d0",
+    "docs/134-u17-pro-layout.md": "1a5668eb40048662ad6516a470bc36e8bb6d7f57c095e45b6de0601eb8bbc50b",
+    "docs/142-u17-theme-editor.md": "91e2b97a145d411a202f191cc9df24e154720104ea45e56e7dd5a944afb6fa99",
+    "packages/plugin-antd/src/pro-layout.tsx": "673ca0d82d165ba15361feab06fc4a737d94cee31300b337417b996ef0d08116",
+    "scripts/pro-layout-fixture.ts": "ed8052323c69a8bf7fca4a99632f8b59668874a083caffcc0cbea0428921a204",
+    "tests/browser/pro-layout.test.ts": "9006681f6bb96d02b08924c1b949779b0444d3cf3d399f9ca3fd7d55ee636105"
+  },
+  "sourceInputCount": 8,
+  "sourceInputsDigest": "52d245e76992bead220c78d9185010447860d3bb77b73d11e214c3b008f6d45f",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "17f1e3ab5481945f372171d5ed99e942debbd25f995c9bb53d4641395c011e46",
+    "docs/59-umi-feature-roadmap.md": "1f4c8ec5f85e024bc57ea648da85d461ea5aafe49b1391674af1da140a2bccc1",
+    "docs/112-roadmap-audit-2026-10-21.md": "3585fe1a3c7300f6d72b8d660145174c27248067d0a64a7e7a319f94b2bfa3d0",
+    "docs/134-u17-pro-layout.md": "1a5668eb40048662ad6516a470bc36e8bb6d7f57c095e45b6de0601eb8bbc50b",
+    "docs/142-u17-theme-editor.md": "91e2b97a145d411a202f191cc9df24e154720104ea45e56e7dd5a944afb6fa99"
+  },
+  "evidence": [
+    ".cache/u17-5-charts/check.log",
+    ".cache/u17-5-charts/browser.log",
+    ".cache/u17-5-charts/package.log",
+    ".cache/u17-4-theme-editor/targeted.log",
+    "artifacts/u17-4-theme-editor-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "prolayout-settings-only",
+    "localstorage-best-effort",
+    "no-server-side-theme-store",
+    "no-cross-tab-settings-sync",
+    "setting-drawer-upstream-deprecation-warnings",
+    "no-ssr-verification",
+    "strict-peer-validation-disabled-for-optional-consumer",
+    "no-publication-or-deployment"
+  ]
+}

@@ -35,6 +35,7 @@ import { writeStaticExportFixture, verifyStaticExport, verifyStaticExportPages }
 import { writeMpaFixture, verifyMpaPages, verifyMpaOutput } from './mpa-fixture.js';
 import { writeAntdFixture, verifyAntdPage } from './antd-fixture.js';
 import { writeProLayoutFixture, verifyProLayoutPage } from './pro-layout-fixture.js';
+import { writeChartsFixture, verifyChartsPage } from './charts-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
 import { writeConventionalLoaderFixture, verifyConventionalLoaderPage } from './conventional-loader-fixture.js';
@@ -617,6 +618,22 @@ const bad:ProLayoutPluginOptions={id:42};
     await command('pro-layout-build',proLayoutConsumer,'build');
     await withServer(proLayoutConsumer,'preview',async url=>{await verifyProLayoutPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'pro-layout-preview.png')});});
     report.stages.push({label:'installed-pro-layout-menu-locale-collapse-dev-build-preview',adapter:'@cormijs/plugin-antd/pro-layout',previewRegenerated:false});
+
+    }
+    if (selected('charts')) {
+    const chartsConsumer=await create('charts','react');await writeChartsFixture(chartsConsumer);
+    const chartsManifest=consumerManifest(kit,'react');
+    chartsManifest.dependencies['@cormijs/plugin-react']=chartsManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    chartsManifest.dependencies['@ant-design/plots']='2.6.8';
+    // @antv/component imports tslib without declaring it; isolated consumers need it at the root.
+    chartsManifest.dependencies.tslib='2.8.1';
+    await writeFile(join(chartsConsumer,'package.json'),JSON.stringify(chartsManifest,null,2));
+    await install('charts-install',chartsConsumer);await auditLinks(chartsConsumer);
+    await command('charts-typecheck',chartsConsumer,'typecheck');
+    await withServer(chartsConsumer,'dev',async url=>{await verifyChartsPage(page,url);assert.deepEqual(errors,[]);});
+    await command('charts-build',chartsConsumer,'build');
+    await withServer(chartsConsumer,'preview',async url=>{await verifyChartsPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'charts-preview.png')});});
+    report.stages.push({label:'installed-charts-library-dev-build-preview',adapter:'@ant-design/plots',previewRegenerated:false});
 
     }
     if (selected('initial-state')) {
