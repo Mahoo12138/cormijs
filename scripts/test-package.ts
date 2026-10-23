@@ -36,6 +36,7 @@ import { writeMpaFixture, verifyMpaPages, verifyMpaOutput } from './mpa-fixture.
 import { writeAntdFixture, verifyAntdPage } from './antd-fixture.js';
 import { writeProLayoutFixture, verifyProLayoutPage } from './pro-layout-fixture.js';
 import { writeChartsFixture, verifyChartsPage } from './charts-fixture.js';
+import { writeReactQueryFixture, verifyReactQueryPage } from './react-query-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
 import { writeConventionalLoaderFixture, verifyConventionalLoaderPage } from './conventional-loader-fixture.js';
@@ -634,6 +635,27 @@ const bad:ProLayoutPluginOptions={id:42};
     await command('charts-build',chartsConsumer,'build');
     await withServer(chartsConsumer,'preview',async url=>{await verifyChartsPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'charts-preview.png')});});
     report.stages.push({label:'installed-charts-library-dev-build-preview',adapter:'@ant-design/plots',previewRegenerated:false});
+
+    }
+    if (selected('react-query')) {
+    const reactQueryConsumer=await create('react-query','react');await writeReactQueryFixture(reactQueryConsumer);
+    const reactQueryManifest=consumerManifest(kit,'react');
+    reactQueryManifest.dependencies['@cormijs/plugin-react-query']=reactQueryManifest.pnpm.overrides['@cormijs/plugin-react-query']!;
+    reactQueryManifest.dependencies['@cormijs/plugin-react']=reactQueryManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    reactQueryManifest.dependencies['@tanstack/react-query']='5.104.5';
+    await writeFile(join(reactQueryConsumer,'package.json'),JSON.stringify(reactQueryManifest,null,2));
+    await install('react-query-install',reactQueryConsumer);await auditLinks(reactQueryConsumer);
+    await command('react-query-typecheck',reactQueryConsumer,'typecheck');
+    await writeFile(join(reactQueryConsumer,'types.mts'),`import {reactQueryPlugin,type ReactQueryPluginOptions} from '@cormijs/plugin-react-query';
+const options:ReactQueryPluginOptions={id:'consumer:react-query',defaults:{staleTime:1000,gcTime:5000,retry:0,refetchOnWindowFocus:false}};void [reactQueryPlugin,options];
+// @ts-expect-error retry is false or an integer
+const bad:ReactQueryPluginOptions={defaults:{retry:'always'}};
+`);
+    await execute('react-query-public-types',reactQueryConsumer,process.execPath,typeArguments);
+    await withServer(reactQueryConsumer,'dev',async url=>{await verifyReactQueryPage(page,url);assert.deepEqual(errors,[]);});
+    await command('react-query-build',reactQueryConsumer,'build');
+    await withServer(reactQueryConsumer,'preview',async url=>{await verifyReactQueryPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'react-query-preview.png')});});
+    report.stages.push({label:'installed-react-query-shared-cache-dev-build-preview',adapter:'@cormijs/plugin-react-query',previewRegenerated:false});
 
     }
     if (selected('initial-state')) {

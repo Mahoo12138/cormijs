@@ -1,0 +1,133 @@
+{
+  "format": "cormi:f6-react-query-validation:1",
+  "verifiedAt": "2026-10-23T16:01:40.732Z",
+  "base": "35434f457e8d6e1840b2134e3d8101ee53a1a0c1",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "EADME.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "package.json",
+      "pnpm-lock.yaml",
+      "scripts/test-package.ts",
+      "tsconfig.json",
+      "docs/144-f6-react-query.md",
+      "packages/plugin-react-query/",
+      "scripts/react-query-fixture.ts",
+      "tests/browser/react-query.test.ts",
+      "tests/react-query.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62",
+    "@tanstack/react-query": "5.104.5"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/f6-react-query/check.log",
+      "sha256": "d90242a58c013edc1cd8ed95361da16f599745ee8ee612c646fa0c328eb1cd3e",
+      "seconds": 125.273162083,
+      "tests": 571,
+      "pass": 571,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests including plugin validation/withdrawal"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/f6-react-query/browser.log",
+      "sha256": "cb31d4f603c260568f791512bb59ee87ddc8a603cf8a2b5c8835b31304015045",
+      "seconds": 605.997019041,
+      "tests": 56,
+      "pass": 56,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes shared React Query cache and refetch in dev/build/preview"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/f6-react-query/package.log",
+      "sha256": "07118d1a161540afd4b4716d9d45c1912c3f518e6b7a05564fd7f65f094006f6",
+      "stages": 359,
+      "passed": true,
+      "note": "installed react-query consumer with public types and dev/build/preview verification"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/react-query.test.ts",
+      "log": ".cache/f6-react-query/targeted.log",
+      "sha256": "604f64f2308bbf7302f1a9f4870fbf88b1468fe6fef412f5150adc078cb5cdd4",
+      "seconds": 10.939574166,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    },
+    "unitRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/react-query.test.ts",
+      "log": ".cache/f6-react-query/unit.log",
+      "sha256": "ffc4711023c828a2b18237e0ab4b0634c6425db66cae447334bb354d0d5965ce",
+      "seconds": 0.33947054200000004,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "docs/49-application-guide.md": "06fe3b410a3b20da5b72eb25d2d44f52726fcae798815573b64d2582fdb342a3",
+    "docs/59-umi-feature-roadmap.md": "0d34cc265d268f9f527736ac9ed70a50de8a9b348168fc50c1dd7c6cd4a54ff1",
+    "docs/112-roadmap-audit-2026-10-21.md": "9d7c413f755bee12f38df39ee0c9160c26a16d27630a507dae25b17a93f47fa0",
+    "docs/144-f6-react-query.md": "5561433d2bbc89f47d82f9652232c51bbb6928af7396d10fc296cd3dda6314bd",
+    "package.json": "535a6fcba63f9f01f067bc79cc87b8a61b52fe32d986ad9cea39917efcf8d736",
+    "pnpm-lock.yaml": "dafe907ab58110d6b47137d065766abc59e9bd7084225b1a1457ce44c84030a0",
+    "tsconfig.json": "b70c0850cf75c2ae461915dbd0bd8834b251e554272e3dbba91aa4a7920338c2",
+    "packages/plugin-react-query/package.json": "744d5f215c5ec00ce54da1989802f3bd0f4526d6e1d7a31a0cb0cb845d25114e",
+    "packages/plugin-react-query/tsconfig.json": "44038e1a2f86ffbe0c75d359fde017935a701319fbb64b621678c214a1450cd3",
+    "packages/plugin-react-query/src/index.ts": "4fbf3fc7e4c17806686e30a5ae9e3bae66e5abadae126761cdaa94a263a660b0",
+    "packages/plugin-react-query/src/runtime.tsx": "d45654dfaf4c3339059558d91224bfab7635f77e7fe32c1d493f0433ae73ae1f",
+    "scripts/react-query-fixture.ts": "e13adc109a2502c6f5b4e69c979f824c74001b46b00dbd2494821d0510839c91",
+    "scripts/test-package.ts": "e660285817af847f041a60e1a5d6376876a391ff9f64fca8f88c25e2bd17e0c2",
+    "tests/react-query.test.ts": "d8a7fae86bfe255124072b36d1e2e790f124fdc0e52d0641252d152f8d9a3c7a",
+    "tests/browser/react-query.test.ts": "d180cd3d27ff5824e5b01375fa58c75d0700f1bb2d588cf60edcef65e9b2440f"
+  },
+  "sourceInputCount": 15,
+  "sourceInputsDigest": "e58c0d5969265ef10ee976f3307617ca8e61970f69808b89566915851af76b7e",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "06fe3b410a3b20da5b72eb25d2d44f52726fcae798815573b64d2582fdb342a3",
+    "docs/59-umi-feature-roadmap.md": "0d34cc265d268f9f527736ac9ed70a50de8a9b348168fc50c1dd7c6cd4a54ff1",
+    "docs/112-roadmap-audit-2026-10-21.md": "9d7c413f755bee12f38df39ee0c9160c26a16d27630a507dae25b17a93f47fa0",
+    "docs/144-f6-react-query.md": "5561433d2bbc89f47d82f9652232c51bbb6928af7396d10fc296cd3dda6314bd"
+  },
+  "evidence": [
+    ".cache/f6-react-query/check.log",
+    ".cache/f6-react-query/browser.log",
+    ".cache/f6-react-query/package.log",
+    ".cache/f6-react-query/targeted.log",
+    ".cache/f6-react-query/unit.log",
+    "artifacts/f6-react-query-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "react-query-5-only",
+    "four-default-options-only",
+    "one-query-client-per-mount",
+    "no-ssr-dehydration",
+    "no-devtools-or-persistence",
+    "no-query-key-generation",
+    "no-dva-or-valtio-adapter",
+    "no-qiankun-or-module-federation",
+    "no-publication-or-deployment"
+  ]
+}

@@ -40,6 +40,9 @@ importers:
       '@cormijs/plugin-react':
         specifier: workspace:*
         version: link:packages/plugin-react
+      '@cormijs/plugin-react-query':
+        specifier: workspace:*
+        version: link:packages/plugin-react-query
       '@cormijs/plugin-react-vite':
         specifier: workspace:*
         version: link:packages/plugin-react-vite
@@ -61,6 +64,9 @@ importers:
       '@cormijs/runtime':
         specifier: workspace:*
         version: link:packages/runtime
+      '@tanstack/react-query':
+        specifier: 5.104.5
+        version: 5.104.5(@types/react@19.2.0)(react@19.3.1)
       '@types/node':
         specifier: 22.13.10
         version: 22.13.10
@@ -206,6 +212,22 @@ importers:
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
+
+  packages/plugin-react-query:
+    dependencies:
+      '@cormijs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@cormijs/plugin-react':
+        specifier: workspace:*
+        version: link:../plugin-react
+    devDependencies:
+      '@tanstack/react-query':
+        specifier: 5.104.5
+        version: 5.104.5(@types/react@19.2.0)(react@19.3.1)
+      '@types/react':
+        specifier: 19.2.0
+        version: 19.2.0
 
   packages/plugin-react-vite:
     dependencies:
@@ -1303,6 +1325,18 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@tanstack/query-core@5.104.5':
+    resolution: {integrity: sha512-Q94gI8Opd+CbdVNOdj8ZCyV8WqLYitrDq1t96Xc8WZT6lY0r5iRnJLXYDxMex7EEf2v+mXvn4FcjaBKSxXZQ9A==}
+
+  '@tanstack/react-query@5.104.5':
+    resolution: {integrity: sha512-RORgFe052U+93weaNuqg7qHq7vNVNzXN/VrXqD4bbAuQCWUqOl2lV5Ui9flWk5CVvMyL/Bh27QWhzwH0aaOx9g==}
+    peerDependencies:
+      '@types/react': ^18 || ^19
+      react: ^18 || ^19
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -2919,6 +2953,15 @@ snapshots:
     optional: true
 
   '@standard-schema/spec@1.1.0': {}
+
+  '@tanstack/query-core@5.104.5': {}
+
+  '@tanstack/react-query@5.104.5(@types/react@19.2.0)(react@19.3.1)':
+    dependencies:
+      '@tanstack/query-core': 5.104.5
+      react: 19.3.1
+    optionalDependencies:
+      '@types/react': 19.2.0
 
   '@types/babel__core@7.20.5':
     dependencies:

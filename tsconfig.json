@@ -14,6 +14,7 @@
     {"path": "packages/plugin-antd"},
     {"path": "packages/plugin-react-vite"},
     {"path": "packages/plugin-typescript"},
-    {"path": "packages/preset-react-vite"}
+    {"path": "packages/preset-react-vite"},
+    {"path": "packages/plugin-react-query"}
   ]
 }
