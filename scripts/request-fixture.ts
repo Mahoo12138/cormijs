@@ -90,6 +90,11 @@ function Debounced(){
   return <section><p data-debounced>{data?.message ?? ''}</p><p data-debounced-loading>{String(loading)}</p>
     <button onClick={()=>{void run();void run();}}>Run debounced</button></section>;
 }
+function DebouncedMax(){
+  const {data,run}=useRequest<{message:string}>((client,signal)=>client.get('/debounced-max',{signal}),{manual:true,debounceWait:500,debounceMaxWait:300});
+  return <section><p data-debounced-max>{data?.message ?? ''}</p>
+    <button onClick={()=>{void run();setTimeout(()=>{void run();},100);setTimeout(()=>{void run();},200);}}>Run debounce max</button></section>;
+}
 function Throttled(){
   const {data,run}=useRequest<{message:string}>((client,signal)=>client.get('/throttled',{signal}),{manual:true,throttleWait:200});
   return <section><p data-throttled>{data?.message ?? ''}</p>
@@ -116,7 +121,7 @@ function Deps(){
   const {data}=useRequest<{message:string}>((client,signal)=>client.get('/deps',{signal,params:{q}}),{refreshDeps:[q]});
   return <section><p data-deps>{data?.message ?? ''}</p><button onClick={()=>setQ('two')}>Change dep</button></section>;
 }
-export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Cached /><Tagged /><Debounced /><Throttled /><TrailingThrottled /><TrailingOnly /><Persisted /><CursorPaged /><Deps /><Link to="/other">Other</Link></main>;}`,
+export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Cached /><Tagged /><Debounced /><DebouncedMax /><Throttled /><TrailingThrottled /><TrailingOnly /><Persisted /><CursorPaged /><Deps /><Link to="/other">Other</Link></main>;}`,
     'src/pages/other.tsx': `import { Link } from '@cormijs/runtime';
 export default function Other(){return <main><h1>Request other</h1><Link to="/">Request home</Link></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -129,7 +134,7 @@ export default function Other(){return <main><h1>Request other</h1><Link to="/">
 export async function verifyRequestPage(page: Page, url: string) {
   let helloCount = 0, seenHeader = '', slowCount = 0, flakyCount = 0, pollCount = 0, depsCount = 0, cachedCount = 0;
   const taggedCounts: Record<string, number> = {};
-  let debouncedCount = 0, throttledCount = 0, trailingCount = 0, trailingOnlyCount = 0, persistedCount = 0;
+  let debouncedCount = 0, debouncedMaxCount = 0, throttledCount = 0, trailingCount = 0, trailingOnlyCount = 0, persistedCount = 0;
   await page.route('**/api/**', async route => {
     const request = route.request(), target = new URL(request.url());
     seenHeader = request.headers()['x-app'] ?? '';
@@ -151,6 +156,9 @@ export async function verifyRequestPage(page: Page, url: string) {
     } else if (target.pathname === '/api/poll') {
       pollCount++;
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'poll:' + pollCount }) });
+    } else if (target.pathname === '/api/debounced-max') {
+      debouncedMaxCount++;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'debounced-max:' + debouncedMaxCount }) });
     } else if (target.pathname === '/api/throttled') {
       throttledCount++;
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'throttled:' + throttledCount }) });
@@ -284,6 +292,12 @@ export async function verifyRequestPage(page: Page, url: string) {
   await page.waitForFunction(() => document.querySelector('[data-debounced]')?.textContent === 'debounced:1');
   await page.waitForTimeout(200);
   assert.equal(debouncedCount, 1, 'debounceWait coalesces rapid runs');
+  await page.getByRole('button', { name: 'Run debounce max', exact: true }).click();
+  await page.waitForTimeout(450);
+  assert.equal(debouncedMaxCount, 1, 'debounceMaxWait flushes before the trailing wait');
+  await page.waitForTimeout(400);
+  assert.equal(debouncedMaxCount, 1, 'maxWait executes the coalesced burst once');
+  await page.waitForFunction(() => document.querySelector('[data-debounced-max]')?.textContent === 'debounced-max:1');
   await page.getByRole('button', { name: 'Run throttled', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('[data-throttled]')?.textContent === 'throttled:1');
   assert.equal(throttledCount, 1, 'throttleWait drops the immediate second call');

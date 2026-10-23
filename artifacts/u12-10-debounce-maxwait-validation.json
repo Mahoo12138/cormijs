@@ -1,0 +1,108 @@
+{
+  "format": "cormi:u12-10-debounce-maxwait-validation:1",
+  "verifiedAt": "2026-10-23T07:13:25.530Z",
+  "base": "ae4ca51646247a15a7da5d33ef4a059bb1ade1cf",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "ocs/112-roadmap-audit-2026-10-21.md",
+      "docs/127-u12-debounce.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts",
+      "docs/139-u12-debounce-maxwait.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-10-debounce-maxwait/check.log",
+      "sha256": "6b989a6771a73db0e6f53f2e551485d5fc763897790883c034666f3cb567a765",
+      "seconds": 133.746767666,
+      "tests": 570,
+      "pass": 570,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-10-debounce-maxwait/browser.log",
+      "sha256": "58d74087eb14958d884a3d503b7b604580ceb14177b858ad882455c456122c38",
+      "seconds": 580.81004675,
+      "tests": 54,
+      "pass": 54,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes debounce maxWait burst assertions in dev/build/preview"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-10-debounce-maxwait/package.log",
+      "sha256": "5dee6928b8c1bd121cfd8137342a0c10441d7412773d66f4fa204834bd9f82b0",
+      "stages": 344,
+      "passed": true,
+      "note": "request consumer public types include debounceMaxWait"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-10-debounce-maxwait/targeted.log",
+      "sha256": "066b29c2a868a213e2da3ab997fec3e961676b736a66ff3ded8eaf8ef73fe1ca",
+      "seconds": 18.164241750000002,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "docs/49-application-guide.md": "c9c98201a56afb1572f0a163c14e35b7c0068f37b39038ab0f71127b1289f2ec",
+    "docs/59-umi-feature-roadmap.md": "11c3ab05db0e53a808b0aa6e5e591d5e74218210b49740c37fa892b127e4faae",
+    "docs/112-roadmap-audit-2026-10-21.md": "8d17025552492f9564a66651c1f3a892b3fafdf23abcddcc414550cc2c65fe7b",
+    "docs/127-u12-debounce.md": "a245a121f10433fb5ede6b17a4c954d006cebc5a340fef3d08cdc77c6160f273",
+    "docs/139-u12-debounce-maxwait.md": "3a19ef076504c22693a19a0964c9146e12124fd0239fc8367dd922feaf892e60",
+    "packages/runtime/src/request.tsx": "29b02080ce5377daf86665cb879c555539374635311e552b400b6d181e9ce2ad",
+    "scripts/request-fixture.ts": "4ae53335a83b0f4d92daad7f315f6542583c80196b016d7a417744f26a3aae96",
+    "scripts/test-package.ts": "811319278f80241fca6f4936e157de5edbc47cd63b30b7d8fd9232d33c3a9aa9",
+    "tests/browser/request.test.ts": "11a1899146a134ebb36246be7a818997c33ab364ded94856763c0d9722f521f2"
+  },
+  "sourceInputCount": 9,
+  "sourceInputsDigest": "8d9297f7825f703194ded91439cff566bd7c46a1eeb4e03c40ff166c7a27a323",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "c9c98201a56afb1572f0a163c14e35b7c0068f37b39038ab0f71127b1289f2ec",
+    "docs/59-umi-feature-roadmap.md": "11c3ab05db0e53a808b0aa6e5e591d5e74218210b49740c37fa892b127e4faae",
+    "docs/112-roadmap-audit-2026-10-21.md": "8d17025552492f9564a66651c1f3a892b3fafdf23abcddcc414550cc2c65fe7b",
+    "docs/127-u12-debounce.md": "a245a121f10433fb5ede6b17a4c954d006cebc5a340fef3d08cdc77c6160f273",
+    "docs/139-u12-debounce-maxwait.md": "3a19ef076504c22693a19a0964c9146e12124fd0239fc8367dd922feaf892e60"
+  },
+  "evidence": [
+    ".cache/u12-10-debounce-maxwait/check.log",
+    ".cache/u12-10-debounce-maxwait/browser.log",
+    ".cache/u12-10-debounce-maxwait/package.log",
+    ".cache/u12-10-debounce-maxwait/targeted.log",
+    "artifacts/u12-10-debounce-maxwait-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "trailing-debounce-only",
+    "no-debounce-leading-toggle",
+    "timer-timing-not-wall-clock-guarantee",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

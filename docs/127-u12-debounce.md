@@ -50,5 +50,5 @@ const { data, loading, run } = useRequest(
 
 ## 6. 下一步
 
-- U12 剩余：throttle、游标分页、缓存持久化；
+- U12 剩余：防抖 leading/trailing 开关、跨标签页缓存失效；maxWait 见 [U12-10](139-u12-debounce-maxwait.md)；
 - U17 ProLayout/图表、F6、U33 每页关闭/并发/增量、U16 请求 locale、SSR 生产化。
