@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { ProjectRuntime } from '@cormijs/core';
 import { vitePlugin } from '@cormijs/plugin-vite';
 import { reactPlugin } from '@cormijs/plugin-react';
-import { prerenderPages, prerenderStaticPages, resolvePrerenderPaths, sitemapXml, ssrPlugin } from '@cormijs/plugin-react-vite';
+import { prerenderPages, prerenderStaticPages, resolvePrerenderPaths, sitemapIndexXml, sitemapXml, ssrPlugin } from '@cormijs/plugin-react-vite';
 import { renderServerApplication, renderServerApplicationStream, type ServerApplication } from '@cormijs/runtime/server';
 
 const hasCode = (code: string) => (error: any) => (error?.code ?? error?.cause?.code) === code;
@@ -82,7 +82,9 @@ test('ssr plugin registers its Vite bridge, validates options and withdraws', as
     { prerender: true, prerenderIgnoreErrors: 'yes' }, { prerender: true, prerenderPaths: 1 },
     { prerender: true, prerenderIncremental: 'yes' }, { prerender: true, prerenderPaths: [{ path: '/x', prerender: 'yes' }] }, { prerender: true, prerenderPaths: [{ path: '/x', extra: true }] },
     { prerender: true, robots: 1 }, { prerender: true, robots: '{{sitemap}}' }, { robots: 'x' }, { prerender: true, robots: '' },
-    { prerender: true, prerenderConcurrency: 0 }, { prerender: true, prerenderConcurrency: '2' }]) {
+    { prerender: true, prerenderConcurrency: 0 }, { prerender: true, prerenderConcurrency: '2' },
+    { prerender: true, sitemap: 'https://example.com', sitemapChunkSize: 0 }, { prerender: true, sitemap: 'https://example.com', sitemapChunkSize: 1.5 },
+    { prerender: true, sitemap: 'https://example.com', sitemapChunkSize: 50_001 }, { prerender: true, sitemapChunkSize: 2 }, { sitemap: 'https://example.com', sitemapChunkSize: 2 }]) {
     const rejecting = new ProjectRuntime(3000, root);
     rejecting.mount('vite', vitePlugin);
     rejecting.mount('react', reactPlugin);
@@ -119,6 +121,30 @@ test('prerenderStaticPages writes literal routes, skips redirects and emits a si
   assert.ok(!map.includes('moved'));
   assert.ok(!map.includes('missing'));
   assert.equal(sitemapXml(['https://x.test/a&b']), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://x.test/a&amp;b</loc></url>\n</urlset>\n');
+  assert.equal(sitemapIndexXml(['https://x.test/a&b']), '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <sitemap><loc>https://x.test/a&amp;b</loc></sitemap>\n</sitemapindex>\n');
+});
+
+test('prerenderStaticPages chunks sitemap URLs and writes an index with base-aware links', async t => {
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'cormi-sitemap-index 中文-')));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const shell = '<!doctype html><html><head></head><body><div id="root"></div></body></html>';
+  const pages = [{ path: '/', head: {} }, { path: '/a', head: {} }, { path: '/b', head: {} }];
+  const render = async (request: Request) => ({ html: `<main>${new URL(request.url).pathname}</main>`, status: 200, head: {} });
+  const first = await prerenderStaticPages({ output: root, shell, mountId: 'root', base: '/app/', sitemap: 'https://example.com', sitemapChunkSize: 1, pages, render });
+  assert.equal(first.sitemap, join(root, 'sitemap-index.xml'));
+  assert.deepEqual(first.sitemapChunks, [join(root, 'sitemap-1.xml'), join(root, 'sitemap-2.xml'), join(root, 'sitemap-3.xml')]);
+  assert.equal(existsSync(join(root, 'sitemap.xml')), false);
+  const indexXml = await readFile(join(root, 'sitemap-index.xml'), 'utf8');
+  for (let index = 1; index <= 3; index++) assert.ok(indexXml.includes(`<sitemap><loc>https://example.com/app/sitemap-${index}.xml</loc></sitemap>`), `chunk ${index}`);
+  assert.match(await readFile(join(root, 'sitemap-1.xml'), 'utf8'), /<loc>https:\/\/example.com\/app\/<\/loc>/);
+  assert.doesNotMatch(await readFile(join(root, 'sitemap-1.xml'), 'utf8'), /\/app\/a/);
+  assert.match(await readFile(join(root, 'sitemap-3.xml'), 'utf8'), /<loc>https:\/\/example.com\/app\/b<\/loc>/);
+
+  const second = await prerenderStaticPages({ output: root, shell, mountId: 'root', base: '/app/', sitemap: 'https://example.com', pages: pages.slice(0, 1), render });
+  assert.equal(second.sitemap, join(root, 'sitemap.xml'));
+  assert.equal(existsSync(join(root, 'sitemap-index.xml')), false);
+  assert.ok((await readFile(join(root, 'sitemap.xml'), 'utf8')).includes('https://example.com/app/'));
+  await assert.rejects(prerenderStaticPages({ output: root, shell, mountId: 'root', base: '/', sitemap: 'https://example.com', sitemapChunkSize: 0, pages, render }), hasCode('SSR_PRERENDER_FAILED'));
 });
 
 test('resolvePrerenderPaths accepts arrays and async producers, and prerender can skip page errors', async () => {

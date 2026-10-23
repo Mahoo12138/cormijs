@@ -6,9 +6,9 @@
 
 - `ssrPlugin` 选项 `robots?: string`；非字符串/空/超长/含空字节以 `SSR_INVALID` 失败。
 - 写入时机：SSR bundle 构建并完成预渲染后，写 `dist/robots.txt`。
-- `{{sitemap}}` → `publicUrl(sitemap, base, '/sitemap.xml')`，例如 `https://example.com/app/sitemap.xml`；没有占位时不写 sitemap URL。
+- `{{sitemap}}` → `publicUrl(sitemap, base, '/sitemap.xml')`，例如 `https://example.com/app/sitemap.xml`；启用 `sitemapChunkSize` 时指向 `/sitemap-index.xml`；没有占位时不写 sitemap URL。
 - 占位存在但没有 `sitemap` 时构建失败；`robots` 与 `sitemap` 都要求 `prerender: true`。
-- 不生成 sitemap index、多语言 alternates 或按环境切换 robots。
+- 设置 `sitemapChunkSize` 时 `{{sitemap}}` 指向 `sitemap-index.xml`；不生成多语言 alternates 或按环境切换 robots。sitemap 分片规则见 [U33-7](137-u33-sitemap-index.md)。
 
 ## 边界
 

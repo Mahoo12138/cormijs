@@ -34,6 +34,8 @@ export interface SsrPluginOptions {
   readonly robots?: string;
   /** Absolute site origin used to write sitemap.xml for prerendered routes. Requires prerender. */
   readonly sitemap?: string;
+  /** Split sitemap URLs into chunks of at most this many entries and write sitemap-index.xml (1–50000). */
+  readonly sitemapChunkSize?: number;
   /** Stream HTML through React's streaming renderer instead of buffering the whole page. */
   readonly streaming?: boolean;
 }
@@ -190,6 +192,9 @@ const xml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;'
 export function sitemapXml(urls: readonly string[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <url><loc>${xml(url)}</loc></url>`).join('\n')}${urls.length ? '\n' : ''}</urlset>\n`;
 }
+export function sitemapIndexXml(urls: readonly string[]): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <sitemap><loc>${xml(url)}</loc></sitemap>`).join('\n')}${urls.length ? '\n' : ''}</sitemapindex>\n`;
+}
 
 function sitemapSite(value: unknown): string {
   if (typeof value !== 'string' || !value || value.length > 2048) throw new CormiError('SSR_INVALID', 'sitemap must be an absolute site URL.');
@@ -252,6 +257,7 @@ export interface PrerenderOptions {
   readonly pages: readonly StaticPage[];
   readonly render: Render;
   readonly sitemap?: string;
+  readonly sitemapChunkSize?: number;
   readonly ignoreErrors?: boolean;
   readonly incremental?: boolean;
   /** Parallel page renders, 1–16; default 1. Results keep page order. */
@@ -261,7 +267,9 @@ export interface PrerenderResult {
   readonly written: readonly string[];
   readonly unchanged: readonly string[];
   readonly skipped: readonly { readonly path: string; readonly status: number; readonly error?: string }[];
+  /** Entry sitemap written to disk: sitemap.xml, or sitemap-index.xml when chunked. */
   readonly sitemap?: string;
+  readonly sitemapChunks?: readonly string[];
 }
 
 /**
@@ -271,6 +279,10 @@ export interface PrerenderResult {
 export async function prerenderStaticPages(options: PrerenderOptions): Promise<PrerenderResult> {
   const concurrency = options.concurrency ?? 1;
   if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 16) throw new CormiError('SSR_PRERENDER_FAILED', 'Prerender concurrency must be an integer from 1 to 16.');
+  if (options.sitemapChunkSize !== undefined && (!options.sitemap || !Number.isInteger(options.sitemapChunkSize)
+    || options.sitemapChunkSize < 1 || options.sitemapChunkSize > 50_000)) {
+    throw new CormiError('SSR_PRERENDER_FAILED', 'sitemapChunkSize requires sitemap and must be an integer from 1 to 50000.');
+  }
   type Outcome = { readonly kind: 'written' | 'unchanged'; readonly path: string; readonly url?: string }
     | { readonly kind: 'skipped'; readonly path: string; readonly status: number; readonly error?: string };
   const renderPage = async (page: StaticPage): Promise<Outcome> => {
@@ -318,19 +330,36 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
       if (outcome.url) urls.push(outcome.url);
     }
   }
-  let sitemap: string | undefined;
+  let sitemap: string | undefined, sitemapChunks: readonly string[] | undefined;
   if (options.sitemap) {
-    sitemap = join(options.output, 'sitemap.xml');
-    await writeFile(sitemap, sitemapXml(urls));
+    if (options.sitemapChunkSize === undefined) {
+      sitemap = join(options.output, 'sitemap.xml');
+      await writeFile(sitemap, sitemapXml(urls));
+      await rm(join(options.output, 'sitemap-index.xml'), { force: true });
+    } else {
+      const chunkSize = options.sitemapChunkSize;
+      const count = Math.max(1, Math.ceil(urls.length / chunkSize));
+      const chunks: string[] = [];
+      for (let index = 0; index < count; index++) {
+        const file = join(options.output, `sitemap-${index + 1}.xml`);
+        await writeFile(file, sitemapXml(urls.slice(index * chunkSize, (index + 1) * chunkSize)));
+        chunks.push(file);
+      }
+      sitemapChunks = Object.freeze(chunks);
+      sitemap = join(options.output, 'sitemap-index.xml');
+      await writeFile(sitemap, sitemapIndexXml(chunks.map((_, index) => publicUrl(options.sitemap!, options.base, `/sitemap-${index + 1}.xml`))));
+      await rm(join(options.output, 'sitemap.xml'), { force: true });
+    }
   }
-  return Object.freeze({ written: Object.freeze(written), unchanged: Object.freeze(unchanged), skipped: Object.freeze(skipped), ...(sitemap ? { sitemap } : {}) });
+  return Object.freeze({ written: Object.freeze(written), unchanged: Object.freeze(unchanged), skipped: Object.freeze(skipped),
+    ...(sitemap ? { sitemap } : {}), ...(sitemapChunks ? { sitemapChunks } : {}) });
 }
 
 /** Opt-in SSR: dev renders through Vite's SSR module graph, preview through a built server bundle. */
 export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
   name: 'cormi:ssr', inject: ['vite', 'react'],
   apply(ctx, options = {}) {
-    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'prerenderIgnoreErrors', 'prerenderIncremental', 'prerenderConcurrency', 'robots', 'sitemap', 'streaming'].includes(key))) {
+    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'prerenderIgnoreErrors', 'prerenderIncremental', 'prerenderConcurrency', 'robots', 'sitemap', 'sitemapChunkSize', 'streaming'].includes(key))) {
       throw new CormiError('SSR_INVALID', 'Invalid SSR plugin options.');
     }
     if (options.prerender !== undefined && typeof options.prerender !== 'boolean') throw new CormiError('SSR_INVALID', 'prerender must be boolean.');
@@ -350,6 +379,10 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
     if (options.robots !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'robots requires prerender: true.');
     const sitemap = options.sitemap === undefined ? undefined : sitemapSite(options.sitemap);
     if (sitemap !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'sitemap requires prerender: true.');
+    if (options.sitemapChunkSize !== undefined && (!Number.isInteger(options.sitemapChunkSize) || options.sitemapChunkSize < 1 || options.sitemapChunkSize > 50_000)) {
+      throw new CormiError('SSR_INVALID', 'sitemapChunkSize must be an integer from 1 to 50000.');
+    }
+    if (options.sitemapChunkSize !== undefined && sitemap === undefined) throw new CormiError('SSR_INVALID', 'sitemapChunkSize requires sitemap.');
     if (options.robots?.includes('{{sitemap}}') && sitemap === undefined) throw new CormiError('SSR_INVALID', 'robots {{sitemap}} requires sitemap.');
     const id = options.id ?? 'cormi:ssr';
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('SSR_INVALID', 'Invalid SSR plugin id.');
@@ -419,9 +452,11 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
               const extraPaths = await resolvePrerenderPaths(options.prerenderPaths);
               const result = await prerenderStaticPages({ output: resolved.build.outDir, shell, mountId, base: resolved.base,
                 pages: prerenderPages(routes, extraPaths), render: module.render as Render, ignoreErrors: options.prerenderIgnoreErrors === true,
-                incremental: options.prerenderIncremental === true, concurrency: options.prerenderConcurrency ?? 1, ...(sitemap !== undefined ? { sitemap } : {}) });
+                incremental: options.prerenderIncremental === true, concurrency: options.prerenderConcurrency ?? 1, ...(sitemap !== undefined ? { sitemap } : {}),
+                ...(options.sitemapChunkSize !== undefined ? { sitemapChunkSize: options.sitemapChunkSize } : {}) });
               if (options.robots !== undefined) {
-                const content = options.robots.replaceAll('{{sitemap}}', sitemap === undefined ? '' : publicUrl(sitemap, resolved.base, '/sitemap.xml'));
+                const sitemapEntry = options.sitemapChunkSize === undefined ? '/sitemap.xml' : '/sitemap-index.xml';
+                const content = options.robots.replaceAll('{{sitemap}}', sitemap === undefined ? '' : publicUrl(sitemap, resolved.base, sitemapEntry));
                 await writeFile(join(resolved.build.outDir, 'robots.txt'), content);
               }
               if (result.skipped.length) console.warn('[cormi:ssr:prerender] skipped routes', JSON.stringify(result.skipped));

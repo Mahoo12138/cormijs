@@ -18,7 +18,7 @@ export default defineConfig({
   plugins: [
     { id: 'routes', plugin: routeConfigPlugin, options: { id: 'application:routes', routes } },
     { id: 'head', plugin: headPlugin, options: { id: 'application:head', titleTemplate: ' · demo' } },
-    { id: 'ssr', plugin: ssrPlugin, options: { id: 'application:ssr', prerender: true, prerenderPaths: async () => [{ path: '/backend/7' }, { path: '/backend/8', prerender: false }], prerenderIncremental: true, prerenderConcurrency: 2, robots: 'Sitemap: {{sitemap}}', sitemap: 'https://example.com', streaming: true } },
+    { id: 'ssr', plugin: ssrPlugin, options: { id: 'application:ssr', prerender: true, prerenderPaths: async () => [{ path: '/backend/7' }, { path: '/backend/8', prerender: false }], prerenderIncremental: true, prerenderConcurrency: 2, robots: 'Sitemap: {{sitemap}}', sitemap: 'https://example.com', sitemapChunkSize: 2, streaming: true } },
     { id: 'serve', plugin: servePlugin, options: { id: 'application:serve', port: 0, base: '/ssr/', streaming: true } },
   ],
   app: { ssr: true, base: '/ssr/', routes: [], server: { port: 0 } },

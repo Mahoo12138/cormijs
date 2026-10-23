@@ -1,0 +1,125 @@
+{
+  "format": "cormi:u33-7-sitemap-index-validation:1",
+  "verifiedAt": "2026-10-23T02:55:18.875Z",
+  "base": "72872a0a91ae14b324508422fdadf4684a4525f8",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "ocs/112-roadmap-audit-2026-10-21.md",
+      "docs/131-u33-robots.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/plugin-react-vite/src/index.ts",
+      "packages/plugin-react-vite/src/ssr.ts",
+      "scripts/ssr-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/browser/ssr.test.ts",
+      "tests/ssr.test.ts",
+      "docs/137-u33-sitemap-index.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u33-7-sitemap-index/check.log",
+      "sha256": "04be1452d800f9576b16c3ae0d4219211915671063f285a368b2af2c1d7f5794",
+      "seconds": 134.14866279100002,
+      "tests": 570,
+      "pass": 570,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests including chunked sitemap units"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u33-7-sitemap-index/browser.log",
+      "sha256": "d0cf79668951266fede55f8575f16078d9687f2f1723bc19a8ed71af9fa5e425",
+      "seconds": 589.384644417,
+      "tests": 54,
+      "pass": 54,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes real SSR build with 2 sitemap chunks, index and robots entry"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u33-7-sitemap-index/package.log",
+      "sha256": "1c20caf0cabc74ad5162f3383827a2004b3f6725c20b56fb037f4adb3bdc98e8",
+      "stages": 344,
+      "passed": true,
+      "note": "installed ssr consumer public types and dev/preview/serve verification"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/ssr.test.ts",
+      "log": ".cache/u33-7-sitemap-index/targeted.log",
+      "sha256": "15e9c93aa91ce858902c17d0f37e7404f6e205364c6ecd46ef56b95d180b7fd4",
+      "seconds": 11.373062916999999,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    },
+    "unitRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/ssr.test.ts",
+      "log": ".cache/u33-7-sitemap-index/unit.log",
+      "sha256": "8f5430185db8eba8b3832090a3aba1644d7e26e0598e13456428f313fd8d33ef",
+      "seconds": 0.65949575,
+      "tests": 8,
+      "pass": 8,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "docs/49-application-guide.md": "734d33fb72ef7185e4357afb8049aff282310ee56f228eedf89fa04849731c77",
+    "docs/59-umi-feature-roadmap.md": "350799c06ac56e69750ff952043487913e661414c636b14fc5b53b5ed9a6cde9",
+    "docs/112-roadmap-audit-2026-10-21.md": "7461adaf8cd168c09197668479b17a79d2de42370c987f8c5562fa9cbd73d5aa",
+    "docs/131-u33-robots.md": "e28b55ad923c07d544c2d26170f916db3113ab62bbb9bfcdf09842c1d4aee61c",
+    "docs/137-u33-sitemap-index.md": "55195712f3e2ed25a273badbfda4f7f1b8b9d2d5a4140822af74e726ad4944fc",
+    "packages/plugin-react-vite/src/index.ts": "29662cfe674ac2962c110ab46f64c94ebca991190413c5cc24e52f3aeb302ea0",
+    "packages/plugin-react-vite/src/ssr.ts": "d0600ed081cf6d43ad0c5b312df4e407fa6d5eacda0e2cd1a596d35f145bf62f",
+    "scripts/ssr-fixture.ts": "bc3d3b92dc081db50cee22501215ef853363ac85413eb9e04ca736528f003878",
+    "scripts/test-package.ts": "3b49b8d78dad6e663856a6ca8cbb60915e1832493e782966e693e4d727b5ac9e",
+    "tests/ssr.test.ts": "810702bf71d2309500872d2769514c14d34bab93504106b1663152f60b698603",
+    "tests/browser/ssr.test.ts": "edf4469ed6998dce527308e5ba0bec6ee89760d485221ac2345f83d3cac2e5df"
+  },
+  "sourceInputCount": 11,
+  "sourceInputsDigest": "c0216af6dc81c1958cbce8ec8ac1d70dad702966ba78afc9e60f46246fd88387",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "734d33fb72ef7185e4357afb8049aff282310ee56f228eedf89fa04849731c77",
+    "docs/59-umi-feature-roadmap.md": "350799c06ac56e69750ff952043487913e661414c636b14fc5b53b5ed9a6cde9",
+    "docs/112-roadmap-audit-2026-10-21.md": "7461adaf8cd168c09197668479b17a79d2de42370c987f8c5562fa9cbd73d5aa",
+    "docs/131-u33-robots.md": "e28b55ad923c07d544c2d26170f916db3113ab62bbb9bfcdf09842c1d4aee61c",
+    "docs/137-u33-sitemap-index.md": "55195712f3e2ed25a273badbfda4f7f1b8b9d2d5a4140822af74e726ad4944fc"
+  },
+  "evidence": [
+    ".cache/u33-7-sitemap-index/check.log",
+    ".cache/u33-7-sitemap-index/browser.log",
+    ".cache/u33-7-sitemap-index/package.log",
+    ".cache/u33-7-sitemap-index/targeted.log",
+    ".cache/u33-7-sitemap-index/unit.log",
+    "artifacts/u33-7-sitemap-index-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "no-lastmod-changefreq-priority",
+    "no-gzip-sitemaps",
+    "no-language-or-directory-grouping",
+    "stale-old-chunks-not-removed",
+    "chunk-size-1-50000",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}
