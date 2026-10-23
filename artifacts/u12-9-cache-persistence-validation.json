@@ -1,0 +1,124 @@
+{
+  "format": "cormi:u12-9-cache-persistence-validation:1",
+  "verifiedAt": "2026-10-23T06:36:15.913Z",
+  "base": "f29f3d8b99b19c1e37def4a45cd7fce56e2b4496",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "ocs/112-roadmap-audit-2026-10-21.md",
+      "docs/121-u12-request-cache.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/app-config.ts",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/request.test.ts",
+      "docs/138-u12-cache-persistence.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-9-cache-persistence/check.log",
+      "sha256": "d788d4275616d34b5ad40b57255f60f350631fc3551ad7c8a34e9b3d2271c19f",
+      "seconds": 132.2527205,
+      "tests": 570,
+      "pass": 570,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests including cache persistence config validation"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-9-cache-persistence/browser.log",
+      "sha256": "61b1c174b406bbb4e779215cae8fb676c0bfa967ca2dff5ecf5e4085c3104145",
+      "seconds": 415.195042125,
+      "tests": 54,
+      "pass": 54,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes sessionStorage cache survival across reload and invalidation in dev/build/preview"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-9-cache-persistence/package.log",
+      "sha256": "69f2533db2a430560a25c495d15f1638132a82cbf2fda9480f43c381a76f5f7f",
+      "stages": 344,
+      "passed": true,
+      "note": "request consumer public types include cachePersist/cachePersistKey"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-9-cache-persistence/targeted.log",
+      "sha256": "caf0729427b58627791414234dd4553f4298cd80805c2c7bf4b3b201fd3461eb",
+      "seconds": 15.582819625,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    },
+    "unitRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/request.test.ts",
+      "log": ".cache/u12-9-cache-persistence/unit.log",
+      "sha256": "b1802d20925a355691e5593951713c6961bd7632cead6ebd86e7b6b42c63dadb",
+      "seconds": 0.46440354100000003,
+      "tests": 2,
+      "pass": 2,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "docs/49-application-guide.md": "083d3b1cb28489e72c35c131f7498d08cb3a97cfccde521a55c622134542a9bd",
+    "docs/59-umi-feature-roadmap.md": "b86982101453e0c14db79b6df67c34307b15c9029246d3d17e16d7606925bc4d",
+    "docs/112-roadmap-audit-2026-10-21.md": "d0fbe515576a0085e0e408a9aa3caae184a195964be6e6161152dcecdc2eb024",
+    "docs/121-u12-request-cache.md": "bec4a34bd62ee639ff96b06c6ebdf3173f95832513483576d4ea1f0649639af5",
+    "docs/138-u12-cache-persistence.md": "781bfd769eb39ea8c6e4d4535837f0e7a1a2a2f6b427dec57a3d496f67fd855f",
+    "packages/runtime/src/app-config.ts": "3edbec351486a6b182f2d1f99a5ec73c698bf35cf60ca4fc97ecf6ae83779329",
+    "packages/runtime/src/request.tsx": "857df6bcbba3d81d12a54b672af37baede92095b187f6e33df31f74b69993d9d",
+    "scripts/request-fixture.ts": "82cf1cc757753417d5062dce9c38b934cd5c00460f02262ecacc497886ef7622",
+    "scripts/test-package.ts": "0b5141d555a829963074fcffd273de39dc8ca63a14b8f2cea2f1ca0b0c7b90bc",
+    "tests/request.test.ts": "da5e4665594823c585e0d03a462f71d9f9c75e5f0b4ae9d75394f8219547b434",
+    "tests/browser/request.test.ts": "11a1899146a134ebb36246be7a818997c33ab364ded94856763c0d9722f521f2"
+  },
+  "sourceInputCount": 11,
+  "sourceInputsDigest": "9bd4e27f27858ecc035e2e4e7ec54f0bd4dbbe31169811f363ef40b395264ce0",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "083d3b1cb28489e72c35c131f7498d08cb3a97cfccde521a55c622134542a9bd",
+    "docs/59-umi-feature-roadmap.md": "b86982101453e0c14db79b6df67c34307b15c9029246d3d17e16d7606925bc4d",
+    "docs/112-roadmap-audit-2026-10-21.md": "d0fbe515576a0085e0e408a9aa3caae184a195964be6e6161152dcecdc2eb024",
+    "docs/121-u12-request-cache.md": "bec4a34bd62ee639ff96b06c6ebdf3173f95832513483576d4ea1f0649639af5",
+    "docs/138-u12-cache-persistence.md": "781bfd769eb39ea8c6e4d4535837f0e7a1a2a2f6b427dec57a3d496f67fd855f"
+  },
+  "evidence": [
+    ".cache/u12-9-cache-persistence/check.log",
+    ".cache/u12-9-cache-persistence/browser.log",
+    ".cache/u12-9-cache-persistence/package.log",
+    ".cache/u12-9-cache-persistence/targeted.log",
+    ".cache/u12-9-cache-persistence/unit.log",
+    "artifacts/u12-9-cache-persistence-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "json-serializable-values-only",
+    "no-encryption-or-cross-tab-sync",
+    "web-storage-xss-exposure",
+    "five-megabyte-load-ceiling",
+    "no-proactive-stale-key-cleanup",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

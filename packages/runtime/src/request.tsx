@@ -34,6 +34,11 @@ function validate(config: RequestConfig) {
   if (config.baseURL !== undefined && (typeof config.baseURL !== 'string' || !config.baseURL)) throw new TypeError('REQUEST_INVALID: baseURL must be a non-empty string');
   if (config.timeout !== undefined && (!Number.isFinite(config.timeout) || config.timeout <= 0)) throw new TypeError('REQUEST_INVALID: timeout must be a positive number');
   if (config.cacheLimit !== undefined && (!Number.isInteger(config.cacheLimit) || config.cacheLimit < 1 || config.cacheLimit > 10_000)) throw new TypeError('REQUEST_INVALID: cacheLimit must be an integer from 1 to 10000');
+  if (config.cachePersist !== undefined && config.cachePersist !== 'session' && config.cachePersist !== 'local') throw new TypeError('REQUEST_INVALID: cachePersist must be session or local');
+  if (config.cachePersistKey !== undefined && (typeof config.cachePersistKey !== 'string' || !config.cachePersistKey || config.cachePersistKey.length > 128 || /[\0\r\n]/.test(config.cachePersistKey))) {
+    throw new TypeError('REQUEST_INVALID: cachePersistKey must be bounded text');
+  }
+  if (config.cachePersistKey !== undefined && config.cachePersist === undefined) throw new TypeError('REQUEST_INVALID: cachePersistKey requires cachePersist');
   if (config.headers !== undefined) {
     if (!config.headers || typeof config.headers !== 'object' || Array.isArray(config.headers)
       || Object.entries(config.headers).some(([name, value]) => !name || typeof value !== 'string')) throw new TypeError('REQUEST_INVALID: headers must contain string values');
@@ -53,9 +58,42 @@ const bodyLike = (body: unknown) => typeof body === 'string'
 export function createRequestClient(input: RequestConfig = {}): RequestClient {
   validate(input);
   const config = Object.freeze({ ...input, ...(input.headers ? { headers: Object.freeze({ ...input.headers }) } : {}) });
-  const cache = new Map<string, { readonly expires: number; readonly value: unknown; readonly tags: readonly string[] }>();
+  type CacheEntry = { readonly expires: number; readonly value: unknown; readonly tags: readonly string[] };
+  const cache = new Map<string, CacheEntry>();
   const inflight = new Map<string, Promise<unknown>>();
-  const cacheLimit = config.cacheLimit ?? 100;
+  const cacheLimit = config.cacheLimit ?? 100, cachePersistKey = config.cachePersistKey ?? 'cormi:request-cache';
+  const storage = (): Storage | undefined => {
+    if (!config.cachePersist || typeof window === 'undefined') return undefined;
+    try { return config.cachePersist === 'local' ? window.localStorage : window.sessionStorage; } catch { return undefined; }
+  };
+  const persist = () => {
+    const store = storage();
+    if (!store) return;
+    try {
+      store.setItem(cachePersistKey, JSON.stringify({ version: 1, entries: [...cache].map(([key, entry]) => ({ key, expires: entry.expires, value: entry.value, tags: entry.tags })) }));
+    } catch { /* storage can be unavailable, full or blocked by policy */ }
+  };
+  if (config.cachePersist) {
+    try {
+      const raw = storage()?.getItem(cachePersistKey);
+      const payload = raw && raw.length <= 5_000_000 ? JSON.parse(raw) as { version?: unknown; entries?: unknown } : undefined;
+      if (payload?.version === 1 && Array.isArray(payload.entries)) {
+        for (const item of payload.entries) {
+          if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
+          const entry = item as Record<string, unknown>, key = entry.key;
+          if (typeof key !== 'string' || !key || key.length > 8192 || typeof entry.expires !== 'number' || !Number.isFinite(entry.expires)
+            || entry.expires <= Date.now() || entry.value === undefined
+            || !Array.isArray(entry.tags) || entry.tags.length > 16 || entry.tags.some(tag => typeof tag !== 'string' || !tag)) continue;
+          while (cache.size >= cacheLimit) {
+            const oldest = cache.keys().next();
+            if (oldest.done) break;
+            cache.delete(oldest.value);
+          }
+          cache.set(key, { expires: entry.expires, value: entry.value, tags: Object.freeze([...entry.tags]) });
+        }
+      }
+    } catch { /* corrupt or unavailable storage is ignored */ }
+  }
   const request = async <T,>(path: string, options: RequestOptions = {}): Promise<T> => {
     if (typeof path !== 'string' || !path) throw new TypeError('REQUEST_INVALID: path must be a non-empty string');
     if (options.cacheTime !== undefined && (!Number.isFinite(options.cacheTime) || options.cacheTime < 0 || options.cacheTime > 3_600_000)) throw new TypeError('REQUEST_INVALID: cacheTime must be 0–3600000ms');
@@ -109,6 +147,7 @@ export function createRequestClient(input: RequestConfig = {}): RequestClient {
           cache.delete(oldest.value);
         }
         cache.set(key, { expires: Date.now() + cacheTime, value: data, tags: Object.freeze([...cacheTags]) });
+        persist();
       }
       return data as T;
     })();
@@ -130,6 +169,7 @@ export function createRequestClient(input: RequestConfig = {}): RequestClient {
       for (const [key, entry] of cache) {
         if (tags === undefined || tags.length === 0 || entry.tags.some(tag => tags.includes(tag))) { cache.delete(key); removed++; }
       }
+      if (removed) persist();
       return removed;
     },
   }) satisfies RequestClient;

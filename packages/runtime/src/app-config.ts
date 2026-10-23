@@ -8,6 +8,10 @@ export interface RequestConfig {
   readonly timeout?: number;
   /** Maximum cached GET entries; oldest is evicted first. Default 100. */
   readonly cacheLimit?: number;
+  /** Opt in to persisting GET cache entries across reloads; response data must be JSON-serializable. */
+  readonly cachePersist?: 'session' | 'local';
+  /** Web Storage key for persisted entries; default `cormi:request-cache`. */
+  readonly cachePersistKey?: string;
 }
 export interface LocaleConfig {
   readonly default?: string;

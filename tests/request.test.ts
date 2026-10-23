@@ -37,7 +37,10 @@ test('request client resolves base URLs, params, JSON bodies, errors, timeouts a
   const controller = new AbortController();
   const aborted = client.get('/slow', { signal: controller.signal }); controller.abort();
   await assert.rejects(aborted, (error: unknown) => error instanceof DOMException && error.name === 'AbortError');
-  for (const config of [{ baseURL: 42 }, { timeout: 0 }, { headers: { x: 1 } }]) assert.throws(() => createRequestClient(config as never), /REQUEST_INVALID/);
+  for (const config of [{ baseURL: 42 }, { timeout: 0 }, { headers: { x: 1 } },
+    { cachePersist: 'memory' }, { cachePersistKey: 'orphan' }, { cachePersist: 'session', cachePersistKey: '' }]) {
+    assert.throws(() => createRequestClient(config as never), /REQUEST_INVALID/);
+  }
 });
 
 async function project(t: TestContext) {

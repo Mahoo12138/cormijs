@@ -24,7 +24,8 @@ export async function writeRequestFixture(root: string) {
     'src/app.tsx': `import { defineApp } from '@cormijs/runtime';
 export default defineApp({ request: { baseURL: '/api', headers: { 'x-app': 'cormi' }, timeout: 2000, cacheLimit: 1 } });`,
     'src/pages/index.tsx': `import { useRef, useState } from 'react';
-import { Link, useCursorPagination, usePagination, useRequest, useRequestClient } from '@cormijs/runtime';
+import { Link, createRequestClient, useCursorPagination, usePagination, useRequest, useRequestClient } from '@cormijs/runtime';
+const persistedClient=createRequestClient({baseURL:'/api',cachePersist:'session',cachePersistKey:'demo:request-cache',cacheLimit:4});
 function Auto(){
   const {data,loading,error,refresh}=useRequest<{message:string}>((client,signal)=>client.get('/hello',{signal,params:{q:'one'}}));
   return <section data-auto-section><p data-auto>{data?.message ?? ''}</p><p data-loading>{String(loading)}</p><p data-error>{error ? 'error' : ''}</p><button onClick={()=>void refresh()}>Refresh</button></section>;
@@ -66,6 +67,12 @@ function Cached(){
   return <section><p data-cached>{messages.join(',')}</p>
     <button onClick={load}>Run cached</button>
     <button onClick={()=>void client.get<{message:string}>('/cached',{cacheTime:5000,cacheBust:true}).then(item=>setMessages(value=>[...value,item.message]))}>Bust cache</button></section>;
+}
+function Persisted(){
+  const [message,setMessage]=useState('');
+  return <section><p data-persisted>{message}</p>
+    <button onClick={()=>void persistedClient.get<{message:string}>('/persisted',{cacheTime:60000}).then(item=>setMessage(item.message))}>Load persisted</button>
+    <button onClick={()=>{persistedClient.invalidateCache();}}>Invalidate persisted</button></section>;
 }
 function Tagged(){
   const client=useRequestClient();
@@ -109,7 +116,7 @@ function Deps(){
   const {data}=useRequest<{message:string}>((client,signal)=>client.get('/deps',{signal,params:{q}}),{refreshDeps:[q]});
   return <section><p data-deps>{data?.message ?? ''}</p><button onClick={()=>setQ('two')}>Change dep</button></section>;
 }
-export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Cached /><Tagged /><Debounced /><Throttled /><TrailingThrottled /><TrailingOnly /><CursorPaged /><Deps /><Link to="/other">Other</Link></main>;}`,
+export default function Home(){return <main><h1>Request home</h1><Auto /><Manual /><Failure /><Race /><Retry /><Polling /><Paged /><Cached /><Tagged /><Debounced /><Throttled /><TrailingThrottled /><TrailingOnly /><Persisted /><CursorPaged /><Deps /><Link to="/other">Other</Link></main>;}`,
     'src/pages/other.tsx': `import { Link } from '@cormijs/runtime';
 export default function Other(){return <main><h1>Request other</h1><Link to="/">Request home</Link></main>;}`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -122,7 +129,7 @@ export default function Other(){return <main><h1>Request other</h1><Link to="/">
 export async function verifyRequestPage(page: Page, url: string) {
   let helloCount = 0, seenHeader = '', slowCount = 0, flakyCount = 0, pollCount = 0, depsCount = 0, cachedCount = 0;
   const taggedCounts: Record<string, number> = {};
-  let debouncedCount = 0, throttledCount = 0, trailingCount = 0, trailingOnlyCount = 0;
+  let debouncedCount = 0, throttledCount = 0, trailingCount = 0, trailingOnlyCount = 0, persistedCount = 0;
   await page.route('**/api/**', async route => {
     const request = route.request(), target = new URL(request.url());
     seenHeader = request.headers()['x-app'] ?? '';
@@ -160,6 +167,9 @@ export async function verifyRequestPage(page: Page, url: string) {
       const n = target.searchParams.get('n') ?? '0';
       taggedCounts[n] = (taggedCounts[n] ?? 0) + 1;
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'tagged:' + taggedCounts[n] }) });
+    } else if (target.pathname === '/api/persisted') {
+      persistedCount++;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'persisted:' + persistedCount }) });
     } else if (target.pathname === '/api/cached') {
       cachedCount++;
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ message: 'cached:' + cachedCount }) });
@@ -293,6 +303,18 @@ export async function verifyRequestPage(page: Page, url: string) {
   await page.getByRole('button', { name: 'Change dep', exact: true }).click();
   await page.waitForFunction(() => document.querySelector('[data-deps]')?.textContent === 'deps:two');
   assert.ok(depsCount >= 2);
+  await page.getByRole('button', { name: 'Load persisted', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-persisted]')?.textContent === 'persisted:1');
+  assert.equal(persistedCount, 1);
+  await page.reload();
+  await page.getByRole('heading', { name: 'Request home', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Load persisted', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-persisted]')?.textContent === 'persisted:1');
+  assert.equal(persistedCount, 1, 'sessionStorage cache survives a reload');
+  await page.getByRole('button', { name: 'Invalidate persisted', exact: true }).click();
+  await page.getByRole('button', { name: 'Load persisted', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('[data-persisted]')?.textContent === 'persisted:2');
+  assert.equal(persistedCount, 2, 'invalidateCache removes the persisted entry');
   await page.getByRole('link', { name: 'Other', exact: true }).click();
   await page.getByRole('heading', { name: 'Request other', exact: true }).waitFor();
   await page.waitForTimeout(200);

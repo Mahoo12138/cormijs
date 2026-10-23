@@ -42,7 +42,7 @@ const fresh = await client.get<User>('/api/me', { cacheTime: 5000, cacheBust: tr
 | 并发去重 | 插件/生态 | 内置 |
 | 失效 | 生态方案 | 仅 cacheBust/过期 |
 | 容量控制 | 生态方案 | 未提供 |
-| 持久化 | 生态方案 | 未提供 |
+| 持久化 | 生态方案 | 可选 session/local Web Storage（U12-9） |
 
 ## 5. 验证
 
@@ -55,5 +55,5 @@ const fresh = await client.get<User>('/api/me', { cacheTime: 5000, cacheBust: tr
 
 ## 6. 下一步
 
-- U12 剩余：容量/LRU、按标签失效、防抖节流；
+- U12 剩余：maxWait、跨标签页失效；持久化见 [U12-9](138-u12-cache-persistence.md)；
 - U17 Antd/ProLayout、U09 依赖排序、U33 自动路径发现、F6。
