@@ -206,6 +206,10 @@ export interface UseRequestOptions<T> {
   readonly debounceWait?: number;
   /** Maximum time a debounced call may be delayed (1–60000ms); requires debounceWait. */
   readonly debounceMaxWait?: number;
+  /** Execute the first call of a debounce burst immediately; default false. */
+  readonly debounceLeading?: boolean;
+  /** Execute one coalesced trailing call per debounce burst; default true. */
+  readonly debounceTrailing?: boolean;
   /** Throttle run/refresh calls within this window (0–60000ms); polling bypasses it. */
   readonly throttleWait?: number;
   /** Execute the first call in a throttle window; default true. */
@@ -242,6 +246,10 @@ function validateUseRequest<T>(options: UseRequestOptions<T>): void {
   if (options.debounceWait !== undefined && (!Number.isInteger(options.debounceWait) || options.debounceWait < 0 || options.debounceWait > 60_000)) throw new TypeError('REQUEST_INVALID: debounceWait must be an integer from 0 to 60000');
   if (options.debounceMaxWait !== undefined && (!Number.isInteger(options.debounceMaxWait) || options.debounceMaxWait < 1 || options.debounceMaxWait > 60_000)) throw new TypeError('REQUEST_INVALID: debounceMaxWait must be an integer from 1 to 60000');
   if (options.debounceMaxWait !== undefined && !(options.debounceWait ?? 0)) throw new TypeError('REQUEST_INVALID: debounceMaxWait requires debounceWait');
+  if (options.debounceLeading !== undefined && typeof options.debounceLeading !== 'boolean') throw new TypeError('REQUEST_INVALID: debounceLeading must be boolean');
+  if (options.debounceTrailing !== undefined && typeof options.debounceTrailing !== 'boolean') throw new TypeError('REQUEST_INVALID: debounceTrailing must be boolean');
+  if ((options.debounceLeading !== undefined || options.debounceTrailing !== undefined) && !(options.debounceWait ?? 0)) throw new TypeError('REQUEST_INVALID: debounceLeading/debounceTrailing require debounceWait');
+  if ((options.debounceWait ?? 0) > 0 && options.debounceLeading !== true && options.debounceTrailing === false) throw new TypeError('REQUEST_INVALID: debounceLeading=false requires debounceTrailing');
   if (options.throttleWait !== undefined && (!Number.isInteger(options.throttleWait) || options.throttleWait < 0 || options.throttleWait > 60_000)) throw new TypeError('REQUEST_INVALID: throttleWait must be an integer from 0 to 60000');
   if (options.throttleLeading !== undefined && typeof options.throttleLeading !== 'boolean') throw new TypeError('REQUEST_INVALID: throttleLeading must be boolean');
   if (options.throttleTrailing !== undefined && typeof options.throttleTrailing !== 'boolean') throw new TypeError('REQUEST_INVALID: throttleTrailing must be boolean');
@@ -261,7 +269,7 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
   const mounted = useRef(true), generation = useRef(0), controller = useRef<AbortController | undefined>(undefined);
   const polling = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), poll = useRef<() => void>(() => {});
   const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), debounceResolve = useRef<((value: T | undefined) => void) | undefined>(undefined);
-  const debounceStart = useRef(0);
+  const debounceStart = useRef(0), debounceLast = useRef(0);
   const lastThrottle = useRef(0);
   const throttleTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined), throttlePending = useRef<Array<(value: T | undefined) => void>>([]);
   const stopPolling = () => { if (polling.current) { clearTimeout(polling.current); polling.current = undefined; } };
@@ -271,6 +279,7 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
     debounceResolve.current?.(undefined);
     debounceResolve.current = undefined;
     debounceStart.current = 0;
+    debounceLast.current = 0;
   };
   const execute = useCallback(async (): Promise<T | undefined> => {
     const token = ++generation.current;
@@ -335,8 +344,16 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
     const wait = optionsRef.current.debounceWait ?? 0;
     if (wait) {
       const maxWait = optionsRef.current.debounceMaxWait ?? 0, now = Date.now();
-      if (!debounce.current) debounceStart.current = now;
-      else {
+      const leading = optionsRef.current.debounceLeading === true, trailing = optionsRef.current.debounceTrailing !== false;
+      const active = debounceStart.current > 0 && now - debounceLast.current < wait;
+      if (!active) {
+        stopDebounce();
+        debounceStart.current = now;
+        debounceLast.current = now;
+        if (leading) return executeRef.current();
+      } else debounceLast.current = now;
+      if (!trailing) return Promise.resolve(undefined);
+      if (debounce.current) {
         clearTimeout(debounce.current);
         debounceResolve.current?.(undefined);
       }
@@ -347,6 +364,7 @@ export function useRequest<T>(service: (client: RequestClient, signal: AbortSign
           debounce.current = undefined;
           debounceResolve.current = undefined;
           debounceStart.current = 0;
+          debounceLast.current = 0;
           void executeRef.current().then(resolve, () => resolve(undefined));
         }, Math.max(0, deadline - now));
       });

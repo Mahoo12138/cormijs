@@ -44,5 +44,5 @@ const { run } = useRequest(service, {
 
 ## 5. 下一步
 
-- U12 剩余：防抖 leading/trailing 开关、跨标签页缓存失效；
+- U12 剩余：跨标签页缓存失效；防抖边沿见 [U12-11](140-u12-debounce-edges.md)；
 - U17 图表/主题编辑器、F6、U09 热替换、U16 请求 locale、SSR 生产化、U33 sitemap lastmod/压缩。

@@ -1,0 +1,111 @@
+{
+  "format": "cormi:u12-11-debounce-edges-validation:1",
+  "verifiedAt": "2026-10-23T08:55:06.444Z",
+  "base": "800f3f56a600680e18f0ec3b6166b27f73db9224",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "ocs/112-roadmap-audit-2026-10-21.md",
+      "docs/127-u12-debounce.md",
+      "docs/139-u12-debounce-maxwait.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/src/request.tsx",
+      "scripts/request-fixture.ts",
+      "scripts/test-package.ts",
+      "docs/140-u12-debounce-edges.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u12-11-debounce-edges/check.log",
+      "sha256": "37d1b4be62b07a865022631e3ddb916023eb7ceecb04a69e86e69dfe4b2ce1cd",
+      "seconds": 164.124843334,
+      "tests": 570,
+      "pass": 570,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "typecheck + all node tests"
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u12-11-debounce-edges/browser.log",
+      "sha256": "c478766fa43ae2f2db88d6639c16a4ba46f23522682c2381ecdd154f37b62eb5",
+      "seconds": 590.133579709,
+      "tests": 54,
+      "pass": 54,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "includes leading+trailing and leading-only debounce assertions in dev/build/preview"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u12-11-debounce-edges/package.log",
+      "sha256": "8cb0c125edc44f7e992095078c9340f2d4dbdf4d471cde7dd6605abb2d46c15d",
+      "stages": 344,
+      "passed": true,
+      "note": "request consumer public types include debounceLeading/debounceTrailing"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/request.test.ts",
+      "log": ".cache/u12-11-debounce-edges/targeted.log",
+      "sha256": "840cc992d8e98744c0265eb474bf496204bb429682aab651a74b5e5aa5d46d32",
+      "seconds": 33.695274167,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "docs/49-application-guide.md": "54f511b0ac180041ba3161d62f79e4d9cae066cb3ca641ff95fcb833d040f026",
+    "docs/59-umi-feature-roadmap.md": "414e4943348f1ab982bbf879843a03651655c81503233dc629261e3d06715b09",
+    "docs/112-roadmap-audit-2026-10-21.md": "8b43c4528fd2fa407ef1b6a8e01f39991147b30f8d3c9c216164f81e32de3343",
+    "docs/127-u12-debounce.md": "dd28a891f08dc6a8385e4587a63a7464d3a4d317cca951c6c85597b3c1f38a4a",
+    "docs/139-u12-debounce-maxwait.md": "cc5d6382fd0105a701648c92a53fece4d8c9ab75e2c89bf9f30dc8ae2d458310",
+    "docs/140-u12-debounce-edges.md": "d7b46fd6eb022ba001a8eaef98ae03da6b1384fead31388036c9bda4c535f159",
+    "packages/runtime/src/request.tsx": "4da766fe7cd1ca8df3ca4b47dc6485090b4fd98752c7750571b856ffd798da3a",
+    "scripts/request-fixture.ts": "fbf3f41dee2f208599cd10519eb99026c3bff6ede213731e62414646b0d073eb",
+    "scripts/test-package.ts": "14967b498375944e55b40b1c08c885a154bb7f422cdf0248298e6f386a8e0753",
+    "tests/browser/request.test.ts": "11a1899146a134ebb36246be7a818997c33ab364ded94856763c0d9722f521f2"
+  },
+  "sourceInputCount": 10,
+  "sourceInputsDigest": "8222d305cd5e55ba1902ed70b65ffb7353628d31628f3e67055925dd25459d9d",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "54f511b0ac180041ba3161d62f79e4d9cae066cb3ca641ff95fcb833d040f026",
+    "docs/59-umi-feature-roadmap.md": "414e4943348f1ab982bbf879843a03651655c81503233dc629261e3d06715b09",
+    "docs/112-roadmap-audit-2026-10-21.md": "8b43c4528fd2fa407ef1b6a8e01f39991147b30f8d3c9c216164f81e32de3343",
+    "docs/127-u12-debounce.md": "dd28a891f08dc6a8385e4587a63a7464d3a4d317cca951c6c85597b3c1f38a4a",
+    "docs/139-u12-debounce-maxwait.md": "cc5d6382fd0105a701648c92a53fece4d8c9ab75e2c89bf9f30dc8ae2d458310",
+    "docs/140-u12-debounce-edges.md": "d7b46fd6eb022ba001a8eaef98ae03da6b1384fead31388036c9bda4c535f159"
+  },
+  "evidence": [
+    ".cache/u12-11-debounce-edges/check.log",
+    ".cache/u12-11-debounce-edges/browser.log",
+    ".cache/u12-11-debounce-edges/package.log",
+    ".cache/u12-11-debounce-edges/targeted.log",
+    "artifacts/u12-11-debounce-edges-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "no-per-key-debounce",
+    "no-cross-component-sharing",
+    "timer-timing-not-wall-clock-guarantee",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}
