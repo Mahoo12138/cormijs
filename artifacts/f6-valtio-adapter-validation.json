@@ -1,0 +1,115 @@
+{
+  "format": "cormi:f6-valtio-adapter-validation:1",
+  "verifiedAt": "2026-10-24T16:47:54.702Z",
+  "base": "86494b79e4866eb6ddc94345f76bc1745d31db10",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "EADME.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/59-umi-feature-roadmap.md",
+      "package.json",
+      "pnpm-lock.yaml",
+      "scripts/test-package.ts",
+      "tsconfig.json",
+      "docs/150-f6-valtio.md",
+      "packages/valtio/",
+      "scripts/valtio-fixture.ts",
+      "tests/browser/valtio.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62",
+    "valtio": "2.3.2"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/valtio-adapter/check.log",
+      "sha256": "97a2f4c7c0112a5a395e5fd398afe023539c7fe98af5c6733e8b97fafbc76b46",
+      "seconds": 139.74467775,
+      "tests": 572,
+      "pass": 572,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/valtio-adapter/browser.log",
+      "sha256": "d0f32a8eb5d2438bd1cef889a58b5530c8ea2b330126326fa490c850f0e7e602",
+      "seconds": 630.265857459,
+      "tests": 57,
+      "pass": 57,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "two useSnapshot observers update after an outside-React proxy mutation"
+    },
+    "package": {
+      "command": "CORMI_PACKAGE_ONLY=valtio pnpm test:package",
+      "log": ".cache/valtio-adapter/package.log",
+      "sha256": "9ba99a567fc8e7cc0a4fd2d3880dde9d0748f7865d2110f16acaa0cc0291e83a",
+      "stages": 83,
+      "passed": true,
+      "note": "valtio consumer subset only; host disk space is insufficient for the full matrix"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/valtio.test.ts",
+      "log": ".cache/valtio-adapter/targeted.log",
+      "sha256": "25186f35894e3d1aead4c392f20f1329f259bd2876ac71d610d0026bf0a21907",
+      "seconds": 11.981812416999999,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "README.md": "a50288a93e1d8a7587eb5b689e1876b276784d755579489738d0cee1719fcce1",
+    "docs/59-umi-feature-roadmap.md": "389af04e3ce34768b9a65b576e36dc068fa0959b37073716822f1ad1a477b354",
+    "docs/112-roadmap-audit-2026-10-21.md": "e850e73dd18f7871002a51cd74aa23741b4c760b92601b84f19b7714dd3bf0db",
+    "docs/150-f6-valtio.md": "83e99242505fb2b8614b3a47c25877f8b22ac45d4763ca39174d4d747007d004",
+    "package.json": "0256c24abae1b48a9588b04858092c4c12a6bf8f7f721bda64fa5b0b08a8b95f",
+    "pnpm-lock.yaml": "a01b9fc7c7b5cd055a1c4928bdcbdeda9c7eb988c6ad5a31142c3d169f23c786",
+    "tsconfig.json": "afe13ec7d878d458579a7a26a70784f0de0c4543efbce2c5d7fb053577a92bc9",
+    "packages/valtio/package.json": "8ecc8a54aee83bc0a633c4fd79e9c62d7b4d03e8e4d0243c01336898f1c6b9ed",
+    "packages/valtio/tsconfig.json": "c574f899a8a1bd01e6620eb0ba972cebeb8c0cd3e9a8e60604706368671447d9",
+    "packages/valtio/src/index.ts": "8c5e5d3e1fd3536fd4086e1e983c5fe5b1eeb221e6157c8e8da57d012c394f4b",
+    "scripts/valtio-fixture.ts": "1c27337b2a96e6ec0875184af33e926067e05e29f9720cd3cc0396b234d7eb45",
+    "scripts/test-package.ts": "651dc54e2d4d373d7b5f3a58bdeeb696c0bb52e5fa91c05208024cdc23aadbe6",
+    "tests/browser/valtio.test.ts": "c16bb0f6c34f3552e0a1f98d3f5dbd39d262b3d38cc819d161a005556d75eb06"
+  },
+  "sourceInputCount": 13,
+  "sourceInputsDigest": "be2488fd384eec57eb90ce9e4341e57278778d911bfab0309533dfe92dc64cf1",
+  "documentationInputs": {
+    "docs/59-umi-feature-roadmap.md": "389af04e3ce34768b9a65b576e36dc068fa0959b37073716822f1ad1a477b354",
+    "docs/112-roadmap-audit-2026-10-21.md": "e850e73dd18f7871002a51cd74aa23741b4c760b92601b84f19b7714dd3bf0db",
+    "docs/150-f6-valtio.md": "83e99242505fb2b8614b3a47c25877f8b22ac45d4763ca39174d4d747007d004"
+  },
+  "evidence": [
+    ".cache/valtio-adapter/check.log",
+    ".cache/valtio-adapter/browser.log",
+    ".cache/valtio-adapter/package.log",
+    ".cache/valtio-adapter/targeted.log",
+    "artifacts/f6-valtio-adapter-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "valtio-2-only",
+    "removed-legacy-utils-not-exported",
+    "no-provider-or-plugin",
+    "no-ssr-dehydration",
+    "no-cormi-model-bridge",
+    "package-suite-subset-only-due-to-disk",
+    "no-publication-or-deployment"
+  ]
+}

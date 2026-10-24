@@ -37,6 +37,7 @@ import { writeAntdFixture, verifyAntdPage } from './antd-fixture.js';
 import { writeProLayoutFixture, verifyProLayoutPage } from './pro-layout-fixture.js';
 import { writeChartsFixture, verifyChartsPage } from './charts-fixture.js';
 import { writeReactQueryFixture, verifyReactQueryPage } from './react-query-fixture.js';
+import { writeValtioFixture, verifyValtioPage } from './valtio-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
 import { writeConventionalLoaderFixture, verifyConventionalLoaderPage } from './conventional-loader-fixture.js';
@@ -657,6 +658,24 @@ const bad:ReactQueryPluginOptions={defaults:{retry:'always'}};
     await command('react-query-build',reactQueryConsumer,'build');
     await withServer(reactQueryConsumer,'preview',async url=>{await verifyReactQueryPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'react-query-preview.png')});});
     report.stages.push({label:'installed-react-query-shared-cache-dev-build-preview',adapter:'@cormijs/plugin-react-query',previewRegenerated:false});
+
+    }
+    if (selected('valtio')) {
+    const valtioConsumer=await create('valtio','react');await writeValtioFixture(valtioConsumer);
+    const valtioManifest=consumerManifest(kit,'react');
+    valtioManifest.dependencies['@cormijs/plugin-react']=valtioManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    valtioManifest.dependencies['@cormijs/valtio']=valtioManifest.pnpm.overrides['@cormijs/valtio']!;
+    await writeFile(join(valtioConsumer,'package.json'),JSON.stringify(valtioManifest,null,2));
+    await install('valtio-install',valtioConsumer);await auditLinks(valtioConsumer);
+    await command('valtio-typecheck',valtioConsumer,'typecheck');
+    await writeFile(join(valtioConsumer,'types.mts'),`import {proxy,snapshot,subscribe,useSnapshot,watch} from '@cormijs/valtio';
+const state=snapshot(proxy({count:0}));const stop:()=>void=subscribe(proxy({count:0}),()=>{});stop();void [state,useSnapshot,watch];
+`);
+    await execute('valtio-public-types',valtioConsumer,process.execPath,typeArguments);
+    await withServer(valtioConsumer,'dev',async url=>{await verifyValtioPage(page,url);assert.deepEqual(errors,[]);});
+    await command('valtio-build',valtioConsumer,'build');
+    await withServer(valtioConsumer,'preview',async url=>{await verifyValtioPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'valtio-preview.png')});});
+    report.stages.push({label:'installed-valtio-snapshot-adapter-dev-build-preview',adapter:'@cormijs/valtio',previewRegenerated:false});
 
     }
     if (selected('initial-state')) {

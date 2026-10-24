@@ -48,6 +48,7 @@
     "@cormijs/preset-react-vite": "workspace:*",
     "@cormijs/routes": "workspace:*",
     "@cormijs/runtime": "workspace:*",
+    "@cormijs/valtio": "workspace:*",
     "@tanstack/react-query": "5.104.5",
     "@types/node": "22.13.10",
     "@types/react": "19.2.0",
