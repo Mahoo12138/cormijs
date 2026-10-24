@@ -41,7 +41,7 @@ const routes = [
 
 - 不提供全局 alternates 模板、按 locale 目录自动改写、语言前缀推断或反向链接生成。
 - 不校验 alternate 目标是否已预渲染、是否存活或是否互相引用；由应用保证正确性。
-- 动态 `prerenderPaths` 没有路由 meta，不能声明 alternates。
+- 动态 `prerenderPaths` 可通过对象条目声明 `alternates`/`lastmod`（U33-10）；没有对象元数据的路径仍无法声明。
 - 不输出 `xhtml:link` 到 HTML `<head>`；需要 head 时使用路由/组件 head API。
 - 不处理 RTL/语言协商或搜索引擎提交。
 
@@ -60,5 +60,5 @@ const routes = [
 
 ## 5. 下一步
 
-- U33 剩余：动态路径 lastmod/alternates、changefreq/priority、按语言拆分 sitemap；
+- U33 剩余：changefreq/priority、按语言拆分 sitemap；
 - F6 微前端/dva/valtio、U09 热替换、U16 请求 locale、SSR 生产化、U17 服务端图表。

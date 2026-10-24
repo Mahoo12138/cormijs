@@ -1,0 +1,124 @@
+{
+  "format": "cormi:u33-10-dynamic-prerender-metadata-validation:1",
+  "verifiedAt": "2026-10-24T16:08:21.045Z",
+  "base": "5b7faeaeefd5258fb38587c21e4897f7df5e981a",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "ocs/112-roadmap-audit-2026-10-21.md",
+      "docs/148-u33-sitemap-alternates.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/plugin-react-vite/src/index.ts",
+      "packages/plugin-react-vite/src/ssr.ts",
+      "scripts/ssr-fixture.ts",
+      "tests/browser/ssr.test.ts",
+      "tests/ssr.test.ts",
+      "docs/149-u33-dynamic-prerender-metadata.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u33-10-dynamic-metadata/check.log",
+      "sha256": "1f05d01a6699ba8bbf39e80c29bdee8100b3a89d521ce1d2938dd7a7d3cdaaea",
+      "seconds": 152.038204834,
+      "tests": 572,
+      "pass": 572,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u33-10-dynamic-metadata/browser.log",
+      "sha256": "ace6cb69d729c6cc21926ed5f4a96e803081594c11c952dba4dfde896c4e4962",
+      "seconds": 646.758923667,
+      "tests": 56,
+      "pass": 56,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "dynamic /backend/7 lastmod and alternate appear in the real sitemap"
+    },
+    "package": {
+      "command": "CORMI_PACKAGE_ONLY=ssr pnpm test:package",
+      "log": ".cache/u33-10-dynamic-metadata/package.log",
+      "sha256": "964b2a08d04dc8baa66b23f7f3d26475c3e5af2af62304e16f42ee170d1d586a",
+      "stages": 83,
+      "passed": true,
+      "note": "ssr consumer subset only; host disk space is insufficient for the full 359-stage matrix"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/ssr.test.ts",
+      "log": ".cache/u33-10-dynamic-metadata/targeted.log",
+      "sha256": "210ea4d39d3e0597830f36b681c1ca0776655123473f6d2b0dd714b15cb65bd5",
+      "seconds": 14.334904584,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    },
+    "unitRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/ssr.test.ts",
+      "log": ".cache/u33-10-dynamic-metadata/unit.log",
+      "sha256": "2bc680f693579c4b8515dcbdd3042567658ffdbc0199fdcb12c780b2e117705d",
+      "seconds": 1.0082465409999999,
+      "tests": 8,
+      "pass": 8,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "docs/49-application-guide.md": "b6b73cc6f70eee2f2851b1ad7acb0bfac4d00062c30eb5f89833326b7bd7973d",
+    "docs/59-umi-feature-roadmap.md": "ee6b417151c0c481bc51137c544d20af1383f905a566ffecfeaf98f514e23904",
+    "docs/112-roadmap-audit-2026-10-21.md": "722b56f63fc161baf87d0ad8155b88fcae069b6b39d79920997c390d544133d3",
+    "docs/147-u33-sitemap-lastmod-gzip.md": "aaf1ef05a2c05bb50439d385d04f23a89440b106bc7afcb92cb8b78f82ea10c6",
+    "docs/148-u33-sitemap-alternates.md": "51925e85f98fbaed151192b1752e1ce69d0f950d5791e142e705cef9818d0f93",
+    "docs/149-u33-dynamic-prerender-metadata.md": "4fd025540c987062b7309cb137c83d97cd98254b295e4dddb8de58298f6b8775",
+    "packages/plugin-react-vite/src/index.ts": "0fe72023280caa1eae7647d9d43ae302f1b9a052d563c649c6491a5ea0695a4f",
+    "packages/plugin-react-vite/src/ssr.ts": "2924cbdd7445f9ca5eda65bc2d7388dddbb3b682c471afff41104b2ce7531810",
+    "packages/plugin-react-vite/src/static-export.ts": "50efe2fc2be876f00ef46d1574d979d9f08f6e253af6a8586bb69c868fbe8987",
+    "scripts/ssr-fixture.ts": "03f4f3ec43b9e48d25de31fe3c5a451dcb26a10f65665e53e802fd4b3a3340a1",
+    "tests/ssr.test.ts": "fc7a1ac260c2c3f69fe60164a3b43e9fab74a183d300e2c30eecbc7a7f981561",
+    "tests/browser/ssr.test.ts": "4487d199d4c4c621921ebc42823788e9ced6ea3c93b233d4fe9639085ff07b1c"
+  },
+  "sourceInputCount": 12,
+  "sourceInputsDigest": "2eaddb49ec4f099bcb5351d376916cd6bf052572d9c346cce5af4e36f0a4c138",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "b6b73cc6f70eee2f2851b1ad7acb0bfac4d00062c30eb5f89833326b7bd7973d",
+    "docs/59-umi-feature-roadmap.md": "ee6b417151c0c481bc51137c544d20af1383f905a566ffecfeaf98f514e23904",
+    "docs/112-roadmap-audit-2026-10-21.md": "722b56f63fc161baf87d0ad8155b88fcae069b6b39d79920997c390d544133d3",
+    "docs/147-u33-sitemap-lastmod-gzip.md": "aaf1ef05a2c05bb50439d385d04f23a89440b106bc7afcb92cb8b78f82ea10c6",
+    "docs/148-u33-sitemap-alternates.md": "51925e85f98fbaed151192b1752e1ce69d0f950d5791e142e705cef9818d0f93",
+    "docs/149-u33-dynamic-prerender-metadata.md": "4fd025540c987062b7309cb137c83d97cd98254b295e4dddb8de58298f6b8775"
+  },
+  "evidence": [
+    ".cache/u33-10-dynamic-metadata/check.log",
+    ".cache/u33-10-dynamic-metadata/browser.log",
+    ".cache/u33-10-dynamic-metadata/package.log",
+    ".cache/u33-10-dynamic-metadata/targeted.log",
+    ".cache/u33-10-dynamic-metadata/unit.log",
+    "artifacts/u33-10-dynamic-prerender-metadata-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "explicit-dynamic-entries-only",
+    "no-global-alternates-template",
+    "no-language-split",
+    "no-changefreq-priority",
+    "package-suite-subset-only-due-to-disk",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

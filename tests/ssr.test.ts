@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { ProjectRuntime } from '@cormijs/core';
 import { vitePlugin } from '@cormijs/plugin-vite';
 import { reactPlugin } from '@cormijs/plugin-react';
-import { prerenderPages, prerenderStaticPages, resolvePrerenderPaths, sitemapIndexXml, sitemapXml, ssrPlugin } from '@cormijs/plugin-react-vite';
+import { prerenderPages, prerenderStaticPages, resolvePrerenderEntries, resolvePrerenderPaths, sitemapIndexXml, sitemapXml, ssrPlugin } from '@cormijs/plugin-react-vite';
 import { renderServerApplication, renderServerApplicationStream, type ServerApplication } from '@cormijs/runtime/server';
 
 const hasCode = (code: string) => (error: any) => (error?.code ?? error?.cause?.code) === code;
@@ -164,6 +164,10 @@ test('resolvePrerenderPaths accepts arrays and async producers, and prerender ca
   assert.deepEqual(await resolvePrerenderPaths(['/users/2', '/users/1', '/users/2']), ['/users/1', '/users/2']);
   assert.deepEqual(await resolvePrerenderPaths(['/users/1', { path: '/users/2', prerender: false }, { path: '/users/3' }]), ['/users/1', '/users/3']);
   assert.deepEqual(await resolvePrerenderPaths(async () => ['/guide']), ['/guide']);
+  assert.deepEqual(await resolvePrerenderEntries([{ path: '/users/3', lastmod: '2026-03-04', alternates: { en: '/en/users/3' } }]),
+    [{ path: '/users/3', lastmod: '2026-03-04', alternates: { en: '/en/users/3' } }]);
+  await assert.rejects(resolvePrerenderEntries([{ path: '/users/3', lastmod: 'bad' }]), hasCode('SSR_INVALID'));
+  await assert.rejects(resolvePrerenderEntries([{ path: '/users/3', alternates: { en: 'relative' } }]), hasCode('SSR_INVALID'));
   await assert.rejects(resolvePrerenderPaths(async () => ['relative']), hasCode('SSR_INVALID'));
   await assert.rejects(resolvePrerenderPaths(1 as never), hasCode('SSR_INVALID'));
   const root = await realpath(await mkdtemp(join(tmpdir(), 'cormi-prerender-errors 中文-')));
@@ -201,7 +205,9 @@ test('prerenderStaticPages bounds concurrent renders and keeps page order', asyn
 
 test('prerenderPages merges explicit dynamic paths with literal routes', () => {
   const pages = prerenderPages([{ id: 'home', path: '', module: { specifier: './src/pages/home.tsx', exportName: 'default' }, source: { file: 'src/pages/home.tsx' } }],
-    ['/users/2', '/users/1', '/users/2']);
+    ['/users/2', { path: '/users/1', lastmod: '2026-03-04', alternates: { en: '/en/users/1' } }, '/users/2']);
   assert.deepEqual(pages.map(page => page.path), ['/', '/users/1', '/users/2']);
   assert.deepEqual(pages.find(page => page.path === '/users/1')?.head, {});
+  assert.equal(pages.find(page => page.path === '/users/1')?.lastmod, '2026-03-04');
+  assert.deepEqual(pages.find(page => page.path === '/users/1')?.alternates, { en: '/en/users/1' });
 });

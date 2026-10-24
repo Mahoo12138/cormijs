@@ -15,6 +15,10 @@ export interface PrerenderPathEntry {
   readonly path: string;
   /** Set false to keep the path out of this build while retaining it in configuration. */
   readonly prerender?: boolean;
+  /** ISO-8601 lastmod for this dynamic path's sitemap entry. */
+  readonly lastmod?: string;
+  /** hreflang → app-relative path map for this dynamic path. */
+  readonly alternates?: Readonly<Record<string, string>>;
 }
 export type PrerenderPath = string | PrerenderPathEntry;
 export interface SsrPluginOptions {
@@ -233,41 +237,65 @@ function publicUrl(site: string, base: string, path: string): string {
   return `${site}${prefix}${path === '/' ? '' : path.slice(1)}`;
 }
 
-function extraPrerenderPaths(value: unknown): readonly string[] {
+function alternatesOf(value: unknown): Readonly<Record<string, string>> | undefined {
+  if (value === undefined) return undefined;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new CormiError('SSR_INVALID', 'alternates must map hreflang to app-relative paths.');
+  const result: Record<string, string> = {};
+  for (const [locale, href] of Object.entries(value)) {
+    if (!locale || (locale !== 'x-default' && !/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(locale))
+      || typeof href !== 'string' || !href.startsWith('/') || href.length > 2048 || /[\0\r\n#]/.test(href)) {
+      throw new CormiError('SSR_INVALID', 'alternates must map hreflang to app-relative paths without fragments.');
+    }
+    result[locale] = href;
+  }
+  return Object.freeze(result);
+}
+
+function extraPrerenderEntries(value: unknown): readonly PrerenderPathEntry[] {
   if (!Array.isArray(value) || value.length > 10000) throw new CormiError('SSR_INVALID', 'prerenderPaths must be an array of at most 10000 paths.');
-  const paths = new Set<string>();
+  const paths = new Map<string, PrerenderPathEntry>();
   for (const raw of value) {
-    let path: unknown = raw, prerender = true;
+    let path: unknown = raw, prerender = true, lastmod: string | undefined, alternates: Readonly<Record<string, string>> | undefined;
     if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
       const entry = raw as Record<string, unknown>;
-      if (Object.keys(entry).some(key => !['path', 'prerender'].includes(key)) || typeof entry.path !== 'string'
+      if (Object.keys(entry).some(key => !['path', 'prerender', 'lastmod', 'alternates'].includes(key)) || typeof entry.path !== 'string'
         || entry.prerender !== undefined && typeof entry.prerender !== 'boolean') {
-        throw new CormiError('SSR_INVALID', 'prerenderPaths entries must be a path string or { path, prerender? }.');
+        throw new CormiError('SSR_INVALID', 'prerenderPaths entries must be a path string or { path, prerender?, lastmod?, alternates? }.');
       }
       path = entry.path;
       prerender = entry.prerender !== false;
+      lastmod = entry.lastmod === undefined ? undefined : sitemapLastmodOf(entry.lastmod);
+      alternates = alternatesOf(entry.alternates);
     }
     if (!prerender) continue;
     if (typeof path !== 'string' || !path.startsWith('/') || path.startsWith('//') || path.length > 512 || /[\0\r\n?#%\\]/.test(path)
       || path.split('/').some(segment => segment === '..' || segment === '.')) throw new CormiError('SSR_INVALID', 'prerenderPaths entries must be internal application paths.');
-    paths.add(path === '/' ? '/' : path.replace(/\/+$/, ''));
+    const normalized = path === '/' ? '/' : path.replace(/\/+$/, '');
+    if (!paths.has(normalized)) paths.set(normalized, Object.freeze({ path: normalized, ...(lastmod ? { lastmod } : {}), ...(alternates ? { alternates } : {}) }));
   }
-  return Object.freeze([...paths].sort());
+  return Object.freeze([...paths.values()].sort((a, b) => a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 }
 
 /** Resolve an array or async path producer (Umi extraRoutePaths) with per-page disable and validation. */
-export async function resolvePrerenderPaths(value: SsrPluginOptions['prerenderPaths']): Promise<readonly string[]> {
+export async function resolvePrerenderEntries(value: SsrPluginOptions['prerenderPaths']): Promise<readonly PrerenderPathEntry[]> {
   if (value === undefined) return Object.freeze([]);
   if (typeof value !== 'function' && !Array.isArray(value)) throw new CormiError('SSR_INVALID', 'prerenderPaths must be an array or an async function.');
   const paths = typeof value === 'function' ? await value() : value;
-  return extraPrerenderPaths(paths);
+  return extraPrerenderEntries(paths);
+}
+export async function resolvePrerenderPaths(value: SsrPluginOptions['prerenderPaths']): Promise<readonly string[]> {
+  return Object.freeze((await resolvePrerenderEntries(value)).map(entry => entry.path));
 }
 
 /** Literal route pages plus explicit extra paths; extra paths use the SSR render result for their head. */
-export function prerenderPages(routes: readonly RouteRecord[], extraPaths: readonly string[] = []): readonly StaticPage[] {
+export function prerenderPages(routes: readonly RouteRecord[], extraPaths: readonly (string | PrerenderPathEntry)[] = []): readonly StaticPage[] {
   const pages = new Map<string, StaticPage>();
   for (const page of staticPages(routes)) pages.set(page.path, page);
-  for (const path of extraPaths) if (!pages.has(path)) pages.set(path, { path, head: {} });
+  for (const extra of extraPaths) {
+    const entry = typeof extra === 'string' ? { path: extra } : extra;
+    if (!pages.has(entry.path)) pages.set(entry.path, { path: entry.path, head: {},
+      ...(entry.lastmod ? { lastmod: entry.lastmod } : {}), ...(entry.alternates ? { alternates: entry.alternates } : {}) });
+  }
   return Object.freeze([...pages.values()].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0)));
 }
 
@@ -425,7 +453,7 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
     if (options.prerenderIgnoreErrors !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderIgnoreErrors requires prerender: true.');
     if (options.prerenderIncremental !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderIncremental requires prerender: true.');
     if (options.prerenderConcurrency !== undefined && options.prerender !== true) throw new CormiError('SSR_INVALID', 'prerenderConcurrency requires prerender: true.');
-    if (Array.isArray(options.prerenderPaths)) extraPrerenderPaths(options.prerenderPaths);
+    if (Array.isArray(options.prerenderPaths)) extraPrerenderEntries(options.prerenderPaths);
     if (options.robots !== undefined && (typeof options.robots !== 'string' || !options.robots || options.robots.length > 65536 || options.robots.includes('\0'))) {
       throw new CormiError('SSR_INVALID', 'robots must be bounded text.');
     }
@@ -505,7 +533,7 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
               const shell = await readFile(join(resolved.build.outDir, 'index.html'), 'utf8');
               await mkdir(join(resolved.build.outDir, '.cormi'), { recursive: true });
               await writeFile(serverShellPath(resolved.build.outDir), shell);
-              const extraPaths = await resolvePrerenderPaths(options.prerenderPaths);
+              const extraPaths = await resolvePrerenderEntries(options.prerenderPaths);
               const result = await prerenderStaticPages({ output: resolved.build.outDir, shell, mountId, base: resolved.base,
                 pages: prerenderPages(routes, extraPaths), render: module.render as Render, ignoreErrors: options.prerenderIgnoreErrors === true,
                 incremental: options.prerenderIncremental === true, concurrency: options.prerenderConcurrency ?? 1, ...(sitemap !== undefined ? { sitemap } : {}),

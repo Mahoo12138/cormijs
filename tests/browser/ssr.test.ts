@@ -55,7 +55,8 @@ test('SSR renders routes and loader data in preview and hydrates without errors'
   const sitemapIndex = await readFile(join(f.root, 'dist/sitemap-index.xml'), 'utf8');
   for (const chunk of [1, 2]) assert.ok(sitemapIndex.includes(`<sitemap><loc>https://example.com/ssr/sitemap-${chunk}.xml</loc><lastmod>2026-01-02</lastmod></sitemap>`), `chunk ${chunk}`);
   const sitemap = (await readFile(join(f.root, 'dist/sitemap-1.xml'), 'utf8')) + (await readFile(join(f.root, 'dist/sitemap-2.xml'), 'utf8'));
-  for (const url of ['https://example.com/ssr/', 'https://example.com/ssr/status', 'https://example.com/ssr/backend/7']) assert.ok(sitemap.includes(`<loc>${url}</loc><lastmod>2026-01-02</lastmod>`), url);
+  for (const url of ['https://example.com/ssr/', 'https://example.com/ssr/status']) assert.ok(sitemap.includes(`<loc>${url}</loc><lastmod>2026-01-02</lastmod>`), url);
+  assert.ok(sitemap.includes('<loc>https://example.com/ssr/backend/7</loc><lastmod>2026-04-05</lastmod><xhtml:link rel="alternate" hreflang="en" href="https://example.com/ssr/backend/7"/>'), 'dynamic path metadata is emitted');
   assert.ok(sitemap.includes('<loc>https://example.com/ssr/guide</loc><lastmod>2026-03-04</lastmod><xhtml:link rel="alternate" hreflang="en" href="https://example.com/ssr/guide"/><xhtml:link rel="alternate" hreflang="zh-CN" href="https://example.com/ssr/guide?lang=zh"/><xhtml:link rel="alternate" hreflang="x-default" href="https://example.com/ssr/guide"/>'), 'route meta.lastmod and alternates win');
   for (const name of ['sitemap-1.xml', 'sitemap-2.xml', 'sitemap-index.xml']) {
     assert.equal(gunzipSync(await readFile(join(f.root, 'dist', name + '.gz'))).toString(), await readFile(join(f.root, 'dist', name), 'utf8'), name);
