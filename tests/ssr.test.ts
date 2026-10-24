@@ -4,6 +4,7 @@ import { createElement, Suspense } from 'react';
 import { Outlet, redirect } from 'react-router';
 import { existsSync } from 'node:fs';
 import { mkdtemp, readFile, realpath, rm } from 'node:fs/promises';
+import { gunzipSync } from 'node:zlib';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ProjectRuntime } from '@cormijs/core';
@@ -84,7 +85,9 @@ test('ssr plugin registers its Vite bridge, validates options and withdraws', as
     { prerender: true, robots: 1 }, { prerender: true, robots: '{{sitemap}}' }, { robots: 'x' }, { prerender: true, robots: '' },
     { prerender: true, prerenderConcurrency: 0 }, { prerender: true, prerenderConcurrency: '2' },
     { prerender: true, sitemap: 'https://example.com', sitemapChunkSize: 0 }, { prerender: true, sitemap: 'https://example.com', sitemapChunkSize: 1.5 },
-    { prerender: true, sitemap: 'https://example.com', sitemapChunkSize: 50_001 }, { prerender: true, sitemapChunkSize: 2 }, { sitemap: 'https://example.com', sitemapChunkSize: 2 }]) {
+    { prerender: true, sitemap: 'https://example.com', sitemapChunkSize: 50_001 }, { prerender: true, sitemapChunkSize: 2 }, { sitemap: 'https://example.com', sitemapChunkSize: 2 },
+    { prerender: true, sitemap: 'https://example.com', sitemapLastmod: 'not-a-date' }, { prerender: true, sitemapLastmod: '2026-01-02' },
+    { prerender: true, sitemap: 'https://example.com', sitemapGzip: 'yes' }, { prerender: true, sitemapGzip: true }]) {
     const rejecting = new ProjectRuntime(3000, root);
     rejecting.mount('vite', vitePlugin);
     rejecting.mount('react', reactPlugin);
@@ -122,6 +125,8 @@ test('prerenderStaticPages writes literal routes, skips redirects and emits a si
   assert.ok(!map.includes('missing'));
   assert.equal(sitemapXml(['https://x.test/a&b']), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://x.test/a&amp;b</loc></url>\n</urlset>\n');
   assert.equal(sitemapIndexXml(['https://x.test/a&b']), '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <sitemap><loc>https://x.test/a&amp;b</loc></sitemap>\n</sitemapindex>\n');
+  assert.equal(sitemapXml(['https://x.test/a'], '2026-01-02'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://x.test/a</loc><lastmod>2026-01-02</lastmod></url>\n</urlset>\n');
+  assert.equal(sitemapIndexXml(['https://x.test/a'], '2026-01-02'), '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <sitemap><loc>https://x.test/a</loc><lastmod>2026-01-02</lastmod></sitemap>\n</sitemapindex>\n');
 });
 
 test('prerenderStaticPages chunks sitemap URLs and writes an index with base-aware links', async t => {
@@ -130,13 +135,18 @@ test('prerenderStaticPages chunks sitemap URLs and writes an index with base-awa
   const shell = '<!doctype html><html><head></head><body><div id="root"></div></body></html>';
   const pages = [{ path: '/', head: {} }, { path: '/a', head: {} }, { path: '/b', head: {} }];
   const render = async (request: Request) => ({ html: `<main>${new URL(request.url).pathname}</main>`, status: 200, head: {} });
-  const first = await prerenderStaticPages({ output: root, shell, mountId: 'root', base: '/app/', sitemap: 'https://example.com', sitemapChunkSize: 1, pages, render });
+  const first = await prerenderStaticPages({ output: root, shell, mountId: 'root', base: '/app/', sitemap: 'https://example.com', sitemapChunkSize: 1,
+    sitemapLastmod: '2026-01-02', sitemapGzip: true, pages, render });
   assert.equal(first.sitemap, join(root, 'sitemap-index.xml'));
   assert.deepEqual(first.sitemapChunks, [join(root, 'sitemap-1.xml'), join(root, 'sitemap-2.xml'), join(root, 'sitemap-3.xml')]);
+  assert.deepEqual(first.sitemapGzip, [join(root, 'sitemap-1.xml.gz'), join(root, 'sitemap-2.xml.gz'), join(root, 'sitemap-3.xml.gz'), join(root, 'sitemap-index.xml.gz')]);
   assert.equal(existsSync(join(root, 'sitemap.xml')), false);
   const indexXml = await readFile(join(root, 'sitemap-index.xml'), 'utf8');
-  for (let index = 1; index <= 3; index++) assert.ok(indexXml.includes(`<sitemap><loc>https://example.com/app/sitemap-${index}.xml</loc></sitemap>`), `chunk ${index}`);
-  assert.match(await readFile(join(root, 'sitemap-1.xml'), 'utf8'), /<loc>https:\/\/example.com\/app\/<\/loc>/);
+  for (let index = 1; index <= 3; index++) assert.ok(indexXml.includes(`<sitemap><loc>https://example.com/app/sitemap-${index}.xml</loc><lastmod>2026-01-02</lastmod></sitemap>`), `chunk ${index}`);
+  for (const [plain, gzipped] of [[join(root, 'sitemap-1.xml'), join(root, 'sitemap-1.xml.gz')], [join(root, 'sitemap-index.xml'), join(root, 'sitemap-index.xml.gz')]] as const) {
+    assert.equal(gunzipSync(await readFile(gzipped)).toString(), await readFile(plain, 'utf8'));
+  }
+  assert.match(await readFile(join(root, 'sitemap-1.xml'), 'utf8'), /<loc>https:\/\/example.com\/app\/<\/loc><lastmod>2026-01-02<\/lastmod>/);
   assert.doesNotMatch(await readFile(join(root, 'sitemap-1.xml'), 'utf8'), /\/app\/a/);
   assert.match(await readFile(join(root, 'sitemap-3.xml'), 'utf8'), /<loc>https:\/\/example.com\/app\/b<\/loc>/);
 

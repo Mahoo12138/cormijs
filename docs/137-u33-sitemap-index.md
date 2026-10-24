@@ -55,5 +55,5 @@ dist/robots.txt   # Sitemap: https://example.com/app/sitemap-index.xml
 
 ## 5. 下一步
 
-- U33 剩余：sitemap `lastmod`/压缩、按语言拆分；
+- U33 剩余：按页 lastmod、按语言拆分/alternates、changefreq/priority；统一 lastmod/压缩见 [U33-8](147-u33-sitemap-lastmod-gzip.md)；
 - U17 图表/主题编辑器、F6、U09 热替换、U12 缓存持久化、U16 请求 locale、SSR 生产化。

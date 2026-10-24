@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { chromium } from 'playwright-core';
 import { existsSync } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
+import { gunzipSync } from 'node:zlib';
 import { join } from 'node:path';
 import { app, cli } from '../launcher-helpers.js';
 import { assertPortFree } from '../helpers.js';
@@ -52,9 +53,12 @@ test('SSR renders routes and loader data in preview and hydrates without errors'
   assert.match(await readFile(join(f.root, 'dist/index.html'), 'utf8'), /<title>Helmet home title · demo<\/title>/);
   assert.match(await readFile(join(f.root, 'dist/guide/index.html'), 'utf8'), /data-guide="true">loaded on server</);
   const sitemapIndex = await readFile(join(f.root, 'dist/sitemap-index.xml'), 'utf8');
-  for (const chunk of [1, 2]) assert.ok(sitemapIndex.includes(`<sitemap><loc>https://example.com/ssr/sitemap-${chunk}.xml</loc></sitemap>`), `chunk ${chunk}`);
+  for (const chunk of [1, 2]) assert.ok(sitemapIndex.includes(`<sitemap><loc>https://example.com/ssr/sitemap-${chunk}.xml</loc><lastmod>2026-01-02</lastmod></sitemap>`), `chunk ${chunk}`);
   const sitemap = (await readFile(join(f.root, 'dist/sitemap-1.xml'), 'utf8')) + (await readFile(join(f.root, 'dist/sitemap-2.xml'), 'utf8'));
-  for (const url of ['https://example.com/ssr/', 'https://example.com/ssr/guide', 'https://example.com/ssr/status', 'https://example.com/ssr/backend/7']) assert.ok(sitemap.includes(`<loc>${url}</loc>`), url);
+  for (const url of ['https://example.com/ssr/', 'https://example.com/ssr/guide', 'https://example.com/ssr/status', 'https://example.com/ssr/backend/7']) assert.ok(sitemap.includes(`<loc>${url}</loc><lastmod>2026-01-02</lastmod>`), url);
+  for (const name of ['sitemap-1.xml', 'sitemap-2.xml', 'sitemap-index.xml']) {
+    assert.equal(gunzipSync(await readFile(join(f.root, 'dist', name + '.gz'))).toString(), await readFile(join(f.root, 'dist', name), 'utf8'), name);
+  }
   assert.equal(existsSync(join(f.root, 'dist/sitemap.xml')), false, 'chunked builds write an index instead of a single sitemap');
   const dynamicPage = await readFile(join(f.root, 'dist/backend/7/index.html'), 'utf8');
   assert.match(dynamicPage, /server loader<!-- -->:<!-- -->7<!-- -->:<!-- -->\/ssr\/backend\/7/);

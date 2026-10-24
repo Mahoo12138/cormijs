@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { gzipSync } from 'node:zlib';
 import { build as viteBuild, type PreviewServer, type ResolvedConfig, type ViteDevServer } from 'vite';
 import type {} from '@cormijs/plugin-vite';
 import type {} from '@cormijs/plugin-react';
@@ -36,6 +37,10 @@ export interface SsrPluginOptions {
   readonly sitemap?: string;
   /** Split sitemap URLs into chunks of at most this many entries and write sitemap-index.xml (1–50000). */
   readonly sitemapChunkSize?: number;
+  /** ISO-8601 date/datetime written as `<lastmod>` for every sitemap entry. */
+  readonly sitemapLastmod?: string;
+  /** Also write gzip copies of sitemap files (`sitemap.xml.gz`, chunks and index). */
+  readonly sitemapGzip?: boolean;
   /** Stream HTML through React's streaming renderer instead of buffering the whole page. */
   readonly streaming?: boolean;
 }
@@ -189,13 +194,19 @@ export function navigation(request: import('node:http').IncomingMessage): boolea
 }
 
 const xml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-export function sitemapXml(urls: readonly string[]): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <url><loc>${xml(url)}</loc></url>`).join('\n')}${urls.length ? '\n' : ''}</urlset>\n`;
+export function sitemapXml(urls: readonly string[], lastmod?: string): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <url><loc>${xml(url)}</loc>${lastmod ? `<lastmod>${xml(lastmod)}</lastmod>` : ''}</url>`).join('\n')}${urls.length ? '\n' : ''}</urlset>\n`;
 }
-export function sitemapIndexXml(urls: readonly string[]): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <sitemap><loc>${xml(url)}</loc></sitemap>`).join('\n')}${urls.length ? '\n' : ''}</sitemapindex>\n`;
+export function sitemapIndexXml(urls: readonly string[], lastmod?: string): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <sitemap><loc>${xml(url)}</loc>${lastmod ? `<lastmod>${xml(lastmod)}</lastmod>` : ''}</sitemap>`).join('\n')}${urls.length ? '\n' : ''}</sitemapindex>\n`;
 }
 
+function sitemapLastmodOf(value: unknown): string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2}))?$/.test(value) || Number.isNaN(Date.parse(value))) {
+    throw new CormiError('SSR_INVALID', 'sitemapLastmod must be an ISO-8601 date or datetime.');
+  }
+  return value;
+}
 function sitemapSite(value: unknown): string {
   if (typeof value !== 'string' || !value || value.length > 2048) throw new CormiError('SSR_INVALID', 'sitemap must be an absolute site URL.');
   let url: URL;
@@ -258,6 +269,8 @@ export interface PrerenderOptions {
   readonly render: Render;
   readonly sitemap?: string;
   readonly sitemapChunkSize?: number;
+  readonly sitemapLastmod?: string;
+  readonly sitemapGzip?: boolean;
   readonly ignoreErrors?: boolean;
   readonly incremental?: boolean;
   /** Parallel page renders, 1–16; default 1. Results keep page order. */
@@ -270,6 +283,7 @@ export interface PrerenderResult {
   /** Entry sitemap written to disk: sitemap.xml, or sitemap-index.xml when chunked. */
   readonly sitemap?: string;
   readonly sitemapChunks?: readonly string[];
+  readonly sitemapGzip?: readonly string[];
 }
 
 /**
@@ -283,6 +297,9 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
     || options.sitemapChunkSize < 1 || options.sitemapChunkSize > 50_000)) {
     throw new CormiError('SSR_PRERENDER_FAILED', 'sitemapChunkSize requires sitemap and must be an integer from 1 to 50000.');
   }
+  if (options.sitemapLastmod !== undefined && !options.sitemap) throw new CormiError('SSR_PRERENDER_FAILED', 'sitemapLastmod requires sitemap.');
+  if (options.sitemapGzip !== undefined && (!options.sitemap || typeof options.sitemapGzip !== 'boolean')) throw new CormiError('SSR_PRERENDER_FAILED', 'sitemapGzip requires sitemap and must be boolean.');
+  const sitemapLastmod = options.sitemapLastmod === undefined ? undefined : sitemapLastmodOf(options.sitemapLastmod);
   type Outcome = { readonly kind: 'written' | 'unchanged'; readonly path: string; readonly url?: string }
     | { readonly kind: 'skipped'; readonly path: string; readonly status: number; readonly error?: string };
   const renderPage = async (page: StaticPage): Promise<Outcome> => {
@@ -330,36 +347,45 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
       if (outcome.url) urls.push(outcome.url);
     }
   }
-  let sitemap: string | undefined, sitemapChunks: readonly string[] | undefined;
+  let sitemap: string | undefined, sitemapChunks: readonly string[] | undefined, sitemapGzipFiles: string[] | undefined;
   if (options.sitemap) {
+    const writeSitemap = async (file: string, content: string) => {
+      await writeFile(file, content);
+      if (options.sitemapGzip !== true) return;
+      const gzipped = file + '.gz';
+      await writeFile(gzipped, gzipSync(content));
+      (sitemapGzipFiles ??= []).push(gzipped);
+    };
     if (options.sitemapChunkSize === undefined) {
       sitemap = join(options.output, 'sitemap.xml');
-      await writeFile(sitemap, sitemapXml(urls));
+      await writeSitemap(sitemap, sitemapXml(urls, sitemapLastmod));
       await rm(join(options.output, 'sitemap-index.xml'), { force: true });
+      await rm(join(options.output, 'sitemap-index.xml.gz'), { force: true });
     } else {
       const chunkSize = options.sitemapChunkSize;
       const count = Math.max(1, Math.ceil(urls.length / chunkSize));
       const chunks: string[] = [];
       for (let index = 0; index < count; index++) {
         const file = join(options.output, `sitemap-${index + 1}.xml`);
-        await writeFile(file, sitemapXml(urls.slice(index * chunkSize, (index + 1) * chunkSize)));
+        await writeSitemap(file, sitemapXml(urls.slice(index * chunkSize, (index + 1) * chunkSize), sitemapLastmod));
         chunks.push(file);
       }
       sitemapChunks = Object.freeze(chunks);
       sitemap = join(options.output, 'sitemap-index.xml');
-      await writeFile(sitemap, sitemapIndexXml(chunks.map((_, index) => publicUrl(options.sitemap!, options.base, `/sitemap-${index + 1}.xml`))));
+      await writeSitemap(sitemap, sitemapIndexXml(chunks.map((_, index) => publicUrl(options.sitemap!, options.base, `/sitemap-${index + 1}.xml`)), sitemapLastmod));
       await rm(join(options.output, 'sitemap.xml'), { force: true });
+      await rm(join(options.output, 'sitemap.xml.gz'), { force: true });
     }
   }
   return Object.freeze({ written: Object.freeze(written), unchanged: Object.freeze(unchanged), skipped: Object.freeze(skipped),
-    ...(sitemap ? { sitemap } : {}), ...(sitemapChunks ? { sitemapChunks } : {}) });
+    ...(sitemap ? { sitemap } : {}), ...(sitemapChunks ? { sitemapChunks } : {}), ...(sitemapGzipFiles ? { sitemapGzip: Object.freeze(sitemapGzipFiles) } : {}) });
 }
 
 /** Opt-in SSR: dev renders through Vite's SSR module graph, preview through a built server bundle. */
 export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
   name: 'cormi:ssr', inject: ['vite', 'react'],
   apply(ctx, options = {}) {
-    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'prerenderIgnoreErrors', 'prerenderIncremental', 'prerenderConcurrency', 'robots', 'sitemap', 'sitemapChunkSize', 'streaming'].includes(key))) {
+    if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).some(key => !['id', 'mountId', 'prerender', 'prerenderPaths', 'prerenderIgnoreErrors', 'prerenderIncremental', 'prerenderConcurrency', 'robots', 'sitemap', 'sitemapChunkSize', 'sitemapLastmod', 'sitemapGzip', 'streaming'].includes(key))) {
       throw new CormiError('SSR_INVALID', 'Invalid SSR plugin options.');
     }
     if (options.prerender !== undefined && typeof options.prerender !== 'boolean') throw new CormiError('SSR_INVALID', 'prerender must be boolean.');
@@ -383,6 +409,9 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
       throw new CormiError('SSR_INVALID', 'sitemapChunkSize must be an integer from 1 to 50000.');
     }
     if (options.sitemapChunkSize !== undefined && sitemap === undefined) throw new CormiError('SSR_INVALID', 'sitemapChunkSize requires sitemap.');
+    if (options.sitemapLastmod !== undefined && sitemap === undefined) throw new CormiError('SSR_INVALID', 'sitemapLastmod requires sitemap.');
+    if (options.sitemapGzip !== undefined && (sitemap === undefined || typeof options.sitemapGzip !== 'boolean')) throw new CormiError('SSR_INVALID', 'sitemapGzip requires sitemap and must be boolean.');
+    const sitemapLastmod = options.sitemapLastmod === undefined ? undefined : sitemapLastmodOf(options.sitemapLastmod);
     if (options.robots?.includes('{{sitemap}}') && sitemap === undefined) throw new CormiError('SSR_INVALID', 'robots {{sitemap}} requires sitemap.');
     const id = options.id ?? 'cormi:ssr';
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('SSR_INVALID', 'Invalid SSR plugin id.');
@@ -453,7 +482,8 @@ export const ssrPlugin: Plugin.Object<SsrPluginOptions> = {
               const result = await prerenderStaticPages({ output: resolved.build.outDir, shell, mountId, base: resolved.base,
                 pages: prerenderPages(routes, extraPaths), render: module.render as Render, ignoreErrors: options.prerenderIgnoreErrors === true,
                 incremental: options.prerenderIncremental === true, concurrency: options.prerenderConcurrency ?? 1, ...(sitemap !== undefined ? { sitemap } : {}),
-                ...(options.sitemapChunkSize !== undefined ? { sitemapChunkSize: options.sitemapChunkSize } : {}) });
+                ...(options.sitemapChunkSize !== undefined ? { sitemapChunkSize: options.sitemapChunkSize } : {}),
+                ...(sitemapLastmod !== undefined ? { sitemapLastmod } : {}), ...(options.sitemapGzip !== undefined ? { sitemapGzip: options.sitemapGzip } : {}) });
               if (options.robots !== undefined) {
                 const sitemapEntry = options.sitemapChunkSize === undefined ? '/sitemap.xml' : '/sitemap-index.xml';
                 const content = options.robots.replaceAll('{{sitemap}}', sitemap === undefined ? '' : publicUrl(sitemap, resolved.base, sitemapEntry));
