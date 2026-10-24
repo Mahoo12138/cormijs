@@ -1,0 +1,112 @@
+{
+  "format": "cormi:u17-7-prolayout-locale-validation:1",
+  "verifiedAt": "2026-10-24T01:00:42.794Z",
+  "base": "ce03450f7103cf4f7d218dcbc36297e5cecbfe59",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "ocs/112-roadmap-audit-2026-10-21.md",
+      "docs/134-u17-pro-layout.md",
+      "docs/142-u17-theme-editor.md",
+      "docs/49-application-guide.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/plugin-antd/src/pro-layout.tsx",
+      "scripts/pro-layout-fixture.ts",
+      "docs/146-u17-prolayout-locale.md"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "155.0.4283.62",
+    "@ant-design/pro-layout": "7.22.7"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/u17-7-prolayout-locale/check.log",
+      "sha256": "add096ba8523c4b2b0a1791a0720ef86165eed031eb653985095c3c735fcc5f3",
+      "seconds": 126.61912600000001,
+      "tests": 572,
+      "pass": 572,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/u17-7-prolayout-locale/browser.log",
+      "sha256": "025ed019eb08af79ab3462cbe9c999592c25e3fc71801a544872f4b41aa3d87d",
+      "seconds": 608.133396958,
+      "tests": 56,
+      "pass": 56,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "SettingDrawer and ProLayout copy follow en to zh locale switches"
+    },
+    "package": {
+      "command": "pnpm test:package",
+      "log": ".cache/u17-7-prolayout-locale/package.log",
+      "sha256": "e78fd4343fb854fb7576306b0b19ce6059c7c2a318c4d0aeee28e2662b53cc26",
+      "stages": 359,
+      "passed": true,
+      "note": "installed pro-layout consumer exercises the same locale assertions"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/pro-layout.test.ts",
+      "log": ".cache/u17-7-prolayout-locale/targeted.log",
+      "sha256": "589928ee944a3008fa0ccb0a9e3baee12eadcf3bccfcee424f7dd0efe060363c",
+      "seconds": 13.814509167,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "docs/49-application-guide.md": "f5f8c834fdc22afd107e5ad9d741e14525ee0ab64d87b8eaaf6090e2d09c21cf",
+    "docs/59-umi-feature-roadmap.md": "e3290217a284bb8fbd7a748512e9b91215859dcee21914514de024a38afc1b51",
+    "docs/112-roadmap-audit-2026-10-21.md": "60bc41c7dd7f0eb80f448d8026f94ef760e39afeed5c2c1cc70de84f831e21ab",
+    "docs/134-u17-pro-layout.md": "666ca5f2692ec7a2c063632adf2eb9c25b1b2fb94b079e6ad411a0e04ac1a3ac",
+    "docs/142-u17-theme-editor.md": "6c6511ac616ac376ea50c919f4c3e2f76c64405636091d963012b677e388cd60",
+    "docs/146-u17-prolayout-locale.md": "d13a7357aee7301dcd52cbf35dd3aaec74892cb041749f034e29b22f347dca90",
+    "packages/plugin-antd/src/pro-layout.tsx": "1cc4c1a56539c11b66c1e73f5f33863f68d7a982f8aab68fc42d1b9b16988519",
+    "scripts/pro-layout-fixture.ts": "a0b14b1a227dcc260bc4420fa302c86fba98b37e90d1ce1fe825d9bca61ce2b0",
+    "tests/browser/pro-layout.test.ts": "9006681f6bb96d02b08924c1b949779b0444d3cf3d399f9ca3fd7d55ee636105"
+  },
+  "sourceInputCount": 9,
+  "sourceInputsDigest": "4d9f5c62e1184d61640816b65540e56653bda5a7b227e795dfbd82e1496278fb",
+  "documentationInputs": {
+    "docs/49-application-guide.md": "f5f8c834fdc22afd107e5ad9d741e14525ee0ab64d87b8eaaf6090e2d09c21cf",
+    "docs/59-umi-feature-roadmap.md": "e3290217a284bb8fbd7a748512e9b91215859dcee21914514de024a38afc1b51",
+    "docs/112-roadmap-audit-2026-10-21.md": "60bc41c7dd7f0eb80f448d8026f94ef760e39afeed5c2c1cc70de84f831e21ab",
+    "docs/134-u17-pro-layout.md": "666ca5f2692ec7a2c063632adf2eb9c25b1b2fb94b079e6ad411a0e04ac1a3ac",
+    "docs/142-u17-theme-editor.md": "6c6511ac616ac376ea50c919f4c3e2f76c64405636091d963012b677e388cd60",
+    "docs/146-u17-prolayout-locale.md": "d13a7357aee7301dcd52cbf35dd3aaec74892cb041749f034e29b22f347dca90"
+  },
+  "evidence": [
+    ".cache/u17-7-prolayout-locale/check.log",
+    ".cache/u17-7-prolayout-locale/browser.log",
+    ".cache/u17-7-prolayout-locale/package.log",
+    ".cache/u17-7-prolayout-locale/targeted.log",
+    "artifacts/u17-7-prolayout-locale-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "five-prolayout-locales-only",
+    "setting-drawer-ignores-formatMessage",
+    "window-g-locale-global-bridge",
+    "umi-locale-localstorage-precedence",
+    "no-ssr-copy-verification",
+    "no-custom-locale-translation-bundle",
+    "finite-test-sample-not-long-term-leak-proof",
+    "no-publication-or-deployment"
+  ]
+}

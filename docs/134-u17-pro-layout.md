@@ -88,5 +88,5 @@ export default function Layout() {
 
 ## 6. 下一步
 
-- U17 剩余：图表 SSR、ProLayout 高级配置与更多 locale 联动；
+- U17 剩余：服务端图表内容、ProLayout 高级配置与 SettingDrawer 自定义文案；
 - 之后推进 F6 微前端/状态库适配，或 U09 热替换、U12 缓存持久化、U33 sitemap index、SSR 生产化。

@@ -54,7 +54,7 @@ function ThemeToggle() {
 - ProLayout 7.22.7 对 antd 6 使用 SettingDrawer 时会输出 `Drawer width`、`List`、`Alert message` 的弃用警告；这是上游兼容问题，浏览器测试过滤这些已知警告，不能视为无警告。
 - 未验证 SSR 下的 SettingDrawer/hydration；设置读取只发生在浏览器 effect。
 - 设置持久化键按 origin 共享，不做跨标签页同步；清除 localStorage 会丢失设置。
-- SettingDrawer 文案跟随 ProLayout 内置 locale，不由 cormi locale 管理。
+- SettingDrawer 文案跟随 ProLayout 内置 locale；U17-7 将活动 cormi locale 映射到五个内置 locale，自定义语言仍受上游限制。
 
 ## 4. 验证
 

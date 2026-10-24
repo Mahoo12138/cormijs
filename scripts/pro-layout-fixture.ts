@@ -82,6 +82,12 @@ export async function verifyProLayoutPage(page: Page, url: string) {
   assert.match((await sider.getAttribute('class')) ?? '', /ant-pro-sider-light/);
   assert.equal(await themed.evaluate(node => getComputedStyle(node).backgroundColor), 'rgb(22, 119, 255)');
   assert.equal(await page.locator('.ant-pro-setting-drawer-handle').count(), 1);
+  await page.locator('.ant-pro-setting-drawer-handle').click();
+  const drawer = page.locator('.ant-pro-setting-drawer-drawer-content');
+  await drawer.waitFor({ state: 'visible' });
+  assert.match(await drawer.innerText(), /Page style setting/);
+  await page.keyboard.press('Escape');
+  await drawer.waitFor({ state: 'hidden' });
   await page.locator('[data-theme]').click();
   await page.waitForFunction(() => !document.querySelector('.ant-pro-sider')?.classList.contains('ant-pro-sider-light'));
   await page.waitForFunction(() => getComputedStyle(document.querySelector('[data-themed]')!).backgroundColor !== 'rgb(22, 119, 255)');
@@ -116,6 +122,7 @@ export async function verifyProLayoutPage(page: Page, url: string) {
   assert.equal(await page.evaluate(() => localStorage.getItem('demo:pro-layout-collapse')), 'false');
   await page.locator('.ant-pro-setting-drawer-handle').click();
   await page.locator('.ant-pro-setting-drawer-drawer-content').waitFor({ state: 'visible' });
+  assert.match(await page.locator('.ant-pro-setting-drawer-drawer-content').innerText(), /整体风格设置/);
   await page.keyboard.press('Escape');
   await page.locator('.ant-pro-setting-drawer-drawer-content').waitFor({ state: 'hidden' });
 }

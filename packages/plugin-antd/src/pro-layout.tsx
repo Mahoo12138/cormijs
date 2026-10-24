@@ -1,7 +1,7 @@
 import { ProLayout, SettingDrawer, type MenuDataItem } from '@ant-design/pro-layout';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
-import { toLayoutRoutes, useMenu, useMenuCollapse } from '@cormijs/runtime';
+import { localeCandidates, toLayoutRoutes, useLocaleOptional, useMenu, useMenuCollapse } from '@cormijs/runtime';
 
 export interface ProLayoutSettings {
   readonly layout?: 'side' | 'top' | 'mix';
@@ -33,6 +33,10 @@ export interface ProLayoutShellProps {
   readonly settingDrawer?: boolean;
   /** Persist settings under this localStorage key; omit to keep settings in memory. */
   readonly settingsStorageKey?: string;
+  /** Mirror the active cormi locale into ProLayout's g_locale bridge; default true. */
+  readonly syncLocale?: boolean;
+  /** Override ProLayout main copy; SettingDrawer still uses its five built-in locale bundles. */
+  readonly formatMessage?: (message: { readonly id: string; readonly defaultMessage?: string }) => string;
   readonly children?: ReactNode;
 }
 
@@ -60,6 +64,15 @@ function settingsFrom(value: unknown, strict: boolean): ProLayoutSettings {
   }
   return Object.freeze(result as ProLayoutSettings);
 }
+type ProLayoutLocale = 'zh-CN' | 'zh-TW' | 'en-US' | 'it-IT' | 'ko-KR';
+const proLayoutLocaleAliases: Readonly<Record<string, ProLayoutLocale>> = Object.freeze({
+  zh: 'zh-CN', 'zh-CN': 'zh-CN', 'zh-Hans': 'zh-CN', 'zh-TW': 'zh-TW', 'zh-Hant': 'zh-TW',
+  en: 'en-US', 'en-US': 'en-US', it: 'it-IT', 'it-IT': 'it-IT', ko: 'ko-KR', 'ko-KR': 'ko-KR',
+});
+function proLayoutLocaleOf(locale: string): ProLayoutLocale {
+  for (const candidate of localeCandidates(locale)) { const match = proLayoutLocaleAliases[candidate]; if (match) return match; }
+  return 'en-US';
+}
 const ProLayoutSettingsContext = createContext<ProLayoutSettingsState | null>(null);
 /** Settings editor state shared with the layout children; requires ProLayoutShell. */
 export function useProLayoutSettings(): ProLayoutSettingsState {
@@ -73,13 +86,18 @@ export function useProLayoutSettings(): ProLayoutSettingsState {
  * Mount menuPlugin and antdPlugin first; this component owns no plugin resources.
  */
 export function ProLayoutShell({ title, logo, layout = 'side', fixedHeader = true, siderWidth = 208, breakpoint = false,
-  icons, settings: initialSettings, settingDrawer = false, settingsStorageKey, children }: ProLayoutShellProps) {
+  icons, settings: initialSettings, settingDrawer = false, settingsStorageKey, syncLocale = true, formatMessage, children }: ProLayoutShellProps) {
   if (settingsStorageKey !== undefined && (typeof settingsStorageKey !== 'string' || !settingsStorageKey || settingsStorageKey.length > 128 || /[\0\r\n]/.test(settingsStorageKey))) {
     throw new TypeError('PRO_LAYOUT_SETTINGS_INVALID: settingsStorageKey must be bounded text');
   }
   if (typeof settingDrawer !== 'boolean') throw new TypeError('PRO_LAYOUT_SETTINGS_INVALID: settingDrawer must be boolean');
+  if (typeof syncLocale !== 'boolean') throw new TypeError('PRO_LAYOUT_SETTINGS_INVALID: syncLocale must be boolean');
+  if (formatMessage !== undefined && typeof formatMessage !== 'function') throw new TypeError('PRO_LAYOUT_SETTINGS_INVALID: formatMessage must be a function');
   const menu = useMenu();
   const { pathname } = useLocation();
+  const intl = useLocaleOptional();
+  const proLayoutLocale = proLayoutLocaleOf(intl?.locale ?? 'en');
+  const [, setLocaleTick] = useState(0);
   const { collapsed, setCollapsed } = useMenuCollapse();
   const defaults = useRef<Readonly<ProLayoutSettings>>(Object.freeze({
     layout, navTheme: 'light', fixedHeader, fixSiderbar: true, siderWidth, contentWidth: 'Fluid',
@@ -105,6 +123,18 @@ export function ProLayoutShell({ title, logo, layout = 'side', fixedHeader = tru
     settingsRef.current = next; setSettings(next);
     if (settingsStorageKey) try { window.localStorage.removeItem(settingsStorageKey); } catch { /* best effort */ }
   }, [settingsStorageKey]);
+  useEffect(() => {
+    if (!syncLocale || typeof window === 'undefined') return;
+    const host = window as typeof window & { g_locale?: string };
+    const previous = host.g_locale;
+    host.g_locale = proLayoutLocale;
+    window.dispatchEvent(new Event('languagechange'));
+    setLocaleTick(value => value + 1);
+    return () => {
+      if (host.g_locale !== proLayoutLocale) return;
+      if (previous === undefined) delete host.g_locale; else host.g_locale = previous;
+    };
+  }, [proLayoutLocale, syncLocale]);
   useEffect(() => {
     try {
       if (settingsStorageKey) {
@@ -136,6 +166,8 @@ export function ProLayoutShell({ title, logo, layout = 'side', fixedHeader = tru
         siderWidth={settings.siderWidth ?? 208}
         contentWidth={settings.contentWidth}
         breakpoint={breakpoint}
+        locale={proLayoutLocale}
+        formatMessage={formatMessage}
         location={{ pathname }}
         route={route}
         collapsed={collapsed}
