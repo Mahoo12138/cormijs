@@ -3,6 +3,7 @@ import type { Builder, BuildPlan, BuildResult, ServerHandle } from '@cormijs/bui
 import { build as viteBuild, createServer, preview as vitePreview,
   type InlineConfig, type PluginOption, type PreviewServer, type ViteDevServer } from 'vite';
 import { lstat, mkdir, mkdtemp, realpath, rm, stat } from 'node:fs/promises';
+import { createServer as createNetServer } from 'node:net';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { developmentBridge } from './development.js';
 import { applyPublicEnvironment, publicEnvironment } from './environment.js';
@@ -16,6 +17,18 @@ export interface ViteExtensions {
 declare module 'cordis' { interface Context { vite: ViteExtensions } }
 
 type NativeServer = ViteDevServer | PreviewServer;
+
+async function freePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const socket = createNetServer();
+    socket.unref();
+    socket.once('error', reject);
+    socket.listen(0, '127.0.0.1', () => {
+      const address = socket.address(), port = address && typeof address === 'object' ? address.port : 0;
+      socket.close(error => error ? reject(error) : resolve(port));
+    });
+  });
+}
 
 async function validatePlan(plan: BuildPlan, preview: boolean): Promise<{ root: string; output: string }> {
   if (!isAbsolute(plan.root)) throw new CormiError('ROOT_INVALID', 'BuildPlan.root must be absolute.');
@@ -139,18 +152,20 @@ export const vitePlugin: CordisPlugin.Object<void> = {
       // Factory snapshot taken before creating the Vite session; caller order is explicit.
       const plugins = ordered().map(([, entry]) => entry.create());
       const cache = await mkdtemp(join(root, '.cormi-vite-'));
+      // Vite maps an explicit 0 back to its default port; pick a real free port instead.
+      const port = plan.server?.port === 0 ? await freePort() : plan.server?.port ?? 5173;
       const config: InlineConfig = {
         root, configFile: false, envDir: false, envPrefix: [], cacheDir: cache,
         define: Object.fromEntries(Object.entries(publicValues).map(([key, value]) => ['import.meta.env.' + key, JSON.stringify(value)])),
         base: plan.base, mode: plan.mode, logLevel: 'silent', clearScreen: false,
-        server: { host: plan.server?.host ?? '127.0.0.1', port: plan.server?.port ?? 0,
+        server: { host: plan.server?.host ?? '127.0.0.1', port,
           strictPort: true, open: false, fs: { strict: true, allow: [root],
             deny: ['.env', '.env.*', '*.{crt,pem,key,p12,pfx,cer,der}', '.npmrc', '.yarnrc.yml', '**/.git/**',
               '**/.cormi/run-*/**', '**/.cormi.lock/**', '**/cormi.config.*', '**/.cormi/inspect.jsonc', '**/.cormi/*.d.ts',
               '**/.cormi-publish-*/**', '**/.cormi-publish.lock/**', '**/.cormi-local/**',
               ...(plan.serverOnlyFiles ?? []).map(file => file.split(sep).join('/').replace(/[?*\[\]{}()!+@]/g, '\\$&'))],
           } },
-        preview: { host: plan.server?.host ?? '127.0.0.1', port: plan.server?.port ?? 0, strictPort: true, open: false },
+        preview: { host: plan.server?.host ?? '127.0.0.1', port, strictPort: true, open: false },
         build: { outDir: output, emptyOutDir: false, write: true, watch: null },
         optimizeDeps: { noDiscovery: true, include: [] },
         plugins: [...(diagnostics ? [diagnostics.plugin] : []), {
