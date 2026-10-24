@@ -194,8 +194,13 @@ export function navigation(request: import('node:http').IncomingMessage): boolea
 }
 
 const xml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-export function sitemapXml(urls: readonly string[], lastmod?: string): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <url><loc>${xml(url)}</loc>${lastmod ? `<lastmod>${xml(lastmod)}</lastmod>` : ''}</url>`).join('\n')}${urls.length ? '\n' : ''}</urlset>\n`;
+export interface SitemapUrl {
+  readonly url: string;
+  readonly lastmod?: string;
+}
+export function sitemapXml(entries: readonly (string | SitemapUrl)[], lastmod?: string): string {
+  const rows = entries.map(entry => typeof entry === 'string' ? { url: entry, lastmod } : { url: entry.url, lastmod: entry.lastmod ?? lastmod });
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows.map(row => `  <url><loc>${xml(row.url)}</loc>${row.lastmod ? `<lastmod>${xml(row.lastmod)}</lastmod>` : ''}</url>`).join('\n')}${rows.length ? '\n' : ''}</urlset>\n`;
 }
 export function sitemapIndexXml(urls: readonly string[], lastmod?: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <sitemap><loc>${xml(url)}</loc>${lastmod ? `<lastmod>${xml(lastmod)}</lastmod>` : ''}</sitemap>`).join('\n')}${urls.length ? '\n' : ''}</sitemapindex>\n`;
@@ -300,7 +305,7 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
   if (options.sitemapLastmod !== undefined && !options.sitemap) throw new CormiError('SSR_PRERENDER_FAILED', 'sitemapLastmod requires sitemap.');
   if (options.sitemapGzip !== undefined && (!options.sitemap || typeof options.sitemapGzip !== 'boolean')) throw new CormiError('SSR_PRERENDER_FAILED', 'sitemapGzip requires sitemap and must be boolean.');
   const sitemapLastmod = options.sitemapLastmod === undefined ? undefined : sitemapLastmodOf(options.sitemapLastmod);
-  type Outcome = { readonly kind: 'written' | 'unchanged'; readonly path: string; readonly url?: string }
+  type Outcome = { readonly kind: 'written' | 'unchanged'; readonly path: string; readonly url?: string; readonly lastmod?: string }
     | { readonly kind: 'skipped'; readonly path: string; readonly status: number; readonly error?: string };
   const renderPage = async (page: StaticPage): Promise<Outcome> => {
     const target = page.path === '/' ? join(options.output, 'index.html') : join(options.output, ...page.path.split('/').filter(Boolean), 'index.html');
@@ -314,13 +319,18 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
       if (typeof status === 'number' && status >= 400) return { kind: 'skipped', path: page.path, status };
       const html = await injectShell(options.shell, rendered as { html?: unknown }, options.mountId).text();
       const outputUrl = options.sitemap ? publicUrl(options.sitemap, options.base, page.path) : undefined;
+      let pageLastmod: string | undefined;
+      if (outputUrl && page.lastmod !== undefined) {
+        try { pageLastmod = sitemapLastmodOf(page.lastmod); }
+        catch { throw new CormiError('SSR_PRERENDER_FAILED', 'Page meta.lastmod must be an ISO-8601 date or datetime.', { path: page.path }); }
+      }
       if (options.incremental) {
         const existing = await readFile(target, 'utf8').catch((error: NodeJS.ErrnoException) => error.code === 'ENOENT' ? undefined : Promise.reject(error));
-        if (existing === html) return { kind: 'unchanged', path: page.path, ...(outputUrl ? { url: outputUrl } : {}) };
+        if (existing === html) return { kind: 'unchanged', path: page.path, ...(outputUrl ? { url: outputUrl } : {}), ...(pageLastmod ? { lastmod: pageLastmod } : {}) };
       }
       if (page.path !== '/') await mkdir(dirname(target), { recursive: true });
       await writeFile(target, html);
-      return { kind: 'written', path: page.path, ...(outputUrl ? { url: outputUrl } : {}) };
+      return { kind: 'written', path: page.path, ...(outputUrl ? { url: outputUrl } : {}), ...(pageLastmod ? { lastmod: pageLastmod } : {}) };
     } catch (error) {
       if (!options.ignoreErrors) throw error;
       return { kind: 'skipped', path: page.path, status: 0, error: error instanceof Error ? error.message : String(error) };
@@ -338,13 +348,13 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
   };
   await Promise.all(Array.from({ length: Math.min(concurrency, options.pages.length) }, () => worker()));
   if (failure !== undefined) throw failure;
-  const written: string[] = [], unchanged: string[] = [], skipped: PrerenderResult['skipped'][number][] = [], urls: string[] = [];
+  const written: string[] = [], unchanged: string[] = [], skipped: PrerenderResult['skipped'][number][] = [], urls: SitemapUrl[] = [];
   for (const outcome of outcomes) {
     if (!outcome) continue;
     if (outcome.kind === 'skipped') skipped.push({ path: outcome.path, status: outcome.status, ...(outcome.error !== undefined ? { error: outcome.error } : {}) });
     else {
       (outcome.kind === 'written' ? written : unchanged).push(outcome.path);
-      if (outcome.url) urls.push(outcome.url);
+      if (outcome.url) urls.push({ url: outcome.url, ...(outcome.lastmod ? { lastmod: outcome.lastmod } : {}) });
     }
   }
   let sitemap: string | undefined, sitemapChunks: readonly string[] | undefined, sitemapGzipFiles: string[] | undefined;

@@ -16,6 +16,8 @@ export interface StaticExportOptions {
 export interface StaticPage {
   /** Absolute application path, always starting with `/`. */
   readonly path: string;
+  /** Route-level sitemap lastmod from `meta.lastmod`, when present. */
+  readonly lastmod?: string;
   readonly head: { readonly title?: string; readonly metas?: readonly HtmlMeta[]; readonly links?: readonly HtmlLink[]; readonly jsonLd?: unknown };
 }
 
@@ -100,7 +102,8 @@ export function staticPages(routes: readonly RouteRecord[]): readonly StaticPage
     const path = pathOf(route);
     if (path === undefined || path.split('/').some(segment => segment.includes(':') || segment === '*')) continue;
     if (pages.has(path)) continue;
-    pages.set(path, Object.freeze({ path, head: merged(route) }));
+    const lastmod = (route.meta as { lastmod?: unknown } | undefined)?.lastmod;
+    pages.set(path, Object.freeze({ path, ...(typeof lastmod === 'string' && lastmod ? { lastmod } : {}), head: merged(route) }));
   }
   return Object.freeze([...pages.values()].sort((a, b) => (a.path < b.path ? -1 : 1)));
 }

@@ -1,6 +1,6 @@
 # cormi Umi 吸收路线完成度审计（2026-10-21，更新 2026-10-22）
 
-本文件按 [Umi 功能路线](59-umi-feature-roadmap.md) 与当前工作区、测试产物逐项核对，回答“路线目标是否已经完成”。结论是**未完成**：U32/U33 的 SSR、预渲染、serverLoader 与流式核心已交付，U09/U16 的模型与 locale 能力大幅补齐，U12 请求能力已交付，U17 已交付可选 Antd Provider、ProLayout 外壳与菜单图标注册表；仍有 F6 微前端与 dva/valtio 适配、U17 服务端图表/自定义 SettingDrawer 文案、U33 按页 lastmod/语言 alternates、SSR 生产化等明确缺口。
+本文件按 [Umi 功能路线](59-umi-feature-roadmap.md) 与当前工作区、测试产物逐项核对，回答“路线目标是否已经完成”。结论是**未完成**：U32/U33 的 SSR、预渲染、serverLoader 与流式核心已交付，U09/U16 的模型与 locale 能力大幅补齐，U12 请求能力已交付，U17 已交付可选 Antd Provider、ProLayout 外壳与菜单图标注册表；仍有 F6 微前端与 dva/valtio 适配、U17 服务端图表/自定义 SettingDrawer 文案、U33 动态路径 lastmod/语言 alternates、SSR 生产化等明确缺口。
 
 ## 1. 目标重述
 
@@ -32,7 +32,7 @@
 | 路线项 | 缺口 | 当前状态 |
 | --- | --- | --- |
 | U32 | `serverLoader` 与流式 SSR 已交付；压缩/TLS/背压/代理缓冲与流中错误恢复未实现 | 部分完成 |
-| U33 | 字面路由与 `prerenderPaths` 预渲染、sitemap/分片索引/lastmod/预压缩、单页容错/关闭、增量写入、robots.txt、并发预渲染已交付；按页 lastmod、语言 alternates、changefreq/priority 未实现 | 部分完成 |
+| U33 | 字面路由与 `prerenderPaths` 预渲染、sitemap/分片索引/默认与按页 lastmod/预压缩、单页容错/关闭、增量写入、robots.txt、并发预渲染已交付；动态路径 lastmod、语言 alternates、changefreq/priority 未实现 | 部分完成 |
 | U09 | Hook/对象模型、reducers/effects/subscriptions、extraModels、依赖排序、选择器 isEqual 已交付；热替换保留 store 未实现 | 部分完成 |
 | U17 | 可选 `@cormijs/plugin-antd`（locale/direction/theme）、`ProLayoutShell`（菜单/导航/折叠持久化/主题编辑器/内置文案 locale）、菜单图标注册表、应用侧图表库与 `ClientOnly` SSR 边界已交付；自定义 SettingDrawer 文案、服务端图表内容未实现 | 部分完成 |
 | U16 | UI locale 归一化/回退链/资源解析与 RTL direction 已交付；按请求 locale、RTL 样式/组件封装未实现 | 部分完成 |
@@ -47,7 +47,7 @@
 路线目标要求的是 Umi 应用能力清单的持续吸收，而不是“当前测试全绿”。当前仍有上表的多项应用能力与生态集成缺失，因此：
 
 - **不得**将本目标标记为 complete；
-- 下一优先级建议：F6 微前端/dva/valtio 适配，或 U17 服务端图表内容；其后补 U33 按页 lastmod/语言 alternates、U16 请求 locale 与 SSR 生产化；
+- 下一优先级建议：F6 微前端/dva/valtio 适配，或 U17 服务端图表内容；其后补 U33 动态路径 lastmod/语言 alternates、U16 请求 locale 与 SSR 生产化；
 - 任何新切片仍需完整的 `pnpm check`、`pnpm test:browser`、`pnpm test:package` 与证据文件后才能提交。
 
 ## 6. 审计方法

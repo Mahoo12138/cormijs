@@ -17,7 +17,7 @@
 
 ## 2. 契约与语义
 
-- `sitemapLastmod` 接受 `YYYY-MM-DD` 或带时间的 ISO-8601（`Z`/时区偏移、可选毫秒），要求同时配置 `sitemap`；每个 `<url>`/`<sitemap>` 条目写入相同 `<lastmod>`。
+- `sitemapLastmod` 接受 `YYYY-MM-DD` 或带时间的 ISO-8601（`Z`/时区偏移、可选毫秒），作为默认 `<lastmod>`；路由 `meta.lastmod` 存在时按页覆盖，要求同时配置 `sitemap`。索引条目的 `<lastmod>` 使用默认值。
 - `sitemapGzip` 为布尔值，要求 `sitemap`；启用后为每个 sitemap 文件写一份 gzip 副本，文件名追加 `.gz`，内容与未压缩文件一致（Node `gzipSync`）。
 - `PrerenderResult.sitemapGzip` 按写入顺序返回 gzip 文件路径；`sitemap`/`sitemapChunks` 仍指向未压缩入口/分片。
 - robots `{{sitemap}}` 仍展开到 `sitemap.xml` 或 `sitemap-index.xml`，不指向 `.gz`；预压缩副本供 CDN/静态服务器按 `Accept-Encoding` 使用。
@@ -26,7 +26,7 @@
 
 ## 3. 边界
 
-- `lastmod` 是全站统一值，不读取页面 mtime、路由 meta 或 git 历史；不能按页覆盖。
+- 路由级 `meta.lastmod` 只适用于字面/预渲染页面；`prerenderPaths` 动态路径没有 meta，仍使用默认值。不读取页面 mtime 或 git 历史。
 - 不生成 `changefreq`/`priority`、语言 alternates 或按语言拆分。
 - 不做 Brotli、不重命名入口、不自动配置服务器 `Content-Encoding`/缓存头；`.gz` 只是文件副本。
 - gzip 由 Node 同步压缩；大 sitemap 会占用构建期内存，但不引入并发/流式压缩。
@@ -36,8 +36,8 @@
 
 | 检查 | 结果 |
 | --- | --- |
-| `tests/ssr.test.ts` | lastmod XML、索引/分片 lastmod、gzip 解压一致、非法选项 |
-| `tests/browser/ssr.test.ts` | 真实 Vite 构建的 index/2 分片/索引均含 lastmod，三个 `.gz` 解压与原文一致 |
+| `tests/ssr.test.ts` | 默认/按页 lastmod XML、索引/分片 lastmod、gzip 解压一致、非法选项 |
+| `tests/browser/ssr.test.ts` | 真实 Vite 构建中 guide 的 `meta.lastmod` 覆盖默认值，其余 URL/索引使用默认值；三个 `.gz` 解压与原文一致 |
 | 安装包 `ssr` consumer | 同一 fixture 的 dev/preview/serve 验收 |
 | `pnpm check` | 572/572 |
 | `pnpm test:browser` | 56/56 |
