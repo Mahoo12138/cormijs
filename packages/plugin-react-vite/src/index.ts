@@ -12,7 +12,7 @@ export { staticExportPlugin, staticPages, notFoundPage, renderStaticPage, writeS
 export { apiRoutePlugin, resolveApiRoutes, matchApiRoute, runApiHandler, type ApiRoutePluginOptions, type ApiRoute, type ApiHandler, type ApiHandlerContext } from './api.js';
 export { mpaPlugin, resolveMpaEntries, mpaEntrySource, mpaHtml, type MpaPluginOptions, type MpaCandidate, type MpaEntry } from './mpa.js';
 export { proxyPlugin, normalizeProxy, type ProxyPluginOptions, type ProxyTarget, type ProxyTargetOptions, type NormalizedProxyTarget } from './proxy.js';
-export { ssrPlugin, prerenderPages, prerenderStaticPages, resolvePrerenderPaths, sitemapIndexXml, sitemapXml, type SitemapUrl, type SsrPluginOptions, type PrerenderOptions, type PrerenderResult, type PrerenderPath, type PrerenderPathEntry } from './ssr.js';
+export { ssrPlugin, prerenderPages, prerenderStaticPages, resolvePrerenderPaths, sitemapIndexXml, sitemapXml, type SitemapAlternate, type SitemapUrl, type SsrPluginOptions, type PrerenderOptions, type PrerenderResult, type PrerenderPath, type PrerenderPathEntry } from './ssr.js';
 export { servePlugin, type ServePluginOptions } from './serve.js';
 
 /** All Vite-specific React behavior stays in this optional bridge. */

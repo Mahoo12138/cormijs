@@ -126,6 +126,7 @@ test('prerenderStaticPages writes literal routes, skips redirects and emits a si
   assert.equal(sitemapXml(['https://x.test/a&b']), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://x.test/a&amp;b</loc></url>\n</urlset>\n');
   assert.equal(sitemapIndexXml(['https://x.test/a&b']), '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <sitemap><loc>https://x.test/a&amp;b</loc></sitemap>\n</sitemapindex>\n');
   assert.equal(sitemapXml(['https://x.test/a'], '2026-01-02'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://x.test/a</loc><lastmod>2026-01-02</lastmod></url>\n</urlset>\n');
+  assert.equal(sitemapXml([{ url: 'https://x.test/a', lastmod: '2026-02-03', alternates: [{ hreflang: 'en', href: 'https://x.test/en/a' }] }], '2026-01-02'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n  <url><loc>https://x.test/a</loc><lastmod>2026-02-03</lastmod><xhtml:link rel="alternate" hreflang="en" href="https://x.test/en/a"/></url>\n</urlset>\n');
   assert.equal(sitemapXml([{ url: 'https://x.test/a', lastmod: '2026-02-03' }], '2026-01-02'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://x.test/a</loc><lastmod>2026-02-03</lastmod></url>\n</urlset>\n');
   assert.equal(sitemapIndexXml(['https://x.test/a'], '2026-01-02'), '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <sitemap><loc>https://x.test/a</loc><lastmod>2026-01-02</lastmod></sitemap>\n</sitemapindex>\n');
 });
@@ -134,7 +135,7 @@ test('prerenderStaticPages chunks sitemap URLs and writes an index with base-awa
   const root = await realpath(await mkdtemp(join(tmpdir(), 'cormi-sitemap-index 中文-')));
   t.after(() => rm(root, { recursive: true, force: true }));
   const shell = '<!doctype html><html><head></head><body><div id="root"></div></body></html>';
-  const pages = [{ path: '/', head: {} }, { path: '/a', head: {}, lastmod: '2026-02-03' }, { path: '/b', head: {} }];
+  const pages = [{ path: '/', head: {} }, { path: '/a', head: {}, lastmod: '2026-02-03', alternates: { en: '/en/a', 'x-default': '/a' } }, { path: '/b', head: {} }];
   const render = async (request: Request) => ({ html: `<main>${new URL(request.url).pathname}</main>`, status: 200, head: {} });
   const first = await prerenderStaticPages({ output: root, shell, mountId: 'root', base: '/app/', sitemap: 'https://example.com', sitemapChunkSize: 1,
     sitemapLastmod: '2026-01-02', sitemapGzip: true, pages, render });
@@ -149,7 +150,7 @@ test('prerenderStaticPages chunks sitemap URLs and writes an index with base-awa
   }
   assert.match(await readFile(join(root, 'sitemap-1.xml'), 'utf8'), /<loc>https:\/\/example.com\/app\/<\/loc><lastmod>2026-01-02<\/lastmod>/);
   assert.doesNotMatch(await readFile(join(root, 'sitemap-1.xml'), 'utf8'), /\/app\/a/);
-  assert.match(await readFile(join(root, 'sitemap-2.xml'), 'utf8'), /<loc>https:\/\/example.com\/app\/a<\/loc><lastmod>2026-02-03<\/lastmod>/);
+  assert.match(await readFile(join(root, 'sitemap-2.xml'), 'utf8'), /<loc>https:\/\/example.com\/app\/a<\/loc><lastmod>2026-02-03<\/lastmod><xhtml:link rel="alternate" hreflang="en" href="https:\/\/example.com\/app\/en\/a"\/><xhtml:link rel="alternate" hreflang="x-default" href="https:\/\/example.com\/app\/a"\/>/);
   assert.match(await readFile(join(root, 'sitemap-3.xml'), 'utf8'), /<loc>https:\/\/example.com\/app\/b<\/loc><lastmod>2026-01-02<\/lastmod>/);
 
   const second = await prerenderStaticPages({ output: root, shell, mountId: 'root', base: '/app/', sitemap: 'https://example.com', pages: pages.slice(0, 1), render });

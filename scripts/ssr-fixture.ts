@@ -9,7 +9,7 @@ import { headPlugin, routeConfigPlugin } from '@cormijs/plugin-react';
 import { servePlugin, ssrPlugin } from '@cormijs/plugin-react-vite';
 const routes = [
   { id: 'home', path: '/', component: './src/pages/index.tsx', meta: { head: { title: 'SSR home page', metas: [{ name: 'description', content: 'server description' }] } } },
-  { id: 'guide', path: 'guide', component: './src/pages/guide.tsx', clientLoader: 'clientLoader', meta: { lastmod: '2026-03-04', head: { title: 'SSR guide page', jsonLd: { '@type': 'Article', headline: 'Guide' } } } },
+  { id: 'guide', path: 'guide', component: './src/pages/guide.tsx', clientLoader: 'clientLoader', meta: { lastmod: '2026-03-04', alternates: { en: '/guide', 'zh-CN': '/guide?lang=zh', 'x-default': '/guide' }, head: { title: 'SSR guide page', jsonLd: { '@type': 'Article', headline: 'Guide' } } } },
   { id: 'backend', path: 'backend/:id', component: './src/pages/backend.tsx', serverLoader: 'serverLoader', meta: { head: { title: 'SSR backend page' } } },
   { id: 'status', path: 'status', component: './src/pages/status.tsx', serverLoader: 'serverLoader', meta: { head: { title: 'SSR status page' } } },
 ];

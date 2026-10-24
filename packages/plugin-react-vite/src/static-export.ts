@@ -18,6 +18,8 @@ export interface StaticPage {
   readonly path: string;
   /** Route-level sitemap lastmod from `meta.lastmod`, when present. */
   readonly lastmod?: string;
+  /** Route-level hreflang → app-relative path map from `meta.alternates`. */
+  readonly alternates?: Readonly<Record<string, string>>;
   readonly head: { readonly title?: string; readonly metas?: readonly HtmlMeta[]; readonly links?: readonly HtmlLink[]; readonly jsonLd?: unknown };
 }
 
@@ -103,7 +105,11 @@ export function staticPages(routes: readonly RouteRecord[]): readonly StaticPage
     if (path === undefined || path.split('/').some(segment => segment.includes(':') || segment === '*')) continue;
     if (pages.has(path)) continue;
     const lastmod = (route.meta as { lastmod?: unknown } | undefined)?.lastmod;
-    pages.set(path, Object.freeze({ path, ...(typeof lastmod === 'string' && lastmod ? { lastmod } : {}), head: merged(route) }));
+    const alternates = (route.meta as { alternates?: unknown } | undefined)?.alternates;
+    const alternateMap = alternates && typeof alternates === 'object' && !Array.isArray(alternates)
+      ? Object.fromEntries(Object.entries(alternates).filter(([, value]) => typeof value === 'string')) as Record<string, string> : undefined;
+    pages.set(path, Object.freeze({ path, ...(typeof lastmod === 'string' && lastmod ? { lastmod } : {}),
+      ...(alternateMap && Object.keys(alternateMap).length ? { alternates: Object.freeze(alternateMap) } : {}), head: merged(route) }));
   }
   return Object.freeze([...pages.values()].sort((a, b) => (a.path < b.path ? -1 : 1)));
 }

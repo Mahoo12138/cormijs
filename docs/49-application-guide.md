@@ -786,7 +786,7 @@ plugins: [
 
 开启 `notFound: true` 时用 catch-all 路由 head 生成 `dist/404.html`。构建后 `dist/index.html`、`dist/guide/index.html` 等各自带有该路由（含祖先）的 `meta.head`；动态段、catch-all 与 redirect 路由不会生成页面文件。它只是 HTML 外壳：页面内容仍需浏览器挂载，不是预渲染。`index.html` 必须声明 `<meta charset>`，否则非 ASCII 标题可能按错误编码返回。与 `headPlugin` 搭配可在客户端导航后继续同步标题。规则见 [F5e 静态导出](88-f5e-static-export.md)。
 
-需要真正的预渲染时，改用 `ssrPlugin` 的 `prerender: true`：构建后用同一 SSR bundle 渲染字面路由，执行 clientLoader/serverLoader，写入首屏标记、hydration 与 head；`prerenderPaths: ['/users/1']` 枚举动态路径（对应 Umi `extraRoutePaths`），`sitemap: 'https://example.com'` 生成带 `app.base` 的 sitemap.xml；`sitemapChunkSize` 改为分片并生成 `sitemap-index.xml`；`sitemapLastmod` 写入默认 lastmod，路由 `meta.lastmod` 可按页覆盖，`sitemapGzip` 输出 `.gz` 副本（robots 仍指向未压缩入口）。构建保留 `dist/.cormi/shell.html` 供 preview/serve 继续 SSR。loader 返回 Response 或状态 ≥400 的页面会跳过。不要与 `staticExportPlugin` 同时启用后写的壳导出。规则见 [U33-1 预渲染](114-u33-prerender-sitemap.md)。
+需要真正的预渲染时，改用 `ssrPlugin` 的 `prerender: true`：构建后用同一 SSR bundle 渲染字面路由，执行 clientLoader/serverLoader，写入首屏标记、hydration 与 head；`prerenderPaths: ['/users/1']` 枚举动态路径（对应 Umi `extraRoutePaths`），`sitemap: 'https://example.com'` 生成带 `app.base` 的 sitemap.xml；`sitemapChunkSize` 改为分片并生成 `sitemap-index.xml`；`sitemapLastmod` 写入默认 lastmod，路由 `meta.lastmod` 可按页覆盖，`meta.alternates` 输出 hreflang/x-default 链接，`sitemapGzip` 输出 `.gz` 副本（robots 仍指向未压缩入口）。构建保留 `dist/.cormi/shell.html` 供 preview/serve 继续 SSR。loader 返回 Response 或状态 ≥400 的页面会跳过。不要与 `staticExportPlugin` 同时启用后写的壳导出。规则见 [U33-1 预渲染](114-u33-prerender-sitemap.md)。
 
 示例：`pnpm cormi build --root examples/static-export`，再 `pnpm cormi preview --root examples/static-export`。
 

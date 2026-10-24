@@ -194,13 +194,19 @@ export function navigation(request: import('node:http').IncomingMessage): boolea
 }
 
 const xml = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+export interface SitemapAlternate {
+  readonly hreflang: string;
+  readonly href: string;
+}
 export interface SitemapUrl {
   readonly url: string;
   readonly lastmod?: string;
+  readonly alternates?: readonly SitemapAlternate[];
 }
 export function sitemapXml(entries: readonly (string | SitemapUrl)[], lastmod?: string): string {
-  const rows = entries.map(entry => typeof entry === 'string' ? { url: entry, lastmod } : { url: entry.url, lastmod: entry.lastmod ?? lastmod });
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${rows.map(row => `  <url><loc>${xml(row.url)}</loc>${row.lastmod ? `<lastmod>${xml(row.lastmod)}</lastmod>` : ''}</url>`).join('\n')}${rows.length ? '\n' : ''}</urlset>\n`;
+  const rows = entries.map(entry => typeof entry === 'string' ? { url: entry, lastmod, alternates: undefined } : { url: entry.url, lastmod: entry.lastmod ?? lastmod, alternates: entry.alternates });
+  const namespaces = rows.some(row => row.alternates?.length) ? ' xmlns:xhtml="http://www.w3.org/1999/xhtml"' : '';
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"${namespaces}>\n${rows.map(row => `  <url><loc>${xml(row.url)}</loc>${row.lastmod ? `<lastmod>${xml(row.lastmod)}</lastmod>` : ''}${(row.alternates ?? []).map(alternate => `<xhtml:link rel="alternate" hreflang="${xml(alternate.hreflang)}" href="${xml(alternate.href)}"/>`).join('')}</url>`).join('\n')}${rows.length ? '\n' : ''}</urlset>\n`;
 }
 export function sitemapIndexXml(urls: readonly string[], lastmod?: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <sitemap><loc>${xml(url)}</loc>${lastmod ? `<lastmod>${xml(lastmod)}</lastmod>` : ''}</sitemap>`).join('\n')}${urls.length ? '\n' : ''}</sitemapindex>\n`;
@@ -305,7 +311,7 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
   if (options.sitemapLastmod !== undefined && !options.sitemap) throw new CormiError('SSR_PRERENDER_FAILED', 'sitemapLastmod requires sitemap.');
   if (options.sitemapGzip !== undefined && (!options.sitemap || typeof options.sitemapGzip !== 'boolean')) throw new CormiError('SSR_PRERENDER_FAILED', 'sitemapGzip requires sitemap and must be boolean.');
   const sitemapLastmod = options.sitemapLastmod === undefined ? undefined : sitemapLastmodOf(options.sitemapLastmod);
-  type Outcome = { readonly kind: 'written' | 'unchanged'; readonly path: string; readonly url?: string; readonly lastmod?: string }
+  type Outcome = { readonly kind: 'written' | 'unchanged'; readonly path: string; readonly url?: string; readonly lastmod?: string; readonly alternates?: readonly SitemapAlternate[] }
     | { readonly kind: 'skipped'; readonly path: string; readonly status: number; readonly error?: string };
   const renderPage = async (page: StaticPage): Promise<Outcome> => {
     const target = page.path === '/' ? join(options.output, 'index.html') : join(options.output, ...page.path.split('/').filter(Boolean), 'index.html');
@@ -319,18 +325,29 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
       if (typeof status === 'number' && status >= 400) return { kind: 'skipped', path: page.path, status };
       const html = await injectShell(options.shell, rendered as { html?: unknown }, options.mountId).text();
       const outputUrl = options.sitemap ? publicUrl(options.sitemap, options.base, page.path) : undefined;
-      let pageLastmod: string | undefined;
+      let pageLastmod: string | undefined, pageAlternates: readonly SitemapAlternate[] | undefined;
       if (outputUrl && page.lastmod !== undefined) {
         try { pageLastmod = sitemapLastmodOf(page.lastmod); }
         catch { throw new CormiError('SSR_PRERENDER_FAILED', 'Page meta.lastmod must be an ISO-8601 date or datetime.', { path: page.path }); }
       }
+      if (outputUrl && page.alternates) {
+        const alternates: SitemapAlternate[] = [];
+        for (const [locale, href] of Object.entries(page.alternates)) {
+          if (!locale || (locale !== 'x-default' && !/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(locale))
+            || typeof href !== 'string' || !href.startsWith('/') || href.length > 2048 || /[\0\r\n#]/.test(href)) {
+            throw new CormiError('SSR_PRERENDER_FAILED', 'Page meta.alternates must map locales to app-relative paths.', { path: page.path });
+          }
+          alternates.push(Object.freeze({ hreflang: locale, href: publicUrl(options.sitemap!, options.base, href) }));
+        }
+        pageAlternates = Object.freeze(alternates);
+      }
       if (options.incremental) {
         const existing = await readFile(target, 'utf8').catch((error: NodeJS.ErrnoException) => error.code === 'ENOENT' ? undefined : Promise.reject(error));
-        if (existing === html) return { kind: 'unchanged', path: page.path, ...(outputUrl ? { url: outputUrl } : {}), ...(pageLastmod ? { lastmod: pageLastmod } : {}) };
+        if (existing === html) return { kind: 'unchanged', path: page.path, ...(outputUrl ? { url: outputUrl } : {}), ...(pageLastmod ? { lastmod: pageLastmod } : {}), ...(pageAlternates ? { alternates: pageAlternates } : {}) };
       }
       if (page.path !== '/') await mkdir(dirname(target), { recursive: true });
       await writeFile(target, html);
-      return { kind: 'written', path: page.path, ...(outputUrl ? { url: outputUrl } : {}), ...(pageLastmod ? { lastmod: pageLastmod } : {}) };
+      return { kind: 'written', path: page.path, ...(outputUrl ? { url: outputUrl } : {}), ...(pageLastmod ? { lastmod: pageLastmod } : {}), ...(pageAlternates ? { alternates: pageAlternates } : {}) };
     } catch (error) {
       if (!options.ignoreErrors) throw error;
       return { kind: 'skipped', path: page.path, status: 0, error: error instanceof Error ? error.message : String(error) };
@@ -354,7 +371,7 @@ export async function prerenderStaticPages(options: PrerenderOptions): Promise<P
     if (outcome.kind === 'skipped') skipped.push({ path: outcome.path, status: outcome.status, ...(outcome.error !== undefined ? { error: outcome.error } : {}) });
     else {
       (outcome.kind === 'written' ? written : unchanged).push(outcome.path);
-      if (outcome.url) urls.push({ url: outcome.url, ...(outcome.lastmod ? { lastmod: outcome.lastmod } : {}) });
+      if (outcome.url) urls.push({ url: outcome.url, ...(outcome.lastmod ? { lastmod: outcome.lastmod } : {}), ...(outcome.alternates ? { alternates: outcome.alternates } : {}) });
     }
   }
   let sitemap: string | undefined, sitemapChunks: readonly string[] | undefined, sitemapGzipFiles: string[] | undefined;

@@ -47,5 +47,5 @@
 
 ## 5. 下一步
 
-- U33 剩余：按页 lastmod、按语言拆分/alternates、changefreq/priority；
+- U33 剩余：动态路径 lastmod/alternates、按语言拆分、changefreq/priority；语言 alternates 见 [U33-9](148-u33-sitemap-alternates.md)；
 - F6 微前端/dva/valtio、U09 热替换、U16 请求 locale、SSR 生产化、U17 服务端图表。
