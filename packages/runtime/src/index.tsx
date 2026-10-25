@@ -49,12 +49,13 @@ export async function resolveRouteComponent(load: () => Promise<ComponentType>):
   catch (error) { return function RouteImportFailure(): never { throw error; }; }
 }
 
-/** A mount owns its router, root and runtime effects; no module-global application singleton. */
-export async function mountApplication(options: {
+export interface MountApplicationOptions {
   element: HTMLElement; routes: RouteObject[]; base?: string; plugins?: readonly RuntimeEntry[]; strict?: boolean;
   appConfig?: Readonly<RuntimeConfig>; loading?: ComponentType; history?: HistoryType; models?: readonly ModelDescriptor[];
   prefetch?: Readonly<Record<string, () => Promise<unknown>>>; signal?: AbortSignal; hydrate?: boolean;
-}): Promise<ApplicationHandle> {
+}
+/** A mount owns its router, root and runtime effects; no module-global application singleton. */
+export async function mountApplication(options: MountApplicationOptions): Promise<ApplicationHandle> {
   if (options.strict !== undefined && typeof options.strict !== 'boolean') throw new TypeError('strict must be boolean');
   if (options.hydrate !== undefined && typeof options.hydrate !== 'boolean') throw new TypeError('hydrate must be boolean');
   if (options.history !== undefined && !['browser', 'hash', 'memory'].includes(options.history)) throw new TypeError('history must be browser, hash or memory');

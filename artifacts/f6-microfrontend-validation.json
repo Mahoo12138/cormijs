@@ -1,0 +1,112 @@
+{
+  "format": "cormi:f6-microfrontend-validation:1",
+  "verifiedAt": "2026-10-25T08:09:18.550Z",
+  "base": "7079799f41b4e2032e5c87ea9e5ab296e0c981d3",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "EADME.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/59-umi-feature-roadmap.md",
+      "packages/runtime/package.json",
+      "packages/runtime/src/index.tsx",
+      "scripts/test-package.ts",
+      "docs/152-f6-microfrontend.md",
+      "packages/runtime/src/microfrontend.ts",
+      "scripts/microfrontend-fixture.ts",
+      "tests/browser/microfrontend.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "156.0.4314.42"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/microfrontend-adapter/check.log",
+      "sha256": "d36f8b9d7f252c9891d4c04269238c83f45ad71b8caeb2e9aeb19e446f56e0b7",
+      "seconds": 128.147170417,
+      "tests": 573,
+      "pass": 573,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/microfrontend-adapter/browser.log",
+      "sha256": "45dded57f77482c76747a8d1b8b3d90b60d75af6dd32335a7730174dff03f076",
+      "seconds": 644.291394,
+      "tests": 59,
+      "pass": 59,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "mount, duplicate guard, update, unmount and remount in dev/build/preview"
+    },
+    "package": {
+      "command": "CORMI_PACKAGE_ONLY=microfrontend pnpm test:package",
+      "log": ".cache/microfrontend-adapter/package.log",
+      "sha256": "fc97fc7cf5b918c4a6aebf897112e336d9a449d7982a78c4974cdcfa78a9cdf8",
+      "stages": 83,
+      "passed": true,
+      "note": "microfrontend consumer subset only; host disk space is insufficient for the full matrix"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/microfrontend.test.ts",
+      "log": ".cache/microfrontend-adapter/targeted.log",
+      "sha256": "3dbb3e39041d34af349ec6b1b21a10016602d32cb1af9c530055896acb2db17c",
+      "seconds": 13.591139417,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "README.md": "eb2d596c63c7853f94039939d635a8ffe57bb27b0123dd4b71054f40444c6283",
+    "docs/59-umi-feature-roadmap.md": "01097f990e3b707feed9fdfd9f4d3235aed944938f6cda6e3da8efc5058cc08e",
+    "docs/112-roadmap-audit-2026-10-21.md": "c0723a54b89e7a5ca9fec16a41fef1d5521235294f204b6bfbabc0e87fe2564b",
+    "docs/152-f6-microfrontend.md": "60f185bc3fdebc2c222893428f03bd87cceed0ed3d3cc3e864dc090ab2534c6f",
+    "packages/runtime/package.json": "1cdbabe84cd94add39f136ca382c254b98e778e085a63a343ba4913a221a69fc",
+    "packages/runtime/src/index.tsx": "0378922a20ccc84e49e18ea4788737194fd5cdf9258bd082ebe1f9adfbbfa5cf",
+    "packages/runtime/src/microfrontend.ts": "07c8c81cdb4356ff491aa215970c39652ff8312312398cf028e6634adff49d7b",
+    "scripts/microfrontend-fixture.ts": "3fb109da66e4009082d0b223a75e627e1a872c711401d0794e7819901168328b",
+    "scripts/test-package.ts": "3fc6a8488183f2a92f0ed47775dc50b92126804f91133f5b04b94dbe462155e9",
+    "tests/browser/microfrontend.test.ts": "baea019e3774b5ab93aff5252b3ab503e30e5f7c6306719ae1b174d4b22c2e90"
+  },
+  "sourceInputCount": 10,
+  "sourceInputsDigest": "68dd849ed2c6ff14699dd20709b26d688642767fef8b76b885871f4c0ab2b9ec",
+  "documentationInputs": {
+    "docs/59-umi-feature-roadmap.md": "01097f990e3b707feed9fdfd9f4d3235aed944938f6cda6e3da8efc5058cc08e",
+    "docs/112-roadmap-audit-2026-10-21.md": "c0723a54b89e7a5ca9fec16a41fef1d5521235294f204b6bfbabc0e87fe2564b",
+    "docs/152-f6-microfrontend.md": "60f185bc3fdebc2c222893428f03bd87cceed0ed3d3cc3e864dc090ab2534c6f"
+  },
+  "evidence": [
+    ".cache/microfrontend-adapter/check.log",
+    ".cache/microfrontend-adapter/browser.log",
+    ".cache/microfrontend-adapter/package.log",
+    ".cache/microfrontend-adapter/targeted.log",
+    "artifacts/f6-microfrontend-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "lifecycle-only",
+    "no-qiankun-host-registration",
+    "no-umd-or-html-entry",
+    "no-sandbox-or-style-isolation",
+    "no-props-global-state-forwarding",
+    "single-mount-per-instance",
+    "no-real-qiankun-host-verification",
+    "package-suite-subset-only-due-to-disk",
+    "no-publication-or-deployment"
+  ]
+}

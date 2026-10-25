@@ -39,6 +39,7 @@ import { writeChartsFixture, verifyChartsPage } from './charts-fixture.js';
 import { writeReactQueryFixture, verifyReactQueryPage } from './react-query-fixture.js';
 import { writeValtioFixture, verifyValtioPage } from './valtio-fixture.js';
 import { writeDvaFixture, verifyDvaPage } from './dva-fixture.js';
+import { writeMicrofrontendFixture, verifyMicrofrontendPage } from './microfrontend-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
 import { writeConventionalLoaderFixture, verifyConventionalLoaderPage } from './conventional-loader-fixture.js';
@@ -698,6 +699,25 @@ const bad:DvaModel={state:{}};
     await command('dva-build',dvaConsumer,'build');
     await withServer(dvaConsumer,'preview',async url=>{await verifyDvaPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'dva-preview.png')});});
     report.stages.push({label:'installed-dva-reducer-adapter-dev-build-preview',adapter:'@cormijs/dva',previewRegenerated:false});
+
+    }
+    if (selected('microfrontend')) {
+    const microConsumer=await create('microfrontend','react');await writeMicrofrontendFixture(microConsumer);
+    const microManifest=consumerManifest(kit,'react');
+    microManifest.dependencies['@cormijs/plugin-react']=microManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    await writeFile(join(microConsumer,'package.json'),JSON.stringify(microManifest,null,2));
+    await install('microfrontend-install',microConsumer);await auditLinks(microConsumer);
+    await command('microfrontend-typecheck',microConsumer,'typecheck');
+    await writeFile(join(microConsumer,'types.mts'),`import {createMicroApp,type MicroAppLifecycles,type MicroApplication} from '@cormijs/runtime/microfrontend';
+const application:MicroApplication={routes:[],history:'memory'};const lifecycles:MicroAppLifecycles=createMicroApp(application,{mountId:'micro-root'});void lifecycles;
+// @ts-expect-error routes are required
+const bad:MicroApplication={history:'memory'};
+`);
+    await execute('microfrontend-public-types',microConsumer,process.execPath,typeArguments);
+    await withServer(microConsumer,'dev',async url=>{await verifyMicrofrontendPage(page,url);assert.deepEqual(errors,[]);});
+    await command('microfrontend-build',microConsumer,'build');
+    await withServer(microConsumer,'preview',async url=>{await verifyMicrofrontendPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'microfrontend-preview.png')});});
+    report.stages.push({label:'installed-microfrontend-lifecycles-dev-build-preview',adapter:'@cormijs/runtime/microfrontend',previewRegenerated:false});
 
     }
     if (selected('initial-state')) {
