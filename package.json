@@ -37,6 +37,7 @@
     "@cormijs/builder": "workspace:*",
     "@cormijs/core": "workspace:*",
     "@cormijs/create": "workspace:*",
+    "@cormijs/dva": "workspace:*",
     "@cormijs/plugin-antd": "workspace:*",
     "@cormijs/plugin-dev-api": "workspace:*",
     "@cormijs/plugin-react": "workspace:*",

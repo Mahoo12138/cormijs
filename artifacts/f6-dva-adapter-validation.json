@@ -1,0 +1,131 @@
+{
+  "format": "cormi:f6-dva-adapter-validation:1",
+  "verifiedAt": "2026-10-25T07:45:15.474Z",
+  "base": "13fa32569e40686f9c6a250ebd8fde3f6fac1e6e",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "EADME.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/59-umi-feature-roadmap.md",
+      "package.json",
+      "pnpm-lock.yaml",
+      "scripts/test-package.ts",
+      "tsconfig.json",
+      "docs/151-f6-dva.md",
+      "packages/dva/",
+      "scripts/dva-fixture.ts",
+      "tests/browser/dva.test.ts",
+      "tests/dva.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "156.0.4314.42",
+    "dva-core": "2.0.4",
+    "redux": "4.2.1"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/dva-adapter/check.log",
+      "sha256": "1ceda3c369f0047665ffbaf5c41aff5120e9966c5a012472101a63f3728338ac",
+      "seconds": 129.124857334,
+      "tests": 573,
+      "pass": 573,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/dva-adapter/browser.log",
+      "sha256": "a1d78dcb1ee682d6de741d0d2dd9cf3ebacd55e4a42f646e07fd096b55a4e5d6",
+      "seconds": 634.3306655,
+      "tests": 58,
+      "pass": 58,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "reducer dispatch updates useSelector in dev/build/preview; a prior run had one transient 404 console error and passed on rerun"
+    },
+    "package": {
+      "command": "CORMI_PACKAGE_ONLY=dva pnpm test:package",
+      "log": ".cache/dva-adapter/package.log",
+      "sha256": "dd4615915636f2104dc3dae6c614d361e105ab52cf7dc90f8eabf7b39b360e44",
+      "stages": 83,
+      "passed": true,
+      "note": "dva consumer subset only; host disk space is insufficient for the full matrix"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/dva.test.ts",
+      "log": ".cache/dva-adapter/targeted.log",
+      "sha256": "595b8b4adbe990d2ffc17f3cbaaf68c4f033c0c065a4960b406974b18033ddb6",
+      "seconds": 12.247009792,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    },
+    "unitRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/dva.test.ts",
+      "log": ".cache/dva-adapter/unit.log",
+      "sha256": "692f16053962db039210b028e64aac404f38da423131b8053b823f9113a83a55",
+      "seconds": 0.129090625,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "README.md": "64528009c2c38fea49fbafc54933822627f1cd2b4b0e1e309ef5c77c89bb0647",
+    "docs/59-umi-feature-roadmap.md": "31084cb7b5b0b6a3b16bf221abe71a8fe91a6ec15f317937819d9480d8675c88",
+    "docs/112-roadmap-audit-2026-10-21.md": "6111ad0aa6a44508bd839a238cd01575aee8eb223292957d9c3b778d92669321",
+    "docs/151-f6-dva.md": "e3390676dc1b279f83af5b590ca1c86085dd881241d676e928644d7091e9b9e8",
+    "package.json": "85ee757c243505aeda11046bff9b90572ff7d6667a9ad82012cb86a8a8edbf4b",
+    "pnpm-lock.yaml": "dfdbb2542bb993d6e01c399bd14e2b13f4ff2057b7167b603d8d38172d3d77df",
+    "tsconfig.json": "f8656e1a435ab54fb48002cc3c9f3a947b0bd49be5949b1fda9cb197ce33fb05",
+    "packages/dva/package.json": "716cae3fee8208f069628a2c5f61c33b9677a68a715d6d1aae5b4f406c480269",
+    "packages/dva/tsconfig.json": "c574f899a8a1bd01e6620eb0ba972cebeb8c0cd3e9a8e60604706368671447d9",
+    "packages/dva/src/index.tsx": "13a1a106daa0d4cd7950745578a0f70c557fb722a4b2b358171bf12dfde9a2d4",
+    "packages/dva/src/dva-core.d.ts": "834c99323b790382b1f0807d56862f132a74ff7910ceb7fca0572a296aade0bb",
+    "scripts/dva-fixture.ts": "bedb39a88f43bf46876de9b52b92d12aa3ddad63021e0c3b5e2cea0ed85c95da",
+    "scripts/test-package.ts": "45c4080e2ab543c22ad09272c6c508ad1ae2f6b2ed3794e574b0dccd1a593397",
+    "tests/dva.test.ts": "f2e61f03f6cdc60de642eed8a016e6869cd0fd271204e7eee19b01232e79d66f",
+    "tests/browser/dva.test.ts": "6dc927929c2d8ad17ff96a7080645413cce813bedeaafab8ac1d907bde83e280"
+  },
+  "sourceInputCount": 15,
+  "sourceInputsDigest": "d36d1b8e76d6f9e391aa46347f48ad00a98182e6c4521216d2dd5c380fe3b002",
+  "documentationInputs": {
+    "docs/59-umi-feature-roadmap.md": "31084cb7b5b0b6a3b16bf221abe71a8fe91a6ec15f317937819d9480d8675c88",
+    "docs/112-roadmap-audit-2026-10-21.md": "6111ad0aa6a44508bd839a238cd01575aee8eb223292957d9c3b778d92669321",
+    "docs/151-f6-dva.md": "e3390676dc1b279f83af5b590ca1c86085dd881241d676e928644d7091e9b9e8"
+  },
+  "evidence": [
+    ".cache/dva-adapter/check.log",
+    ".cache/dva-adapter/browser.log",
+    ".cache/dva-adapter/package.log",
+    ".cache/dva-adapter/targeted.log",
+    ".cache/dva-adapter/unit.log",
+    "artifacts/f6-dva-adapter-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "dva-core-2-vendored-types",
+    "no-model-discovery",
+    "effects-not-browser-verified",
+    "no-immer-or-loading",
+    "no-ssr-dehydration",
+    "no-provider-teardown-api",
+    "package-suite-subset-only-due-to-disk",
+    "one-transient-404-in-prior-browser-run",
+    "no-publication-or-deployment"
+  ]
+}
