@@ -1,0 +1,120 @@
+{
+  "format": "cormi:f6-qiankun-host-validation:1",
+  "verifiedAt": "2026-10-25T18:00:05.284Z",
+  "base": "b3c1c9a0536680c094fe79bf195d16a843097bf1",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "changedFiles": [
+      "EADME.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/59-umi-feature-roadmap.md",
+      "package.json",
+      "packages/plugin-qiankun/package.json",
+      "packages/plugin-qiankun/tsconfig.json",
+      "packages/plugin-react/src/modules.ts",
+      "pnpm-lock.yaml",
+      "scripts/test-package.ts",
+      "docs/154-f6-qiankun-host.md",
+      "packages/plugin-qiankun/src/host.tsx",
+      "scripts/qiankun-host-fixture.ts",
+      "tests/browser/qiankun-host.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "playwright": "1.58.2",
+    "browser": "156.0.4314.42",
+    "qiankun": "2.10.16"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/qiankun-host/check.log",
+      "sha256": "53ffe453f6c419ff085e65aa2c0d1c7d6540364a3b14cf5d26d12c28bb5829ad",
+      "seconds": 134.887766667,
+      "tests": 573,
+      "pass": 573,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/qiankun-host/browser.log",
+      "sha256": "1b0922ffbcb5303855c92b6ffadba6ded717dd1c9e617d36781a65678ff94423",
+      "seconds": 671.6317223330001,
+      "tests": 61,
+      "pass": 61,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "host component mounts, unmounts and remounts a fake same-origin micro app"
+    },
+    "package": {
+      "command": "CORMI_PACKAGE_ONLY=qiankun-host pnpm test:package",
+      "log": ".cache/qiankun-host/package.log",
+      "sha256": "7a35fa72a933b53c4c3955087f2ae52d97498affcf5baafc5d08c9b42a90baed",
+      "stages": 83,
+      "passed": true,
+      "note": "qiankun-host consumer subset; full 359-stage matrix not rerun due host disk"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test --test-concurrency=1 tests/browser/qiankun-host.test.ts",
+      "log": ".cache/qiankun-host/targeted.log",
+      "sha256": "25b8da5cb861d76e74fc3079f48db5b2c9ae614bd3cf75e6517c28a4d7af6db7",
+      "seconds": 11.564378083,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "README.md": "28fe63d3356a034ed35abdcb21b6fe688c0b63a5a417a384fd868371b2b45df6",
+    "docs/59-umi-feature-roadmap.md": "79771943621e485f9fdf95ba804eaa9c7c81be6f36e1f248dc284a3bbb8c1819",
+    "docs/112-roadmap-audit-2026-10-21.md": "fd6dfb40e6904e28ba7f123012e71bfa48d6528e97ba7a09654bf205c475e58e",
+    "docs/154-f6-qiankun-host.md": "ced9f78cc0c9d990048f2a3fa04751fc9424a60217aaaee9f00262fed798a9ee",
+    "package.json": "deeb68294eeb4ef435c9a2d4fb47b5caa45cc7b4d86ddb8367d9b5264ee6a2f0",
+    "pnpm-lock.yaml": "b243a348a4769788994abd6b4309b34a033f7f4796cfc8b5e2e18476eca22292",
+    "tsconfig.json": "03be7c56da5e8320573b1a41bad0445770c0cf589415195fa98a8cb73abae63f",
+    "packages/plugin-react/src/modules.ts": "059e3af63dd965f326c5074f304a82bc8d7acea8a1f5a2844ce6c014875a7c89",
+    "packages/plugin-qiankun/package.json": "39330a785753c164f4a13d439aa5ae672b70e6efcaddd4e76ec6307d5dad9360",
+    "packages/plugin-qiankun/tsconfig.json": "0275505cef3019e4aa84f6c4054a45b60ca8d49eb50d40d43fe6c75e35c87d95",
+    "packages/plugin-qiankun/src/host.tsx": "9f44b32ab39913987b26d4cc72f35fdcf0ce99ed7e1c8cb5c73fc483f352fac7",
+    "scripts/qiankun-host-fixture.ts": "93871d2e97b2d9a6c0c2f5562f59604ef770386abba518a23e7644ce6385de7d",
+    "scripts/test-package.ts": "c4aee6510e2140369da1342f39115d9529c64e215063ea84e5f9437181ed7a69",
+    "tests/browser/qiankun-host.test.ts": "2dcd6b888caff66e06658cce0c72b74ae27da64b935076c17f8bd4903ef7ca59"
+  },
+  "sourceInputCount": 14,
+  "sourceInputsDigest": "e8636d3a52164b7711c9e9cd5d13998cf183ab089dc9014dec68289c816fea48",
+  "documentationInputs": {
+    "docs/59-umi-feature-roadmap.md": "79771943621e485f9fdf95ba804eaa9c7c81be6f36e1f248dc284a3bbb8c1819",
+    "docs/112-roadmap-audit-2026-10-21.md": "fd6dfb40e6904e28ba7f123012e71bfa48d6528e97ba7a09654bf205c475e58e",
+    "docs/154-f6-qiankun-host.md": "ced9f78cc0c9d990048f2a3fa04751fc9424a60217aaaee9f00262fed798a9ee"
+  },
+  "evidence": [
+    ".cache/qiankun-host/check.log",
+    ".cache/qiankun-host/browser.log",
+    ".cache/qiankun-host/package.log",
+    ".cache/qiankun-host/targeted.log",
+    "artifacts/f6-qiankun-host-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "host-component-only",
+    "no-register-micro-apps-or-active-rule",
+    "no-menu-or-route-automapping",
+    "no-global-state-or-props-update",
+    "no-sandbox-style-config",
+    "no-ssr-verification",
+    "fake-same-origin-entry-not-real-qiankun-host",
+    "package-suite-subset-only-due-to-disk",
+    "no-publication-or-deployment"
+  ]
+}

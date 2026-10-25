@@ -41,6 +41,7 @@ import { writeValtioFixture, verifyValtioPage } from './valtio-fixture.js';
 import { writeDvaFixture, verifyDvaPage } from './dva-fixture.js';
 import { writeMicrofrontendFixture, verifyMicrofrontendPage } from './microfrontend-fixture.js';
 import { writeQiankunFixture, verifyQiankunDevPage, verifyQiankunBuild, verifyQiankunUmd } from './qiankun-fixture.js';
+import { writeQiankunHostFixture, verifyQiankunHostPage } from './qiankun-host-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
 import { writeConventionalLoaderFixture, verifyConventionalLoaderPage } from './conventional-loader-fixture.js';
@@ -740,6 +741,27 @@ const bad:QiankunPluginOptions={name:42};
     await verifyQiankunBuild(qiankunConsumer);
     await withServer(qiankunConsumer,'preview',async url=>{await verifyQiankunUmd(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'qiankun-preview.png')});});
     report.stages.push({label:'installed-qiankun-umd-lifecycle-dev-build-preview',adapter:'@cormijs/plugin-qiankun',previewRegenerated:false});
+
+    }
+    if (selected('qiankun-host')) {
+    const qiankunHostConsumer=await create('qiankun-host','react');await writeQiankunHostFixture(qiankunHostConsumer);
+    const qiankunHostManifest=consumerManifest(kit,'react');
+    qiankunHostManifest.dependencies['@cormijs/plugin-react']=qiankunHostManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    qiankunHostManifest.dependencies['@cormijs/plugin-qiankun']=qiankunHostManifest.pnpm.overrides['@cormijs/plugin-qiankun']!;
+    qiankunHostManifest.dependencies.qiankun='2.10.16';
+    await writeFile(join(qiankunHostConsumer,'package.json'),JSON.stringify(qiankunHostManifest,null,2));
+    await install('qiankun-host-install',qiankunHostConsumer);await auditLinks(qiankunHostConsumer);
+    await command('qiankun-host-typecheck',qiankunHostConsumer,'typecheck');
+    await writeFile(join(qiankunHostConsumer,'types.mts'),`import {QiankunMicroApp,type QiankunMicroAppProps} from '@cormijs/plugin-qiankun/host';
+const props:QiankunMicroAppProps={name:'FakeMicro',entry:'./fake/qiankun.html'};void [QiankunMicroApp,props];
+// @ts-expect-error name is required
+const bad:QiankunMicroAppProps={entry:'./fake/qiankun.html'};
+`);
+    await execute('qiankun-host-public-types',qiankunHostConsumer,process.execPath,typeArguments);
+    await withServer(qiankunHostConsumer,'dev',async url=>{await verifyQiankunHostPage(page,url);assert.deepEqual(errors,[]);});
+    await command('qiankun-host-build',qiankunHostConsumer,'build');
+    await withServer(qiankunHostConsumer,'preview',async url=>{await verifyQiankunHostPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'qiankun-host-preview.png')});});
+    report.stages.push({label:'installed-qiankun-host-component-dev-build-preview',adapter:'@cormijs/plugin-qiankun/host',previewRegenerated:false});
 
     }
     if (selected('initial-state')) {

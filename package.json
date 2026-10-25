@@ -59,6 +59,7 @@
     "cormijs": "workspace:*",
     "dayjs": "1.11.23",
     "playwright-core": "1.58.2",
+    "qiankun": "2.10.16",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-router": "7.18.2",
