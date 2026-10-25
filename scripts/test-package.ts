@@ -40,6 +40,7 @@ import { writeReactQueryFixture, verifyReactQueryPage } from './react-query-fixt
 import { writeValtioFixture, verifyValtioPage } from './valtio-fixture.js';
 import { writeDvaFixture, verifyDvaPage } from './dva-fixture.js';
 import { writeMicrofrontendFixture, verifyMicrofrontendPage } from './microfrontend-fixture.js';
+import { writeQiankunFixture, verifyQiankunDevPage, verifyQiankunBuild, verifyQiankunUmd } from './qiankun-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
 import { writeConventionalLoaderFixture, verifyConventionalLoaderPage } from './conventional-loader-fixture.js';
@@ -59,8 +60,8 @@ const env: NodeJS.ProcessEnv = { ...process.env, CI: 'true', NODE_PATH: '', NODE
   npm_config_userconfig: join(temporary, 'empty.npmrc'), npm_config_globalconfig: join(temporary, 'empty-global.npmrc') };
 await writeFile(env.npm_config_userconfig!, ''); await writeFile(env.npm_config_globalconfig!, '');
 let kit: LocalKit;
-async function execute(label: string, cwd: string, executable: string, args: string[], expected = 0, pattern?: RegExp) {
-  const result = await run(executable, args, cwd, env, 60000);
+async function execute(label: string, cwd: string, executable: string, args: string[], expected = 0, pattern?: RegExp, timeout = 60000) {
+  const result = await run(executable, args, cwd, env, timeout);
   const text = result.stdout + result.stderr, log = join(logRoot, label + '.log'); await writeFile(log, text);
   assert.equal(result.code, expected, `${label}: expected exit ${expected}\n${text}`);
   if (pattern) assert.match(text, pattern);
@@ -69,7 +70,7 @@ async function execute(label: string, cwd: string, executable: string, args: str
 }
 async function install(label: string, cwd: string, expected = 0, pattern?: RegExp) {
   // A cold cache after cleanup needs one online warm-up: CORMI_PACKAGE_OFFLINE=0.
-  return execute(label, cwd, 'pnpm', ['install', ...(process.env.CORMI_PACKAGE_OFFLINE === '0' ? [] : ['--offline']), '--ignore-scripts', '--no-frozen-lockfile'], expected, pattern);
+  return execute(label, cwd, 'pnpm', ['install', ...(process.env.CORMI_PACKAGE_OFFLINE === '0' ? [] : ['--offline']), '--ignore-scripts', '--no-frozen-lockfile'], expected, pattern, process.env.CORMI_PACKAGE_OFFLINE === '0' ? 300_000 : 60_000);
 }
 async function create(name: string, profile: 'core' | 'launcher' | 'react', patched = true) {
   const path = join(delivery, name); await mkdir(path);
@@ -718,6 +719,27 @@ const bad:MicroApplication={history:'memory'};
     await command('microfrontend-build',microConsumer,'build');
     await withServer(microConsumer,'preview',async url=>{await verifyMicrofrontendPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'microfrontend-preview.png')});});
     report.stages.push({label:'installed-microfrontend-lifecycles-dev-build-preview',adapter:'@cormijs/runtime/microfrontend',previewRegenerated:false});
+
+    }
+    if (selected('qiankun')) {
+    const qiankunConsumer=await create('qiankun','react');await writeQiankunFixture(qiankunConsumer);
+    const qiankunManifest=consumerManifest(kit,'react');
+    qiankunManifest.dependencies['@cormijs/plugin-react']=qiankunManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    qiankunManifest.dependencies['@cormijs/plugin-qiankun']=qiankunManifest.pnpm.overrides['@cormijs/plugin-qiankun']!;
+    await writeFile(join(qiankunConsumer,'package.json'),JSON.stringify(qiankunManifest,null,2));
+    await install('qiankun-install',qiankunConsumer);await auditLinks(qiankunConsumer);
+    await command('qiankun-typecheck',qiankunConsumer,'typecheck');
+    await writeFile(join(qiankunConsumer,'types.mts'),`import {qiankunPlugin,type QiankunPluginOptions} from '@cormijs/plugin-qiankun';
+const options:QiankunPluginOptions={id:'consumer:qiankun',name:'CormiMicroApp',mountId:'root'};void [qiankunPlugin,options];
+// @ts-expect-error name is a string
+const bad:QiankunPluginOptions={name:42};
+`);
+    await execute('qiankun-public-types',qiankunConsumer,process.execPath,typeArguments);
+    await withServer(qiankunConsumer,'dev',async url=>{await verifyQiankunDevPage(page,url);assert.deepEqual(errors,[]);});
+    await command('qiankun-build',qiankunConsumer,'build');
+    await verifyQiankunBuild(qiankunConsumer);
+    await withServer(qiankunConsumer,'preview',async url=>{await verifyQiankunUmd(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'qiankun-preview.png')});});
+    report.stages.push({label:'installed-qiankun-umd-lifecycle-dev-build-preview',adapter:'@cormijs/plugin-qiankun',previewRegenerated:false});
 
     }
     if (selected('initial-state')) {

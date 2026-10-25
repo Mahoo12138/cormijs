@@ -109,7 +109,7 @@ export async function generateApplication(root: string, routes: readonly RouteRe
     `const plugins: RuntimeEntry[] = [${runtimes.map((item, i) => `{id:${JSON.stringify(item.id)},plugin:runtime${i}[${JSON.stringify(item.module.exportName)}],options:${JSON.stringify(item.options)}}`).join(',')}];`,
     ...(prefetchEntries.length ? [`const prefetch = {${prefetchEntries.join(',')}};`] : []),
     `export const cormiApplication = {routes,plugins${modelsOption}${prefetchOption},base:${JSON.stringify(base)},strict:${JSON.stringify(strict)}${appOption}${loadingOption}${historyOption}};`,
-    `if (typeof document !== 'undefined') {`,
+    `if (typeof document !== 'undefined' && !(globalThis as {__CORMI_MICRO_APP__?: boolean}).__CORMI_MICRO_APP__) {`,
     `  const element = document.getElementById(${JSON.stringify(mountId)});`,
     `  if (!element) throw new Error('cormi mount element is missing');`,
     `  void Promise.resolve().then(()=>mountApplication({element,...cormiApplication,hydrate:element.childNodes.length>0})).catch(error=>{console.error(error);element.textContent='Application startup failed';});`,

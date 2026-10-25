@@ -40,6 +40,7 @@
     "@cormijs/dva": "workspace:*",
     "@cormijs/plugin-antd": "workspace:*",
     "@cormijs/plugin-dev-api": "workspace:*",
+    "@cormijs/plugin-qiankun": "workspace:*",
     "@cormijs/plugin-react": "workspace:*",
     "@cormijs/plugin-react-query": "workspace:*",
     "@cormijs/plugin-react-vite": "workspace:*",

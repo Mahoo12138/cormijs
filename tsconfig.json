@@ -51,6 +51,9 @@
     },
     {
       "path": "packages/dva"
+    },
+    {
+      "path": "packages/plugin-qiankun"
     }
   ]
 }
