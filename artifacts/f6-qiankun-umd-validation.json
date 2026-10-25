@@ -1,23 +1,14 @@
 {
   "format": "cormi:f6-qiankun-umd-validation:1",
-  "verifiedAt": "2026-10-25T13:42:38.405Z",
-  "base": "e7d5649562416295577ca8b1915abd7ef2025050",
+  "verifiedAt": "2026-10-25T14:46:29.364Z",
+  "base": "0846286ccb7f1fce62e10fc3f652c9054bcc06cf",
   "branch": "main",
   "worktree": {
     "state": "uncommitted",
     "changedFiles": [
-      "EADME.md",
-      "docs/112-roadmap-audit-2026-10-21.md",
-      "docs/59-umi-feature-roadmap.md",
-      "package.json",
-      "packages/plugin-react/src/generate.ts",
-      "pnpm-lock.yaml",
-      "scripts/test-package.ts",
-      "tsconfig.json",
+      "ocs/112-roadmap-audit-2026-10-21.md",
       "docs/153-f6-qiankun-umd.md",
-      "packages/plugin-qiankun/",
-      "scripts/qiankun-fixture.ts",
-      "tests/browser/qiankun.test.ts"
+      "docs/59-umi-feature-roadmap.md"
     ]
   },
   "environment": {
@@ -58,10 +49,10 @@
     "package": {
       "command": "CORMI_PACKAGE_ONLY=qiankun pnpm test:package",
       "log": ".cache/qiankun-umd/package.log",
-      "sha256": "688102f7b5f466dc9026ce838e9bf05be2a75eb3a1230dc7315663fd7ac7c298",
-      "passed": false,
-      "exitCode": 1,
-      "blocker": "ERR_PNPM_NO_OFFLINE_TARBALL for newly resolved @babel tarballs; online install exceeds timeout; baseline dev-api-service install fails before the qiankun consumer"
+      "sha256": "2155c5eb5cee63c30d6982be8d1ca8c38fafa00ff1762da343011fe488520d6d",
+      "stages": 83,
+      "passed": true,
+      "note": "qiankun consumer subset; full 359-stage matrix not rerun due host disk"
     },
     "targetedRepeat": {
       "command": "node --import tsx --test --test-concurrency=1 tests/browser/qiankun.test.ts",
@@ -75,9 +66,9 @@
   },
   "sourceInputs": {
     "README.md": "e2817e61bda1403570a04d1f3883ef5b3f6366ed7c00262c091bf10c1ff8fbf0",
-    "docs/59-umi-feature-roadmap.md": "63a4b7cc88dbec8d6d61b350bc6c4c4c4f82f62e745ee89c7bbead5e93987dd4",
-    "docs/112-roadmap-audit-2026-10-21.md": "c04792eceb9b4912e7aac4de1b290a4b2d337e3b662ec734a256a355db20677a",
-    "docs/153-f6-qiankun-umd.md": "e3dd48263342ca5f73c2c1c8d4dd74599c73b5a5b9fbdcf9a97059cf184c9534",
+    "docs/59-umi-feature-roadmap.md": "25187f755bde56d20a8fdcdd11b2b5e70435016b0103c17adce4b4d07b722879",
+    "docs/112-roadmap-audit-2026-10-21.md": "b8204dd0a68c8e3a30a89653b5fa7e8b5f96d0ac229b55c18e01627d863b6418",
+    "docs/153-f6-qiankun-umd.md": "2126e476b6a53b3f9bc10262779a43eb4c30e39653ce891cfac3ce0779ed20ae",
     "package.json": "35fff653a402af1f823a472ff01ad9b6902aa802e68403d0f1c38bc5bd0bda8a",
     "pnpm-lock.yaml": "44fd7012431c5b5e6f60ec8d00d74069d78b3f1503e8339c337daec693b3f660",
     "tsconfig.json": "03be7c56da5e8320573b1a41bad0445770c0cf589415195fa98a8cb73abae63f",
@@ -90,11 +81,11 @@
     "tests/browser/qiankun.test.ts": "76a08cf5d82b09d42f8dde83e0925b0beeac1880750a457f870054ae972b94df"
   },
   "sourceInputCount": 14,
-  "sourceInputsDigest": "d0b2df4f29054a3c77529065c21b0a9d4b42167055e4b8e16f548c483a68a513",
+  "sourceInputsDigest": "df97db34bf6949c67a9b5a7ab79ab8531fa1889b44896698500fdbf2e68968e4",
   "documentationInputs": {
-    "docs/59-umi-feature-roadmap.md": "63a4b7cc88dbec8d6d61b350bc6c4c4c4f82f62e745ee89c7bbead5e93987dd4",
-    "docs/112-roadmap-audit-2026-10-21.md": "c04792eceb9b4912e7aac4de1b290a4b2d337e3b662ec734a256a355db20677a",
-    "docs/153-f6-qiankun-umd.md": "e3dd48263342ca5f73c2c1c8d4dd74599c73b5a5b9fbdcf9a97059cf184c9534"
+    "docs/59-umi-feature-roadmap.md": "25187f755bde56d20a8fdcdd11b2b5e70435016b0103c17adce4b4d07b722879",
+    "docs/112-roadmap-audit-2026-10-21.md": "b8204dd0a68c8e3a30a89653b5fa7e8b5f96d0ac229b55c18e01627d863b6418",
+    "docs/153-f6-qiankun-umd.md": "2126e476b6a53b3f9bc10262779a43eb4c30e39653ce891cfac3ce0779ed20ae"
   },
   "evidence": [
     ".cache/qiankun-umd/check.log",
@@ -112,7 +103,7 @@
     "no-sandbox-style-isolation",
     "no-props-global-state",
     "no-real-qiankun-host-verification",
-    "package-install-blocked-by-registry-store-drift",
+    "package-suite-subset-only-due-to-disk",
     "no-publication-or-deployment"
   ]
 }

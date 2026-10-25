@@ -44,22 +44,22 @@ registerMicroApps([{ name: 'CormiMicroApp', entry: '//localhost:8000/qiankun.htm
 - UMD 打包应用依赖，不共享宿主 React；不做 externals、沙箱样式隔离或 CSS 去重。
 - 不处理 publicPath、CDN、跨域/CORS 或 qiankun 的 props/global state；跨域 entry 需宿主配置。
 - 未验证真实 qiankun host；浏览器测试直接加载 UMD 并调用 lifecycle。UMD base 测试通过 `history.replaceState` 对齐。
-- 安装包 consumer 已加入 `qiankun` 阶段，但本轮被上游 registry/离线 store 漂移阻塞（缺 Babel tarball），未获得安装包结论。
+- 安装包 consumer 已加入 `qiankun` 阶段；离线 store 补齐 Babel/rollup 平台包后通过（`CORMI_PACKAGE_ONLY=qiankun`）。
 
 ## 4. 验证
 
 | 检查 | 结果 |
 | --- | --- |
 | `tests/browser/qiankun.test.ts` | dev 正常自动挂载；build 生成 qiankun.js/html；preview 加载 UMD、mount/render/increment/unmount |
-| 安装包 `qiankun` consumer | **未验证**：`ERR_PNPM_NO_OFFLINE_TARBALL` / 在线安装超时（环境阻塞） |
+| 安装包 `qiankun` consumer | 离线安装、typecheck、公共类型、dev/build/preview UMD 生命周期验收（83 阶段子集） |
 | `pnpm check` | 573/573 |
 | `pnpm test:browser` | 60/60 |
-| `pnpm test:package` | 本轮未通过（阻塞在基线 consumer 安装） |
+| `pnpm test:package` | 83 阶段（`CORMI_PACKAGE_ONLY=qiankun`；全量 359 因宿主磁盘未重跑） |
 
 完整计数、日志哈希与源码哈希见 [机器证据](../artifacts/f6-qiankun-umd-validation.json)。
 
 ## 5. 下一步
 
 - F6 剩余：qiankun host 注册/菜单集成、Module Federation、多 builder/MFSU、dva 自动发现/immer；
-- 先恢复安装包验证环境（registry 版本/store 同步）再补 qiankun consumer 结论；
+- 全量安装包矩阵仍受宿主磁盘限制；
 - U33 按语言拆分、U09 热替换、U16 请求 locale、SSR 生产化、U17 服务端图表。

@@ -23,9 +23,9 @@
 
 - `pnpm check`：**573/573**
 - `pnpm test:browser`：**60/60**
-- `pnpm test:package`：qiankun 子集被 registry/store 漂移阻塞（此前 ssr 子集 83、全量 359）
+- `pnpm test:package`：**qiankun 子集 83 阶段**（全量 359 因宿主磁盘不足未重跑）
 - 最新证据：[F6-5 qiankun UMD](../artifacts/f6-qiankun-umd-validation.json)、[F6-4 microfrontend](../artifacts/f6-microfrontend-validation.json)、[F6-3 dva](../artifacts/f6-dva-adapter-validation.json)、[F6-2 valtio](../artifacts/f6-valtio-adapter-validation.json)、[U33-10 动态预渲染元数据](../artifacts/u33-10-dynamic-prerender-metadata-validation.json)、[U33-9 sitemap alternates](../artifacts/u33-9-sitemap-alternates-validation.json)、[U33-8 sitemap lastmod/gzip](../artifacts/u33-8-sitemap-lastmod-gzip-validation.json)、[U17-7 ProLayout locale](../artifacts/u17-7-prolayout-locale-validation.json)、[U17-6 图表 SSR](../artifacts/u17-6-chart-ssr-validation.json)、[F6-1 React Query](../artifacts/f6-react-query-validation.json)、[U17-5 图表集成](../artifacts/u17-5-charts-validation.json)、[U17-4 主题编辑器](../artifacts/u17-4-theme-editor-validation.json)、[U12-12 跨标签页缓存](../artifacts/u12-12-cross-tab-cache-validation.json)、[U12-11 防抖边沿](../artifacts/u12-11-debounce-edges-validation.json)、[U12-10 防抖 maxWait](../artifacts/u12-10-debounce-maxwait-validation.json)、[U12-9 缓存持久化](../artifacts/u12-9-cache-persistence-validation.json)、[U33-7 sitemap index](../artifacts/u33-7-sitemap-index-validation.json)、[U12-8 尾调用节流](../artifacts/u12-8-trailing-throttle-validation.json)、[U17-3 菜单图标](../artifacts/u17-3-menu-icons-validation.json)、[U17-2 ProLayout](../artifacts/u17-2-pro-layout-validation.json)、[U12-7 游标分页](../artifacts/u12-7-cursor-pagination-validation.json)、[U33-6 并发预渲染](../artifacts/u33-6-prerender-concurrency-validation.json)、[U33-5 robots](../artifacts/u33-5-robots-validation.json)、[U12-6 节流](../artifacts/u12-6-throttle-validation.json)、[U09-4 选择器等值](../artifacts/u09-4-selector-equality-validation.json)、[U17-1 Antd](../artifacts/u17-antd-validation.json)、[U32-2 流式 SSR](../artifacts/u32-streaming-validation.json)、[U33-4 预渲染控制](../artifacts/u33-4-prerender-control-validation.json)、[U16-2 RTL](../artifacts/u16-2-rtl-validation.json)。
-- 工作区：本轮验证完成后以特性提交 + 文档索引提交交付；最新特性提交为 942f164（F6 qiankun UMD/HTML 入口）；安装包 qiankun consumer 待 registry/store 恢复后验证，工作树干净，未推送。
+- 工作区：本轮验证完成后以特性提交 + 文档索引提交交付；最新特性提交为 942f164（F6 qiankun UMD/HTML 入口），工作树干净，未推送。
 
 ## 4. 未完成要求（阻断完成判定）
 
@@ -36,7 +36,7 @@
 | U09 | Hook/对象模型、reducers/effects/subscriptions、extraModels、依赖排序、选择器 isEqual 已交付；热替换保留 store 未实现 | 部分完成 |
 | U17 | 可选 `@cormijs/plugin-antd`（locale/direction/theme）、`ProLayoutShell`（菜单/导航/折叠持久化/主题编辑器/内置文案 locale）、菜单图标注册表、应用侧图表库与 `ClientOnly` SSR 边界已交付；自定义 SettingDrawer 文案、服务端图表内容未实现 | 部分完成 |
 | U16 | UI locale 归一化/回退链/资源解析与 RTL direction 已交付；按请求 locale、RTL 样式/组件封装未实现 | 部分完成 |
-| F6 | React Query、valtio、dva、qiankun 子应用生命周期与 UMD/HTML 入口已交付（F6-1–F6-5）；qiankun host 注册、Module Federation、dva 自动发现/immer/loading、多 builder/MFSU、qiankun 安装包验证未完成 | 部分完成 |
+| F6 | React Query、valtio、dva、qiankun 子应用生命周期与 UMD/HTML 入口已交付（F6-1–F6-5）；qiankun host 注册、Module Federation、dva 自动发现/immer/loading、多 builder/MFSU 未完成 | 部分完成 |
 | U25 | externals；runtimePublicPath 已确认 Vite chunk 导入无法等价实现 | 未交付 |
 | U23/U24/U29 | Tailwind/UnoCSS 与 API 类型工作流未实现；U24 已交付 `meta.icon` + 图标注册表适配，自动发现/资源管线/代码生成未实现 | 部分完成 |
 
