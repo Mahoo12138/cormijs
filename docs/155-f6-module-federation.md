@@ -50,7 +50,7 @@ export default defineConfig({
 ## 3. 边界
 
 - 仅客户端路由合并。SSR 的 `renderServerApplication` 不执行 `RuntimePlugin.routes`，因此远端路由在服务端 HTML 中不存在；在 `app.ssr: true` 的宿主上直接访问远端路径会发生服务端 404 与客户端路由不一致。此切片未提供 SSR 远端加载。
-- remotes 在构建期写入生成入口，修改远端地址需要重新构建宿主；没有 hzero `microConfig.json` 式的运行时清单、按路径懒加载清单或远程版本元数据接口。
+- 本切片的静态 remotes 在构建期写入生成入口；运行时 `PACKAGE_PUBLIC_URL`/公开清单由 [F6-8](156-f6-runtime-remote-manifests.md) 补充。
 - 只共享显式配置的模块，不做依赖自动探测、版本兼容范围协商、CSS 隔离、qiankun 式 JS 沙箱或应用间 global state。
 - 远端必须是 cormi 应用并使用 `exposeRoutes`，或由自定义 expose 导出 `getRoutes()` / 默认路由数组；不兼容 hzero `getRouterData` 的 `{type,routes}` 结构，也不解析 Umi 路由数据。
 - 不提供 `registerMicroApps`/activeRule 或菜单注册表；Qiankun 场景仍使用 F6-4–F6-6。远端 CSS/资源的 `publicPath`、CDN 路径与 CORS 是部署责任，本切片未暴露 `publicPath` 配置。
@@ -74,5 +74,5 @@ export default defineConfig({
 ## 5. 下一步
 
 - F6 剩余：qiankun `registerMicroApps`/activeRule/菜单集成、多 builder/MFSU、dva 自动发现/immer/loading；
-- 联邦后续：运行时 remote 清单、SSR 远端路由、CSS/样式隔离、版本兼容提示与多 remote 菜单排序验证；
+- 联邦后续：SSR 远端路由、清单签名/完整性、CSS/样式隔离、版本兼容提示与多 remote 菜单排序验证；
 - U33 按语言拆分、U09 热替换、U16 请求 locale、SSR 生产化、U17 服务端图表。

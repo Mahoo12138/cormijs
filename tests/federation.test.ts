@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import type { RouteObject } from 'react-router';
 import { mergeFederatedRoutes, routePrefix, FederationRouteError } from '../packages/plugin-federation/src/merge.js';
+import { manifestRemote, manifestUrlFor, normalizePrefixes, normalizePublicUrls, parseFederationManifest } from '../packages/plugin-federation/src/manifest.js';
 import { federationRuntime } from '../packages/plugin-federation/src/runtime.js';
 
 test('federated routes keep menu metadata, namespace ids and mount under a prefix wrapper', () => {
@@ -86,8 +87,54 @@ test('federation runtime skips work without remotes and refuses malformed runtim
     { remotes: [{ name: 'shop', entry: 'relative/remoteEntry.js' }] },
     { remotes: [{ name: 'shop', entry: 'http://x/remoteEntry.js', module: '../x' }] },
     { remotes: [{ name: 'shop', entry: 'http://x/remoteEntry.js', prefix: 'shop' }] },
-    { remotes: [{ name: 'shop', entry: 'http://x/remoteEntry.js' }], timeout: 10 }]) {
+    { remotes: [{ name: 'shop', entry: 'http://x/remoteEntry.js' }], timeout: 10 },
+    { remotes: [], publicUrls: ['ftp://x/manifest.json'] },
+    { remotes: [], publicUrls: ['http://x/'], prefixes: { shop: 'shop' } }]) {
     await assert.rejects(Promise.resolve(federationRuntime.routes!({ routes: [], options, appConfig: {}, basename: '/', signal: new AbortController().signal })),
       /FEDERATION_INVALID/);
   }
+});
+
+test('public URLs accept env strings, package roots and direct manifests with bounded validation', () => {
+  assert.deepEqual(normalizePublicUrls(undefined), []);
+  assert.deepEqual(normalizePublicUrls('https://a.example/app/, https://b.example/pkg\n/cormi/'), ['https://a.example/app/', 'https://b.example/pkg', '/cormi/']);
+  assert.deepEqual(normalizePublicUrls(['https://a.example/', 'https://a.example/']), ['https://a.example/']);
+  for (const value of ['ftp://a.example/', '//a.example/', 'https://user:pw@a.example/', 'https://a.example/#x', 'https://a.example/a/../b', 'relative/path']) {
+    assert.throws(() => normalizePublicUrls(value), /FEDERATION_MANIFEST_INVALID/, value);
+  }
+  assert.throws(() => normalizePublicUrls(new Array(33).fill('https://a.example/')), /at most 32/);
+  assert.equal(manifestUrlFor('https://cdn.example.com/app/', 'http://host/'), 'https://cdn.example.com/app/cormi-federation.json');
+  assert.equal(manifestUrlFor('https://cdn.example.com/app', 'http://host/'), 'https://cdn.example.com/app/cormi-federation.json');
+  assert.equal(manifestUrlFor('/micro/', 'https://host.example/base/'), 'https://host.example/micro/cormi-federation.json');
+  assert.equal(manifestUrlFor('https://cdn.example.com/app/manifest.json', 'http://host/'), 'https://cdn.example.com/app/manifest.json');
+  assert.equal(manifestUrlFor('https://cdn.example.com/pkg/package.json', 'http://host/'), 'https://cdn.example.com/pkg/package.json');
+  assert.throws(() => manifestUrlFor('ftp://cdn/manifest.json', 'http://host/'), /http\(s\)/);
+});
+
+test('manifests resolve entries and npm package metadata into route remotes', () => {
+  const manifest = parseFederationManifest({
+    format: 'cormi:federation:1', name: 'shop', entry: './remoteEntry.js', routes: './routes',
+    prefix: '/shop', version: '1.2.3', buildId: 'build 1',
+  }, 'https://cdn.example.com/shop/cormi-federation.json');
+  assert.equal(manifest.entry, 'https://cdn.example.com/shop/remoteEntry.js?v=build+1');
+  assert.deepEqual(manifestRemote(manifest), { name: 'shop', entry: manifest.entry, module: './routes', prefix: '/shop', required: true });
+  assert.deepEqual(manifestRemote(manifest, '/store'), { name: 'shop', entry: manifest.entry, module: './routes', prefix: '/store', required: true });
+  assert.equal(manifestRemote(parseFederationManifest({ format: 'cormi:federation:1', name: 'widgets', entry: '/remoteEntry.js' }, 'https://cdn.example.com/widgets/cormi-federation.json')), undefined);
+
+  const pkg = parseFederationManifest({ name: '@acme/shop', version: '2.0.0', cormi: { federation: {
+    format: 'cormi:federation:1', name: 'shop', entry: './dist/remoteEntry.js', routes: './routes', prefix: '/shop',
+  } } }, 'https://unpkg.com/@acme/shop@2.0.0/package.json');
+  assert.equal(pkg.entry, 'https://unpkg.com/@acme/shop@2.0.0/dist/remoteEntry.js');
+
+  const base = { format: 'cormi:federation:1', name: 'shop', entry: './remoteEntry.js' };
+  assert.throws(() => parseFederationManifest({ ...base, format: 'v2' }, 'https://cdn.example.com/cormi-federation.json'), /unsupported/i);
+  assert.throws(() => parseFederationManifest({ ...base, name: '../shop' }, 'https://cdn.example.com/cormi-federation.json'), /name/);
+  assert.throws(() => parseFederationManifest({ ...base, entry: 'ftp://cdn/entry.js' }, 'https://cdn.example.com/cormi-federation.json'), /http\(s\)/);
+  assert.throws(() => parseFederationManifest({ ...base, hasRoutes: true }, 'https://cdn.example.com/cormi-federation.json'), /hasRoutes/);
+  assert.throws(() => parseFederationManifest({ ...base, routes: '../routes' }, 'https://cdn.example.com/cormi-federation.json'), /routes/);
+  assert.throws(() => parseFederationManifest({ ...base, prefix: '/a/' }, 'https://cdn.example.com/cormi-federation.json'), /prefix/);
+  assert.throws(() => parseFederationManifest({ ...base, version: 'x'.repeat(65) }, 'https://cdn.example.com/cormi-federation.json'), /version/);
+  assert.throws(() => parseFederationManifest({ name: '@acme/shop' }, 'https://unpkg.com/@acme/shop/package.json'), /cormi.federation/);
+  assert.deepEqual(normalizePrefixes({ shop: '/shop', widgets: '/' }), { shop: '/shop', widgets: '/' });
+  assert.throws(() => normalizePrefixes({ shop: 'shop' }), /prefix override/i);
 });

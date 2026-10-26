@@ -24,15 +24,25 @@ export interface FederationPluginOptions {
   readonly exposes?: Readonly<Record<string, string>>;
   /** Expose the generated route tree as `./routes` for host-side route merging. */
   readonly exposeRoutes?: boolean;
+  /** Route prefix published in this remote's manifest; hosts can still override it. */
+  readonly prefix?: string;
+  /** Optional version published in this remote's manifest. */
+  readonly version?: string;
   readonly remotes?: readonly FederationRemoteOptions[];
+  /** Remote package roots or direct JSON manifests loaded at startup; falls back to PACKAGE_PUBLIC_URL. */
+  readonly publicUrls?: string | readonly string[];
+  /** Per-remote route prefix overrides applied to manifest remotes. */
+  readonly prefixes?: Readonly<Record<string, string>>;
   /** Shared dependency package names; defaults to React, React DOM, React Router and cormi runtime. */
   readonly shared?: readonly string[];
-  /** Milliseconds allowed for one remote route module; defaults to 15000. */
+  /** Milliseconds allowed for one manifest or remote route module; defaults to 15000. */
   readonly routeTimeout?: number;
 }
 export interface FederationRuntimeOptions {
   readonly name: string;
   readonly remotes: readonly FederationRemote[];
+  readonly publicUrls: readonly string[];
+  readonly prefixes?: Readonly<Record<string, string>>;
   readonly timeout: number;
 }
 export const DEFAULT_SHARED = Object.freeze(['react', 'react-dom', 'react-router', '@cormijs/runtime']);

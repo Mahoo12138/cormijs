@@ -17,13 +17,13 @@ export default defineConfig({
   presets: [preset],
   plugins: [
     { id: 'routes', plugin: routeConfigPlugin, options: { id: 'remote-routes', routes } },
-    { id: 'federation', plugin: federationPlugin, options: { name: 'CormiRemote', exposeRoutes: true } },
+    { id: 'federation', plugin: federationPlugin, options: { name: 'CormiRemote', exposeRoutes: true, prefix: '/remote', version: '1.0.0' } },
   ],
   app: { base: '/', server: { port: 0 } },
 });
 `;
 
-export function federationHostConfiguration(remoteEntry: string): string {
+function federationHostConfiguration(options: string): string {
   return `import { defineConfig } from 'cormijs';
 import preset from '@cormijs/preset-react-vite';
 import { menuPlugin, routeConfigPlugin } from '@cormijs/plugin-react';
@@ -35,14 +35,24 @@ export default defineConfig({
   presets: [preset],
   plugins: [
     { id: 'routes', plugin: routeConfigPlugin, options: { id: 'host-routes', routes } },
-    { id: 'federation', plugin: federationPlugin, options: { name: 'CormiHost', remotes: [
-      { name: 'CormiRemote', entry: ${JSON.stringify(remoteEntry)}, prefix: '/remote' },
-    ] } },
+    { id: 'federation', plugin: federationPlugin, options: ${options} },
     { id: 'menu', plugin: menuPlugin },
   ],
   app: { base: '/', server: { port: 0 } },
 });
 `;
+}
+
+export function federationStaticHostConfiguration(remoteEntry: string): string {
+  return federationHostConfiguration(`{ name: 'CormiHost', remotes: [
+      { name: 'CormiRemote', entry: ${JSON.stringify(remoteEntry)}, prefix: '/remote' },
+    ] }`);
+}
+
+/** No publicUrls means the build/startup environment must provide PACKAGE_PUBLIC_URL. */
+export function federationManifestHostConfiguration(publicUrls?: readonly string[]): string {
+  const option = publicUrls === undefined ? '' : `, publicUrls: ${JSON.stringify(publicUrls)}`;
+  return federationHostConfiguration(`{ name: 'CormiHost'${option} }`);
 }
 
 const tsconfig = JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -101,7 +111,16 @@ export async function writeFederationRemote(root: string) {
 export async function writeFederationHost(root: string, remoteEntry: string) {
   await writeFiles(root, {
     'index.html': indexHtml,
-    'cormi.config.ts': federationHostConfiguration(remoteEntry),
+    'cormi.config.ts': federationStaticHostConfiguration(remoteEntry),
+    'tsconfig.json': tsconfig,
+    'src/screens/home.tsx': homePage,
+  });
+}
+
+export async function writeFederationManifestHost(root: string, publicUrls?: readonly string[]) {
+  await writeFiles(root, {
+    'index.html': indexHtml,
+    'cormi.config.ts': federationManifestHostConfiguration(publicUrls),
     'tsconfig.json': tsconfig,
     'src/screens/home.tsx': homePage,
   });

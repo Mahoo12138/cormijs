@@ -18,9 +18,9 @@ export async function app(t: TestContext) {
   });
   return { root, write: (name: string, content: string) => writeFile(join(root, name), content) };
 }
-export function cli(t: TestContext, root: string, command: string, args: string[] = []) {
+export function cli(t: TestContext, root: string, command: string, args: string[] = [], env: NodeJS.ProcessEnv = {}) {
   const child = spawn(process.execPath, [resolve('packages/cormi/dist/cli.js'), command, '--root', root, '--json', ...args], {
-    stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, NODE_PATH: '' },
+    stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, NODE_PATH: '', ...env },
   });
   const events: Record<string, any>[] = []; let buffer = '', stderr = ''; let ended = false;
   child.stdout.on('data', chunk => {
