@@ -49,12 +49,12 @@ export async function verifyQiankunBuild(root: string) {
 
 export async function verifyQiankunUmd(page: Page, url: string) {
   await page.goto(new URL('qiankun.html', url).href);
-  await page.evaluate(() => { window.history.replaceState(null, '', '/qiankun/'); });
+  await page.evaluate(() => { window.history.replaceState(null, '', '/mounted/'); });
   await page.evaluate(async () => {
     const api = (window as any).CormiMicroApp;
     if (!api) throw new Error('CormiMicroApp global missing');
     await api.bootstrap();
-    await api.mount({ container: document.body });
+    await api.mount({ container: document.body, base: '/mounted/' });
   });
   await page.getByRole('heading', { name: 'Qiankun demo', exact: true }).waitFor();
   await page.locator('[data-increment]').click();

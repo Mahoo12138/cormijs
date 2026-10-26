@@ -5,10 +5,18 @@ import type { Page } from 'playwright-core';
 
 export const qiankunHostConfiguration = `import { defineConfig } from 'cormijs';
 import preset from '@cormijs/preset-react-vite';
-import { appRuntimePlugin } from '@cormijs/plugin-react';
+import { appRuntimePlugin, menuPlugin } from '@cormijs/plugin-react';
+import { qiankunHostPlugin } from '@cormijs/plugin-qiankun';
 export default defineConfig({
   presets: [preset],
-  plugins: [{ id: 'app', plugin: appRuntimePlugin }],
+  plugins: [
+    { id: 'app', plugin: appRuntimePlugin },
+    { id: 'qiankun-host', plugin: qiankunHostPlugin, options: { apps: [
+      { name: 'FakeMicro', entry: '/host/fake/qiankun.html', path: 'slave', title: 'Slave app', icon: 'Appstore', order: 2,
+        props: { greeting: 'hello' } },
+    ] } },
+    { id: 'menu', plugin: menuPlugin },
+  ],
   app: { base: '/host/', server: { port: 0 } },
 });
 `;
@@ -22,15 +30,21 @@ export async function writeQiankunHostFixture(root: string) {
     'public/fake/qiankun.html': '<!doctype html><html><head><meta charset="utf-8" /></head><body><script src="./fake-micro.js"></script></body></html>',
     'public/fake/fake-micro.js': `window.FakeMicro = {
   bootstrap: async function () {},
-  mount: async function (props) { props.container.innerHTML = '<p data-fake-micro>Fake micro mounted</p>'; },
+  mount: async function (props) {
+    props.container.innerHTML = '<p data-fake-micro>Fake micro mounted</p><p data-fake-base>' + (props.base || '') + '</p><p data-fake-greeting>' + (props.greeting || '') + '</p>';
+  },
   unmount: async function (props) { props.container.innerHTML = ''; },
   update: async function () {},
 };`,
     'src/pages/index.tsx': `import { useState } from 'react';
+import { Link, useMenu } from '@cormijs/runtime';
 import { QiankunMicroApp } from '@cormijs/plugin-qiankun/host';
 export default function Home(){
   const [mounted, setMounted] = useState(false);
-  return <main><h1>Qiankun host demo</h1><button data-toggle onClick={()=>setMounted(value=>!value)}>{mounted ? 'Unmount' : 'Mount'}</button>
+  const menu = useMenu();
+  return <main><h1>Qiankun host demo</h1>
+    <nav>{menu.map(item => <Link key={item.id} data-menu={item.id} to={item.path}>{item.title}</Link>)}</nav>
+    <button data-toggle onClick={()=>setMounted(value=>!value)}>{mounted ? 'Unmount' : 'Mount'}</button>
     {mounted ? <QiankunMicroApp name="FakeMicro" entry="./fake/qiankun.html" /> : null}</main>;
 }`,
     'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
@@ -43,9 +57,21 @@ export default function Home(){
 export async function verifyQiankunHostPage(page: Page, url: string) {
   await page.goto(url);
   await page.getByRole('heading', { name: 'Qiankun host demo', exact: true }).waitFor();
+  await page.locator('[data-menu]', { hasText: 'Slave app' }).click();
+  await page.waitForURL(/\/host\/slave\/?$/);
+  await page.locator('[data-fake-micro]').waitFor();
+  assert.equal(await page.locator('[data-qiankun-host="FakeMicro"] [data-fake-micro]').count(), 1);
+  assert.equal(await page.locator('[data-fake-base]').innerText(), '/host/slave/');
+  assert.equal(await page.locator('[data-fake-greeting]').innerText(), 'hello');
+  await page.goto(new URL('slave/deep', url).href);
+  await page.locator('[data-fake-micro]').waitFor();
+  assert.equal(await page.locator('[data-fake-base]').innerText(), '/host/slave/');
+  await page.goto(url);
+  await page.getByRole('heading', { name: 'Qiankun host demo', exact: true }).waitFor();
   await page.locator('[data-toggle]').click();
   await page.locator('[data-fake-micro]').waitFor();
   assert.equal(await page.locator('[data-qiankun-host="FakeMicro"] [data-fake-micro]').count(), 1);
+  assert.equal(await page.locator('[data-fake-base]').innerText(), '');
   await page.locator('[data-toggle]').click();
   await page.waitForFunction(() => document.querySelector('[data-fake-micro]') === null);
   await page.locator('[data-toggle]').click();

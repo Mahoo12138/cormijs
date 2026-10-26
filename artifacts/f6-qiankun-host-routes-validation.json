@@ -1,0 +1,136 @@
+{
+  "format": "cormi:f6-qiankun-host-routes-validation:1",
+  "verifiedAt": "2026-10-26T06:31:50.798Z",
+  "base": "b1a3ebe77ec6e3d00d8dfc8affda9955bde55a1b",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "files": [
+      "README.md",
+      "docs/59-umi-feature-roadmap.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/154-f6-qiankun-host.md",
+      "docs/157-f6-qiankun-host-routes.md",
+      "packages/runtime/src/microfrontend.ts",
+      "packages/plugin-qiankun/package.json",
+      "packages/plugin-qiankun/src/index.ts",
+      "packages/plugin-qiankun/src/host.tsx",
+      "packages/plugin-qiankun/src/host-plugin.ts",
+      "pnpm-lock.yaml",
+      "scripts/qiankun-host-fixture.ts",
+      "scripts/qiankun-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/qiankun-host.test.ts",
+      "tests/browser/qiankun-host.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "vite": "7.3.2",
+    "react": "19.3.1",
+    "reactRouter": "7.18.2",
+    "qiankun": "2.10.16",
+    "playwright": "1.58.2",
+    "browser": "156.0.4314.42"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/qiankun-host-routes/check.log",
+      "sha256": "24a6ae93d144f64755e63bbc3d955924e59a8978c38d447cba4b69c534b3e447",
+      "seconds": 149.460431375,
+      "tests": 584,
+      "pass": 584,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/qiankun-host-routes/browser.log",
+      "sha256": "32732ae64d9731b97857a13855340f5dd796c6f9acd8150053ab490b7e0c2c3a",
+      "seconds": 760.93466975,
+      "tests": 62,
+      "pass": 62,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "qiankun host menu navigation, /host/slave/ deep links, /host/slave/ base propagation, manual component mount/unmount, and UMD props.base mounting"
+    },
+    "package": {
+      "command": "CORMI_PACKAGE_ONLY=qiankun-host pnpm test:package",
+      "log": ".cache/qiankun-host-routes/package.log",
+      "sha256": "8f86a8469cbc29f0f08641d8d14bd0e1af1da0e3dec94c602785ffcb3fba8132",
+      "stages": 83,
+      "packages": 19,
+      "passed": true,
+      "result": ".cache/qiankun-host-routes/package-result.json",
+      "note": "packed qiankun-host consumer covers route plugin, menu, base, public types and the manual component; full install matrix not rerun due host disk"
+    }
+  },
+  "coverage": [
+    "menu-route-generation",
+    "catch-all-child-route",
+    "deep-link",
+    "host-base-propagation",
+    "per-mount-base",
+    "umd-base",
+    "access-meta",
+    "props-style-json-validation",
+    "manual-component-lifecycle"
+  ],
+  "sourceInputs": {
+    "README.md": "a6c9a5da4aea45419df125717c43e2f8f3d2eacfd88aebf29064cc87471e1c38",
+    "docs/59-umi-feature-roadmap.md": "8f2745945d996312718fb9ace83d05bde6af033353975c71a6b1d22e1dd7a955",
+    "docs/112-roadmap-audit-2026-10-21.md": "fdca286a6c30558617c775f7696747d08b2e7837f5a19212f89850a1c96db199",
+    "docs/154-f6-qiankun-host.md": "76591751da191d0df2a68f1ba75a71e94fd58d12baa0f9b62c65d7891df5b100",
+    "docs/157-f6-qiankun-host-routes.md": "35a4b01bb5014b8ef610c1bca86d72284527925bbbe2dacf5f8eeb01611142cf",
+    "packages/runtime/src/microfrontend.ts": "c77e0e9245a4c48a75f0a9ed7338f8234fa2a3d8c92ca0aa218695814e176f5e",
+    "packages/plugin-qiankun/package.json": "0cb2779f44e555b30843a45fd7d9b777e78b3fafdde9cd2a237c793e8a9d9f25",
+    "packages/plugin-qiankun/src/index.ts": "94af337deca3cfb13790dc5c08f8bb5b13092cfed32870f0e7d525f102b1d2b1",
+    "packages/plugin-qiankun/src/host.tsx": "99f7cd9dbf3090e3fddae8eeb8b2293bb5ab1faebdbdc8cbfbdf36bbd8a313bc",
+    "packages/plugin-qiankun/src/host-plugin.ts": "a9821ba56eb0ebd3e295e9314b51fd25cdb20432b86499de125cb118a88040fe",
+    "pnpm-lock.yaml": "16eb02105197c177de144798d6f433a9e55d15564d61ef72ed3a00703a5acf33",
+    "scripts/qiankun-host-fixture.ts": "6766677d5d51c3b3b5faec3f42f29846c160419799292f8d38d689c562a69449",
+    "scripts/qiankun-fixture.ts": "78be58e23286ec7d823e9cb1f46e79d15149971fe8b1f3a2d10f72643ce03905",
+    "scripts/test-package.ts": "ecf39ff714d9bb2a831ace696f2f52bfdcf5c304efaf5518d5d96b82074592a5",
+    "tests/qiankun-host.test.ts": "2338b8bca1c3d45def937f5cbf536ba1cff8961ee3ed7d3f543e20d7d085ce23",
+    "tests/browser/qiankun-host.test.ts": "415b5c22686515bda47b54e2d7b3e372fdc5937bb40321f4dc5cb35b28936098"
+  },
+  "sourceInputCount": 16,
+  "sourceInputsDigest": "47349b0747db4b1dd1342e77585f1e9245d902c64e445c976d42a000d1cc9dcb",
+  "documentationInputs": {
+    "README.md": "a6c9a5da4aea45419df125717c43e2f8f3d2eacfd88aebf29064cc87471e1c38",
+    "docs/59-umi-feature-roadmap.md": "8f2745945d996312718fb9ace83d05bde6af033353975c71a6b1d22e1dd7a955",
+    "docs/112-roadmap-audit-2026-10-21.md": "fdca286a6c30558617c775f7696747d08b2e7837f5a19212f89850a1c96db199",
+    "docs/154-f6-qiankun-host.md": "76591751da191d0df2a68f1ba75a71e94fd58d12baa0f9b62c65d7891df5b100",
+    "docs/157-f6-qiankun-host-routes.md": "35a4b01bb5014b8ef610c1bca86d72284527925bbbe2dacf5f8eeb01611142cf"
+  },
+  "evidence": [
+    ".cache/qiankun-host-routes/check.log",
+    ".cache/qiankun-host-routes/browser.log",
+    ".cache/qiankun-host-routes/package.log",
+    ".cache/qiankun-host-routes/package-result.json",
+    "artifacts/f6-qiankun-host-routes-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "no-global-register-micro-apps",
+    "no-function-or-array-active-rule",
+    "no-keep-alive-or-tabs",
+    "no-sandbox-style-configuration",
+    "no-global-state",
+    "static-prefixes-only",
+    "no-ssr-verification",
+    "no-multi-mount-same-app",
+    "edge-only-browser",
+    "package-suite-subset-only-due-to-disk",
+    "no-publication-or-deployment"
+  ]
+}

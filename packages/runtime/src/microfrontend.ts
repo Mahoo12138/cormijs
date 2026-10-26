@@ -10,6 +10,8 @@ export interface MicroAppOptions {
 export interface MicroAppProps {
   /** qiankun passes its container as an Element; selectors are accepted for direct tests. */
   readonly container?: Element | string;
+  /** Per-mount browser-history base; overrides the application/options base until the next unmount. */
+  readonly base?: string;
 }
 export interface MicroAppLifecycles {
   bootstrap(): Promise<void>;
@@ -41,13 +43,18 @@ export function createMicroApp(application: MicroApplication, options: MicroAppO
     if (mounting) return mounting;
     if (handle) throw new Error('MICRO_APP_INVALID: application is already mounted');
     mounting = (async () => {
+      const requested = props?.base;
+      if (requested !== undefined && (typeof requested !== 'string' || !requested.startsWith('/') || !requested.endsWith('/'))) {
+        throw new Error('MICRO_APP_INVALID: props.base must be an absolute path ending in /');
+      }
+      const effective = requested ?? base;
       const container = resolveContainer(props);
       const existing = container.querySelector<HTMLElement>(`#${mountId}`);
       element = existing ?? document.createElement('div');
       created = !existing;
       if (!existing) { element.id = mountId; container.appendChild(element); }
       try {
-        handle = await mountApplication({ ...application, ...(base === undefined ? {} : { base }), element });
+        handle = await mountApplication({ ...application, ...(effective === undefined ? {} : { base: effective }), element });
       } catch (error) {
         if (created) element.remove();
         element = undefined; created = false;

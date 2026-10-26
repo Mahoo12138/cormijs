@@ -12,7 +12,7 @@ async function browser(t: TestContext) {
   const page = await instance.newPage({ viewport: { width: 1280, height: 800 } }); page.setDefaultTimeout(12000); return page;
 }
 
-test('qiankun host component loads and unmounts a micro app in dev, build and preview', { timeout: 150000 }, async t => {
+test('qiankun host routes, menu, deep links and component mounts work in dev, build and preview', { timeout: 150000 }, async t => {
   const f = await app(t); await writeQiankunHostFixture(f.root); const page = await browser(t), errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });

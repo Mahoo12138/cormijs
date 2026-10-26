@@ -65,7 +65,7 @@
 | U33 | exportStatic/预渲染/静态导出 | 部分已有（F5e/U33-1..10）：可选 staticExportPlugin 为每个字面路径路由生成带 `meta.head` 的 HTML 外壳，notFound 可生成 404.html；`ssrPlugin.prerender` 用已构建 SSR bundle 真正预渲染字面路由与 `prerenderPaths`（数组/异步函数、对象条目可每页关闭），执行 clientLoader/serverLoader、写入 hydration 与 head，跳过 Response/≥400，`prerenderIgnoreErrors` 跳过单页异常，`prerenderIncremental` 跳过未变化 HTML，可选 sitemap 并包含 app.base，`robots` 输出 robots.txt（`{{sitemap}}` 替换），`prerenderConcurrency` 支持并行渲染；`sitemapChunkSize` 分片并生成 `sitemap-index.xml`（robots 指向索引），`sitemapLastmod` 写入默认 lastmod、路由 `meta.lastmod` 按页覆盖、`sitemapGzip` 输出预压缩副本（U33-8）；路由 `meta.alternates` 输出 hreflang/x-default sitemap 链接（U33-9）；动态 `prerenderPaths` 对象条目支持 `lastmod`/`alternates`（U33-10）；按语言拆分、changefreq/priority 待后续 | 静态导出插件 | F5 |
 | U34 | MPA | 部分已有（F5q）：mpaPlugin 按 `src/pages` 顶层目录生成独立 HTML 与 React 入口，dev/build/preview 可用，与 SPA 共存；App/Provider 包装与热更新待后续（全局/页面级 layout 与自定义 HTML 模板已交付） | 独立 MPA profile | F5 |
 | U35 | apiRoute | 部分已有（F5n）：apiRoutePlugin 将 `src/api/**` 的 Fetch 处理器注册为路由，dev 由 Vite 中间件运行、build 用 esbuild 编译、preview 提供编译产物；独立生产服务、中间件链与流式响应待后续 | 独立服务端路由插件 | F5 |
-| U36 | qiankun、Module Federation | 部分已有（F6-4–F6-8）：子应用 lifecycle、UMD/HTML 入口、`QiankunMicroApp` host 组件、`remoteEntry`/共享依赖/远端路由合并，以及 `PACKAGE_PUBLIC_URL`/公开清单启动发现与 npm 产物清单；`registerMicroApps`/activeRule/菜单集成、SSR 远端路由与清单签名/完整性未实现 | 可选主/子应用与 federation adapter | F6 |
+| U36 | qiankun、Module Federation | 部分已有（F6-4–F6-9）：子应用 lifecycle、UMD/HTML 入口、`QiankunMicroApp`、路由/菜单/base 集成、`remoteEntry`/共享依赖/远端路由合并，以及 `PACKAGE_PUBLIC_URL`/公开清单与 npm 产物清单；全局 `registerMicroApps`/函数式 activeRule、联邦 SSR 远端路由与清单签名/完整性未实现 | 可选主/子应用与 federation adapter | F6 |
 | U37 | dva、valtio、react-query | 部分已有（F6-1/F6-2/F6-3）：可选 `@cormijs/plugin-react-query` 挂载 `QueryClientProvider`；可选 `@cormijs/valtio` 再导出 proxy/snapshot/useSnapshot；可选 `@cormijs/dva` 显式注册模型并提供 hook/connect；dva 自动发现/immer/loading 未实现 | 各状态库/服务端状态 adapter | F6 |
 | U38 | analytics、moment2dayjs、confetti 等官方插件 | 部分已有（F5h）：可选 analyticsPlugin 在路由变化时发送 GA4 `page_view` 与 `cormi:pageview`（不注入脚本、不做 consent）；moment2dayjs/confetti 等仍未移植 | 独立可选插件 | F6 |
 | U39 | analyze、MFSU、depsOnDemand、esmi 等优化 | 部分有 Vite 原生优化；无 Umi 功能等价结论 | 构建优化插件，按真实后端分别验证 | F6 |
@@ -144,7 +144,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F4m | abbe5aa | CSS Modules/资源类型声明 | docs/110 |
 | U16-1 | ba6ea1f | locale 变更订阅 | docs/111 |
 
-最新冻结验证（2026-10-26）：`pnpm check` 581/581、`pnpm test:browser` 62/62、`pnpm test:package` federation 子集 87 阶段通过（`CORMI_PACKAGE_ONLY=federation`，暖缓存离线安装；安装包全量未重跑，宿主磁盘不足）；证据见 `artifacts/f6-runtime-manifest-validation.json`，此前产物未重跑并保持原样。仍未覆盖的大项见 F6、U09 热替换、U16 按请求 locale/RTL 样式、SSR 生产化与 U33 动态路径 alternates/按语言拆分；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交 89682a3（F6-8 PACKAGE_PUBLIC_URL/运行时远端清单），文档索引提交随后。
+最新冻结验证（2026-10-26）：`pnpm check` 584/584、`pnpm test:browser` 62/62、`pnpm test:package` qiankun-host 子集 83 阶段通过（`CORMI_PACKAGE_ONLY=qiankun-host`，暖缓存离线安装；安装包全量未重跑，宿主磁盘不足）；证据见 `artifacts/f6-qiankun-host-routes-validation.json`，此前产物未重跑并保持原样。仍未覆盖的大项见 F6、U09 热替换、U16 按请求 locale/RTL 样式、SSR 生产化与 U33 动态路径 alternates/按语言拆分；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交 89682a3（F6-8 运行时远端清单），文档索引提交随后。
 
 ## 4. 实施顺序与可审阅交付
 
@@ -342,8 +342,9 @@ locale 对应 `packages/plugins/src/locale.ts` 与模板：消息发现、默认
 **F6-6 状态（2026-10-25）：** qiankun host 适配已交付：`@cormijs/plugin-qiankun/host` 的 `QiankunMicroApp` 在 React 容器中调用 `loadMicroApp`，支持相对/绝对 entry、props、fallback、卸载/重建；qiankun 为可选 peer。无 `registerMicroApps`/activeRule/菜单集成、沙箱配置、global state 或 SSR。用法与边界见 [F6-6 qiankun host](154-f6-qiankun-host.md)。
 **F6-7 状态（2026-10-26）：** Module Federation 与远端路由合并已交付：`@cormijs/plugin-federation` 基于 `@module-federation/vite` 输出/消费 `remoteEntry.js`，默认以 singleton 共享 React、React DOM、React Router 与 `@cormijs/runtime`；远程 `exposeRoutes` 暴露 `./routes`，宿主通过 `RuntimePlugin.routes` 在 router 创建前加载并合并 React Router 路由树，支持 id 命名空间、路径前缀、精确冲突检测、超时与可选 remote；菜单和深链读取合并后的路由。仅客户端合并；运行时清单由 F6-8 补充，仍无 SSR 远端路由、qiankun 式沙箱或 CSS 隔离。浏览器 dev/build/preview 与安装包 remote/host 消费均已验证。用法与边界见 [F6-7 Module Federation](155-f6-module-federation.md)。
 **F6-8 状态（2026-10-26）：** 运行时远端清单已交付：远端构建/开发服务器提供 `cormi-federation.json`，宿主可通过 `publicUrls`、`PACKAGE_PUBLIC_URL` 或 `window.__CORMI_PACKAGE_PUBLIC_URL__` 在启动时发现 remote，解析 `entry`/`routes`/`prefix`/`buildId` 并合并静态 remotes；支持 npm `package.json` 的 `cormi.federation` 作为产物清单、`prefixes` 前缀覆盖与 `?v=buildId` 入口缓存失效。清单在首屏路由创建前一次性拉取，失败阻止启动；仍为客户端路由合并，无 SSR、签名/完整性或运行时依赖安装。dev/build/preview 与安装包 remote/host 分离部署已验证。用法与边界见 [F6-8 运行时清单](156-f6-runtime-remote-manifests.md)。
+**F6-9 状态（2026-10-26）：** qiankun host 路由与菜单集成已交付：`qiankunHostPlugin` 为每个子应用生成菜单可见父路由和 `*` 子路由，`QiankunRoute` 按宿主 base 计算子应用 base 并通过既有 `QiankunMicroApp` 挂载；`MicroAppProps.base` 支持每次 mount 覆盖，UMD lifecycle 已透传。`path`/字符串 `activeRule` 归一化为唯一静态前缀，props/style 受 JSON 校验，access 由路由守卫处理。采用 `loadMicroApp` 手动模式，无全局 `registerMicroApps`/`start`、函数式 activeRule、keep-alive 或 sandbox 配置。菜单/深链/base 与安装包 host consumer 已验证。用法与边界见 [F6-9 qiankun host 路由](157-f6-qiankun-host-routes.md)。
 
-推进 qiankun `registerMicroApps`/activeRule/菜单集成、联邦 SSR 远端路由与清单签名/完整性、状态库 adapter、分析/优化与不同 builder；保留低频官方插件/实验入口的逐项清单。MFSU 等与特定后端相关的实现，以解决同一开发问题为目标，记录复用、适配、等价替代或待实现决定，不造一个无效的同名开关。若放弃某个上游功能，必须给出具体理由供用户决策，不能直接从表中消失。
+推进 qiankun 全局 `registerMicroApps`/函数式 activeRule/keep-alive、联邦 SSR 远端路由与清单签名/完整性、状态库 adapter、分析/优化与不同 builder；保留低频官方插件/实验入口的逐项清单。MFSU 等与特定后端相关的实现，以解决同一开发问题为目标，记录复用、适配、等价替代或待实现决定，不造一个无效的同名开关。若放弃某个上游功能，必须给出具体理由供用户决策，不能直接从表中消失。
 
 ## 5. Cordis 如何承担这些功能
 

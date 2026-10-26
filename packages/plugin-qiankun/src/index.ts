@@ -5,6 +5,8 @@ import { join } from 'node:path';
 import { build as viteBuild, type ResolvedConfig } from 'vite';
 import type {} from '@cormijs/plugin-vite';
 
+export { qiankunHostPlugin, qiankunHostRoutes, qiankunRoutePath, type QiankunHostAppOptions, type QiankunHostOptions } from './host-plugin.js';
+
 export interface QiankunPluginOptions {
   readonly id?: string;
   /** UMD global; qiankun reads this object as the sub-app lifecycles. */

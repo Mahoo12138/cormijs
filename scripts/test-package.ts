@@ -754,15 +754,19 @@ const bad:QiankunPluginOptions={name:42};
     await install('qiankun-host-install',qiankunHostConsumer);await auditLinks(qiankunHostConsumer);
     await command('qiankun-host-typecheck',qiankunHostConsumer,'typecheck');
     await writeFile(join(qiankunHostConsumer,'types.mts'),`import {QiankunMicroApp,type QiankunMicroAppProps} from '@cormijs/plugin-qiankun/host';
-const props:QiankunMicroAppProps={name:'FakeMicro',entry:'./fake/qiankun.html'};void [QiankunMicroApp,props];
+import {qiankunHostPlugin,qiankunHostRoutes,type QiankunHostOptions} from '@cormijs/plugin-qiankun';
+const props:QiankunMicroAppProps={name:'FakeMicro',entry:'./fake/qiankun.html'};const host:QiankunHostOptions={apps:[{name:'FakeMicro',entry:'/host/fake/qiankun.html',path:'slave',title:'Slave',props:{greeting:'hello'}}]};
+const routes=qiankunHostRoutes(host);void [QiankunMicroApp,props,qiankunHostPlugin,host,routes];
 // @ts-expect-error name is required
 const bad:QiankunMicroAppProps={entry:'./fake/qiankun.html'};
+// @ts-expect-error apps is required
+const badHost:QiankunHostOptions={};
 `);
     await execute('qiankun-host-public-types',qiankunHostConsumer,process.execPath,typeArguments);
     await withServer(qiankunHostConsumer,'dev',async url=>{await verifyQiankunHostPage(page,url);assert.deepEqual(errors,[]);});
     await command('qiankun-host-build',qiankunHostConsumer,'build');
     await withServer(qiankunHostConsumer,'preview',async url=>{await verifyQiankunHostPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'qiankun-host-preview.png')});});
-    report.stages.push({label:'installed-qiankun-host-component-dev-build-preview',adapter:'@cormijs/plugin-qiankun/host',previewRegenerated:false});
+    report.stages.push({label:'installed-qiankun-host-routes-menu-component-dev-build-preview',adapter:'@cormijs/plugin-qiankun/host',previewRegenerated:false});
 
     }
     if (selected('federation')) {

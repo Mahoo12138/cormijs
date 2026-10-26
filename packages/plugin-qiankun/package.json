@@ -22,7 +22,10 @@
   },
   "dependencies": {
     "@cormijs/core": "workspace:*",
+    "@cormijs/plugin-react": "workspace:*",
     "@cormijs/plugin-vite": "workspace:*",
+    "@cormijs/routes": "workspace:*",
+    "@cormijs/runtime": "workspace:*",
     "@vitejs/plugin-react": "5.1.4",
     "vite": "7.3.2"
   },

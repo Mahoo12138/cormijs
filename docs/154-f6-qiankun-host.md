@@ -30,7 +30,7 @@ export default function Page() {
 
 ## 3. 边界
 
-- 不是 qiankun 主应用插件：不调用 `registerMicroApps`，不处理 activeRule、路由自动映射、菜单/面包屑或全局生命周期。
+- 组件本身不是 qiankun 主应用插件：不调用全局 `registerMicroApps`/`start`，不处理函数式 activeRule、菜单/面包屑或全局生命周期；路由/菜单集成由 [F6-9](157-f6-qiankun-host-routes.md) 提供。
 - 一个组件只加载一个子应用；不支持预加载策略、并行/多实例调度或 keep-alive。
 - 不提供沙箱/样式隔离配置、props 双向通信、global state 或应用间事件总线。
 - 未验证 SSR；`qiankun`/`loadMicroApp` 只在浏览器 effect 中执行，模块本身是客户端子路径。
@@ -53,5 +53,5 @@ export default function Page() {
 
 ## 5. 下一步
 
-- F6 剩余：qiankun `registerMicroApps`/activeRule/菜单集成、Module Federation、多 builder/MFSU、dva 自动发现/immer；
+- F6 剩余：qiankun 全局 `registerMicroApps`/函数式 activeRule、Module Federation SSR、多 builder/MFSU、dva 自动发现/immer；
 - U33 按语言拆分、U09 热替换、U16 请求 locale、SSR 生产化、U17 服务端图表。

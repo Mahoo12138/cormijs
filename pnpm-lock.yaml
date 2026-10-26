@@ -251,9 +251,18 @@ importers:
       '@cormijs/core':
         specifier: workspace:*
         version: link:../core
+      '@cormijs/plugin-react':
+        specifier: workspace:*
+        version: link:../plugin-react
       '@cormijs/plugin-vite':
         specifier: workspace:*
         version: link:../plugin-vite
+      '@cormijs/routes':
+        specifier: workspace:*
+        version: link:../routes
+      '@cormijs/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       '@vitejs/plugin-react':
         specifier: 5.1.4
         version: 5.1.4(vite@7.3.2(@types/node@22.13.10)(tsx@4.23.15))
