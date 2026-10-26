@@ -129,6 +129,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F6-6 | 64615c0 | qiankun host 组件 | docs/154 |
 | F6-7 | 0cbf91f | Module Federation 远端路由合并 | docs/155 |
 | F6-8 | 89682a3 | PACKAGE_PUBLIC_URL/运行时远端清单 | docs/156 |
+| F6-9 | 622668e | qiankun host 路由/菜单/base 集成 | docs/157 |
 | U17-6 | 1f0e755 | ClientOnly 图表 SSR 边界 | docs/145 |
 | U17-7 | 97bc489 | ProLayout 内置文案 locale | docs/146 |
 | U33-8 | e2ab63a | sitemap lastmod/gzip | docs/147 |
@@ -144,7 +145,7 @@ Umi 文档与源码的来源定位，见下一节及机器库存。F1/F4 的基�
 | F4m | abbe5aa | CSS Modules/资源类型声明 | docs/110 |
 | U16-1 | ba6ea1f | locale 变更订阅 | docs/111 |
 
-最新冻结验证（2026-10-26）：`pnpm check` 584/584、`pnpm test:browser` 62/62、`pnpm test:package` qiankun-host 子集 83 阶段通过（`CORMI_PACKAGE_ONLY=qiankun-host`，暖缓存离线安装；安装包全量未重跑，宿主磁盘不足）；证据见 `artifacts/f6-qiankun-host-routes-validation.json`，此前产物未重跑并保持原样。仍未覆盖的大项见 F6、U09 热替换、U16 按请求 locale/RTL 样式、SSR 生产化与 U33 动态路径 alternates/按语言拆分；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交 89682a3（F6-8 运行时远端清单），文档索引提交随后。
+最新冻结验证（2026-10-26）：`pnpm check` 584/584、`pnpm test:browser` 62/62、`pnpm test:package` qiankun-host 子集 83 阶段通过（`CORMI_PACKAGE_ONLY=qiankun-host`，暖缓存离线安装；安装包全量未重跑，宿主磁盘不足）；证据见 `artifacts/f6-qiankun-host-routes-validation.json`，此前产物未重跑并保持原样。仍未覆盖的大项见 F6、U09 热替换、U16 按请求 locale/RTL 样式、SSR 生产化与 U33 动态路径 alternates/按语言拆分；逐项完成度见 [路线完成度审计](112-roadmap-audit-2026-10-21.md)。最新特性提交 622668e（F6-9 qiankun host 路由/菜单/base 集成），文档索引提交随后。
 
 ## 4. 实施顺序与可审阅交付
 
