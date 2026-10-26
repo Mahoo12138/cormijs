@@ -42,6 +42,7 @@ import { writeDvaFixture, verifyDvaPage } from './dva-fixture.js';
 import { writeMicrofrontendFixture, verifyMicrofrontendPage } from './microfrontend-fixture.js';
 import { writeQiankunFixture, verifyQiankunDevPage, verifyQiankunBuild, verifyQiankunUmd } from './qiankun-fixture.js';
 import { writeQiankunHostFixture, verifyQiankunHostPage } from './qiankun-host-fixture.js';
+import { writeFederationRemote, writeFederationHost, remoteEntryUrl, serveDirectory, verifyFederationPage } from './federation-fixture.js';
 import { writeAnalyticsFixture, verifyAnalyticsPage } from './analytics-fixture.js';
 import { writeToolsFixture, writeFakeTools } from './tools-fixture.js';
 import { writeConventionalLoaderFixture, verifyConventionalLoaderPage } from './conventional-loader-fixture.js';
@@ -762,6 +763,40 @@ const bad:QiankunMicroAppProps={entry:'./fake/qiankun.html'};
     await command('qiankun-host-build',qiankunHostConsumer,'build');
     await withServer(qiankunHostConsumer,'preview',async url=>{await verifyQiankunHostPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'qiankun-host-preview.png')});});
     report.stages.push({label:'installed-qiankun-host-component-dev-build-preview',adapter:'@cormijs/plugin-qiankun/host',previewRegenerated:false});
+
+    }
+    if (selected('federation')) {
+    const federationRemote=await create('federation-remote','react');await writeFederationRemote(federationRemote);
+    const federationRemoteManifest=consumerManifest(kit,'react');
+    federationRemoteManifest.dependencies['@cormijs/plugin-react']=federationRemoteManifest.pnpm.overrides['@cormijs/plugin-react']!;
+    federationRemoteManifest.dependencies['@cormijs/plugin-federation']=federationRemoteManifest.pnpm.overrides['@cormijs/plugin-federation']!;
+    await writeFile(join(federationRemote,'package.json'),JSON.stringify(federationRemoteManifest,null,2));
+    await install('federation-remote-install',federationRemote);await auditLinks(federationRemote);
+    await command('federation-remote-typecheck',federationRemote,'typecheck');
+    await command('federation-remote-build',federationRemote,'build');
+    assert.ok(existsSync(join(federationRemote,'dist/remoteEntry.js')),'packed remote must emit remoteEntry.js');
+    const federationServer=await serveDirectory(join(federationRemote,'dist'));
+    try {
+      const federationHost=await create('federation-host','react');await writeFederationHost(federationHost,remoteEntryUrl(federationServer.url));
+      const federationHostManifest=consumerManifest(kit,'react');
+      federationHostManifest.dependencies['@cormijs/plugin-react']=federationHostManifest.pnpm.overrides['@cormijs/plugin-react']!;
+      federationHostManifest.dependencies['@cormijs/plugin-federation']=federationHostManifest.pnpm.overrides['@cormijs/plugin-federation']!;
+      await writeFile(join(federationHost,'package.json'),JSON.stringify(federationHostManifest,null,2));
+      await install('federation-host-install',federationHost);await auditLinks(federationHost);
+      await command('federation-host-typecheck',federationHost,'typecheck');
+      await writeFile(join(federationHost,'types.mts'),`import {federationPlugin,type FederationPluginOptions} from '@cormijs/plugin-federation';
+import {federationRuntime,mergeFederatedRoutes,type FederationRemote} from '@cormijs/plugin-federation/runtime';
+const options:FederationPluginOptions={name:'CormiHost',remotes:[{name:'CormiRemote',entry:'http://127.0.0.1:1/remoteEntry.js',prefix:'/remote'}]};
+const remote:FederationRemote={name:'CormiRemote',entry:'http://127.0.0.1:1/remoteEntry.js',module:'./routes',required:true};void [federationPlugin,options,federationRuntime,mergeFederatedRoutes,remote];
+// @ts-expect-error name is required
+const bad:FederationPluginOptions={remotes:[]};
+`);
+      await execute('federation-public-types',federationHost,process.execPath,typeArguments);
+      await withServer(federationHost,'dev',async url=>{await verifyFederationPage(page,url);assert.deepEqual(errors,[]);});
+      await command('federation-host-build',federationHost,'build');
+      await withServer(federationHost,'preview',async url=>{await verifyFederationPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'federation-preview.png')});});
+      report.stages.push({label:'installed-federation-shared-routes-dev-build-preview',adapter:'@cormijs/plugin-federation',previewRegenerated:false});
+    } finally { await federationServer.close(); }
 
     }
     if (selected('initial-state')) {

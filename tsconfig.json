@@ -54,6 +54,9 @@
     },
     {
       "path": "packages/plugin-qiankun"
+    },
+    {
+      "path": "packages/plugin-federation"
     }
   ]
 }

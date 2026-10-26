@@ -24,9 +24,18 @@ export { ClientOnly, type ClientOnlyProps } from './client-only.js';
 export { defineApp, resolveAppConfig, type HistoryType, type RequestConfig, type LocaleConfig, type AccessConfig, type RuntimeConfig, type AppRuntimeContext, type AppRoutesContext, type RootContainerContext, type RouteChangeEvent } from './app-config.js';
 export { Link, NavLink, Navigate, Outlet, createSearchParams, useHref, useLocation, useMatch, useNavigate, useNavigation, useParams, useSearchParams } from 'react-router';
 
+export interface RuntimeRoutesContext {
+  readonly routes: RouteObject[];
+  readonly options: unknown;
+  readonly appConfig: Readonly<RuntimeConfig>;
+  readonly basename: string;
+  readonly signal: AbortSignal;
+}
 export interface RuntimePlugin {
   Provider?: ComponentType<PropsWithChildren<{ options: unknown; appConfig: Readonly<RuntimeConfig>; routes: readonly RouteObject[]; basename: string; prefetch?: Readonly<Record<string, () => Promise<unknown>>>; signal?: AbortSignal }>>;
   setup?(context: { signal: AbortSignal; options: unknown; appConfig: Readonly<RuntimeConfig> }): void | RuntimeCleanup | Promise<void | RuntimeCleanup>;
+  /** Client-only route contribution; mutate `routes` before the router is created and return nothing. */
+  routes?(context: RuntimeRoutesContext): void | Promise<void>;
   /** The first argument keeps the original location-only contract. */
   onRouteChange?(location: Readonly<Location>, event: RouteChangeEvent, context?: { readonly options: unknown; readonly signal: AbortSignal }): void;
 }
@@ -101,6 +110,11 @@ export async function mountApplication(options: MountApplicationOptions): Promis
     await runAppRender(appConfig.render, context, async () => {
       const sourceRoutes = copyClientRoutes(options.routes);
       const routes = copyClientRoutes(sourceRoutes);
+      for (const entry of entries) {
+        const returned = await entry.plugin.routes?.({ routes, options: entry.options ?? {}, appConfig, basename, signal: lifetime.signal });
+        if (returned !== undefined) throw new TypeError(`RUNTIME_ROUTES_INVALID: ${entry.id} routes must mutate routes and return void`);
+        lifetime.signal.throwIfAborted();
+      }
       if (await appConfig.patchClientRoutes?.({ ...context, routes }) !== undefined) throw new TypeError('APP_ROUTES_INVALID: patchClientRoutes mutates routes and must return void');
       lifetime.signal.throwIfAborted();
       // Validate the patched tree before constructing a router, preserving its normal lazy boundaries.

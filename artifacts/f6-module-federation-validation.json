@@ -1,0 +1,134 @@
+{
+  "format": "cormi:f6-module-federation-validation:1",
+  "verifiedAt": "2026-10-26T01:15:30.190Z",
+  "base": "04f4c6cd02a0f0a6e4f99c43a975cd8c6b415139",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "files": [
+      "README.md",
+      "docs/59-umi-feature-roadmap.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/155-f6-module-federation.md",
+      "package.json",
+      "pnpm-lock.yaml",
+      "tsconfig.json",
+      "packages/runtime/src/index.tsx",
+      "packages/plugin-federation/package.json",
+      "packages/plugin-federation/tsconfig.json",
+      "packages/plugin-federation/src/index.ts",
+      "packages/plugin-federation/src/runtime.ts",
+      "packages/plugin-federation/src/merge.ts",
+      "packages/plugin-federation/src/types.ts",
+      "scripts/test-package.ts",
+      "scripts/federation-fixture.ts",
+      "tests/federation.test.ts",
+      "tests/browser/federation.test.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "vite": "7.3.2",
+    "moduleFederationVite": "1.23.5",
+    "moduleFederationRuntime": "2.9.2",
+    "react": "19.3.1",
+    "reactRouter": "7.18.2",
+    "playwright": "1.58.2",
+    "browser": "156.0.4314.42"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/federation/check.log",
+      "sha256": "9d70fd0b92e6a36a5951b95278ce181eecb866268bcc40c0d5f4932b77b52123",
+      "seconds": 133.045997667,
+      "tests": 579,
+      "pass": 579,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/federation/browser.log",
+      "sha256": "80b72fdc1331c33b888f8f969a45287535e98234685c5d5ec3277d15b28b7705",
+      "seconds": 732.391068417,
+      "tests": 62,
+      "pass": 62,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "full 62-test suite passed before the final malformed-route hardening; targetRepeat below was run against the final source set"
+    },
+    "package": {
+      "command": "CORMI_PACKAGE_ONLY=federation pnpm test:package",
+      "log": ".cache/federation/package.log",
+      "sha256": "b15bc4cfdc74a2ed2516cdb2b0005ae230ae2d7c37e79edba6d4a3f13ae5fe72",
+      "stages": 87,
+      "packages": 19,
+      "passed": true,
+      "result": ".cache/federation/package-result.json",
+      "note": "independent packed remote and host consumers using the warm offline store; remote build, host dev/build/preview; full install matrix not rerun due host disk"
+    },
+    "targetedRepeat": {
+      "command": "node --import tsx --test tests/browser/federation.test.ts",
+      "log": ".cache/federation/targeted.log",
+      "sha256": "891e73da2271216f8f10494acbf10f3f251a6e7ff97aea3b141bf8813de12bda",
+      "seconds": 13.888619,
+      "tests": 1,
+      "pass": 1,
+      "fail": 0
+    }
+  },
+  "sourceInputs": {
+    "package.json": "d83ca7624f4d00cbf7af9d3f1767716f1d98f194086ca6cc62210216c7b54568",
+    "pnpm-lock.yaml": "39d3e07e93e496fd42b845eceb208cae471d8576ce3344b7e2c53c422d8ababa",
+    "tsconfig.json": "260402a4ec9c14f8580a4172cdc6e29d8321658c6955301f16ac4f3eb245f1c9",
+    "packages/runtime/src/index.tsx": "159741af5386db88ab14bf4afd2870d61fae1cbe3cc8e83da3b6a473a81453df",
+    "packages/plugin-federation/package.json": "76ac92923a1260ca77c3f0b3852c004cd049f5215a20d5d16fc4a40267aa4689",
+    "packages/plugin-federation/tsconfig.json": "253e0edfd1cb6620d7df02d8df091615ae5db2ed57dbf93601e15e2e1b7bcf9a",
+    "packages/plugin-federation/src/index.ts": "cdbc8e991debf2643bb811fc262fa8ffb31d795a0c6509d1a54e451b65eb84a8",
+    "packages/plugin-federation/src/runtime.ts": "758547996c3a035be537b267bd254332fecb30b3fd70a1c955b92246c4b3da2f",
+    "packages/plugin-federation/src/merge.ts": "ee03652e521443061f5094601f3cce2a3978d85df17db2c48a83b56b8025330d",
+    "packages/plugin-federation/src/types.ts": "fe2b4c139c47521bd1b700dab7e926d3732417a8d6ffeb0d1b69e40512d9c655",
+    "scripts/test-package.ts": "6740a8505f11cfdccfe01f70c17cf04eca24db74e8cb354d8157d95630db2e85",
+    "scripts/federation-fixture.ts": "3af79cfabfe822855a1a2eb046e2d8ff28e4dba542c6543c863aaccdbd487e0c",
+    "tests/federation.test.ts": "98103226af681fb2ed44bc81c29591d987d708ce1e178fa37f9b043c64d3e8d3",
+    "tests/browser/federation.test.ts": "40dfba390e26b6a3a35a5182109fa8b4865c2a2e8023ee7ab04da716b8ff0afc"
+  },
+  "sourceInputCount": 14,
+  "sourceInputsDigest": "6a63f483f3171505d60b10228d29f76933aa47e50d73fe0f01247ad9de608764",
+  "documentationInputs": {
+    "README.md": "1d0425caf59e29ce6c998993cc62fe3f5ee56b1b9ca2f5cce36000cd22ed1dff",
+    "docs/59-umi-feature-roadmap.md": "7b8e265d4c0a3e2da531adb6823ef60ebbe68adec1853b2f6c52f86d842ede8f",
+    "docs/112-roadmap-audit-2026-10-21.md": "c6c54ffc14f9fb5c95b2d88cbe05b61f3ca2ae6f80577af58ce326214c26d7be",
+    "docs/155-f6-module-federation.md": "c2759e12c36f7d224e9e9574ac9fe27c2e4244945a78e443476890c888adeb0f"
+  },
+  "evidence": [
+    ".cache/federation/check.log",
+    ".cache/federation/browser.log",
+    ".cache/federation/package.log",
+    ".cache/federation/package-result.json",
+    "artifacts/f6-module-federation-validation.json",
+    ".cache/federation/targeted.log"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "client-only-route-merging",
+    "no-ssr-remote-routes",
+    "no-runtime-remote-manifest",
+    "no-css-isolation-or-js-sandbox",
+    "no-qiankun-register-micro-apps",
+    "remote-entry-requires-cors",
+    "no-shared-version-negotiation-verification",
+    "edge-only-browser",
+    "package-suite-subset-only-due-to-disk",
+    "no-publication-or-deployment"
+  ]
+}
