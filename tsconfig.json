@@ -57,6 +57,9 @@
     },
     {
       "path": "packages/plugin-federation"
+    },
+    {
+      "path": "packages/plugin-dva"
     }
   ]
 }

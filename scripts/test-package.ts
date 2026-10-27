@@ -38,7 +38,7 @@ import { writeProLayoutFixture, verifyProLayoutPage } from './pro-layout-fixture
 import { writeChartsFixture, verifyChartsPage } from './charts-fixture.js';
 import { writeReactQueryFixture, verifyReactQueryPage } from './react-query-fixture.js';
 import { writeValtioFixture, verifyValtioPage } from './valtio-fixture.js';
-import { writeDvaFixture, verifyDvaPage } from './dva-fixture.js';
+import { writeDvaAutoFixture, verifyDvaAutoPage } from './dva-fixture.js';
 import { writeMicrofrontendFixture, verifyMicrofrontendPage } from './microfrontend-fixture.js';
 import { writeQiankunFixture, verifyQiankunDevPage, verifyQiankunBuild, verifyQiankunUmd } from './qiankun-fixture.js';
 import { writeQiankunHostFixture, verifyQiankunHostPage } from './qiankun-host-fixture.js';
@@ -684,24 +684,29 @@ const state=snapshot(proxy({count:0}));const stop:()=>void=subscribe(proxy({coun
 
     }
     if (selected('dva')) {
-    const dvaConsumer=await create('dva','react');await writeDvaFixture(dvaConsumer);
+    const dvaConsumer=await create('dva','react');await writeDvaAutoFixture(dvaConsumer);
     const dvaManifest=consumerManifest(kit,'react');
     dvaManifest.dependencies['@cormijs/plugin-react']=dvaManifest.pnpm.overrides['@cormijs/plugin-react']!;
     dvaManifest.dependencies['@cormijs/dva']=dvaManifest.pnpm.overrides['@cormijs/dva']!;
+    dvaManifest.dependencies['@cormijs/plugin-dva']=dvaManifest.pnpm.overrides['@cormijs/plugin-dva']!;
     await writeFile(join(dvaConsumer,'package.json'),JSON.stringify(dvaManifest,null,2));
     await install('dva-install',dvaConsumer);await auditLinks(dvaConsumer);
     await command('dva-typecheck',dvaConsumer,'typecheck');
     await writeFile(join(dvaConsumer,'types.mts'),`import {createDvaRuntime,useDispatch,useSelector,type DvaModel} from '@cormijs/dva';
+import {dvaPlugin,type DvaPluginOptions} from '@cormijs/plugin-dva';
 const model:DvaModel={namespace:'counter',state:{count:0},reducers:{increment:(state:{count:number})=>({count:state.count+1})}};
-const runtime=createDvaRuntime([model]);void [runtime,useDispatch,useSelector];
+const runtime=createDvaRuntime([model],{immer:true,loading:true});
+const options:DvaPluginOptions={immer:true,loading:true};void [runtime,useDispatch,useSelector,model,dvaPlugin,options];
 // @ts-expect-error model needs a namespace
 const bad:DvaModel={state:{}};
+// @ts-expect-error immer is boolean
+const badOptions:DvaPluginOptions={immer:'yes'};
 `);
     await execute('dva-public-types',dvaConsumer,process.execPath,typeArguments);
-    await withServer(dvaConsumer,'dev',async url=>{await verifyDvaPage(page,url);assert.deepEqual(errors,[]);});
+    await withServer(dvaConsumer,'dev',async url=>{await verifyDvaAutoPage(page,url);assert.deepEqual(errors,[]);});
     await command('dva-build',dvaConsumer,'build');
-    await withServer(dvaConsumer,'preview',async url=>{await verifyDvaPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'dva-preview.png')});});
-    report.stages.push({label:'installed-dva-reducer-adapter-dev-build-preview',adapter:'@cormijs/dva',previewRegenerated:false});
+    await withServer(dvaConsumer,'preview',async url=>{await verifyDvaAutoPage(page,url);assert.deepEqual(errors,[]);await page.screenshot({path:join(logRoot,'dva-auto-preview.png')});});
+    report.stages.push({label:'installed-dva-auto-discovery-immer-loading-dev-build-preview',adapter:'@cormijs/plugin-dva',previewRegenerated:false});
 
     }
     if (selected('microfrontend')) {

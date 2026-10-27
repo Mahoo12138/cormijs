@@ -1,0 +1,147 @@
+{
+  "format": "cormi:f6-dva-auto-validation:1",
+  "verifiedAt": "2026-10-27T02:01:07.941Z",
+  "base": "785536f0c934667cabb542b64cb46e2775c8d42b",
+  "branch": "main",
+  "worktree": {
+    "state": "uncommitted",
+    "files": [
+      "README.md",
+      "docs/59-umi-feature-roadmap.md",
+      "docs/112-roadmap-audit-2026-10-21.md",
+      "docs/151-f6-dva.md",
+      "docs/158-f6-dva-auto-models.md",
+      "package.json",
+      "pnpm-lock.yaml",
+      "tsconfig.json",
+      "packages/dva/package.json",
+      "packages/dva/src/index.tsx",
+      "packages/dva/src/auto.tsx",
+      "packages/dva/src/dva-core.d.ts",
+      "packages/plugin-dva/package.json",
+      "packages/plugin-dva/tsconfig.json",
+      "packages/plugin-dva/src/index.ts",
+      "scripts/dva-fixture.ts",
+      "scripts/test-package.ts",
+      "tests/dva.test.ts",
+      "tests/browser/dva.test.ts",
+      "packages/plugin-react/src/index.ts"
+    ],
+    "unrelatedWorktreeChanges": [
+      "packages/plugin-react/src/index.ts"
+    ]
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "v22.14.0",
+    "pnpm": "10.6.3",
+    "typescript": "5.9.3",
+    "vite": "7.3.2",
+    "react": "19.3.1",
+    "dvaCore": "2.0.4",
+    "redux": "4.2.1",
+    "immer": "11.2.9",
+    "playwright": "1.58.2",
+    "browser": "156.0.4314.42"
+  },
+  "results": {
+    "node": {
+      "command": "pnpm check",
+      "log": ".cache/dva-auto/check.log",
+      "sha256": "535f986091a60592431364828e729629f69dabb711b694f5010dff46c4dd332d",
+      "seconds": 129.036546125,
+      "tests": 584,
+      "pass": 584,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "browser": {
+      "command": "pnpm test:browser",
+      "log": ".cache/dva-auto/browser.log",
+      "sha256": "fd451467ecdb03d01d60c5a1ae20f225de509a1db297a2d013bf40ad614a27e7",
+      "seconds": 683.131062208,
+      "tests": 63,
+      "pass": 63,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0,
+      "note": "explicit dva runtime plus auto model discovery, immer draft reducers, async effect loading true/false, dev/build/preview"
+    },
+    "package": {
+      "command": "CORMI_PACKAGE_ONLY=dva pnpm test:package",
+      "log": ".cache/dva-auto/package.log",
+      "sha256": "ffc2d502174b8ec959c93daa9d1816715e0f5f197d6345272f2eca2cfe7cfb63",
+      "stages": 83,
+      "packages": 20,
+      "passed": true,
+      "result": ".cache/dva-auto/package-result.json",
+      "note": "packed @cormijs/plugin-dva consumer discovers src/models, uses immer/loading, public types and dev/build/preview; full install matrix not rerun due host disk"
+    }
+  },
+  "coverage": [
+    "src-models-auto-discovery",
+    "multiple-model-files",
+    "immer-mutating-reducers",
+    "effect-loading-global-state",
+    "loading-namespace-reserved",
+    "empty-model-provider",
+    "explicit-runtime-compat",
+    "vite-optimizer-interop"
+  ],
+  "sourceInputs": {
+    "README.md": "24acb06cbbccb100970f155ce40d71d048a62b925aa3ffd6fe38bc1041a1b319",
+    "docs/59-umi-feature-roadmap.md": "6223a0b7cf2c92d7fd5a8cff8ca856d6728b78fb5a4831ab0869d9fb18712c56",
+    "docs/112-roadmap-audit-2026-10-21.md": "84e6ce5d3506b03481b403b3fca8d9f8a67f64d722f2397a15afc9d094cc9aff",
+    "docs/151-f6-dva.md": "8642186e6a5d67b96a7574cfbea47adbcf0c291c9b547d5973869974637024f9",
+    "docs/158-f6-dva-auto-models.md": "5bbe93484338f292e2dc4a73461bb88202e37b3cc2388dca5f46057f52bcf5c3",
+    "package.json": "4d7eeb4dcae8e748a4e21e383c6b8841ee2869b01fa459d3dec6342b4e56758f",
+    "pnpm-lock.yaml": "2f740877e998329bee7074d6c1a8d6aade5a7e9d3ece8982867e3d33cffb4c7c",
+    "tsconfig.json": "5850142ced8039acac1b986e4b8cc645bffec33b3057556ca7f2a0a048830989",
+    "packages/dva/package.json": "3fce6ff7c0030a822f551ad4eee732f1d61e379c37e8ee9255b8bb58007fa919",
+    "packages/dva/src/index.tsx": "5a08c80feaecdfc385d0ee104b7e4ea29715b031ca38288cdf4ccced39723255",
+    "packages/dva/src/auto.tsx": "e518a4cffd6bbb428f6bef4b4d36333f12831d8b154f239e73a954abf2488b04",
+    "packages/dva/src/dva-core.d.ts": "a70925327f7cef4e2f9d4e1d80de2938bea03f995d266d559ea8503ad4a84a57",
+    "packages/plugin-dva/package.json": "6bd09b601adb5deb7e930053dd07612158181ff01e5a80dfe513424e3273df1c",
+    "packages/plugin-dva/tsconfig.json": "2462d0ab86fa17a09d538fe4c31f2c60d0ed7b1f0fb1b34779075758871640f1",
+    "packages/plugin-dva/src/index.ts": "d200445573dda50db984204aa22c84574af0ee61b03e3ef76baedb16aea88631",
+    "scripts/dva-fixture.ts": "c3795153be089f71d863a98f91bfe82035fb0bd98fae8fb4f30220dc4bc9fa90",
+    "scripts/test-package.ts": "6dd107af4819efd18c9f075fbc223fd6b0b8e92c02325739e2faab4612b82969",
+    "tests/dva.test.ts": "5e9102ca035055fd5f39b79ae47509c97c56ec060140b496cc96ce1e0e11ff99",
+    "tests/browser/dva.test.ts": "e6621ca204138ff31c7d5c2c49fa3b9796f80a41d842ea4fd74780460652fa3b"
+  },
+  "sourceInputCount": 19,
+  "sourceInputsDigest": "a251c41964edd657b2d17f03083b510e1d7298bf9dbccce82c9e0bb35ecf2635",
+  "documentationInputs": {
+    "README.md": "24acb06cbbccb100970f155ce40d71d048a62b925aa3ffd6fe38bc1041a1b319",
+    "docs/59-umi-feature-roadmap.md": "6223a0b7cf2c92d7fd5a8cff8ca856d6728b78fb5a4831ab0869d9fb18712c56",
+    "docs/112-roadmap-audit-2026-10-21.md": "84e6ce5d3506b03481b403b3fca8d9f8a67f64d722f2397a15afc9d094cc9aff",
+    "docs/151-f6-dva.md": "8642186e6a5d67b96a7574cfbea47adbcf0c291c9b547d5973869974637024f9",
+    "docs/158-f6-dva-auto-models.md": "5bbe93484338f292e2dc4a73461bb88202e37b3cc2388dca5f46057f52bcf5c3"
+  },
+  "evidence": [
+    ".cache/dva-auto/check.log",
+    ".cache/dva-auto/browser.log",
+    ".cache/dva-auto/package.log",
+    ".cache/dva-auto/package-result.json",
+    "artifacts/f6-dva-auto-validation.json"
+  ],
+  "limits": [
+    "macos-arm64-only",
+    "uncommitted-worktree",
+    "unrelated-plugin-react-worktree-change",
+    "vite-only-auto-discovery",
+    "fixed-src-models-directory",
+    "no-extra-models-or-custom-directory",
+    "eager-model-imports-no-code-splitting",
+    "no-ssr-dehydration-or-hmr-store",
+    "no-get-dva-app-global",
+    "simplified-loading-without-delay-options",
+    "no-saga-cancellation-stress",
+    "edge-only-browser",
+    "package-suite-subset-only-due-to-disk",
+    "no-publication-or-deployment"
+  ]
+}

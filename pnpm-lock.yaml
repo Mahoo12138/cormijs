@@ -40,6 +40,9 @@ importers:
       '@cormijs/plugin-dev-api':
         specifier: workspace:*
         version: link:packages/plugin-dev-api
+      '@cormijs/plugin-dva':
+        specifier: workspace:*
+        version: link:packages/plugin-dva
       '@cormijs/plugin-federation':
         specifier: workspace:*
         version: link:packages/plugin-federation
@@ -174,9 +177,15 @@ importers:
 
   packages/dva:
     dependencies:
+      '@cormijs/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       dva-core:
         specifier: 2.0.4
         version: 2.0.4(redux@4.2.1)
+      immer:
+        specifier: 11.2.9
+        version: 11.2.9
       redux:
         specifier: 4.2.1
         version: 4.2.1
@@ -221,6 +230,24 @@ importers:
       '@cormijs/plugin-vite':
         specifier: workspace:*
         version: link:../plugin-vite
+
+  packages/plugin-dva:
+    dependencies:
+      '@cormijs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@cormijs/dva':
+        specifier: workspace:*
+        version: link:../dva
+      '@cormijs/plugin-react':
+        specifier: workspace:*
+        version: link:../plugin-react
+      '@cormijs/plugin-vite':
+        specifier: workspace:*
+        version: link:../plugin-vite
+      vite:
+        specifier: 7.3.2
+        version: 7.3.2(@types/node@22.13.10)(tsx@4.23.15)
 
   packages/plugin-federation:
     dependencies:
@@ -1818,6 +1845,9 @@ packages:
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
+
+  immer@11.2.9:
+    resolution: {integrity: sha512-IQ4UEtXjZjyefyWjtLEDXUSrF6T2hwjKPi6BIJl3bY/2XXW24d6cNGdXJSBOA/+KNnuiXkZY6DR0C3efolhitA==}
 
   import-html-entry@1.17.0:
     resolution: {integrity: sha512-2SDsRlGlE8bqdnGqsOyiDPEWlzJR0jNW4LWopnZl5QE1Yd0nJ7fykWo2GaKUF7Jq7pR0g3dElhuJHyamTt1gPQ==}
@@ -3635,6 +3665,8 @@ snapshots:
   iconv-lite@0.6.3:
     dependencies:
       safer-buffer: 2.1.2
+
+  immer@11.2.9: {}
 
   import-html-entry@1.17.0:
     dependencies:

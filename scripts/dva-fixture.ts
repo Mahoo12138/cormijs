@@ -53,3 +53,73 @@ export async function verifyDvaPage(page: Page, url: string) {
   await page.waitForFunction(() => document.querySelector('[data-count]')?.textContent === '0');
   assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);
 }
+
+export const dvaAutoConfiguration = `import { defineConfig } from 'cormijs';
+import preset from '@cormijs/preset-react-vite';
+import { dvaPlugin } from '@cormijs/plugin-dva';
+export default defineConfig({
+  presets: [preset],
+  plugins: [{ id: 'dva', plugin: dvaPlugin, options: { immer: true, loading: true } }],
+  app: { base: '/dva-auto/', server: { port: 0 } },
+});
+`;
+
+export async function writeDvaAutoFixture(root: string) {
+  await mkdir(join(root, 'src/pages'), { recursive: true });
+  await mkdir(join(root, 'src/models'), { recursive: true });
+  const files: Record<string, string> = {
+    'index.html': '<!doctype html><html><head><title>cormi dva auto</title><link rel="icon" href="data:," /></head><body><div id="root"></div><script type="module" src="/.cormi/app.tsx"></script></body></html>',
+    'cormi.config.ts': dvaAutoConfiguration,
+    'src/models/counter.ts': `export default {
+  namespace: 'counter',
+  state: { count: 0 },
+  reducers: {
+    increment(state: { count: number }) { state.count += 1; return state; },
+    reset(state: { count: number }) { state.count = 0; return state; },
+  },
+  effects: {
+    *incrementAsync(_action: unknown, { call, put }: any) {
+      yield call(() => new Promise(resolve => setTimeout(resolve, 500)));
+      yield put({ type: 'increment' });
+    },
+  },
+};`,
+    'src/models/profile.ts': `export default {
+  namespace: 'profile',
+  state: { name: 'cormi' },
+  reducers: {},
+};`,
+    'src/pages/index.tsx': `import { useDispatch, useSelector } from '@cormijs/dva';
+export default function Home(){
+  const count = useSelector((state: any) => state.counter.count);
+  const name = useSelector((state: any) => state.profile.name);
+  const loading = useSelector((state: any) => state.loading.global);
+  const dispatch = useDispatch();
+  return <main><h1>Dva auto demo</h1><p data-profile>{name}</p><p data-count>{count}</p><p data-loading>{String(loading)}</p>
+    <button data-increment onClick={()=>{dispatch({ type: 'counter/increment' });}}>Increment</button>
+    <button data-async onClick={()=>{dispatch({ type: 'counter/incrementAsync' });}}>Async</button>
+    <button data-reset onClick={()=>{dispatch({ type: 'counter/reset' });}}>Reset</button></main>;
+}`,
+    'tsconfig.json': JSON.stringify({ compilerOptions: { target: 'ES2023', module: 'ESNext', moduleResolution: 'Bundler', jsx: 'react-jsx',
+      strict: true, noEmit: true, skipLibCheck: true, allowImportingTsExtensions: true, lib: ['ES2023', 'DOM', 'DOM.Iterable'], types: ['react', 'react-dom', 'node'] },
+      include: ['cormi.config.ts', 'src', '.cormi/**/*'] }, null, 2),
+  };
+  for (const [name, content] of Object.entries(files)) await writeFile(join(root, name), content);
+}
+
+export async function verifyDvaAutoPage(page: Page, url: string) {
+  await page.goto(url);
+  await page.getByRole('heading', { name: 'Dva auto demo', exact: true }).waitFor();
+  await page.waitForFunction(() => document.querySelector('[data-profile]')?.textContent === 'cormi');
+  assert.equal(await page.locator('[data-count]').innerText(), '0');
+  assert.equal(await page.locator('[data-loading]').innerText(), 'false');
+  await page.locator('[data-increment]').click();
+  await page.waitForFunction(() => document.querySelector('[data-count]')?.textContent === '1');
+  await page.locator('[data-async]').click();
+  await page.waitForFunction(() => document.querySelector('[data-loading]')?.textContent === 'true');
+  await page.waitForFunction(() => document.querySelector('[data-count]')?.textContent === '2');
+  await page.waitForFunction(() => document.querySelector('[data-loading]')?.textContent === 'false');
+  await page.locator('[data-reset]').click();
+  await page.waitForFunction(() => document.querySelector('[data-count]')?.textContent === '0');
+  assert.equal(await page.locator('vite-error-overlay, cormi-development-overlay').count(), 0);
+}

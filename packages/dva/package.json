@@ -7,6 +7,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./auto": {
+      "types": "./dist/auto.d.ts",
+      "import": "./dist/auto.js"
     }
   },
   "files": [
@@ -17,7 +21,9 @@
     "node": ">=22.14.0"
   },
   "dependencies": {
+    "@cormijs/runtime": "workspace:*",
     "dva-core": "2.0.4",
+    "immer": "11.2.9",
     "redux": "4.2.1"
   },
   "peerDependencies": {
