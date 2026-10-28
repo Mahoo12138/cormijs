@@ -1,6 +1,9 @@
-import { CormiError, snapshotConfig, mergeConfigData, configLayer, type ConfigData, type ConfigLayer, type ConfigurationContext, type Plugin } from '@cormijs/core';
+import { CormiError, snapshotConfig, mergeConfigData, configLayer, type ConfigData, type ConfigLayer, type ConfigurationContext, type Plugin, type AppConfig } from '@cormijs/core';
 import { isAbsolute, relative, resolve, sep } from 'node:path';
 import type { WorkerProfileOptions } from './worker-profile.js';
+
+// Re-export the canonical AppConfig type from core (the declaration merging target for all plugins).
+export type { AppConfig } from '@cormijs/core';
 
 export interface PluginEntry<T = any> {
   readonly id: string;
@@ -20,7 +23,7 @@ export interface CormiConfig {
   readonly presets?: readonly Preset[];
   readonly plugins?: readonly PluginEntry[];
   /** Application-specific data is interpreted by the command provider, not the launcher. */
-  readonly app?: Readonly<Record<string, unknown>>;
+  readonly app?: AppConfig;
   readonly watch?: readonly string[];
 }
 export interface ConfigEnvironment {
