@@ -1,5 +1,4 @@
-import { CormiError, type Plugin } from '@cormijs/core';
-import type { RuntimeContribution } from './generate.js';
+import { CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import type {} from './index.js';
 
 export interface HeadPluginOptions {
@@ -27,8 +26,8 @@ export const headPlugin: Plugin.Object<HeadPluginOptions> = {
       }
     }
     if (options.auto !== undefined && typeof options.auto !== 'boolean') throw new CormiError('HEAD_INVALID', 'auto must be a boolean.');
-    const runtime: RuntimeContribution = {
-      id, module: { specifier: '@cormijs/runtime', exportName: 'headRuntime' },
+    const runtime: RuntimePluginDescriptor = {
+      id, module: { package: '@cormijs/runtime', export: 'headRuntime' },
       options: {
         ...(options.titleTemplate !== undefined ? { titleTemplate: options.titleTemplate } : {}),
         ...(options.baseTitle !== undefined ? { baseTitle: options.baseTitle } : {}),

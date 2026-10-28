@@ -1,5 +1,4 @@
-import { CormiError, type Plugin } from '@cormijs/core';
-import type { RuntimeContribution } from './generate.js';
+import { CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import type {} from './index.js';
 
 export interface AnalyticsPluginOptions {
@@ -26,8 +25,8 @@ export const analyticsPlugin: Plugin.Object<AnalyticsPluginOptions> = {
       throw new CormiError('ANALYTICS_INVALID', 'eventName must be a lowercase GA4 event name.');
     }
     if (options.dispatch !== undefined && typeof options.dispatch !== 'boolean') throw new CormiError('ANALYTICS_INVALID', 'dispatch must be a boolean.');
-    const runtime: RuntimeContribution = {
-      id, module: { specifier: '@cormijs/runtime', exportName: 'analyticsRuntime' },
+    const runtime: RuntimePluginDescriptor = {
+      id, module: { package: '@cormijs/runtime', export: 'analyticsRuntime' },
       options: {
         ...(options.measurementId !== undefined ? { measurementId: options.measurementId } : {}),
         ...(options.eventName !== undefined ? { eventName: options.eventName } : {}),

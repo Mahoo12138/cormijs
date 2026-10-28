@@ -1,5 +1,4 @@
-import { CormiError, type Plugin } from '@cormijs/core';
-import type { RuntimeContribution } from './generate.js';
+import { CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import type {} from './index.js';
 
 export interface RoutePrefetchOptions {
@@ -18,7 +17,7 @@ export const routePrefetchPlugin: Plugin.Object<RoutePrefetchOptions> = {
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('PREFETCH_INVALID', 'Invalid route prefetch id.');
     const mode = options.mode ?? 'manual';
     if (mode !== 'manual' && mode !== 'idle') throw new CormiError('PREFETCH_INVALID', 'mode must be manual or idle.');
-    const runtime: RuntimeContribution = { id, module: { specifier: '@cormijs/runtime', exportName: 'prefetchRuntime' }, options: { mode } };
+    const runtime: RuntimePluginDescriptor = { id, module: { package: '@cormijs/runtime', export: 'prefetchRuntime' }, options: { mode } };
     ctx.effect(() => ctx.react.runtime.tap({ id: id + ':runtime', owner: id, ownerOrder: 0, stage: 40, run: () => [runtime] }));
   },
 };

@@ -1,4 +1,4 @@
-import { CormiError, type Plugin } from '@cormijs/core';
+import { CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 import { projectPath } from '@cormijs/routes';
@@ -117,7 +117,7 @@ export const localePlugin: Plugin.Object<LocalePluginOptions> = {
     const id = options.id ?? 'cormi:locale';
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('LOCALE_INVALID', 'Invalid locale id.');
     const config: AppConfigContribution = { id, keys: ['locale'] };
-    const runtime: RuntimeContribution = { id, module: { specifier: '@cormijs/runtime', exportName: 'localeRuntime' } };
+    const runtime: RuntimePluginDescriptor = { id, module: { package: '@cormijs/runtime', export: 'localeRuntime' } };
     ctx.effect(() => ctx.react.appConfig.tap({ id: id + ':config', owner: id, ownerOrder: 0, run: () => [config] }));
     ctx.effect(() => ctx.react.runtime.tap({ id: id + ':runtime', owner: id, ownerOrder: 0, run: () => [runtime] }));
     const source: LocaleCatalogSource = Object.freeze({ id, ...(options.directory !== undefined ? { directory: options.directory } : {}) });

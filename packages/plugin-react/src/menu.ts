@@ -1,5 +1,4 @@
-import { CormiError, type Plugin } from '@cormijs/core';
-import type { RuntimeContribution } from './generate.js';
+import { CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import type {} from './index.js';
 
 export interface MenuPluginOptions {
@@ -25,7 +24,7 @@ export const menuPlugin: Plugin.Object<MenuPluginOptions> = {
     }
     const id = options.id ?? 'cormi:menu';
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('MENU_INVALID', 'Invalid menu id.');
-    const runtime: RuntimeContribution = { id, module: { specifier: '@cormijs/runtime', exportName: 'menuRuntime' }, ...(collapse ? { options: { collapse } } : {}) };
+    const runtime: RuntimePluginDescriptor = { id, module: { package: '@cormijs/runtime', export: 'menuRuntime' }, ...(collapse ? { options: { collapse } } : {}) };
     // Menu filtering reads optional access context, so it must sit inside accessRuntime.
     ctx.effect(() => ctx.react.runtime.tap({ id: id + ':runtime', owner: id, ownerOrder: 0, stage: 20, run: () => [runtime] }));
   },

@@ -1,4 +1,4 @@
-import { CormiError } from '@cormijs/core';
+import { CormiError, type RuntimePluginDescriptor } from '@cormijs/core';
 import { moduleRef, jsonData, validateRoutes, type ModuleRef, type RouteRecord } from '@cormijs/routes';
 import { isAbsolute, join, relative, sep } from 'node:path';
 import { clientSpecifier } from './modules.js';
@@ -8,17 +8,51 @@ import type { GlobalStylePlan } from './global-style.js';
 import type { LocaleCatalog } from './locale.js';
 export { isServerModule } from './modules.js';
 
+// Legacy alias for backward compatibility during migration
 export interface RuntimeContribution { readonly id: string; readonly module: ModuleRef; readonly options?: unknown }
 export type HistoryType = 'browser' | 'hash' | 'memory';
+
+/**
+ * Validate and normalize runtime plugin descriptors into RuntimeContribution (ModuleRef-based).
+ * Accepts both new RuntimePluginDescriptor format and legacy RuntimeContribution format.
+ * The internal pipeline always works with ModuleRef; RuntimePluginDescriptor is the public
+ * authoring type that gets converted here.
+ */
 export function runtimeContributions(input: unknown): readonly RuntimeContribution[] {
   if (!Array.isArray(input) || input.length > 256) throw new CormiError('RUNTIME_INVALID', 'Expected at most 256 runtime modules.');
   const ids = new Set<string>();
   return Object.freeze(input.map((raw: unknown) => {
     if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new CormiError('RUNTIME_INVALID', 'Expected a runtime contribution.');
     const item = raw as Record<string, unknown>;
-    if (Object.keys(item).some(key => !['id', 'module', 'options'].includes(key)) || typeof item.id !== 'string' || !item.id || ids.has(item.id)) throw new CormiError('RUNTIME_ID_CONFLICT', 'Invalid or duplicate runtime id.');
+    if (Object.keys(item).some(key => !['id', 'module', 'options'].includes(key)) || typeof item.id !== 'string' || !item.id || ids.has(item.id))
+      throw new CormiError('RUNTIME_ID_CONFLICT', 'Invalid or duplicate runtime id.');
     ids.add(item.id);
-    return Object.freeze({ id: item.id, module: moduleRef(item.module), options: jsonData(item.options ?? {}, 'RUNTIME_OPTIONS_INVALID') });
+
+    const mod = item.module;
+    let moduleRefValue: ModuleRef;
+
+    if (typeof mod === 'string') {
+      // Plain string: treat as specifier with default export
+      moduleRefValue = moduleRef({ specifier: mod, exportName: 'default' });
+    } else if (mod && typeof mod === 'object' && !Array.isArray(mod)) {
+      const m = mod as Record<string, unknown>;
+      if (typeof m.specifier === 'string' && typeof m.exportName === 'string') {
+        // Legacy RuntimeContribution format: { specifier, exportName }
+        moduleRefValue = moduleRef({ specifier: m.specifier, exportName: m.exportName });
+      } else if (typeof m.package === 'string') {
+        // New RuntimePluginDescriptor format: { package, export? }
+        moduleRefValue = moduleRef({ specifier: m.package, exportName: (m.export as string) ?? 'default' });
+      } else if (typeof m.file === 'string') {
+        // New RuntimePluginDescriptor format: { file }
+        moduleRefValue = moduleRef({ specifier: m.file, exportName: 'default' });
+      } else {
+        throw new CormiError('RUNTIME_INVALID', 'Invalid runtime module reference.');
+      }
+    } else {
+      throw new CormiError('RUNTIME_INVALID', 'Invalid runtime module reference.');
+    }
+
+    return Object.freeze({ id: item.id, module: moduleRefValue, options: jsonData(item.options ?? {}, 'RUNTIME_OPTIONS_INVALID') });
   }));
 }
 /** Stylesheets are side-effect imports resolved relative to `.cormi/`; the specifier stays project-local. */
@@ -48,7 +82,6 @@ export async function generateApplication(root: string, routes: readonly RouteRe
   await Promise.all(routes.map(async route => { if (route.module) routeModules.set(route.id, await clientSpecifier(root, route.module, forbidden)); }));
   const runtimeModules = await Promise.all(runtimes.map(item => clientSpecifier(root, item.module, forbidden)));
   const modelModules = await Promise.all(models.map(model => clientSpecifier(root, model.module, forbidden)));
-  // Boundaries must exist before page lazy resolution. Loading both in one lazy callback cannot catch its own import failure.
   const boundaryPaths = await Promise.all(routes.map(route => route.errorBoundary ? clientSpecifier(root, route.errorBoundary, forbidden) : undefined));
   const boundaryImports = new Map<string, string>();
   for (const path of boundaryPaths) if (path && !boundaryImports.has(path)) boundaryImports.set(path, `boundary${boundaryImports.size}`);

@@ -1,4 +1,4 @@
-import { assertActive, CormiError, type Plugin } from '@cormijs/core';
+import { assertActive, CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import type { DevelopmentState } from '@cormijs/builder';
 import { AtomicEntry, RevisionQueue, OrderedHooks, createBuildPlan, inspectionManifest, type ApplicationRequest, type PreparedApplication, type GeneratedInspection } from '@cormijs/plugin-web';
 import { pageFiles, routesFromFiles, validateRoutes, applyGlobalLayout, type RouteRecord } from '@cormijs/routes';
@@ -46,10 +46,14 @@ export { routeConfigPlugin, type RouteConfigOptions } from './route-config.js';
 export type { ConfigRoute, ModuleRef, RouteMeta, RouteRecord } from '@cormijs/routes';
 export { generateApplication, runtimeContributions, type HistoryType, type RuntimeContribution } from './generate.js';
 export { generateRouteTypes } from './types.js';
+export { AllReactAppSchemas, ReactAppConfigSchema, LocaleAppConfigSchema, ModelAppConfigSchema,
+  InitialStateAppConfigSchema, RequestAppConfigSchema, AccessAppConfigSchema, MenuAppConfigSchema,
+  HeadAppConfigSchema, AnalyticsAppConfigSchema, PrefetchAppConfigSchema, GlobalStyleAppConfigSchema,
+  HtmlAppConfigSchema, ServerAppConfigSchema } from './app-config-schema.js';
 
 export interface ReactCompilation {
   readonly routes: OrderedHooks<readonly RouteRecord[], readonly RouteRecord[]>;
-  readonly runtime: OrderedHooks<void, readonly RuntimeContribution[]>;
+  readonly runtime: OrderedHooks<void, readonly RuntimePluginDescriptor[]>;
   readonly appConfig: OrderedHooks<void, readonly AppConfigContribution[]>;
   readonly layouts: OrderedHooks<void, readonly LayoutContribution[]>;
   readonly loading: OrderedHooks<void, readonly LoadingContribution[]>;
@@ -57,7 +61,9 @@ export interface ReactCompilation {
   readonly access: OrderedHooks<void, readonly AccessContribution[]>;
   readonly locale: OrderedHooks<void, readonly LocaleCatalogSource[]>;
   readonly models: OrderedHooks<void, readonly ModelContribution[]>;
-  readonly styleTypes: OrderedHooks<void, readonly unknown[]>;
+  // styleTypes is a presence flag only; the boolean values are never read, only snapshot().length
+  // is checked to determine whether to emit CSS/asset ambient declarations.
+  readonly styleTypes: OrderedHooks<void, readonly boolean[]>;
 }
 declare module 'cordis' { interface Context { react: ReactCompilation } }
 
@@ -74,7 +80,7 @@ export const reactPlugin: Plugin.Object<void> = {
   name: 'cormi:react',
   apply: ctx => {
     const routes = new OrderedHooks<readonly RouteRecord[], readonly RouteRecord[]>('routes');
-    const runtime = new OrderedHooks<void, readonly RuntimeContribution[]>('runtime');
+    const runtime = new OrderedHooks<void, readonly RuntimePluginDescriptor[]>('runtime');
     const appConfig = new OrderedHooks<void, readonly AppConfigContribution[]>('app-config');
     const layouts = new OrderedHooks<void, readonly LayoutContribution[]>('layouts');
     const loading = new OrderedHooks<void, readonly LoadingContribution[]>('loading');
@@ -82,7 +88,7 @@ export const reactPlugin: Plugin.Object<void> = {
     const access = new OrderedHooks<void, readonly AccessContribution[]>('access');
     const locale = new OrderedHooks<void, readonly LocaleCatalogSource[]>('locale-catalog');
     const models = new OrderedHooks<void, readonly ModelContribution[]>('models');
-    const styleTypes = new OrderedHooks<void, readonly unknown[]>('style-types');
+    const styleTypes = new OrderedHooks<void, readonly boolean[]>('style-types');
     const lifetime = new AbortController(), pending = new Set<Promise<PreparedApplication>>(), sessions = new Set<PreparedApplication>();
     ctx.provide('react', { routes, runtime, appConfig, layouts, loading, styles, access, locale, models, styleTypes } satisfies ReactCompilation);
     ctx.get('diagnostics')?.add('react-hooks', () => [
@@ -313,6 +319,9 @@ export const reactPlugin: Plugin.Object<void> = {
         await compile(initial, true); signal.throwIfAborted();
         if (developing) polling = (async () => {
           while (!signal.aborted) {
+            // 150ms balances responsiveness against redundant I/O: observe() does readdir/stat
+            // on every tick, and signature comparison prevents recompilation when nothing changed.
+            // A longer interval would delay dev feedback; a shorter one would waste I/O on large trees.
             await delay(150, undefined, { signal }).catch(() => {});
             if (signal.aborted) break;
             const observed = await observe();

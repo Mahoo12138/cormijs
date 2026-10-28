@@ -1,6 +1,5 @@
-import { CormiError, type Plugin } from '@cormijs/core';
+import { CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import type { AppConfigContribution } from './app-runtime.js';
-import type { RuntimeContribution } from './generate.js';
 import type {} from './index.js';
 
 export interface RequestPluginOptions {
@@ -16,7 +15,7 @@ export const requestPlugin: Plugin.Object<RequestPluginOptions> = {
     const id = options.id ?? 'cormi:request';
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('REQUEST_INVALID', 'Invalid request id.');
     const config: AppConfigContribution = { id, keys: ['request'] };
-    const runtime: RuntimeContribution = { id, module: { specifier: '@cormijs/runtime', exportName: 'requestRuntime' } };
+    const runtime: RuntimePluginDescriptor = { id, module: { package: '@cormijs/runtime', export: 'requestRuntime' } };
     ctx.effect(() => ctx.react.appConfig.tap({ id: id + ':config', owner: id, ownerOrder: 0, run: () => [config] }));
     ctx.effect(() => ctx.react.runtime.tap({ id: id + ':runtime', owner: id, ownerOrder: 0, run: () => [runtime] }));
   },

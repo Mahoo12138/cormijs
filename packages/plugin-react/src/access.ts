@@ -1,8 +1,7 @@
-import { CormiError, type Plugin } from '@cormijs/core';
+import { CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import { moduleRef, projectPath, type ModuleRef } from '@cormijs/routes';
 import { lstat } from 'node:fs/promises';
 import type { AppConfigContribution } from './app-runtime.js';
-import type { RuntimeContribution } from './generate.js';
 import type {} from './index.js';
 
 export interface AccessContribution {
@@ -73,7 +72,7 @@ export const accessPlugin: Plugin.Object<AccessPluginOptions> = {
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('ACCESS_INVALID', 'Invalid access id.');
     const contribution = accessContributions([{ id, files: options.files ?? DEFAULT_ACCESS_FILES }])[0]!;
     const config: AppConfigContribution = { id, keys: ['access', 'accessForbidden'] };
-    const runtime: RuntimeContribution = { id, module: { specifier: '@cormijs/runtime', exportName: 'accessRuntime' } };
+    const runtime: RuntimePluginDescriptor = { id, module: { package: '@cormijs/runtime', export: 'accessRuntime' } };
     ctx.effect(() => ctx.react.appConfig.tap({ id: id + ':config', owner: id, ownerOrder: 0, run: () => [config] }));
     // Access reads the initial-state context, so its provider must be inside initialStateRuntime.
     ctx.effect(() => ctx.react.runtime.tap({ id: id + ':runtime', owner: id, ownerOrder: 0, stage: 10, run: () => [runtime] }));

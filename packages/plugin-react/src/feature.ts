@@ -1,13 +1,12 @@
-import { CormiError, type Plugin } from '@cormijs/core';
+import { CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import { moduleRef, routeMeta, type RouteRecord } from '@cormijs/routes';
-import { runtimeContributions, type RuntimeContribution } from './generate.js';
 import type {} from './index.js';
 
 export interface ReactFeature {
   readonly id: string;
   readonly stage?: number;
   readonly routes?: readonly (Omit<RouteRecord, 'source'> & { readonly source?: RouteRecord['source'] })[];
-  readonly runtime?: readonly RuntimeContribution[];
+  readonly runtime?: readonly RuntimePluginDescriptor[];
 }
 /** Convenience for declarative features. Native Cordis still owns activation, injection and disposal. */
 export function defineReactFeature(definition: ReactFeature): Plugin.Object<void> {
@@ -24,7 +23,8 @@ export function defineReactFeature(definition: ReactFeature): Plugin.Object<void
     ...(route.meta !== undefined ? { meta: routeMeta(route.meta) } : {}),
     source: Object.freeze({ ...route.source, pluginId: id }),
   })));
-  const runtime = runtimeContributions(definition.runtime ?? []);
+  // Store as RuntimePluginDescriptor[]; runtimeContributions() normalises them to ModuleRef when generating.
+  const runtime: readonly RuntimePluginDescriptor[] = Object.freeze([...(definition.runtime ?? [])]);
   return {
     name: id, inject: ['react'],
     apply: ctx => {
