@@ -11,6 +11,9 @@ export type { Fiber, Plugin } from 'cordis';
 export type { CommandRequest, CommandResult, CommandHandler, CommandRegistry, CommandMiddleware } from './commands.js';
 export { snapshotConfig, mergeConfigData, configLeaves, configLayer } from './config-data.js';
 export type { ConfigData, ConfigSource, ConfigChange, ConfigLayer, ConfigurationContext, EnvironmentSummary } from './config-data.js';
+export { type SchemaService } from './schema.js';
+export { type AppConfig } from './app-config.js';
+export { type RuntimePlugin, type RuntimeCleanup, type RuntimePluginDescriptor, isRuntimePluginDescriptor, resolveRuntimePluginModule } from './runtime-plugin.js';
 
 export class CormiError extends Error {
   constructor(
