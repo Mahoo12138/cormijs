@@ -23,7 +23,10 @@
     "test:reliability": "pnpm build && node --expose-gc --import tsx scripts/test-reliability.ts",
     "test:linux": "node --import tsx scripts/test-linux.ts",
     "test:windows": "node --import tsx scripts/test-windows.ts",
-    "check": "pnpm typecheck && pnpm test"
+    "check": "pnpm typecheck && pnpm test",
+    "docs:dev": "pnpm --dir website docs:dev",
+    "docs:build": "pnpm --dir website docs:build",
+    "docs:preview": "pnpm --dir website docs:preview"
   },
   "pnpm": {
     "patchedDependencies": {

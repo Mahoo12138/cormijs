@@ -1,5 +1,6 @@
 import Schema from '@cormijs/schemastery';
 import type { ModuleRef, RouteRecord } from '@cormijs/routes';
+import { CormiError, type SchemaService } from '@cormijs/core';
 
 // ─── Declaration merging: each feature contributes its own app.* keys ───
 
@@ -246,3 +247,30 @@ export const AllReactAppSchemas = [
   HtmlAppConfigSchema,
   ServerAppConfigSchema,
 ] as const;
+
+/**
+ * Register all plugin-react app config schemas into the SchemaService.
+ * Called once when reactPlugin loads. Schemas are additive and never removed.
+ */
+export function registerAppConfigSchemas(service: SchemaService): void {
+  for (const schema of AllReactAppSchemas) {
+    service.extend('app', schema as any);
+  }
+}
+
+/**
+ * Validate app config input against registered schemas if a SchemaService is available.
+ * On validation failure, throws CormiError('APP_CONFIG_INVALID', ...).
+ * Safe to call when service is undefined (no-op).
+ */
+export function validateAppConfig(input: unknown, service?: SchemaService): void {
+  if (!service) return;
+  const combinedSchema = service.get('app');
+  if (!combinedSchema) return;
+  try {
+    (combinedSchema as any)(input);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new CormiError('APP_CONFIG_INVALID', `App config validation failed: ${message}`, {}, { cause: error });
+  }
+}

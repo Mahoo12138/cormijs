@@ -1,25 +1,22 @@
 import { assertActive, CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import type { DevelopmentState } from '@cormijs/builder';
-import { AtomicEntry, RevisionQueue, OrderedHooks, createBuildPlan, inspectionManifest, type ApplicationRequest, type PreparedApplication, type GeneratedInspection } from '@cormijs/plugin-web';
-import { pageFiles, routesFromFiles, validateRoutes, applyGlobalLayout, type RouteRecord } from '@cormijs/routes';
-import { readdir, realpath, readFile } from 'node:fs/promises';
+import { AtomicEntry, RevisionQueue, OrderedHooks, createBuildPlan, type ApplicationRequest, type PreparedApplication, type GeneratedInspection } from '@cormijs/plugin-web';
+import { type RouteRecord } from '@cormijs/routes';
+import { realpath, readFile } from 'node:fs/promises';
 import { isAbsolute, join, relative } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
-import { transform } from 'esbuild';
-import { generateApplication, generateServerLoaders, runtimeContributions, type HistoryType, type RuntimeContribution } from './generate.js';
-import { generateRouteTypes } from './types.js';
-import { developmentDiagnostic, recoverable, repairSignature } from './development.js';
-import { clientModuleFile, clientSpecifier, inspectModule } from './modules.js';
-import { appConfigContributions, appRuntimeFiles, resolveAppRuntime, type AppConfigContribution, type AppRuntimePlan } from './app-runtime.js';
-import { layoutContributions, layoutFilesToWatch, resolveGlobalLayout, type LayoutContribution } from './layout.js';
-import { loadingContributions, loadingFilesToWatch, resolveGlobalLoading, type LoadingContribution } from './loading.js';
-import { resolveGlobalStyles, styleContributions, styleFilesToWatch, type StyleContribution } from './global-style.js';
-import { accessContributions, accessFilesToWatch, resolveAccessPlan, type AccessContribution } from './access.js';
-import { pageLoaderExports } from './page-loaders.js';
-import { generateLocaleTypes, localeCatalogSources, mergeLocaleCatalogs, readLocaleCatalogs, type LocaleCatalog, type LocaleCatalogSource } from './locale.js';
-import { generateLoaderTypes, type LoaderTypeEntry } from './loaders.js';
-import { generateStyleTypes } from './style-types.js';
-import { modelContributions, modelFiles, modelWatchPaths, resolveModels, type ModelContribution, type ModelPlan } from './model.js';
+import { type HistoryType } from './generate.js';
+import { developmentDiagnostic, recoverable } from './development.js';
+import { clientModuleFile } from './modules.js';
+import { type AppConfigContribution } from './app-runtime.js';
+import { type LayoutContribution } from './layout.js';
+import { type LoadingContribution } from './loading.js';
+import { type StyleContribution } from './global-style.js';
+import { type AccessContribution } from './access.js';
+import { type LocaleCatalogSource } from './locale.js';
+import { type ModelContribution } from './model.js';
+import { createObserveFn, runCompilation, type CompilePhase } from './compilation.js';
+import { registerAppConfigSchemas, validateAppConfig } from './app-config-schema.js';
 export { appRuntimePlugin, appConfigContributions, resolveAppRuntime, type AppRuntimeOptions, type AppConfigContribution, type AppRuntimePlan } from './app-runtime.js';
 export { layoutPlugin, layoutContributions, resolveGlobalLayout, type LayoutPluginOptions, type LayoutContribution } from './layout.js';
 export { loadingPlugin, loadingContributions, resolveGlobalLoading, type LoadingPluginOptions, type LoadingContribution } from './loading.js';
@@ -49,7 +46,11 @@ export { generateRouteTypes } from './types.js';
 export { AllReactAppSchemas, ReactAppConfigSchema, LocaleAppConfigSchema, ModelAppConfigSchema,
   InitialStateAppConfigSchema, RequestAppConfigSchema, AccessAppConfigSchema, MenuAppConfigSchema,
   HeadAppConfigSchema, AnalyticsAppConfigSchema, PrefetchAppConfigSchema, GlobalStyleAppConfigSchema,
-  HtmlAppConfigSchema, ServerAppConfigSchema } from './app-config-schema.js';
+  HtmlAppConfigSchema, ServerAppConfigSchema, registerAppConfigSchemas, validateAppConfig } from './app-config-schema.js';
+export { type ObservationResult, type CompilationOutput, type CompilePhase } from './compilation.js';
+export { buildApplicationManifest } from './manifest-builder.js';
+export { LocaleCompilationService, ModelCompilationService, RuntimeCompilationService, RouteCompilationService } from './services/index.js';
+import { LocaleCompilationService, ModelCompilationService, RuntimeCompilationService, RouteCompilationService } from './services/index.js';
 
 export interface ReactCompilation {
   readonly routes: OrderedHooks<readonly RouteRecord[], readonly RouteRecord[]>;
@@ -64,6 +65,8 @@ export interface ReactCompilation {
   // styleTypes is a presence flag only; the boolean values are never read, only snapshot().length
   // is checked to determine whether to emit CSS/asset ambient declarations.
   readonly styleTypes: OrderedHooks<void, readonly boolean[]>;
+  /** Dev-only: subscribe to the latest inspection manifest after each successful compilation. */
+  readonly onManifest?: (listener: (manifest: GeneratedInspection) => void) => () => void;
 }
 declare module 'cordis' { interface Context { react: ReactCompilation } }
 
@@ -79,33 +82,73 @@ function historyType(value: unknown): HistoryType {
 export const reactPlugin: Plugin.Object<void> = {
   name: 'cormi:react',
   apply: ctx => {
-    const routes = new OrderedHooks<readonly RouteRecord[], readonly RouteRecord[]>('routes');
-    const runtime = new OrderedHooks<void, readonly RuntimePluginDescriptor[]>('runtime');
+    // Initialize domain services first (they register themselves on the context)
+    ctx.plugin(RouteCompilationService);
+    ctx.plugin(RuntimeCompilationService);
+    ctx.plugin(LocaleCompilationService);
+    ctx.plugin(ModelCompilationService);
+
+    // Legacy hooks for backward compatibility (new code should use domain services)
     const appConfig = new OrderedHooks<void, readonly AppConfigContribution[]>('app-config');
     const layouts = new OrderedHooks<void, readonly LayoutContribution[]>('layouts');
     const loading = new OrderedHooks<void, readonly LoadingContribution[]>('loading');
     const styles = new OrderedHooks<void, readonly StyleContribution[]>('styles');
     const access = new OrderedHooks<void, readonly AccessContribution[]>('access');
-    const locale = new OrderedHooks<void, readonly LocaleCatalogSource[]>('locale-catalog');
-    const models = new OrderedHooks<void, readonly ModelContribution[]>('models');
     const styleTypes = new OrderedHooks<void, readonly boolean[]>('style-types');
     const lifetime = new AbortController(), pending = new Set<Promise<PreparedApplication>>(), sessions = new Set<PreparedApplication>();
-    ctx.provide('react', { routes, runtime, appConfig, layouts, loading, styles, access, locale, models, styleTypes } satisfies ReactCompilation);
+
+    // Manifest listeners for dev-only tooling
+    const manifestListeners = new Set<(manifest: GeneratedInspection) => void>();
+    const onManifest = (listener: (manifest: GeneratedInspection) => void) => {
+      manifestListeners.add(listener);
+      return () => manifestListeners.delete(listener);
+    };
+
+    // Provide ReactCompilation surface with lazy getters for service access
+    // Services are accessed on-demand when hooks are actually used
+    const react: ReactCompilation = {
+      // Aliases to domain services (lazy getters ensure services are ready when accessed)
+      get routes() { return ctx['route-compiler'].routes; },
+      get runtime() { return ctx['runtime-compiler'].plugins; },
+      get locale() { return ctx['locale-compiler'].catalog; },
+      get models() { return ctx['model-compiler'].contributions; },
+      // Legacy hooks (not yet migrated to domain services)
+      appConfig,
+      layouts,
+      loading,
+      styles,
+      access,
+      styleTypes,
+      onManifest,
+    };
+    ctx.provide('react', react);
+
+    // Register app config schemas if SchemaService is available
+    ctx.effect(() => {
+      const svc = ctx.get('schema');
+      if (svc) registerAppConfigSchemas(svc);
+      return () => {}; // Schemas are permanent, no cleanup needed
+    });
+
     ctx.get('diagnostics')?.add('react-hooks', () => [
-      ...routes.snapshot().map(({ id, owner }) => ({ kind: 'route-hook', id, declaredOwner: owner })),
-      ...runtime.snapshot().map(({ id, owner }) => ({ kind: 'runtime-hook', id, declaredOwner: owner })),
-      ...appConfig.snapshot().map(({ id, owner }) => ({ kind: 'app-config-hook', id, declaredOwner: owner })),
-      ...layouts.snapshot().map(({ id, owner }) => ({ kind: 'layout-hook', id, declaredOwner: owner })),
-      ...loading.snapshot().map(({ id, owner }) => ({ kind: 'loading-hook', id, declaredOwner: owner })),
-      ...styles.snapshot().map(({ id, owner }) => ({ kind: 'style-hook', id, declaredOwner: owner })),
-      ...access.snapshot().map(({ id, owner }) => ({ kind: 'access-hook', id, declaredOwner: owner })),
-      ...locale.snapshot().map(({ id, owner }) => ({ kind: 'locale-catalog-hook', id, declaredOwner: owner })),
-      ...models.snapshot().map(({ id, owner }) => ({ kind: 'model-hook', id, declaredOwner: owner })),
+      ...ctx.react.routes.snapshot().map(({ id, owner }) => ({ kind: 'route-hook', id, declaredOwner: owner })),
+      ...ctx.react.runtime.snapshot().map(({ id, owner }) => ({ kind: 'runtime-hook', id, declaredOwner: owner })),
+      ...ctx.react.appConfig.snapshot().map(({ id, owner }) => ({ kind: 'app-config-hook', id, declaredOwner: owner })),
+      ...ctx.react.layouts.snapshot().map(({ id, owner }) => ({ kind: 'layout-hook', id, declaredOwner: owner })),
+      ...ctx.react.loading.snapshot().map(({ id, owner }) => ({ kind: 'loading-hook', id, declaredOwner: owner })),
+      ...ctx.react.styles.snapshot().map(({ id, owner }) => ({ kind: 'style-hook', id, declaredOwner: owner })),
+      ...ctx.react.access.snapshot().map(({ id, owner }) => ({ kind: 'access-hook', id, declaredOwner: owner })),
+      ...ctx.react.locale.snapshot().map(({ id, owner }) => ({ kind: 'locale-catalog-hook', id, declaredOwner: owner })),
+      ...ctx.react.models.snapshot().map(({ id, owner }) => ({ kind: 'model-hook', id, declaredOwner: owner })),
     ]);
     async function create(request: ApplicationRequest): Promise<PreparedApplication> {
       assertActive(ctx);
       const plan = createBuildPlan(request, ['pages', 'routes', 'runtime', 'runtimeConfig', 'mountId', 'strict', 'history', 'ssr']);
       const root = await realpath(request.root), input = request.options;
+
+      // Validate app config against registered schemas
+      validateAppConfig(input, ctx.get('schema'));
+
       const pages = input.pages ?? 'src/pages', mountId = input.mountId ?? 'root', developing = request.command === 'dev';
       const strict = input.strict === undefined ? false : input.strict;
       if (typeof strict !== 'boolean') throw new CormiError('CONFIG_INVALID', 'app.strict must be boolean.');
@@ -118,7 +161,7 @@ export const reactPlugin: Plugin.Object<void> = {
       if (request.command === 'preview') return { plan, snapshot: null, async close() {} };
       const html = await readFile(join(root, 'index.html'), 'utf8');
       if (!html.includes('/.cormi/app.tsx')) throw new CormiError('GENERATED_ENTRY_MISSING', 'index.html must import /.cormi/app.tsx.');
-      const entry = await AtomicEntry.open(root), typeFile = await AtomicEntry.open(root, 'routes.d.ts'), localeTypesFile = await AtomicEntry.open(root, 'locale.d.ts'), loaderTypesFile = await AtomicEntry.open(root, 'loaders.d.ts'), styleTypesFile = await AtomicEntry.open(root, 'styles.d.ts'), serverLoadersFile = await AtomicEntry.open(root, 'server-loaders.tsx'), manifestFile = await AtomicEntry.open(root, 'inspect.jsonc');
+      const entry = await AtomicEntry.open(root), typeFile = await AtomicEntry.open(root, 'routes.d.ts'), localeTypesFile = await AtomicEntry.open(root, 'locale.d.ts'), loaderTypesFile = await AtomicEntry.open(root, 'loaders.d.ts'), styleTypesFile = await AtomicEntry.open(root, 'styles.d.ts'), serverLoadersFile = await AtomicEntry.open(root, 'server-loaders.tsx'), manifestFile = await AtomicEntry.open(root, 'inspect.jsonc'), appManifestFile = await AtomicEntry.open(root, 'manifest.json');
       signal.throwIfAborted();
       let latestSnapshot: GeneratedInspection | undefined, lastSignature = '', lastError = '', accepted = 0;
       let polling: Promise<void> | undefined, closing: Promise<void> | undefined;
@@ -163,12 +206,23 @@ export const reactPlugin: Plugin.Object<void> = {
       rememberModules(input.routes); rememberModules(input.runtime);
       if (input.runtimeConfig !== undefined) rememberModules([{ module: input.runtimeConfig }]);
       const baseRepairFiles = [...repairFiles], baseAnchoredFiles = [...anchoredFiles];
+
+      // Create the observation function using the extracted compilation pipeline
+      const observe = createObserveFn({
+        root,
+        pages: pages as string,
+        input,
+        repairFiles,
+        anchoredFiles,
+        react: ctx.react
+      });
+
       const setState = async (next: Omit<DevelopmentState, 'revision'>) => {
         if (signal.aborted) return;
         const published = state = Object.freeze({ ...next, revision: state.revision + 1 });
         await deliver(statusListeners, published, () => state === published);
       };
-      const queue = new RevisionQueue<{ code: string; types: string; localeTypes: string; loaderTypes: string; styleTypes: string; serverLoaders: string; inspection: GeneratedInspection }>(async (value, current) => {
+      const queue = new RevisionQueue<{ code: string; types: string; localeTypes: string; loaderTypes: string; styleTypes: string; serverLoaders: string; inspection: GeneratedInspection; manifest: string }>(async (value, current) => {
         const valid = () => current() && !signal.aborted, first = !state.hasOutput;
         let changed: boolean;
         try {
@@ -179,6 +233,7 @@ export const reactPlugin: Plugin.Object<void> = {
           await serverLoadersFile.publish(value.serverLoaders, valid);
           changed = await entry.publish(value.code, valid);
           await manifestFile.publish(JSON.stringify(value.inspection, null, 2) + '\n', valid);
+          await appManifestFile.publish(value.manifest, valid);
           if (!valid()) throw new CormiError('STALE_GENERATION', 'Inputs changed before publishing diagnostics.');
         } catch (cause) {
           if (cause instanceof CormiError) throw cause;
@@ -187,6 +242,10 @@ export const reactPlugin: Plugin.Object<void> = {
         latestSnapshot = value.inspection; lastError = '';
         await setState({ status: 'ready', hasOutput: true });
         if (changed || first) await deliver(listeners, generatedFiles);
+        // Notify manifest listeners after successful publication
+        for (const fn of manifestListeners) {
+          try { fn(value.inspection); } catch { /* Listener errors don't affect compilation */ }
+        }
         return changed;
       });
       const session: PreparedApplication = {
@@ -213,98 +272,40 @@ export const reactPlugin: Plugin.Object<void> = {
         })(); },
       };
       sessions.add(session);
-      async function observe() {
-        let files: readonly string[] = [], error: unknown;
-        try { files = input.routes !== undefined ? [] : await pageFiles(root, pages as string); } catch (cause) { error = cause; }
-        const appRevision = appConfig.revision;
-        let applicationRuntime: AppRuntimePlan = { keys: [] }, appFiles: string[] = [], layoutInputFiles: string[] = [], loadingInputFiles: string[] = [], styleInputFiles: string[] = [], accessInputFiles: string[] = [], localeFiles: string[] = [], modelInputFiles: string[] = [];
-        try {
-          const sources = appConfigContributions([...(input.runtimeConfig === undefined ? [] : [{ id: 'config:runtime', module: input.runtimeConfig }]), ...await appConfig.collect(undefined)]);
-          appFiles = appRuntimeFiles(root, sources);
-          applicationRuntime = await resolveAppRuntime(root, sources);
-          layoutInputFiles = layoutFilesToWatch(layoutContributions(await layouts.collect(undefined)));
-          loadingInputFiles = loadingFilesToWatch(loadingContributions(await loading.collect(undefined)));
-          styleInputFiles = styleFilesToWatch(styleContributions(await styles.collect(undefined)));
-          accessInputFiles = accessFilesToWatch(accessContributions(await access.collect(undefined)));
-          const catalogSources = localeCatalogSources(await locale.collect(undefined));
-          localeFiles = (await Promise.all(catalogSources.map(source => localeCatalogFiles(root, source)))).flat();
-          const modelSources = modelContributions(await models.collect(undefined));
-          modelInputFiles = [...modelWatchPaths(modelSources), ...await modelFiles(root, modelSources)];
-        } catch (cause) { error ??= cause; }
-        // Candidate existence is tracked even when app.ts and app.tsx currently conflict.
-        const watched = new Set([...anchoredFiles, ...appFiles.filter(isAbsolute)]);
-        const key = JSON.stringify([files, await repairSignature(root, [...files, ...repairFiles, ...watched, ...appFiles, ...layoutInputFiles, ...loadingInputFiles, ...styleInputFiles, ...accessInputFiles, ...localeFiles], watched), routes.revision, runtime.revision, layouts.revision, loading.revision, styles.revision, access.revision, locale.revision, models.revision, appRevision,
-          error instanceof Error ? [(error as NodeJS.ErrnoException).code, error.message] : null]);
-        return { files, error, key, applicationRuntime, appRevision };
-      }
-      async function localeCatalogFiles(root: string, source: LocaleCatalogSource): Promise<string[]> {
-        const directory = source.directory;
-        if (directory === undefined) return [];
-        try { return (await readdir(join(root, directory))).filter(name => name.endsWith('.json')).sort().map(name => join(directory, name)); }
-        catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []; throw error; }
-      }
+
       const compile = async (observed: Awaited<ReturnType<typeof observe>>, initial = false) => {
-        const ticket = ++accepted; let phase = 'scan';
+        const ticket = ++accepted;
+        let phase: CompilePhase = 'scan';
         try {
           await queue.enqueue(async cancelled => {
-            const combined = AbortSignal.any([signal, cancelled]); combined.throwIfAborted();
-            if (observed.error) throw observed.error;
-            // Retain only current/configured references, not every page ever seen by this session.
-            repairFiles.clear(); for (const file of baseRepairFiles) repairFiles.add(file);
-            anchoredFiles.clear(); for (const file of baseAnchoredFiles) anchoredFiles.add(file);
+            const combined = AbortSignal.any([signal, cancelled]);
+            combined.throwIfAborted();
+
+            // Retain only current/configured references
+            repairFiles.clear();
+            for (const file of baseRepairFiles) repairFiles.add(file);
+            anchoredFiles.clear();
+            for (const file of baseAnchoredFiles) anchoredFiles.add(file);
+
             phase = 'routes';
-            const routeRevision = routes.revision, runtimeRevision = runtime.revision, layoutRevision = layouts.revision, loadingRevision = loading.revision, styleRevision = styles.revision, accessRevision = access.revision, localeRevision = locale.revision, modelRevision = models.revision;
-            const routeOrder = routes.snapshot(), runtimeOrder = runtime.snapshot(), layoutOrder = layouts.snapshot(), loadingOrder = loading.snapshot(), styleOrder = styles.snapshot(), accessOrder = access.snapshot(), localeOrder = locale.snapshot(), modelOrder = models.snapshot();
-            const initialRoutes = input.routes !== undefined ? validateRoutes(input.routes) : await (async () => {
-              const scanned = await pageLoaderExports(root, observed.files);
-              return routesFromFiles(observed.files, pages as string, scanned.clientLoaders, scanned.serverLoaders);
-            })();
-            const baseRoutes = validateRoutes(await routes.reduce(initialRoutes, (value): value is readonly RouteRecord[] => Array.isArray(value)));
-            const layoutSources = layoutContributions(await layouts.collect(undefined));
-            const globalLayout = await resolveGlobalLayout(root, layoutSources);
-            if (globalLayout) rememberModules([{ module: globalLayout.module }]);
-            const loadingSources = loadingContributions(await loading.collect(undefined));
-            const globalLoading = await resolveGlobalLoading(root, loadingSources);
-            if (globalLoading) rememberModules([{ module: globalLoading.module }]);
-            const styleSources = styleContributions(await styles.collect(undefined));
-            const globalStyles = await resolveGlobalStyles(root, styleSources);
-            const accessPlan = await resolveAccessPlan(root, accessContributions(await access.collect(undefined)));
-            if (accessPlan) rememberModules([{ module: accessPlan.module }]);
-            const catalogs = await readLocaleCatalogs(root, localeCatalogSources(await locale.collect(undefined)));
-            const modelSources = modelContributions(await models.collect(undefined));
-            const modelPlans = await resolveModels(root, modelSources);
-            rememberModules(modelPlans.map(model => ({ module: model.module })));
-            const next = validateRoutes(globalLayout ? applyGlobalLayout(baseRoutes, { module: globalLayout.module, pluginId: globalLayout.owner }) : baseRoutes);
-            const serverRoute = next.find(route => route.serverLoader !== undefined);
-            if (serverRoute && input.ssr !== true) throw new CormiError('ROUTE_SERVER_LOADER_UNSUPPORTED', 'A serverLoader route requires app.ssr: true and the SSR plugin.', { id: serverRoute.id });
-            rememberModules(next); phase = 'runtime';
-            const plugins = runtimeContributions([...runtimeContributions(input.runtime ?? []), ...await runtime.collect(undefined)]);
-            rememberModules(plugins); phase = 'generate';
-            const code = await generateApplication(root, next, plugins, plan.base, mountId, request.serverOnlyFiles, strict, observed.applicationRuntime, globalLoading?.module, history, modelPlans, globalStyles, accessPlan?.module, catalogs);
-            await transform(code, { loader: 'tsx', format: 'esm', jsx: 'automatic', logLevel: 'silent' });
-            const types = generateRouteTypes(next, modelPlans.map(model => model.namespace));
-            const localeTypes = generateLocaleTypes(catalogs);
-            const loaderEntries: LoaderTypeEntry[] = await Promise.all(next.filter(route => route.module && (route.clientLoader !== undefined || route.serverLoader !== undefined)).map(async route => ({
-              id: route.id, specifier: await clientSpecifier(root, route.module!, new Set(request.serverOnlyFiles)), exportName: (route.clientLoader ?? route.serverLoader)!,
-            })));
-            const loaderTypes = generateLoaderTypes(loaderEntries);
-            const serverLoaders = await generateServerLoaders(root, next, request.serverOnlyFiles);
-            await transform(serverLoaders, { loader: 'tsx', format: 'esm', jsx: 'automatic', logLevel: 'silent' });
-            const hookInfo = (items: readonly { id: string; owner: string; stage?: number }[]) => items.map(({ id, owner, stage }) => ({ id, owner, stage: stage ?? 0 }));
-            const inspection = inspectionManifest(code, types, { renderer: 'react', mode: request.mode, base: plan.base, entry: '.cormi/app.tsx', strict, history,
-              routes: next.map(route => ({ ...route, ...(route.module ? { module: inspectModule(root, route.module) } : {}),
-                ...(route.errorBoundary ? { errorBoundary: inspectModule(root, route.errorBoundary) } : {}) })),
-              layout: globalLayout ? { owner: globalLayout.owner, module: inspectModule(root, globalLayout.module) } : null,
-              loading: globalLoading ? { owner: globalLoading.owner, module: inspectModule(root, globalLoading.module) } : null,
-              styles: globalStyles.map(style => ({ owner: style.owner, file: style.file })),
-              access: accessPlan ? { owner: accessPlan.owner, module: inspectModule(root, accessPlan.module) } : null,
-              localeCatalogs: catalogs.map(catalog => ({ locale: catalog.locale, keys: Object.keys(catalog.messages).length })),
-              models: modelPlans.map(model => ({ namespace: model.namespace, module: inspectModule(root, model.module) })),
-              runtime: plugins.map(({ id, module }) => ({ id, module: inspectModule(root, module) })),
-              appRuntime: { ...observed.applicationRuntime, ...(observed.applicationRuntime.module ? { module: inspectModule(root, observed.applicationRuntime.module) } : {}) },
-              hooks: { routes: hookInfo(routeOrder), runtime: hookInfo(runtimeOrder), layouts: hookInfo(layoutOrder), loading: hookInfo(loadingOrder), styles: hookInfo(styleOrder), access: hookInfo(accessOrder), locale: hookInfo(localeOrder), models: hookInfo(modelOrder) } });
-            if (routes.revision !== routeRevision || runtime.revision !== runtimeRevision || layouts.revision !== layoutRevision || loading.revision !== loadingRevision || styles.revision !== styleRevision || access.revision !== accessRevision || locale.revision !== localeRevision || models.revision !== modelRevision || appConfig.revision !== observed.appRevision) throw new CormiError('CONTRIBUTIONS_CHANGED', 'Plugin contributions changed during compilation; this result cannot be published.');
-            combined.throwIfAborted(); phase = 'commit'; return { code, types, localeTypes, loaderTypes, styleTypes: styleTypes.snapshot().length ? generateStyleTypes() : '', serverLoaders, inspection };
+            const result = await runCompilation({
+              observed,
+              root,
+              pages: pages as string,
+              input,
+              base: plan.base,
+              mountId,
+              strict,
+              history,
+              ssr: input.ssr === true,
+              serverOnlyFiles: request.serverOnlyFiles ?? [],
+              rememberModules,
+              react: ctx.react
+            });
+
+            combined.throwIfAborted();
+            phase = 'commit';
+            return result;
           });
         } catch (error) {
           if (!developing || initial && !recoverable(error)) throw error;
@@ -314,6 +315,7 @@ export const reactPlugin: Plugin.Object<void> = {
           if (message !== lastError) { lastError = message; console.error(`[cormi:generate] ${message}`); }
         }
       };
+
       try {
         const initial = await observe(); lastSignature = initial.key;
         await compile(initial, true); signal.throwIfAborted();

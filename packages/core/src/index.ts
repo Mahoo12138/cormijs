@@ -14,6 +14,7 @@ export type { ConfigData, ConfigSource, ConfigChange, ConfigLayer, Configuration
 export { type SchemaService } from './schema.js';
 export { type AppConfig } from './app-config.js';
 export { type RuntimePlugin, type RuntimeCleanup, type RuntimePluginDescriptor, isRuntimePluginDescriptor, resolveRuntimePluginModule } from './runtime-plugin.js';
+export { type ApplicationManifest, type ManifestRoute, type ManifestPlugin, type ManifestLocaleCatalog, type ManifestLocale, type ManifestModel, type ManifestAccess, type ManifestLayout, type ManifestLoading, type ManifestGlobalStyle, type ManifestAppRuntime, isApplicationManifest } from './application-manifest.js';
 
 export class CormiError extends Error {
   constructor(

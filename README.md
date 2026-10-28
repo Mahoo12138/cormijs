@@ -150,6 +150,18 @@ packages/
 
 core 的物理独立消费者测试验证没有 Vite 仍可运行；React compiler 也可在没有 builder 的宿主中准备入口。Vite 仍是唯一真实后端，可替换测试 provider 不代表其他构建器的原生插件自动兼容。生成型开发应用需要后端提供 `ServerHandle.invalidate`；不支持时明确报错。
 
+## 文档站
+
+面向使用者和插件作者的文档位于 `website/`，使用 VitePress 构建：
+
+```sh
+pnpm docs:dev      # 本地开发
+pnpm docs:build    # 构建到 website/.vitepress/dist
+pnpm docs:preview  # 预览构建结果
+```
+
+`docs/` 继续保存逐阶段的开发记录和验证证据；`website/` 只描述当前实现与已知边界，不把路线计划写成已发布能力。
+
 ## 文档与记录
 
 [架构 Draft 0.11](docs/02-architecture.md)描述完整目标，[MVP 计划](docs/03-mvp-plan.md)记录进度，[插件优先 ADR](docs/04-plugin-first-adr.md)记录边界原则。[命名和启动协议](docs/06-naming-and-launcher.md)、[路由与 React 协议](docs/08-routes-and-react.md)、[受管发布与检查](docs/10-publication-and-tools.md)和[开发恢复](docs/12-development-recovery.md)描述各层接口。历史 [P0](docs/05-p0-results.md)、[P1a](docs/07-p1a-results.md)、[P1b](docs/09-p1b-results.md)、[P1c](docs/11-p1c-results.md) 保留各阶段实际结果，不改写历史验证 JSON。

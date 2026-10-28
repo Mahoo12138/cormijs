@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 430" fill="none">
+  <defs>
+    <linearGradient id="panel" x1="20" y1="0" x2="560" y2="430" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f1b2d"/>
+      <stop offset="1" stop-color="#07101c"/>
+    </linearGradient>
+    <linearGradient id="core" x1="108" y1="198" x2="178" y2="274" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="294" y1="84" x2="542" y2="384" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5eead4"/>
+      <stop offset="1" stop-color="#0d9488"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(140 236) rotate(90) scale(160)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0d9488" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#0d9488" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" stroke="#1e293b" stroke-opacity=".38"/>
+    </pattern>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#020617" flood-opacity=".55"/>
+    </filter>
+  </defs>
+
+  <rect width="580" height="430" rx="26" fill="url(#panel)"/>
+  <rect width="580" height="430" rx="26" fill="url(#grid)"/>
+  <rect width="580" height="430" rx="26" fill="url(#glow)"/>
+  <rect x=".5" y=".5" width="579" height="429" rx="25.5" stroke="#1e293b"/>
+
+  <g font-family="Inter, ui-sans-serif, system-ui, 'PingFang SC', sans-serif">
+    <circle cx="34" cy="34" r="4" fill="#2dd4bf"/>
+    <text x="46" y="38" fill="#94a3b8" font-size="11" letter-spacing=".12em">CORMI APPLICATION</text>
+    <g opacity=".7">
+      <rect x="482" y="25" width="66" height="20" rx="10" stroke="#134e4a" fill="#0b1a1a"/>
+      <text x="495" y="39" fill="#5eead4" font-size="9">React 19</text>
+    </g>
+
+    <g stroke="#1f3a3a" stroke-width="1.5">
+      <path d="M140 198V154M176 218l38-22M176 254l38 22M140 276v24M104 254l-38 22M104 218l-38-22"/>
+    </g>
+
+    <g filter="url(#shadow)">
+      <circle cx="140" cy="236" r="44" fill="#0b1515" stroke="url(#core)" stroke-width="2"/>
+      <circle cx="140" cy="236" r="34" fill="url(#core)" fill-opacity=".16" stroke="#2dd4bf" stroke-opacity=".45"/>
+      <circle cx="140" cy="236" r="5" fill="#ccfbf1"/>
+      <text x="140" y="260" text-anchor="middle" fill="#ccfbf1" font-size="11" font-weight="650" letter-spacing=".04em">cordis</text>
+    </g>
+
+    <g font-size="9.5" fill="#99f6e4" text-anchor="middle">
+      <g><circle cx="140" cy="132" r="22" fill="#0c1820" stroke="#134e4a"/><text x="140" y="135">react</text></g>
+      <g><circle cx="232" cy="184" r="22" fill="#0c1820" stroke="#134e4a"/><text x="232" y="187">routes</text></g>
+      <g><circle cx="232" cy="288" r="22" fill="#0c1820" stroke="#134e4a"/><text x="232" y="291">request</text></g>
+      <g><circle cx="140" cy="340" r="22" fill="#0c1820" stroke="#134e4a"/><text x="140" y="343">locale</text></g>
+      <g><circle cx="48" cy="288" r="22" fill="#0c1820" stroke="#134e4a"/><text x="48" y="291">access</text></g>
+      <g><circle cx="48" cy="184" r="22" fill="#0c1820" stroke="#134e4a"/><text x="48" y="187">vite</text></g>
+    </g>
+
+    <path d="M252 236h26" stroke="#2dd4bf" stroke-width="1.4" stroke-dasharray="3 4"/>
+    <path d="M270 231l7 5-7 5" stroke="#2dd4bf" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <g filter="url(#shadow)">
+      <rect x="292" y="82" width="252" height="304" rx="16" fill="#0c1522" stroke="#243247"/>
+      <path d="M292 112h252" stroke="#1e293b"/>
+      <circle cx="309" cy="97" r="3.5" fill="#f87171" fill-opacity=".8"/>
+      <circle cx="321" cy="97" r="3.5" fill="#fbbf24" fill-opacity=".8"/>
+      <circle cx="333" cy="97" r="3.5" fill="#34d399" fill-opacity=".8"/>
+      <rect x="346" y="89" width="130" height="16" rx="8" fill="#111c2c" stroke="#1e293b"/>
+      <text x="360" y="100.5" fill="#64748b" font-size="8">localhost:8001/workspace</text>
+
+      <rect x="292" y="112" width="64" height="274" fill="#0a1320"/>
+      <path d="M356 112v274" stroke="#16233a"/>
+      <circle cx="310" cy="132" r="5" fill="url(#accent)"/>
+      <rect x="322" y="128" width="22" height="7" rx="3.5" fill="#2dd4bf" fill-opacity=".75"/>
+      <g fill="#243247">
+        <rect x="306" y="154" width="40" height="6" rx="3"/>
+        <rect x="306" y="172" width="32" height="6" rx="3"/>
+        <rect x="306" y="208" width="38" height="6" rx="3"/>
+        <rect x="306" y="226" width="26" height="6" rx="3"/>
+        <rect x="306" y="262" width="36" height="6" rx="3"/>
+        <rect x="306" y="280" width="30" height="6" rx="3"/>
+      </g>
+      <rect x="300" y="190" width="50" height="20" rx="6" fill="#0d9488" fill-opacity=".18" stroke="#0f766e" stroke-opacity=".5"/>
+      <rect x="306" y="197" width="38" height="6" rx="3" fill="#5eead4" fill-opacity=".8"/>
+
+      <text x="372" y="140" fill="#e2e8f0" font-size="12" font-weight="650">Dashboard</text>
+      <text x="372" y="155" fill="#64748b" font-size="8">src/pages/index.tsx</text>
+
+      <g>
+        <rect x="372" y="172" width="76" height="52" rx="9" fill="#0f1c2e" stroke="#1e3348"/>
+        <text x="382" y="190" fill="#64748b" font-size="7">VISITORS</text>
+        <text x="382" y="209" fill="#99f6e4" font-size="15" font-weight="700">12.8k</text>
+        <rect x="382" y="215" width="26" height="3" rx="1.5" fill="#0d9488"/>
+
+        <rect x="456" y="172" width="76" height="52" rx="9" fill="#0f1c2e" stroke="#1e3348"/>
+        <text x="466" y="190" fill="#64748b" font-size="7">CONVERSION</text>
+        <text x="466" y="209" fill="#e2e8f0" font-size="15" font-weight="700">4.2%</text>
+        <rect x="466" y="215" width="18" height="3" rx="1.5" fill="#0d9488"/>
+      </g>
+
+      <g>
+        <rect x="372" y="236" width="160" height="86" rx="9" fill="#0f1c2e" stroke="#1e3348"/>
+        <text x="384" y="254" fill="#94a3b8" font-size="8">Traffic</text>
+        <path d="M384 300l18-14 18 6 18-22 18 8 18-18 18 10 18-16" stroke="url(#accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M384 300l18-14 18 6 18-22 18 8 18-18 18 10 18-16v40h-126z" fill="url(#accent)" fill-opacity=".1"/>
+      </g>
+
+      <g>
+        <rect x="372" y="334" width="76" height="30" rx="8" fill="#0d9488" fill-opacity=".16" stroke="#0f766e" stroke-opacity=".5"/>
+        <text x="384" y="353" fill="#99f6e4" font-size="8">Build</text>
+        <rect x="456" y="334" width="76" height="30" rx="8" fill="#0f1c2e" stroke="#1e3348"/>
+        <text x="468" y="353" fill="#64748b" font-size="8">Preview</text>
+      </g>
+    </g>
+
+    <g opacity=".9">
+      <rect x="40" y="382" width="126" height="18" rx="9" fill="#0b1a1a" stroke="#134e4a"/>
+      <circle cx="52" cy="391" r="2.5" fill="#2dd4bf"/>
+      <text x="60" y="394.5" fill="#5eead4" font-size="8">preset · react-vite</text>
+    </g>
+    <text x="520" y="414" fill="#334155" font-size="8" text-anchor="end">composition over configuration</text>
+  </g>
+</svg>
