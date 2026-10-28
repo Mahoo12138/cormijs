@@ -19,7 +19,12 @@ test('react query plugin contributes its provider, validates defaults and withdr
   host.mount('query', reactQueryPlugin, { id: 'application:react-query', defaults: { staleTime: 1000, retry: 0 } });
   await host.ready();
   const contributions = await host.ctx.react.runtime.collect(undefined);
-  assert.ok(contributions.some(item => item.id === 'application:react-query:runtime' && item.module.exportName === 'reactQueryRuntime'));
+  assert.ok(contributions.some(item => {
+    if (item.id !== 'application:react-query:runtime') return false;
+    const mod = item.module;
+    return typeof mod === 'object' && 'package' in mod && mod.package === '@cormijs/plugin-react-query/runtime'
+      || typeof mod === 'object' && 'specifier' in mod && mod.specifier === '@cormijs/plugin-react-query/runtime' && mod.exportName === 'reactQueryRuntime';
+  }));
   await host.unmount('query');
   assert.ok(!(await host.ctx.react.runtime.collect(undefined)).some(item => item.id === 'application:react-query:runtime'));
   await host.dispose();

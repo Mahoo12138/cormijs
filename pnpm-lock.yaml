@@ -166,9 +166,15 @@ importers:
       '@cormijs/core':
         specifier: workspace:*
         version: link:../core
+      '@cormijs/schemastery':
+        specifier: workspace:*
+        version: link:../schemastery
       cordis:
         specifier: 4.0.0-rc.11
         version: 4.0.0-rc.11(patch_hash=11a745abd66488d5cba00b7388beebaf8a70bc0fdd6e998608e511f77358228e)
+      cosmokit:
+        specifier: 1.7.0
+        version: 1.7.0
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
@@ -311,9 +317,15 @@ importers:
       '@cormijs/routes':
         specifier: workspace:*
         version: link:../routes
+      '@cormijs/schemastery':
+        specifier: workspace:*
+        version: link:../schemastery
       cordis:
         specifier: 4.0.0-rc.11
         version: 4.0.0-rc.11(patch_hash=11a745abd66488d5cba00b7388beebaf8a70bc0fdd6e998608e511f77358228e)
+      cosmokit:
+        specifier: 1.7.0
+        version: 1.7.0
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
@@ -444,6 +456,12 @@ importers:
       '@types/react-dom':
         specifier: 19.2.0
         version: 19.2.0(@types/react@19.2.0)
+
+  packages/schemastery:
+    dependencies:
+      cosmokit:
+        specifier: 1.7.0
+        version: 1.7.0
 
   packages/valtio:
     dependencies:
@@ -1647,6 +1665,9 @@ packages:
         optional: true
       '@cordisjs/plugin-loader':
         optional: true
+
+  cosmokit@1.7.0:
+    resolution: {integrity: sha512-n6qThxy+tt8QggfB6vB4Bo/Nk6pMEfRJk5CiPKyAs8Xd8nnoKdT8WXi8ulsUmDCAwq79DEB2fZ+yJJI2hIKBmw==}
 
   cosmokit@1.8.1:
     resolution: {integrity: sha512-PDBv4l90xZKrUsZ0vtoycgZpO/j4iFsqJXrAxsyBDsnQRI7ZMJXIjgDJsKNjd5L8jnVnnlrDCdhkFbTncgCVjQ==}
@@ -3448,6 +3469,8 @@ snapshots:
     dependencies:
       '@standard-schema/spec': 1.1.0
       cosmokit: 1.8.1
+
+  cosmokit@1.7.0: {}
 
   cosmokit@1.8.1: {}
 

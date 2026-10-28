@@ -5,10 +5,10 @@ import { join, resolve, sep } from 'node:path';
 import { forbiddenPackages, literalModuleEdges } from '../scripts/plugin-boundaries.js';
 
 const rules: Record<string, string[]> = {
-  core: ['cordis'], builder: ['cordis'], cormi: ['@cormijs/core','cordis','esbuild'],
+  core: ['cordis'], builder: ['cordis'], cormi: ['@cormijs/core','@cormijs/schemastery','cordis','cosmokit','esbuild'],
   'plugin-web': ['@cormijs/core','@cormijs/builder','cordis'],
   'plugin-typescript': ['@cormijs/core','@cormijs/plugin-web','cordis','typescript'],
-  'plugin-react': ['@cormijs/core','@cormijs/builder','@cormijs/routes','@cormijs/plugin-web','cordis','esbuild'],
+  'plugin-react': ['@cormijs/core','@cormijs/builder','@cormijs/routes','@cormijs/plugin-web','@cormijs/schemastery','cordis','cosmokit','esbuild'],
   runtime: ['react','react-dom','react-router'],
 };
 test('core bootstrap and domain compilation keep explicit provider boundaries in manifests and source imports', async () => {
