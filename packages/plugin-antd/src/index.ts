@@ -1,4 +1,4 @@
-import { CormiError, type Plugin } from '@cormijs/core';
+import { CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import type {} from '@cormijs/plugin-react';
 import type {} from '@cormijs/plugin-vite';
 
@@ -50,9 +50,9 @@ export const antdPlugin: Plugin.Object<AntdPluginOptions> = {
     const id = options.id ?? 'cormi:antd';
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('ANTD_INVALID', 'Invalid Antd plugin id.');
     const theme = themeOptions(options.theme);
-    const contribution = Object.freeze({
+    const contribution: RuntimePluginDescriptor = Object.freeze({
       id: id + ':runtime',
-      module: Object.freeze({ specifier: '@cormijs/plugin-antd/runtime', exportName: 'antdRuntime' }),
+      module: { package: '@cormijs/plugin-antd/runtime', export: 'antdRuntime' },
       options: Object.freeze({ theme }),
     });
     ctx.effect(() => ctx.react.runtime.tap({ id: id + ':runtime', owner: id, ownerOrder: 0, stage: 20, run: () => [contribution] }));

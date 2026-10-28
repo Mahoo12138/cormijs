@@ -1,4 +1,4 @@
-import { CormiError, type Plugin } from '@cormijs/core';
+import { CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import type {} from '@cormijs/plugin-react';
 
 export interface ReactQueryDefaults {
@@ -48,9 +48,9 @@ export const reactQueryPlugin: Plugin.Object<ReactQueryPluginOptions> = {
     const id = options.id ?? 'cormi:react-query';
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$/.test(id)) throw new CormiError('REACT_QUERY_INVALID', 'Invalid React Query plugin id.');
     const defaults = defaultsOf(options.defaults);
-    const contribution = Object.freeze({
+    const contribution: RuntimePluginDescriptor = Object.freeze({
       id: id + ':runtime',
-      module: Object.freeze({ specifier: '@cormijs/plugin-react-query/runtime', exportName: 'reactQueryRuntime' }),
+      module: { package: '@cormijs/plugin-react-query/runtime', export: 'reactQueryRuntime' },
       options: Object.freeze({ defaults }),
     });
     ctx.effect(() => ctx.react.runtime.tap({ id: id + ':runtime', owner: id, ownerOrder: 0, stage: 20, run: () => [contribution] }));

@@ -1,4 +1,4 @@
-import { CormiError, type Plugin } from '@cormijs/core';
+import { CormiError, type Plugin, type RuntimePluginDescriptor } from '@cormijs/core';
 import type { Plugin as VitePlugin } from 'vite';
 import type {} from '@cormijs/plugin-react';
 import type {} from '@cormijs/plugin-vite';
@@ -15,11 +15,6 @@ interface DvaSettings {
   readonly id: string;
   readonly immer: boolean;
   readonly loading: boolean;
-}
-interface RuntimeContribution {
-  readonly id: string;
-  readonly module: { readonly specifier: string; readonly exportName: string };
-  readonly options?: unknown;
 }
 
 function settings(options: DvaPluginOptions): DvaSettings {
@@ -44,7 +39,7 @@ export const dvaPlugin: Plugin.Object<DvaPluginOptions> = {
   name: 'cormi:dva', inject: ['react', 'vite'],
   apply(ctx, options = {} as DvaPluginOptions) {
     const config = settings(options);
-    const contribution: RuntimeContribution = { id: config.id, module: { specifier: '@cormijs/dva/auto', exportName: 'dvaRuntime' },
+    const contribution: RuntimePluginDescriptor = { id: config.id, module: { package: '@cormijs/dva/auto', export: 'dvaRuntime' },
       options: { immer: config.immer, loading: config.loading } };
     ctx.effect(() => ctx.react.runtime.tap({ id: config.id + ':runtime', owner: config.id, ownerOrder: 0, run: () => [contribution] }));
     ctx.effect(() => ctx.vite.add(config.id, (): VitePlugin => ({
