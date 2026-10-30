@@ -1,0 +1,3 @@
+.layout nav { display: flex; gap: 16px; padding: 12px 0; border-bottom: 1px solid #ddd; }
+.layout .count { margin-left: auto; color: #888; }
+.layout main { padding: 16px 0; }
