@@ -1,0 +1,40 @@
+{
+  "name": "@cormi/renderer-react",
+  "description": "Browser runtime for Cormi: React 19 + react-router 7 + umi-compatible plugin manager",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./server": {
+      "source": "./src/server.tsx",
+      "types": "./lib/server.d.ts",
+      "default": "./lib/server.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "dependencies": {
+    "history": "^5.3.0",
+    "react-router": "^7.18.5"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}
