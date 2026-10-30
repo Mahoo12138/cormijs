@@ -1,0 +1,21 @@
+import { launch } from './browser.ts'
+const browser = await launch()
+const page = await browser.newPage()
+const logs: string[] = []
+page.on('console', msg => logs.push(`${msg.type()}: ${msg.text()}`))
+page.on('pageerror', err => logs.push(`pageerror: ${err.message}`))
+// disable JS first: the page must be complete without it
+const ctx = await browser.newContext({ javaScriptEnabled: false })
+const noJs = await ctx.newPage()
+await noJs.goto('http://localhost:4399/about')
+console.log('no-js:', await noJs.textContent('#loader'), '| css:', await noJs.evaluate(() => getComputedStyle(document.querySelector('nav')!).display))
+await page.goto('http://localhost:4399/')
+await page.waitForFunction(() => document.title.startsWith('Cormi ·'))
+await page.click('button')
+await page.click('button')
+console.log('hydrated:', await page.textContent('button'))
+await page.click('text=About')
+await page.waitForFunction(() => document.querySelector('#loader')?.textContent?.includes('served'))
+console.log('client nav loader:', await page.textContent('#loader'))
+console.log('logs:', logs)
+await browser.close()

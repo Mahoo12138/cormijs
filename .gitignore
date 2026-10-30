@@ -1,0 +1,11 @@
+node_modules/
+lib/
+dist/
+coverage/
+*.tsbuildinfo
+.DS_Store
+.cormi/
+.cormi-production/
+.cormi-test/
+.cordis/
+.env.local

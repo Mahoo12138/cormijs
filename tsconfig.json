@@ -1,0 +1,23 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/core"
+    },
+    {
+      "path": "./packages/renderer-react"
+    },
+    {
+      "path": "./packages/server"
+    },
+    {
+      "path": "./packages/bundler-vite"
+    },
+    {
+      "path": "./packages/preset-react"
+    },
+    {
+      "path": "./packages/cormi"
+    }
+  ]
+}
