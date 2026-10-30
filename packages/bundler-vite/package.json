@@ -1,0 +1,32 @@
+{
+  "name": "@cormi/bundler-vite",
+  "description": "Vite bundler of Cormi",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "source": "./src/index.ts",
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "cormi",
+    "vite",
+    "bundler"
+  ],
+  "dependencies": {
+    "@cormi/core": "workspace:*",
+    "@vitejs/plugin-react": "^5.2.0",
+    "es-module-lexer": "^1.7.0",
+    "vite": "^7.3.7"
+  }
+}
